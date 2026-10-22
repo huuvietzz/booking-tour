@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Hồ sơ cá nhân - Admin</title>
+
+  <link href="assets/img/favicon.png" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+  <link href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Nunito:300,400,600,700|Poppins:300,400,500,600,700" rel="stylesheet">
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/css/style.css" rel="stylesheet">
+
+  <script src="assets/js/admin-auth.js"></script>
+  <script>AdminAuth.requireLogin();</script>
+
+  <style>
+    /* ===== AVATAR ===== */
+    .avatar-wrap {
+      position: relative; width: 120px; height: 120px;
+      border-radius: 50%; cursor: pointer;
+    }
+    .avatar-wrap:focus-visible { outline: 3px solid rgba(65, 84, 241, .35); outline-offset: 3px; }
+    .avatar-default, .avatar-img {
+      width: 100%; height: 100%; border-radius: 50%; overflow: hidden; display: block;
+    }
+    .avatar-default { background: #e4e6eb; }
+    .avatar-img { object-fit: cover; box-shadow: 0 0 0 3px #fff, 0 2px 10px rgba(0, 0, 0, .12); }
+    .avatar-overlay {
+      position: absolute; inset: 0; border-radius: 50%;
+      background: rgba(0, 0, 0, .45); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; opacity: 0; transition: opacity .2s;
+    }
+    .avatar-wrap:hover .avatar-overlay,
+    .avatar-wrap.uploading .avatar-overlay { opacity: 1; }
+    .avatar-wrap.uploading { pointer-events: none; }
+
+    .avatar-actions { font-size: 13px; margin-top: 10px; }
+    .avatar-actions button { border: 0; background: none; padding: 0; color: #4154f1; font-weight: 600; }
+    .avatar-actions button:hover { text-decoration: underline; }
+    .avatar-actions .btn-remove { color: #dc3545; }
+    .avatar-msg { font-size: 12.5px; margin-top: 6px; }
+
+    .profile-card h2 { font-size: 22px; font-weight: 700; color: #2c384e; margin: 14px 0 4px; }
+    .profile-card h3 { font-size: 15px; color: #6c757d; margin: 0; }
+
+    .password-wrap { position: relative; }
+    .password-wrap .form-control { padding-right: 2.6rem; }
+    .password-wrap .toggle-eye {
+      position: absolute; top: 50%; right: .8rem; transform: translateY(-50%);
+      border: 0; background: transparent; color: #6c757d; padding: 0; z-index: 5;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- ======================= HEADER ======================= -->
+<header id="header" class="header fixed-top d-flex align-items-center">
+  <div class="d-flex align-items-center justify-content-between">
+    <a href="index.html" class="logo d-flex align-items-center">
+      <img src="assets/img/logo.png" alt="">
+      <span class="d-none d-lg-block">VietTrip Admin</span>
+    </a>
+    <i class="bi bi-list toggle-sidebar-btn"></i>
+  </div>
+
+  <nav class="header-nav ms-auto">
+    <ul class="d-flex align-items-center">
+      <li class="nav-item dropdown pe-3">
+        <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
+          <img src="assets/img/profile-img.jpg" alt="Profile" class="rounded-circle">
+          <span class="d-none d-md-block dropdown-toggle ps-2" data-admin-name></span>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
+          <li class="dropdown-header"><h6 data-admin-name></h6><span data-admin-role></span></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item d-flex align-items-center" href="profile.html">
+            <i class="bi bi-person"></i><span>Hồ sơ</span>
+          </a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item d-flex align-items-center" href="#" data-admin-logout>
+            <i class="bi bi-box-arrow-right"></i><span>Đăng xuất</span>
+          </a></li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+</header>
+<script>AdminAuth.renderUser();</script>
+
+<!-- ======================= SIDEBAR ======================= -->
+<aside id="sidebar" class="sidebar">
+  <ul class="sidebar-nav" id="sidebar-nav">
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="index.html">
+        <i class="bi bi-grid"></i><span>Bảng điều khiển</span>
+      </a>
+    </li>
+
+    <li class="nav-heading">Kinh doanh</li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="bookings.html">
+        <i class="bi bi-cart-check"></i><span>Quản lý đặt tour</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="payments.html">
+        <i class="bi bi-credit-card"></i><span>Quản lý thanh toán</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="promotions.html">
+        <i class="bi bi-tags"></i><span>Quản lý khuyến mãi</span>
+      </a>
+    </li>
+
+    <li class="nav-heading">Sản phẩm</li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="tours.html">
+        <i class="bi bi-map"></i><span>Quản lý tour</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="tour-schedules.html">
+        <i class="bi bi-calendar-event"></i><span>Quản lý lịch khởi hành</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="locations.html">
+        <i class="bi bi-geo-alt"></i><span>Quản lý địa điểm</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="categories.html">
+        <i class="bi bi-bookmarks"></i><span>Quản lý danh mục</span>
+      </a>
+    </li>
+
+    <li class="nav-heading">Quản lý chung</li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="customers.html">
+        <i class="bi bi-people"></i><span>Quản lý khách hàng</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="reviews.html">
+        <i class="bi bi-star"></i><span>Quản lý đánh giá</span>
+      </a>
+    </li>
+    <li class="nav-item" data-admin-only>
+      <a class="nav-link collapsed" href="staff.html">
+        <i class="bi bi-person-badge"></i><span>Quản lý nhân viên</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="report-revenue.html">
+        <i class="bi bi-bar-chart"></i><span>Báo cáo thống kê</span>
+      </a>
+    </li>
+
+  </ul>
+</aside>
+
+<!-- ======================= NỘI DUNG ======================= -->
+<main id="main" class="main">
+
+  <div class="pagetitle">
+    <h1>Hồ sơ cá nhân</h1>
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="index.html">Trang chủ</a></li>
+        <li class="breadcrumb-item active">Hồ sơ cá nhân</li>
+      </ol>
+    </nav>
+  </div>
+
+  <section class="section profile">
+
+    <div id="pageLoading" class="text-center py-5">
+      <div class="spinner-border text-primary"></div>
+      <p class="text-muted mt-3 mb-0">Đang tải thông tin tài khoản...</p>
+    </div>
+
+    <div class="row d-none" id="pageContent">
+
+      <!-- Thẻ bên trái -->
+      <div class="col-xl-4">
+        <div class="card">
+          <div class="card-body profile-card pt-4 d-flex flex-column align-items-center">
+
+            <!-- Bấm vào avatar để chọn ảnh mới -->
+            <div class="avatar-wrap" id="avatarWrap" role="button" tabindex="0"
+                 title="Đổi ảnh đại diện" aria-label="Đổi ảnh đại diện">
+              <div class="avatar-default" id="avatarDefault"></div>
+              <img class="avatar-img d-none" id="avatarImg" alt="Ảnh đại diện">
+              <div class="avatar-overlay" id="avatarOverlay"><i class="bi bi-camera"></i></div>
+            </div>
+            <input type="file" id="avatarInput" accept="image/jpeg,image/png,image/webp" hidden>
+
+            <div class="avatar-actions">
+              <button type="button" id="changeAvatarBtn">Đổi ảnh</button>
+              <span class="text-muted mx-1 d-none" id="avatarActionSep">·</span>
+              <button type="button" class="btn-remove d-none" id="removeAvatarBtn">Xoá ảnh</button>
+            </div>
+            <div class="avatar-msg d-none" id="avatarMsg"></div>
+
+            <h2 id="cardName">—</h2>
+            <h3 id="cardRole">—</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs bên phải -->
+      <div class="col-xl-8">
+        <div class="card">
+          <div class="card-body pt-3">
+
+            <ul class="nav nav-tabs nav-tabs-bordered">
+              <li class="nav-item">
+                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#profile-overview">Tổng quan</button>
+              </li>
+              <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-edit">Chỉnh sửa hồ sơ</button>
+              </li>
+              <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-change-password">Đổi mật khẩu</button>
+              </li>
+            </ul>
+
+            <div class="tab-content pt-2">
+
+              <!-- ---------- Tổng quan ---------- -->
+              <div class="tab-pane fade show active profile-overview" id="profile-overview">
+                <h5 class="card-title">Chi tiết hồ sơ</h5>
+
+                <div class="row">
+                  <div class="col-lg-3 col-md-4 label">Họ và tên</div>
+                  <div class="col-lg-9 col-md-8" id="ovFullName">—</div>
+                </div>
+                <div class="row">
+                  <div class="col-lg-3 col-md-4 label">Vai trò</div>
+                  <div class="col-lg-9 col-md-8" id="ovRole">—</div>
+                </div>
+                <div class="row">
+                  <div class="col-lg-3 col-md-4 label">Email</div>
+                  <div class="col-lg-9 col-md-8" id="ovEmail">—</div>
+                </div>
+                <div class="row">
+                  <div class="col-lg-3 col-md-4 label">Số điện thoại</div>
+                  <div class="col-lg-9 col-md-8" id="ovPhone">—</div>
+                </div>
+                <div class="row">
+                  <div class="col-lg-3 col-md-4 label">Ngày sinh</div>
+                  <div class="col-lg-9 col-md-8" id="ovDob">—</div>
+                </div>
+                <div class="row">
+                  <div class="col-lg-3 col-md-4 label">Giới tính</div>
+                  <div class="col-lg-9 col-md-8" id="ovGender">—</div>
+                </div>
+                <div class="row">
+                  <div class="col-lg-3 col-md-4 label">Địa chỉ</div>
+                  <div class="col-lg-9 col-md-8" id="ovAddress">—</div>
+                </div>
+              </div>
+
+              <!-- ---------- Chỉnh sửa hồ sơ ---------- -->
+              <div class="tab-pane fade profile-edit pt-3" id="profile-edit">
+
+                <div class="alert d-none" id="infoAlert" role="alert"></div>
+
+                <form id="profileForm" novalidate>
+                  <div class="row mb-3">
+                    <label for="fullName" class="col-md-4 col-lg-3 col-form-label">
+                      Họ và tên <span class="text-danger">*</span>
+                    </label>
+                    <div class="col-md-8 col-lg-9">
+                      <input type="text" class="form-control" id="fullName" maxlength="255">
+                      <div class="invalid-feedback" id="fullNameFeedback"></div>
+                    </div>
+                  </div>
+
+                  <div class="row mb-3">
+                    <label for="email" class="col-md-4 col-lg-3 col-form-label">
+                      Email <span class="text-danger" id="emailRequiredMark">*</span>
+                    </label>
+                    <div class="col-md-8 col-lg-9">
+                      <input type="email" class="form-control" id="email" maxlength="255" disabled>
+                      <div class="invalid-feedback" id="emailFeedback"></div>
+                    </div>
+                  </div>
+
+                  <div class="row mb-3">
+                    <label for="phoneNumber" class="col-md-4 col-lg-3 col-form-label">
+                      Số điện thoại <span class="text-danger">*</span>
+                    </label>
+                    <div class="col-md-8 col-lg-9">
+                      <input type="tel" class="form-control" id="phoneNumber" maxlength="10">
+                      <div class="invalid-feedback" id="phoneNumberFeedback"></div>
+                    </div>
+                  </div>
+
+                  <div class="row mb-3">
+                    <label for="dateOfBirth" class="col-md-4 col-lg-3 col-form-label">Ngày sinh</label>
+                    <div class="col-md-8 col-lg-9">
+                      <input type="date" class="form-control" id="dateOfBirth">
+                    </div>
+                  </div>
+
+                  <div class="row mb-3">
+                    <label for="gender" class="col-md-4 col-lg-3 col-form-label">Giới tính</label>
+                    <div class="col-md-8 col-lg-9">
+                      <select class="form-select" id="gender">
+                        <option value="">-- Chọn --</option>
+                        <option value="MALE">Nam</option>
+                        <option value="FEMALE">Nữ</option>
+                        <option value="OTHER">Khác</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="row mb-3">
+                    <label for="address" class="col-md-4 col-lg-3 col-form-label">Địa chỉ</label>
+                    <div class="col-md-8 col-lg-9">
+                      <input type="text" class="form-control" id="address" maxlength="255">
+                    </div>
+                  </div>
+
+                  <div class="text-center">
+                    <button type="submit" class="btn btn-primary" id="saveBtn">
+                      <span class="spinner-border spinner-border-sm d-none" id="saveSpinner"></span>
+                      <span id="saveText">Lưu thay đổi</span>
+                    </button>
+                    <button type="button" class="btn btn-light ms-2" id="resetBtn">Hoàn tác</button>
+                  </div>
+                </form>
+              </div>
+
+              <!-- ---------- Đổi mật khẩu ---------- -->
+              <div class="tab-pane fade pt-3" id="profile-change-password">
+
+                <div class="alert d-none" id="pwAlert" role="alert"></div>
+
+                <form id="passwordForm" novalidate>
+                  <div class="row mb-3">
+                    <label for="currentPassword" class="col-md-4 col-lg-3 col-form-label">Mật khẩu hiện tại</label>
+                    <div class="col-md-8 col-lg-9">
+                      <div class="password-wrap">
+                        <input type="password" class="form-control" id="currentPassword" autocomplete="current-password">
+                        <button class="toggle-eye" type="button" data-toggle-password="currentPassword" tabindex="-1">
+                          <i class="bi bi-eye"></i>
+                        </button>
+                      </div>
+                      <div class="invalid-feedback d-block d-none" id="currentPasswordFeedback"></div>
+                    </div>
+                  </div>
+
+                  <div class="row mb-3">
+                    <label for="newPassword" class="col-md-4 col-lg-3 col-form-label">Mật khẩu mới</label>
+                    <div class="col-md-8 col-lg-9">
+                      <div class="password-wrap">
+                        <input type="password" class="form-control" id="newPassword"
+                               placeholder="Ít nhất 6 ký tự" autocomplete="new-password">
+                        <button class="toggle-eye" type="button" data-toggle-password="newPassword" tabindex="-1">
+                          <i class="bi bi-eye"></i>
+                        </button>
+                      </div>
+                      <div class="invalid-feedback d-block d-none" id="newPasswordFeedback"></div>
+                    </div>
+                  </div>
+
+                  <div class="row mb-3">
+                    <label for="confirmPassword" class="col-md-4 col-lg-3 col-form-label">Nhập lại mật khẩu mới</label>
+                    <div class="col-md-8 col-lg-9">
+                      <div class="password-wrap">
+                        <input type="password" class="form-control" id="confirmPassword" autocomplete="new-password">
+                        <button class="toggle-eye" type="button" data-toggle-password="confirmPassword" tabindex="-1">
+                          <i class="bi bi-eye"></i>
+                        </button>
+                      </div>
+                      <div class="invalid-feedback d-block d-none" id="confirmPasswordFeedback"></div>
+                    </div>
+                  </div>
+
+                  <div class="text-center">
+                    <button type="submit" class="btn btn-primary" id="pwBtn">
+                      <span class="spinner-border spinner-border-sm d-none" id="pwSpinner"></span>
+                      <span id="pwText">Đổi mật khẩu</span>
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/main.js"></script>
+
+<script>
+  const PHONE_REGEX      = /^0[0-9]{9}$/;
+  const EMAIL_REGEX      = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const AVATAR_TYPES     = ['image/jpeg', 'image/png', 'image/webp'];
+  const AVATAR_MAX_BYTES = 2 * 1024 * 1024;   // khớp spring.servlet.multipart.max-file-size
+  const GENDER_LABEL     = { MALE: 'Nam', FEMALE: 'Nữ', OTHER: 'Khác' };
+  const ROLE_LABEL       = { ADMIN: 'Quản trị viên', STAFF: 'Nhân viên' };
+
+  /** Avatar mặc định kiểu Facebook: đầu + vai xám */
+  const DEFAULT_AVATAR_SVG =
+          '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" ' +
+          'style="width:100%;height:100%;display:block" aria-hidden="true">' +
+          '<rect width="100" height="100" fill="#e4e6eb"/>' +
+          '<circle cx="50" cy="38" r="18" fill="#bcc0c4"/>' +
+          '<ellipse cx="50" cy="94" rx="33" ry="27" fill="#bcc0c4"/>' +
+          '</svg>';
+
+  let originalProfile = null;
+
+  function $(id) { return document.getElementById(id); }
+
+  function fmtDate(val) {
+    if (!val) return '—';
+    const [y, m, d] = String(val).split('T')[0].split('-');
+    return `${d}/${m}/${y}`;
+  }
+
+  function showAlert(boxId, type, message) {
+    const box = $(boxId);
+    box.className = 'alert alert-' + type;
+    box.textContent = message;
+  }
+
+  function hideAlert(boxId) { $(boxId).className = 'alert d-none'; }
+
+  function setFieldError(id, message) {
+    const input = $(id);
+    const feedback = $(id + 'Feedback');
+    input.classList.toggle('is-invalid', !!message);
+    if (feedback) {
+      feedback.textContent = message || '';
+      feedback.classList.toggle('d-none', !message);
+    }
+  }
+
+  /** Body lỗi không chắc là JSON nên parse an toàn */
+  async function readJson(res) {
+    try { return await res.json(); } catch (_) { return null; }
+  }
+
+  /** Gọi API JSON, tự đăng xuất khi 401 */
+  async function callApi(url, options) {
+    const res = await fetch(url, Object.assign({ headers: AdminAuth.authHeaders() }, options));
+    if (res.status === 401) { AdminAuth.logout(); throw new Error('unauthorized'); }
+    return { res, json: await readJson(res) };
+  }
+
+  function errorMessage(json, fallback) {
+    if (json && json.errors && json.errors.length) return json.errors.join(' • ');
+    return (json && json.message) || fallback;
+  }
+
+  // Xem / ẩn mật khẩu
+  document.querySelectorAll('[data-toggle-password]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const input = $(btn.dataset.togglePassword);
+      const hidden = input.type === 'password';
+      input.type = hidden ? 'text' : 'password';
+      btn.querySelector('i').className = hidden ? 'bi bi-eye-slash' : 'bi bi-eye';
+    });
+  });
+
+  // =====================================================================
+  // AVATAR
+  // =====================================================================
+
+  function renderAvatar(avatarUrl) {
+    const img = $('avatarImg');
+    const def = $('avatarDefault');
+
+    if (avatarUrl) {
+      img.src = avatarUrl;
+      img.classList.remove('d-none');
+      def.classList.add('d-none');
+    } else {
+      img.removeAttribute('src');
+      img.classList.add('d-none');
+      def.classList.remove('d-none');
+      def.innerHTML = DEFAULT_AVATAR_SVG;
+    }
+
+    $('removeAvatarBtn').classList.toggle('d-none', !avatarUrl);
+    $('avatarActionSep').classList.toggle('d-none', !avatarUrl);
+  }
+
+  // File ảnh mất / URL sai → hiện hình người rỗng thay vì icon ảnh vỡ
+  $('avatarImg').addEventListener('error', () => {
+    $('avatarImg').classList.add('d-none');
+    $('avatarDefault').classList.remove('d-none');
+    $('avatarDefault').innerHTML = DEFAULT_AVATAR_SVG;
+  });
+
+  function showAvatarMsg(message) {
+    $('avatarMsg').className = 'avatar-msg text-danger';
+    $('avatarMsg').textContent = message;
+  }
+
+  function hideAvatarMsg() { $('avatarMsg').className = 'avatar-msg d-none'; }
+
+  function setAvatarLoading(loading) {
+    $('avatarWrap').classList.toggle('uploading', loading);
+    $('avatarOverlay').innerHTML = loading
+            ? '<span class="spinner-border spinner-border-sm"></span>'
+            : '<i class="bi bi-camera"></i>';
+    $('changeAvatarBtn').disabled = loading;
+    $('removeAvatarBtn').disabled = loading;
+  }
+
+  /**
+   * CHỈ có Authorization. Không dùng AdminAuth.authHeaders() vì nó gắn sẵn
+   * Content-Type: application/json, đè mất "multipart/form-data; boundary=..."
+   */
+  function tokenHeader() {
+    return { 'Authorization': 'Bearer ' + AdminAuth.getToken() };
+  }
+
+  function openFilePicker() {
+    hideAvatarMsg();
+    $('avatarInput').click();
+  }
+
+  $('avatarWrap').addEventListener('click', openFilePicker);
+  $('changeAvatarBtn').addEventListener('click', openFilePicker);
+  $('avatarWrap').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFilePicker(); }
+  });
+
+  $('avatarInput').addEventListener('change', () => {
+    const file = $('avatarInput').files[0];
+    $('avatarInput').value = '';   // reset để chọn lại đúng file cũ vẫn bắt được sự kiện
+    if (file) uploadAvatar(file);
+  });
+
+  async function uploadAvatar(file) {
+    if (!AVATAR_TYPES.includes(file.type)) { showAvatarMsg('Chỉ chấp nhận ảnh JPG, PNG hoặc WEBP'); return; }
+    if (file.size > AVATAR_MAX_BYTES)      { showAvatarMsg('Ảnh không được vượt quá 2MB'); return; }
+
+    // Xem trước ngay, không đợi server
+    const previewUrl = URL.createObjectURL(file);
+    $('avatarImg').src = previewUrl;
+    $('avatarImg').classList.remove('d-none');
+    $('avatarDefault').classList.add('d-none');
+
+    setAvatarLoading(true);
+
+    const formData = new FormData();
+    formData.append('file', file);   // khớp @RequestParam("file")
+
+    try {
+      const res = await fetch('/api/admin/account-info/avatar', {
+        method: 'POST', headers: tokenHeader(), body: formData
+      });
+      if (res.status === 401) { AdminAuth.logout(); return; }
+      const json = await readJson(res);
+
+      if (res.ok && json && json.success) {
+        // Chỉ cập nhật avatar, không gọi fillProfile để giữ những gì đang gõ dở trong form
+        originalProfile = Object.assign({}, originalProfile, { avatarUrl: json.data.avatarUrl });
+        renderAvatar(originalProfile.avatarUrl);
+        AdminAuth.updateUser({ avatarUrl: json.data.avatarUrl });   // header đổi ảnh ngay
+      } else {
+        renderAvatar(originalProfile.avatarUrl);   // quay về ảnh cũ
+        showAvatarMsg(errorMessage(json,
+                res.status === 413 ? 'Ảnh không được vượt quá 2MB' : 'Không tải được ảnh lên'));
+      }
+    } catch (e) {
+      renderAvatar(originalProfile.avatarUrl);
+      showAvatarMsg('Không kết nối được tới máy chủ.');
+    } finally {
+      URL.revokeObjectURL(previewUrl);
+      setAvatarLoading(false);
+    }
+  }
+
+  $('removeAvatarBtn').addEventListener('click', async () => {
+    hideAvatarMsg();
+    setAvatarLoading(true);
+
+    try {
+      const res = await fetch('/api/admin/account-info/avatar', {
+        method: 'DELETE', headers: tokenHeader()
+      });
+      if (res.status === 401) { AdminAuth.logout(); return; }
+      const json = await readJson(res);
+
+      if (res.ok && json && json.success) {
+        originalProfile = Object.assign({}, originalProfile, { avatarUrl: null });
+        renderAvatar(null);
+        AdminAuth.updateUser({ avatarUrl: null });   // header về hình người rỗng
+      } else {
+        showAvatarMsg(errorMessage(json, 'Không xoá được ảnh'));
+      }
+    } catch (e) {
+      showAvatarMsg('Không kết nối được tới máy chủ.');
+    } finally {
+      setAvatarLoading(false);
+    }
+  });
+
+  // =====================================================================
+  // THÔNG TIN CÁ NHÂN
+  // =====================================================================
+
+  function fillProfile(u) {
+    originalProfile = u;
+    const roleText = ROLE_LABEL[u.role] || u.role || '—';
+
+    // Thẻ trái
+    renderAvatar(u.avatarUrl);
+    $('cardName').textContent = u.fullName || '—';
+    $('cardRole').textContent = roleText;
+
+    // Tab tổng quan
+    $('ovFullName').textContent = u.fullName || '—';
+    $('ovRole').textContent     = roleText;
+    $('ovEmail').textContent    = u.email || '—';
+    $('ovPhone').textContent    = u.phoneNumber || '—';
+    $('ovDob').textContent      = fmtDate(u.dateOfBirth);
+    $('ovGender').textContent   = GENDER_LABEL[u.gender] || '—';
+    $('ovAddress').textContent  = u.address || '—';
+
+    // Form chỉnh sửa
+    $('fullName').value    = u.fullName || '';
+    $('email').value       = u.email || '';
+    $('phoneNumber').value = u.phoneNumber || '';
+    $('dateOfBirth').value = u.dateOfBirth || '';
+    $('gender').value      = u.gender || '';
+    $('address').value     = u.address || '';
+
+    // Chỉ ADMIN được sửa email. Khoá ở đây chỉ để giao diện rõ ràng,
+    // server mới là nơi chặn thật (STAFF đổi email → 403).
+    const isAdmin = u.role === 'ADMIN';
+    $('email').disabled = !isAdmin;
+    $('emailRequiredMark').classList.toggle('d-none', !isAdmin);
+  }
+
+  async function loadProfile() {
+    try {
+      const { res, json } = await callApi('/api/admin/account-info');
+      if (res.ok && json && json.success) {
+        fillProfile(json.data);
+        // Đồng bộ localStorage với DB (phiên đăng nhập cũ chưa lưu avatarUrl)
+        AdminAuth.updateUser({ fullName: json.data.fullName, avatarUrl: json.data.avatarUrl });
+        $('pageLoading').classList.add('d-none');
+        $('pageContent').classList.remove('d-none');
+      } else {
+        const p = document.createElement('p');
+        p.className = 'text-danger mb-0';
+        p.textContent = errorMessage(json, 'Không tải được thông tin tài khoản.');
+        $('pageLoading').replaceChildren(p);
+      }
+    } catch (e) {
+      if (e.message !== 'unauthorized') {
+        $('pageLoading').innerHTML = '<p class="text-danger mb-0">Không kết nối được tới máy chủ.</p>';
+      }
+    }
+  }
+
+  function clearProfileErrors() {
+    ['fullName', 'email', 'phoneNumber'].forEach(id => setFieldError(id, null));
+  }
+
+  $('profileForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hideAlert('infoAlert');
+    clearProfileErrors();
+
+    const fullName = $('fullName').value.trim();
+    const email    = $('email').value.trim();
+    const phone    = $('phoneNumber').value.trim();
+
+    let valid = true;
+    if (!fullName) { setFieldError('fullName', 'Vui lòng nhập họ tên'); valid = false; }
+    if (!EMAIL_REGEX.test(email)) { setFieldError('email', 'Email không đúng định dạng'); valid = false; }
+    if (!PHONE_REGEX.test(phone)) {
+      setFieldError('phoneNumber', 'Số điện thoại phải gồm 10 chữ số, bắt đầu bằng 0');
+      valid = false;
+    }
+    if (!valid) return;
+
+    const payload = {
+      fullName:    fullName,
+      email:       email,          // STAFF: ô bị khoá → luôn là email hiện tại
+      phoneNumber: phone,
+      address:     $('address').value.trim() || null,
+      dateOfBirth: $('dateOfBirth').value || null,
+      gender:      $('gender').value || null
+    };
+
+    $('saveBtn').disabled = true;
+    $('saveSpinner').classList.remove('d-none');
+    $('saveText').textContent = 'Đang lưu...';
+
+    try {
+      const { res, json } = await callApi('/api/admin/account-info', {
+        method: 'PUT',
+        body: JSON.stringify(payload)
+      });
+
+      if (res.ok && json && json.success) {
+        const d = json.data;
+
+        if (d.token) {
+          // Vừa đổi email: token cũ mang email cũ sẽ bị 401 → BẮT BUỘC lưu token mới
+          AdminAuth.saveSession({
+            token: d.token, userId: d.userId, email: d.email,
+            fullName: d.fullName, role: d.role, avatarUrl: d.avatarUrl
+          });
+          AdminAuth.renderUser();
+        } else {
+          AdminAuth.updateUser({ fullName: d.fullName, avatarUrl: d.avatarUrl });   // header đổi tên ngay
+        }
+
+        fillProfile(d);
+        showAlert('infoAlert', 'success', json.message || 'Cập nhật thành công');
+      } else {
+        showAlert('infoAlert', 'danger', errorMessage(json, 'Cập nhật thất bại'));
+      }
+    } catch (e) {
+      if (e.message === 'unauthorized') return;
+      console.error(e);   // xem lỗi thật trong Console
+      // Mất mạng thật: fetch ném TypeError "Failed to fetch". Lỗi JS khác thì báo khác đi
+      const isNetwork = e instanceof TypeError && /fetch/i.test(e.message);
+      showAlert('infoAlert', 'danger', isNetwork
+              ? 'Không kết nối được tới máy chủ.'
+              : 'Đã lưu nhưng có lỗi khi hiển thị lại. Vui lòng tải lại trang.');
+    } finally {
+      $('saveBtn').disabled = false;
+      $('saveSpinner').classList.add('d-none');
+      $('saveText').textContent = 'Lưu thay đổi';
+    }
+  });
+
+  $('resetBtn').addEventListener('click', () => {
+    if (originalProfile) fillProfile(originalProfile);
+    hideAlert('infoAlert');
+    clearProfileErrors();
+  });
+
+  // =====================================================================
+  // ĐỔI MẬT KHẨU (giữ nguyên)
+  // =====================================================================
+
+  $('passwordForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hideAlert('pwAlert');
+    ['currentPassword', 'newPassword', 'confirmPassword'].forEach(id => setFieldError(id, null));
+
+    const current = $('currentPassword').value;
+    const newPw   = $('newPassword').value;
+    const confirm = $('confirmPassword').value;
+
+    let valid = true;
+    if (!current) { setFieldError('currentPassword', 'Vui lòng nhập mật khẩu hiện tại'); valid = false; }
+    if (newPw.length < 6) { setFieldError('newPassword', 'Mật khẩu phải có ít nhất 6 ký tự'); valid = false; }
+    else if (newPw === current) { setFieldError('newPassword', 'Mật khẩu mới phải khác mật khẩu hiện tại'); valid = false; }
+    if (confirm !== newPw) { setFieldError('confirmPassword', 'Mật khẩu nhập lại không khớp'); valid = false; }
+    if (!valid) return;
+
+    $('pwBtn').disabled = true;
+    $('pwSpinner').classList.remove('d-none');
+    $('pwText').textContent = 'Đang xử lý...';
+
+    try {
+      const { res, json } = await callApi('/api/admin/account-info/password', {
+        method: 'PUT',
+        body: JSON.stringify({ currentPassword: current, newPassword: newPw, confirmPassword: confirm })
+      });
+
+      if (res.ok && json && json.success) {
+        $('passwordForm').reset();
+        showAlert('pwAlert', 'success', json.message || 'Đổi mật khẩu thành công');
+      } else {
+        showAlert('pwAlert', 'danger', errorMessage(json, 'Đổi mật khẩu thất bại'));
+      }
+    } catch (e) {
+      if (e.message !== 'unauthorized') showAlert('pwAlert', 'danger', 'Không kết nối được tới máy chủ.');
+    } finally {
+      $('pwBtn').disabled = false;
+      $('pwSpinner').classList.add('d-none');
+      $('pwText').textContent = 'Đổi mật khẩu';
+    }
+  });
+
+  loadProfile();
+</script>
+
+</body>
+</html>

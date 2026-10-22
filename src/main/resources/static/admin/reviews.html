@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+    <title>Đánh giá & Phản hồi - Admin</title>
+    <meta content="" name="description">
+    <meta content="" name="keywords">
+
+    <link href="assets/img/favicon.png" rel="icon">
+    <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+    <link href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+    <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+    <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
+    <link href="assets/vendor/quill/quill.snow.css" rel="stylesheet">
+    <link href="assets/vendor/quill/quill.bubble.css" rel="stylesheet">
+    <link href="assets/vendor/remixicon/remixicon.css" rel="stylesheet">
+    <link href="assets/vendor/simple-datatables/style.css" rel="stylesheet">
+    <link href="assets/css/style.css" rel="stylesheet">
+
+    <script src="assets/js/admin-auth.js"></script>
+    <script>AdminAuth.requireLogin();</script>
+
+    <style>
+
+    </style>
+</head>
+
+<body>
+<header id="header" class="header fixed-top d-flex align-items-center">
+
+    <div class="d-flex align-items-center justify-content-between">
+        <a href="index.html" class="logo d-flex align-items-center">
+            <img src="assets/img/logo.png" alt="">
+            <span class="d-none d-lg-block">VietTrip Admin</span>
+        </a>
+        <i class="bi bi-list toggle-sidebar-btn"></i>
+    </div>
+
+    <div class="search-bar">
+        <form class="search-form d-flex align-items-center" method="POST" action="#">
+            <input type="text" name="query" placeholder="Tìm kiếm nhanh..." title="Nhập từ khóa tìm kiếm">
+            <button type="submit" title="Search"><i class="bi bi-search"></i></button>
+        </form>
+    </div>
+
+    <nav class="header-nav ms-auto">
+        <ul class="d-flex align-items-center">
+            <li class="nav-item d-block d-lg-none">
+                <a class="nav-link nav-icon search-bar-toggle " href="#">
+                    <i class="bi bi-search"></i>
+                </a>
+            </li>
+            <li class="nav-item dropdown pe-3">
+                <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
+                    <img src="assets/img/profile-img.jpg" alt="Profile" class="rounded-circle">
+                    <span class="d-none d-md-block dropdown-toggle ps-2" data-admin-name></span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
+                    <li class="dropdown-header"><h6 data-admin-name></h6><span data-admin-role></span></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item d-flex align-items-center" href="profile.html">
+                        <i class="bi bi-person"></i><span>Hồ sơ của tôi</span>
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item d-flex align-items-center" href="#" id="btnLogout" data-admin-logout>
+                        <i class="bi bi-box-arrow-right"></i><span>Đăng xuất</span>
+                    </a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<aside id="sidebar" class="sidebar">
+    <ul class="sidebar-nav" id="sidebar-nav">
+
+        <li class="nav-item">
+            <a class="nav-link" href="index.html">
+                <i class="bi bi-grid"></i><span>Bảng điều khiển</span>
+            </a>
+        </li>
+
+        <!-- ================= KINH DOANH ================= -->
+        <li class="nav-heading">Kinh doanh</li>
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="bookings.html">
+                <i class="bi bi-cart-check"></i><span>Quản lý đặt tour</span>
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="payments.html">
+                <i class="bi bi-credit-card"></i><span>Quản lý thanh toán</span>
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="promotions.html">
+                <i class="bi bi-tags"></i><span>Quản lý khuyến mãi</span>
+            </a>
+        </li>
+
+        <!-- ================= SẢN PHẨM ================= -->
+        <li class="nav-heading">Sản phẩm</li>
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="tours.html">
+                <i class="bi bi-map"></i><span>Quản lý tour</span>
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="tour-schedules.html">
+                <i class="bi bi-calendar-event"></i><span>Quản lý lịch khởi hành</span>
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="locations.html">
+                <i class="bi bi-geo-alt"></i><span>Quản lý địa điểm</span>
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="categories.html">
+                <i class="bi bi-bookmarks"></i><span>Quản lý danh mục</span>
+            </a>
+        </li>
+
+        <!-- ================= QUẢN LÝ CHUNG ================= -->
+        <li class="nav-heading">Quản lý chung</li>
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="customers.html">
+                <i class="bi bi-people"></i><span>Quản lý khách hàng</span>
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="reviews.html">
+                <i class="bi bi-star"></i><span>Quản lý đánh giá</span>
+            </a>
+        </li>
+
+        <!-- Chỉ ADMIN thấy: admin-auth.js gỡ phần tử này nếu là STAFF -->
+        <li class="nav-item" data-admin-only>
+            <a class="nav-link collapsed" href="staff.html">
+                <i class="bi bi-person-badge"></i><span>Quản lý nhân viên</span>
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="report-revenue.html">
+                <i class="bi bi-bar-chart"></i><span>Báo cáo thống kê</span>
+            </a>
+        </li>
+
+    </ul>
+</aside>
+
+<main id="main" class="main">
+
+    <div class="pagetitle">
+        <h1>Đánh giá & Phản hồi</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="index.html">Trang chủ</a></li>
+                <li class="breadcrumb-item">Khách hàng</li>
+                <li class="breadcrumb-item active">Đánh giá</li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section">
+        <div class="row">
+            <div class="col-lg-12">
+
+                <div class="card mb-3">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex gap-2">
+                                <a href="#" class="btn btn-outline-primary btn-sm active">Tất cả</a>
+                                <a href="#" class="btn btn-outline-warning btn-sm">Chờ duyệt</a>
+                                <a href="#" class="btn btn-outline-success btn-sm">Đã duyệt</a>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <select class="form-select form-select-sm" title="Lọc theo Số sao">
+                                    <option selected>Lọc theo Sao</option>
+                                    <option value="5">5 Sao</option>
+                                    <option value="4">4 Sao</option>
+                                    <option value="3">3 Sao</option>
+                                    <option value="1">1-2 Sao</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Quản lý nhận xét từ Khách hàng</h5>
+
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                            <tr>
+                                <th scope="col" style="width: 20%;">Khách hàng & Thời gian</th>
+                                <th scope="col" style="width: 20%;">Tour được đánh giá</th>
+                                <th scope="col" style="width: 35%;">Số sao & Nội dung</th>
+                                <th scope="col" style="width: 10%;">Trạng thái</th>
+                                <th scope="col" class="text-center" style="width: 15%;">Hành động</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+
+                            <tr>
+                                <td>
+                                    <span class="fw-bold text-dark">Nguyễn Hải Đăng</span><br>
+                                    <small class="text-muted"><i class="bi bi-clock"></i> 2 giờ trước</small>
+                                </td>
+                                <td>
+                                    <a href="tour-detail.html?id=1" class="text-primary fw-bold d-block text-truncate">T001 - Hà Nội Sapa</a>
+                                    <small class="text-muted">Mã đơn: BK-260515-01</small>
+                                </td>
+                                <td>
+                                    <div class="text-warning mb-1">
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                    </div>
+                                    <p class="mb-0 text-dark small" style="max-width: 300px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                        Tour cực kỳ chất lượng, HDV Anh Tuấn rất nhiệt tình và chụp ảnh đẹp. Đồ ăn ngon, KS sạch sẽ. Sẽ tiếp tục ủng hộ công ty!
+                                    </p>
+                                </td>
+                                <td>
+                                    <span class="badge bg-warning text-dark">Chờ duyệt</span>
+                                </td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-sm btn-success" title="Duyệt hiển thị"><i class="bi bi-check-lg"></i></button>
+                                    <button type="button" class="btn btn-sm btn-primary" title="Viết phản hồi"><i class="bi bi-reply"></i></button>
+                                    <button type="button" class="btn btn-sm btn-danger" title="Ẩn/Xóa"><i class="bi bi-eye-slash"></i></button>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <span class="fw-bold text-dark">Trần Thu Hương</span><br>
+                                    <small class="text-muted"><i class="bi bi-clock"></i> Hôm qua, 15:30</small>
+                                </td>
+                                <td>
+                                    <a href="tour-detail.html?id=2" class="text-primary fw-bold d-block text-truncate">T002 - Đà Nẵng Hội An</a>
+                                    <small class="text-muted">Mã đơn: BK-260516-02</small>
+                                </td>
+                                <td>
+                                    <div class="text-warning mb-1">
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star text-muted"></i>
+                                        <i class="bi bi-star text-muted"></i>
+                                    </div>
+                                    <p class="mb-0 text-dark small" style="max-width: 300px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                        Lịch trình hơi dày, đi bộ nhiều nên người lớn tuổi hơi mệt. Cảnh đẹp nhưng buffet ở KS chưa phong phú lắm.
+                                    </p>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success">Đã duyệt</span>
+                                </td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" title="Viết phản hồi xin lỗi/cảm ơn"><i class="bi bi-reply"></i> Trả lời</button>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <span class="fw-bold text-dark">Lê Minh Tuấn</span><br>
+                                    <small class="text-muted"><i class="bi bi-clock"></i> 05/03/2026</small>
+                                </td>
+                                <td>
+                                    <a href="tour-detail.html?id=4" class="text-primary fw-bold d-block text-truncate">T004 - Miền Tây 2N1Đ</a>
+                                    <small class="text-muted">Mã đơn: BK-260510-03</small>
+                                </td>
+                                <td>
+                                    <div class="text-warning mb-1">
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-half"></i>
+                                    </div>
+                                    <p class="mb-1 text-dark small">
+                                        Trải nghiệm tuyệt vời, sông nước miền Tây rất đẹp.
+                                    </p>
+                                    <div class="p-2 bg-light border-start border-primary border-3 mt-2">
+                                        <small class="fw-bold text-primary">Admin trả lời:</small><br>
+                                        <small class="text-muted">Cảm ơn anh Tuấn đã đồng hành cùng công ty...</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary">Đã phản hồi</span>
+                                </td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" title="Chỉnh sửa câu trả lời"><i class="bi bi-pencil-square"></i></button>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <span class="fw-bold text-dark">Spam User</span><br>
+                                    <small class="text-muted"><i class="bi bi-clock"></i> 01/03/2026</small>
+                                </td>
+                                <td>
+                                    <a href="#" class="text-secondary fw-bold d-block text-truncate">T001 - Hà Nội Sapa</a>
+                                    <small class="text-muted">Không xác định</small>
+                                </td>
+                                <td>
+                                    <div class="text-warning mb-1">
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star text-muted"></i>
+                                        <i class="bi bi-star text-muted"></i>
+                                        <i class="bi bi-star text-muted"></i>
+                                        <i class="bi bi-star text-muted"></i>
+                                    </div>
+                                    <p class="mb-0 text-muted small fst-italic">
+                                        [Nội dung chứa link rác hoặc từ ngữ không phù hợp]
+                                    </p>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">Đã ẩn</span>
+                                </td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-sm btn-outline-danger" title="Xóa vĩnh viễn"><i class="bi bi-trash"></i></button>
+                                </td>
+                            </tr>
+
+                            </tbody>
+                        </table>
+
+                        <nav aria-label="Page navigation example" class="mt-4">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item disabled"><a class="page-link" href="#" tabindex="-1" aria-disabled="true">Trước</a></li>
+                                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                <li class="page-item"><a class="page-link" href="#">Sau</a></li>
+                            </ul>
+                        </nav>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+</main>
+<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+<script src="assets/vendor/apexcharts/apexcharts.min.js"></script>
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="assets/vendor/chart.js/chart.umd.js"></script>
+<script src="assets/vendor/echarts/echarts.min.js"></script>
+<script src="assets/vendor/quill/quill.js"></script>
+<script src="assets/vendor/simple-datatables/simple-datatables.js"></script>
+<script src="assets/vendor/tinymce/tinymce.min.js"></script>
+<script src="assets/vendor/php-email-form/validate.js"></script>
+
+<script src="assets/js/main.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const userData = JSON.parse(localStorage.getItem('user'));
+        if (userData) {
+            const nameElements = document.querySelectorAll('.nav-profile span, .dropdown-header h6');
+            nameElements.forEach(el => el.innerText = userData.fullName);
+
+            const roleElement = document.querySelector('.dropdown-header span');
+            if (roleElement) roleElement.innerText = userData.role;
+        }
+    });
+</script>
+
+</body>
+
+</html>

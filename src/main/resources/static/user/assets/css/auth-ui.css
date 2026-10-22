@@ -1,0 +1,51 @@
+/* assets/css/auth-ui.css
+   Nút người dùng trên header. Thêm link này vào <head> sau main.css:
+   <link href="assets/css/auth-ui.css" rel="stylesheet"> */
+
+.header .btn-getstarted.btn-user {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px 6px 6px;
+    border-radius: 999px;
+    background-color: color-mix(in srgb, var(--accent-color), transparent 88%);
+    color: var(--accent-color);
+    font-weight: 500;
+    white-space: nowrap;
+    transition: background-color .25s;
+}
+
+.header .btn-getstarted.btn-user:hover {
+    background-color: color-mix(in srgb, var(--accent-color), transparent 78%);
+    color: var(--accent-color);
+}
+
+.btn-user .user-avatar {
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+    border-radius: 50%;
+    overflow: hidden;              /* cắt SVG / ảnh theo khung tròn */
+    background-color: #e4e6eb;     /* nền xám nhạt kiểu Facebook */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-user .user-name {
+    font-size: 15px;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Màn hình nhỏ chỉ giữ avatar cho gọn */
+@media (max-width: 575.98px) {
+    .btn-user .user-name {
+        display: none;
+    }
+
+    .header .btn-getstarted.btn-user {
+        padding: 6px;
+    }
+}

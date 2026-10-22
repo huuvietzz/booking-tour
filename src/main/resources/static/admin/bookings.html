@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Danh sách Đơn hàng - Admin</title>
+
+  <link href="assets/img/favicon.png" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+  <link href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
+  <link href="assets/css/style.css" rel="stylesheet">
+
+  <script src="assets/js/admin-auth.js"></script>
+  <script>AdminAuth.requireLogin();</script>
+
+  <style>
+    /* ===== CUSTOM PAGINATION ===== */
+    .custom-pagination-wrapper {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 2px 4px 2px; flex-wrap: wrap; gap: 10px;
+    }
+    .pagination-info { font-size: 0.82rem; color: #6c757d; white-space: nowrap; }
+    .pagination-info span { font-weight: 600; color: #333; }
+    .custom-pagination {
+      display: flex; align-items: center; gap: 4px;
+      list-style: none; margin: 0; padding: 0;
+    }
+    .custom-pagination .page-item { display: flex; }
+    .custom-pagination .page-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 34px; height: 34px; padding: 0 10px;
+      font-size: 0.82rem; font-weight: 500; color: #4154f1;
+      background: #fff; border: 1.5px solid #c8cef7;
+      border-radius: 6px; cursor: pointer;
+      transition: background .15s, border-color .15s, color .15s, box-shadow .15s;
+      line-height: 1; user-select: none;
+    }
+    .custom-pagination .page-btn:hover:not(.active):not(.disabled):not(.ellipsis) {
+      background: #eef0fd; border-color: #4154f1;
+    }
+    .custom-pagination .page-btn.active {
+      background: #4154f1; border-color: #4154f1; color: #fff;
+      font-weight: 700; box-shadow: 0 2px 8px rgba(65,84,241,.25);
+      cursor: default; pointer-events: none;
+    }
+    .custom-pagination .page-btn.disabled {
+      color: #b8bfd8; border-color: #e6e9f5; background: #f7f8fc;
+      cursor: not-allowed; pointer-events: none;
+    }
+    .custom-pagination .page-btn.ellipsis {
+      border: none; background: transparent; color: #9aa0bc;
+      cursor: default; pointer-events: none; min-width: 24px;
+    }
+
+    /* ===== LOADING OVERLAY ===== */
+    .table-wrapper { position: relative; }
+    #tableLoadingOverlay {
+      display: none; position: absolute; inset: 0;
+      background: rgba(255,255,255,.7); z-index: 10;
+      align-items: center; justify-content: center; border-radius: 4px;
+    }
+    #tableLoadingOverlay.show { display: flex; }
+
+    /* ===== SCROLLBAR ===== */
+    .table-responsive { scrollbar-width: thin; scrollbar-color: #cbd0d5 #f8f9fa; }
+    .table-responsive::-webkit-scrollbar { height: 8px; }
+    .table-responsive::-webkit-scrollbar-track { background: #f8f9fa; border-radius: 4px; }
+    .table-responsive::-webkit-scrollbar-thumb { background: #cbd0d5; border-radius: 4px; }
+    .table-responsive::-webkit-scrollbar-thumb:hover { background: #aab2bd; }
+
+    /* ===== SORTING ===== */
+    th.sortable { cursor: pointer; user-select: none; transition: color .2s; }
+    th.sortable:hover { color: #4154f1; }
+    th.sortable .sort-icon { margin-left: 4px; color: #adb5bd; font-size: .8rem; opacity: 0; transition: all .2s; }
+    th.sortable:hover .sort-icon { opacity: .5; }
+    th.sortable.sort-active { color: #4154f1; }
+    th.sortable.sort-active .sort-icon { opacity: 1; font-weight: bold; font-size: 1.1rem; }
+
+    /* ===== BADGE TRẠNG THÁI ĐƠN ===== */
+    .badge-pending    { background:#e3f2fd; color:#1565c0; border:1px solid #90caf9; }
+    .badge-confirmed  { background:#e8eaf6; color:#283593; border:1px solid #9fa8da; }
+    .badge-completed  { background:#e8f5e9; color:#2e7d32; border:1px solid #a5d6a7; }
+    .badge-cancelled  { background:#f5f5f5; color:#616161; border:1px solid #bdbdbd; }
+
+    /* ===== BADGE THANH TOÁN ===== */
+    .badge-pay-pending  { background:#fff8e1; color:#f57f17; border:1px solid #ffe082; }
+    .badge-pay-paid     { background:#e8f5e9; color:#2e7d32; border:1px solid #a5d6a7; }
+    .badge-pay-partial  { background:#e0f7fa; color:#00695c; border:1px solid #80deea; }
+    .badge-pay-refunded { background:#f5f5f5; color:#616161; border:1px solid #bdbdbd; }
+    .badge-pay-failed   { background:#fce4ec; color:#c62828; border:1px solid #ef9a9a; }
+
+    /* ===== BADGE TRẠNG THÁI LỊCH ===== */
+    .badge-available  { background:#e8f5e9; color:#2e7d32; border:1px solid #a5d6a7; }
+    .badge-full       { background:#fce4ec; color:#c62828; border:1px solid #ef9a9a; }
+    .badge-sch-cancel { background:#f5f5f5; color:#616161; border:1px solid #bdbdbd; }
+
+    /* ===== BADGE SỐ KHÁCH ===== */
+    .badge-guest {
+      background: #f8f9fa; color: #495057; border: 1px solid #dee2e6;
+      font-weight: 500; font-size: .76rem;
+    }
+
+    /* ===== DÒNG ĐƠN ĐÃ HỦY ===== */
+    tr.row-cancelled td:not(:last-child) { opacity: .6; }
+    .money-cancelled { text-decoration: line-through; color: #9e9e9e; }
+
+    /* ===== EXPORT BUTTON ===== */
+    .btn-export {
+      background: #e8f5e9; color: #2e7d32;
+      border: 1.5px solid #a5d6a7;
+      font-size: 0.82rem; font-weight: 600;
+      padding: 5px 14px; border-radius: 6px;
+      cursor: pointer; transition: all .15s;
+      display: inline-flex; align-items: center; gap: 5px;
+    }
+    .btn-export:hover { background: #c8e6c9; border-color: #66bb6a; }
+
+    /* ===== MODAL CHI TIẾT ===== */
+    #viewBookingModal .modal-body { overflow-wrap: break-word; word-break: break-word; }
+    .detail-label { font-size: .78rem; color: #6c757d; margin-bottom: 2px; }
+    .detail-value { font-weight: 600; color: #333; font-size: .92rem; }
+    .detail-section-title {
+      font-size: .75rem; font-weight: 700; letter-spacing: .5px;
+      text-transform: uppercase; color: #4154f1; margin-bottom: 10px;
+    }
+    .money-row {
+      display: flex; justify-content: space-between;
+      padding: 5px 0; font-size: .88rem;
+    }
+    .money-row.total {
+      border-top: 1.5px solid #dee2e6; margin-top: 6px; padding-top: 10px;
+      font-weight: 700; font-size: 1rem; color: #4154f1;
+    }
+    .participant-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px; background: #f8f9fa; border-radius: 6px; margin-bottom: 6px;
+    }
+    .participant-index {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: #e8eaf6; color: #4154f1;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: .76rem; font-weight: 700; flex-shrink: 0;
+    }
+    .badge-primary-guest { background:#fff3e0; color:#e65100; border:1px solid #ffcc80; font-size:.7rem; }
+    .badge-single-room { background:#e0f7fa; color:#00695c; border:1px solid #80deea; font-size:.7rem; }
+
+  </style>
+</head>
+
+<body>
+<header id="header" class="header fixed-top d-flex align-items-center">
+  <div class="d-flex align-items-center justify-content-between">
+    <a href="index.html" class="logo d-flex align-items-center">
+      <img src="assets/img/logo.png" alt="">
+      <span class="d-none d-lg-block">VietTrip Admin</span>
+    </a>
+    <i class="bi bi-list toggle-sidebar-btn"></i>
+  </div>
+  <div class="search-bar">
+    <form class="search-form d-flex align-items-center" method="POST" action="#">
+      <input type="text" name="query" placeholder="Tìm kiếm nhanh..." title="Nhập từ khóa tìm kiếm">
+      <button type="submit" title="Search"><i class="bi bi-search"></i></button>
+    </form>
+  </div>
+  <nav class="header-nav ms-auto">
+    <ul class="d-flex align-items-center">
+      <li class="nav-item dropdown pe-3">
+        <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
+          <img src="assets/img/profile-img.jpg" alt="Profile" class="rounded-circle">
+          <span class="d-none d-md-block dropdown-toggle ps-2" data-admin-name></span>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
+          <li class="dropdown-header"><h6 data-admin-name></h6><span data-admin-role></span></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item d-flex align-items-center" href="profile.html">
+            <i class="bi bi-person"></i><span>Hồ sơ của tôi</span>
+          </a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item d-flex align-items-center" href="#" id="btnLogout" data-admin-logout>
+            <i class="bi bi-box-arrow-right"></i><span>Đăng xuất</span>
+          </a></li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+</header>
+
+<aside id="sidebar" class="sidebar">
+  <ul class="sidebar-nav" id="sidebar-nav">
+
+    <li class="nav-item">
+      <a class="nav-link" href="index.html">
+        <i class="bi bi-grid"></i><span>Bảng điều khiển</span>
+      </a>
+    </li>
+
+    <!-- ================= KINH DOANH ================= -->
+    <li class="nav-heading">Kinh doanh</li>
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="bookings.html">
+        <i class="bi bi-cart-check"></i><span>Quản lý đặt tour</span>
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="payments.html">
+        <i class="bi bi-credit-card"></i><span>Quản lý thanh toán</span>
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="promotions.html">
+        <i class="bi bi-tags"></i><span>Quản lý khuyến mãi</span>
+      </a>
+    </li>
+
+    <!-- ================= SẢN PHẨM ================= -->
+    <li class="nav-heading">Sản phẩm</li>
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="tours.html">
+        <i class="bi bi-map"></i><span>Quản lý tour</span>
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="tour-schedules.html">
+        <i class="bi bi-calendar-event"></i><span>Quản lý lịch khởi hành</span>
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="locations.html">
+        <i class="bi bi-geo-alt"></i><span>Quản lý địa điểm</span>
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="categories.html">
+        <i class="bi bi-bookmarks"></i><span>Quản lý danh mục</span>
+      </a>
+    </li>
+
+    <!-- ================= QUẢN LÝ CHUNG ================= -->
+    <li class="nav-heading">Quản lý chung</li>
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="customers.html">
+        <i class="bi bi-people"></i><span>Quản lý khách hàng</span>
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="reviews.html">
+        <i class="bi bi-star"></i><span>Quản lý đánh giá</span>
+      </a>
+    </li>
+
+    <!-- Chỉ ADMIN thấy: admin-auth.js gỡ phần tử này nếu là STAFF -->
+    <li class="nav-item" data-admin-only>
+      <a class="nav-link collapsed" href="staff.html">
+        <i class="bi bi-person-badge"></i><span>Quản lý nhân viên</span>
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="report-revenue.html">
+        <i class="bi bi-bar-chart"></i><span>Báo cáo thống kê</span>
+      </a>
+    </li>
+
+  </ul>
+</aside>
+
+<main id="main" class="main">
+
+  <div class="pagetitle">
+    <h1>Danh sách Đơn hàng</h1>
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="index.html">Trang chủ</a></li>
+        <li class="breadcrumb-item">Đơn hàng</li>
+        <li class="breadcrumb-item active">Tất cả đơn đặt</li>
+      </ol>
+    </nav>
+  </div>
+
+  <section class="section">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="card">
+          <div class="card-body">
+
+            <!-- HEADER -->
+            <div class="d-flex justify-content-between align-items-center mt-3 mb-4 flex-wrap gap-2">
+              <h5 class="card-title p-0 m-0">Dữ liệu Đơn đặt Tour</h5>
+              <button class="btn-export" onclick="exportToExcel()" title="Xuất danh sách ra file Excel">
+                <i class="bi bi-file-earmark-excel"></i> Xuất Excel
+              </button>
+            </div>
+
+            <!-- FILTER BAR -->
+            <div class="d-flex flex-wrap align-items-end gap-3 mb-3 pb-3 border-bottom">
+              <div>
+                <label class="form-label text-muted small mb-1">
+                  <i class="bi bi-clipboard-check me-1"></i>Trạng thái đơn
+                </label>
+                <select class="form-select form-select-sm" id="filterBookingStatus" onchange="onFilterChange()" style="min-width:160px;">
+                  <option value="">Tất cả</option>
+                  <option value="PENDING">Chờ xác nhận</option>
+                  <option value="CONFIRMED">Đã xác nhận</option>
+                  <option value="COMPLETED">Đã hoàn thành</option>
+                  <option value="CANCELLED">Đã hủy</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label text-muted small mb-1">
+                  <i class="bi bi-credit-card me-1"></i>Thanh toán
+                </label>
+                <select class="form-select form-select-sm" id="filterPaymentStatus" onchange="onFilterChange()" style="min-width:170px;">
+                  <option value="">Tất cả</option>
+                  <option value="PENDING">Chưa thanh toán</option>
+                  <option value="PAID">Đã thanh toán</option>
+                  <option value="PARTIAL">Thanh toán một phần</option>
+                  <option value="REFUNDED">Đã hoàn tiền</option>
+                  <option value="FAILED">Thất bại</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label text-muted small mb-1">
+                  <i class="bi bi-calendar-event me-1"></i>Khởi hành từ
+                </label>
+                <input type="date" class="form-control form-control-sm" id="filterFromDate"
+                       onchange="onFilterChange()" style="min-width:150px;">
+              </div>
+              <div>
+                <label class="form-label text-muted small mb-1">
+                  <i class="bi bi-calendar-check me-1"></i>Đến ngày
+                </label>
+                <input type="date" class="form-control form-control-sm" id="filterToDate"
+                       onchange="onFilterChange()" style="min-width:150px;">
+              </div>
+              <div id="btnClearFilterWrapper" style="display:none;">
+                <button class="btn btn-sm btn-outline-secondary" onclick="clearFilters()">
+                  <i class="bi bi-x-circle me-1"></i>Xóa bộ lọc
+                </button>
+              </div>
+              <div class="ms-auto">
+                <label class="form-label text-muted small mb-1">Hiển thị</label>
+                <select class="form-select form-select-sm" id="selectPerPage" onchange="onPerPageChange(this.value)" style="min-width:95px;">
+                  <option value="5">5 mục</option>
+                  <option value="10" selected>10 mục</option>
+                  <option value="20">20 mục</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label text-muted small mb-1">Tìm kiếm</label>
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                  <input type="text" class="form-control border-start-0" id="searchInput"
+                         placeholder="Mã đơn, tên khách, SĐT, tour..." oninput="onSearchInput(this.value)"
+                         style="min-width:220px;">
+                </div>
+              </div>
+            </div>
+
+            <!-- TABLE -->
+            <div class="table-wrapper">
+              <div id="tableLoadingOverlay">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Đang tải...</span>
+                </div>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-hover align-middle" style="min-width:1050px;">
+                  <thead>
+                  <tr>
+                    <th class="sortable text-nowrap" style="min-width:130px;" data-sort="bookingCode" onclick="sortBy('bookingCode')">
+                      Mã đơn <i class="bi bi-arrow-down-up sort-icon"></i>
+                    </th>
+                    <th class="sortable text-nowrap" style="min-width:140px;" data-sort="bookingDate" onclick="sortBy('bookingDate')">
+                      Ngày đặt <i class="bi bi-arrow-down-up sort-icon"></i>
+                    </th>
+                    <th class="sortable" style="min-width:170px;" data-sort="customerName" onclick="sortBy('customerName')">
+                      Khách hàng <i class="bi bi-arrow-down-up sort-icon"></i>
+                    </th>
+                    <th class="sortable" style="min-width:200px;" data-sort="departureDate" onclick="sortBy('departureDate')">
+                      Lịch trình <i class="bi bi-arrow-down-up sort-icon"></i>
+                    </th>
+                    <th class="text-nowrap text-center" style="min-width:110px;">Số khách</th>
+                    <th class="sortable text-nowrap text-end" style="min-width:130px;" data-sort="finalAmount" onclick="sortBy('finalAmount')">
+                      Thành tiền <i class="bi bi-arrow-down-up sort-icon"></i>
+                    </th>
+                    <th class="text-nowrap text-center" style="min-width:140px;">Thanh toán</th>
+                    <th class="text-nowrap text-center" style="min-width:130px;">Trạng thái</th>
+                    <th class="text-center text-nowrap" style="min-width:100px;">Hành động</th>
+                  </tr>
+                  </thead>
+                  <tbody id="bookingListBody">
+                  <tr><td colspan="9" class="text-center py-4">Đang tải dữ liệu...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- PAGINATION -->
+            <div class="custom-pagination-wrapper">
+              <div class="pagination-info" id="paginationInfo">—</div>
+              <ul class="custom-pagination" id="paginationControls"></ul>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+
+<!-- ============================================================
+     MODAL: CHI TIẾT ĐƠN ĐẶT
+     ============================================================ -->
+<div class="modal fade" id="viewBookingModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header" style="background:#4154f1;">
+        <h5 class="modal-title text-white fw-bold">
+          <i class="bi bi-receipt me-2"></i>Chi tiết đơn <span id="viewBookingCode"></span>
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="viewLoading" class="text-center py-4">
+          <div class="spinner-border text-primary" role="status"></div>
+          <div class="mt-2 text-muted small">Đang tải dữ liệu...</div>
+        </div>
+        <div id="viewBookingBody" style="display:none;"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-export me-auto" id="btnExportParticipants" style="display:none;">
+          <i class="bi bi-file-earmark-excel"></i> Xuất danh sách đoàn
+        </button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/main.js"></script>
+
+<script>
+  /* ============================================================
+     STATE
+     ============================================================ */
+  let currentPage    = 0;
+  let perPage        = 10;
+  let sortCol        = '';
+  let sortAsc        = false;
+  const DEFAULT_SORT = 'bookingDate';   // đơn mới đặt lên đầu
+  let searchKeyword  = '';
+  let searchTimer    = null;
+
+  /* ============================================================
+     HẰNG SỐ HIỂN THỊ
+     ============================================================ */
+  const BOOKING_STATUS = {
+    PENDING:   { label: 'Chờ xác nhận',  cls: 'badge-pending',   icon: 'bi-hourglass-split' },
+    CONFIRMED: { label: 'Đã xác nhận',   cls: 'badge-confirmed', icon: 'bi-check-circle' },
+    COMPLETED: { label: 'Đã hoàn thành', cls: 'badge-completed', icon: 'bi-flag' },
+    CANCELLED: { label: 'Đã hủy',        cls: 'badge-cancelled', icon: 'bi-x-circle' },
+  };
+
+  const PAYMENT_STATUS = {
+    PENDING:  { label: 'Chưa thanh toán', cls: 'badge-pay-pending',  icon: 'bi-hourglass' },
+    PAID:     { label: 'Đã thanh toán',   cls: 'badge-pay-paid',     icon: 'bi-check-circle' },
+    PARTIAL:  { label: 'Một phần',        cls: 'badge-pay-partial',  icon: 'bi-pie-chart' },
+    REFUNDED: { label: 'Đã hoàn tiền',    cls: 'badge-pay-refunded', icon: 'bi-arrow-counterclockwise' },
+    FAILED:   { label: 'Thất bại',        cls: 'badge-pay-failed',   icon: 'bi-x-octagon' },
+  };
+
+  const SCHEDULE_STATUS = {
+    AVAILABLE: { label: 'Mở bán',  cls: 'badge-available' },
+    FULL:      { label: 'Hết chỗ', cls: 'badge-full' },
+    CANCELLED: { label: 'Đã hủy',  cls: 'badge-sch-cancel' },
+  };
+
+  const PARTICIPANT_TYPE = { ADULT: 'Người lớn', CHILD: 'Trẻ em', INFANT: 'Em bé' };
+  const GENDER_LABEL     = { MALE: 'Nam', FEMALE: 'Nữ', OTHER: 'Khác' };
+  const IDENTITY_LABEL   = { CCCD: 'CCCD', PASSPORT: 'Hộ chiếu' };
+  const DOC_STATUS = {
+    NOT_REQUIRED: 'Không yêu cầu', WAITING: 'Chờ nộp', IN_REVIEW: 'Đang duyệt',
+    COMPLETED: 'Đã đủ', REJECTED: 'Bị từ chối',
+  };
+
+  function authHeaders(extra = {}) {
+    return { 'Authorization': `Bearer ${localStorage.getItem('token')}`, ...extra };
+  }
+
+  /* ============================================================
+     BOOT
+     ============================================================ */
+  document.addEventListener('DOMContentLoaded', () => {
+    const userData = JSON.parse(localStorage.getItem('user'));
+    if (userData) {
+      document.querySelectorAll('.nav-profile span, .dropdown-header h6')
+              .forEach(el => el.innerText = userData.fullName);
+      const roleEl = document.querySelector('.dropdown-header span');
+      if (roleEl) roleEl.innerText = userData.role;
+    }
+
+    fetchBookings();
+  });
+
+  /* ============================================================
+     TIỆN ÍCH
+     ============================================================ */
+  function fmtDate(val) {
+    if (!val) return '—';
+    if (Array.isArray(val)) {
+      const [y, m, d] = val;
+      return `${String(d).padStart(2,'0')}/${String(m).padStart(2,'0')}/${y}`;
+    }
+    const [y, m, d] = String(val).split('T')[0].split('-');
+    return `${d}/${m}/${y}`;
+  }
+
+  function fmtDateTime(val) {
+    if (!val) return '—';
+    if (Array.isArray(val)) {
+      const [y, mo, d, h = 0, mi = 0] = val;
+      return `${String(d).padStart(2,'0')}/${String(mo).padStart(2,'0')}/${y} ${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')}`;
+    }
+    const dt = new Date(val);
+    return dt.toLocaleString('vi-VN', {
+      day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
+  }
+
+  function fmtMoney(num) {
+    if (num == null) return '0 đ';
+    return new Intl.NumberFormat('vi-VN').format(num) + ' đ';
+  }
+
+  /** Gộp số khách thành chuỗi ngắn: "2 NL, 1 TE" */
+  function guestSummary(r) {
+    const parts = [];
+    if (r.totalAdults)   parts.push(`${r.totalAdults} NL`);
+    if (r.totalChildren) parts.push(`${r.totalChildren} TE`);
+    if (r.totalInfants)  parts.push(`${r.totalInfants} EB`);
+    return parts.join(', ') || '—';
+  }
+
+  function escapeHtml(str) {
+    return String(str ?? '').replace(/[&<>"']/g, c =>
+            ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  function showLoading(show) {
+    document.getElementById('tableLoadingOverlay').classList.toggle('show', show);
+  }
+
+  function showSuccess(title, text) {
+    Swal.fire({ icon: 'success', title, text, showConfirmButton: false, timer: 1600 });
+  }
+
+  function showError(title, text) {
+    Swal.fire({ icon: 'error', title, text: text || 'Vui lòng thử lại.' });
+  }
+
+  /* ============================================================
+     1. BẢNG DANH SÁCH
+     GET /api/admin/bookings
+     ============================================================ */
+  async function fetchBookings() {
+    showLoading(true);
+
+    const params = new URLSearchParams();
+    params.set('page',    currentPage);
+    params.set('size',    perPage);
+    params.set('sortBy',  sortCol || DEFAULT_SORT);
+    params.set('sortDir', sortAsc ? 'asc' : 'desc');
+
+    const bookingStatusVal = document.getElementById('filterBookingStatus').value;
+    const paymentStatusVal = document.getElementById('filterPaymentStatus').value;
+    const fromDateVal      = document.getElementById('filterFromDate').value;
+    const toDateVal        = document.getElementById('filterToDate').value;
+
+    if (bookingStatusVal) params.set('bookingStatus', bookingStatusVal);
+    if (paymentStatusVal) params.set('bookingPaymentStatus', paymentStatusVal);
+    if (fromDateVal)      params.set('fromDate', fromDateVal);
+    if (toDateVal)        params.set('toDate', toDateVal);
+    if (searchKeyword)    params.set('keyword', searchKeyword);
+
+    try {
+      const res = await fetch(`/api/admin/bookings?${params.toString()}`, { headers: authHeaders() });
+      const result = await res.json();
+
+      if (res.ok && result.success) {
+        const data     = result.data;
+        const pageInfo = data.page;
+
+        if (data.content.length === 0 && currentPage > 0) {
+          currentPage--;
+          fetchBookings();
+          return;
+        }
+
+        renderRows(data.content);
+        renderPagination(pageInfo.totalElements, pageInfo.totalPages, pageInfo.number, pageInfo.size);
+      } else {
+        showTableError('Không thể tải dữ liệu: ' + (result.message || ''));
+      }
+    } catch (e) {
+      console.error(e);
+      showTableError('Lỗi kết nối đến máy chủ!');
+    } finally {
+      showLoading(false);
+    }
+  }
+
+  function renderRows(rows) {
+    const tbody = document.getElementById('bookingListBody');
+
+    if (!rows || rows.length === 0) {
+      const filtering = searchKeyword
+              || document.getElementById('filterBookingStatus').value
+              || document.getElementById('filterPaymentStatus').value
+              || document.getElementById('filterFromDate').value
+              || document.getElementById('filterToDate').value;
+      tbody.innerHTML = `
+        <tr><td colspan="9" class="text-center py-5" style="background:#f8f9fa;">
+          <i class="bi bi-inbox d-block mb-3" style="font-size:3rem;color:#ced4da;"></i>
+          <h6 class="fw-bold text-secondary mb-1">${filtering ? 'Không có đơn nào khớp' : 'Chưa có đơn đặt nào'}</h6>
+          ${filtering ? '' : '<span class="text-muted small">Đơn đặt của khách sẽ hiển thị tại đây.</span>'}
+        </td></tr>`;
+      updateSortUI();
+      return;
+    }
+
+    tbody.innerHTML = rows.map(r => {
+      const bs = BOOKING_STATUS[r.bookingStatus] || { label: r.bookingStatus, cls: '', icon: '' };
+      const ps = PAYMENT_STATUS[r.bookingPaymentStatus] || { label: r.bookingPaymentStatus, cls: '', icon: '' };
+      const isCancelled = r.bookingStatus === 'CANCELLED';
+
+      return `
+        <tr class="${isCancelled ? 'row-cancelled' : ''}">
+          <td><span class="fw-bold text-primary">${escapeHtml(r.bookingCode)}</span></td>
+          <td><small class="text-muted text-nowrap">${fmtDateTime(r.bookingDate)}</small></td>
+          <td>
+            <div class="fw-semibold text-truncate" style="max-width:160px;"
+                 title="${escapeHtml(r.customerName)}">${escapeHtml(r.customerName)}</div>
+            <small class="text-muted text-nowrap">
+              <i class="bi bi-telephone me-1"></i>${escapeHtml(r.customerPhone || '—')}
+            </small>
+          </td>
+          <td>
+            <span class="text-primary fw-bold">${escapeHtml(r.tourCode)}</span>
+            <div class="small text-truncate" style="max-width:190px;"
+                 title="${escapeHtml(r.tourName)}">${escapeHtml(r.tourName)}</div>
+            <small class="text-muted text-nowrap">
+              <i class="bi bi-calendar-event me-1"></i>${fmtDate(r.departureDate)} - ${fmtDate(r.returnDate)}
+            </small>
+          </td>
+          <td class="text-center">
+            <span class="badge badge-guest"><i class="bi bi-people me-1"></i>${guestSummary(r)}</span>
+          </td>
+          <td class="text-end">
+            <span class="fw-bold ${isCancelled ? 'money-cancelled' : 'text-success'}">${fmtMoney(r.finalAmount)}</span>
+            ${r.discountAmount > 0
+              ? `<div><small class="text-muted">Giảm ${fmtMoney(r.discountAmount)}</small></div>` : ''}
+          </td>
+          <td class="text-center">
+            <span class="badge ${ps.cls}"><i class="bi ${ps.icon} me-1"></i>${ps.label}</span>
+          </td>
+          <td class="text-center">
+            <span class="badge ${bs.cls}"><i class="bi ${bs.icon} me-1"></i>${bs.label}</span>
+          </td>
+          <td class="text-center">
+            <div class="d-flex gap-1 justify-content-center">
+              <button class="btn btn-sm btn-outline-info" title="Xem chi tiết"
+                      onclick="viewBooking(${r.bookingId})"><i class="bi bi-eye"></i></button>
+              ${renderActionButtons(r)}
+            </div>
+          </td>
+        </tr>`;
+    }).join('');
+
+    updateSortUI();
+  }
+
+  /** Nút thao tác đổi theo trạng thái đơn */
+  function renderActionButtons(r) {
+    const safeCode = escapeHtml(r.bookingCode);
+    switch (r.bookingStatus) {
+      case 'PENDING':
+        return `
+          <button class="btn btn-sm btn-outline-success" title="Xác nhận đơn"
+                  onclick="confirmBooking(${r.bookingId}, '${safeCode}', '${r.bookingPaymentStatus}')"><i class="bi bi-check2-all"></i></button>
+          <button class="btn btn-sm btn-outline-danger" title="Hủy đơn"
+                  onclick="cancelBooking(${r.bookingId}, '${safeCode}')"><i class="bi bi-x-circle"></i></button>`;
+      case 'CONFIRMED':
+        return `
+          <button class="btn btn-sm btn-outline-primary" title="Đánh dấu hoàn thành"
+                  onclick="completeBooking(${r.bookingId}, '${safeCode}')"><i class="bi bi-flag"></i></button>
+          <button class="btn btn-sm btn-outline-danger" title="Hủy đơn"
+                  onclick="cancelBooking(${r.bookingId}, '${safeCode}')"><i class="bi bi-x-circle"></i></button>`;
+      default:
+        return '';
+    }
+  }
+
+  function showTableError(msg) {
+    document.getElementById('bookingListBody').innerHTML =
+            `<tr><td colspan="9" class="text-center text-danger py-4">
+         <i class="bi bi-exclamation-triangle me-2"></i>${msg}
+       </td></tr>`;
+    document.getElementById('paginationInfo').innerHTML = '—';
+    document.getElementById('paginationControls').innerHTML = '';
+  }
+
+  /* ============================================================
+     PHÂN TRANG
+     ============================================================ */
+  function renderPagination(total, totalPages, pageIndex, size) {
+    const start = total === 0 ? 0 : pageIndex * size + 1;
+    const end   = Math.min((pageIndex + 1) * size, total);
+
+    document.getElementById('paginationInfo').innerHTML = total === 0
+            ? 'Không có mục nào'
+            : `Hiển thị <span>${start}–${end}</span> trong tổng số <span>${total}</span> đơn`;
+
+    const ul = document.getElementById('paginationControls');
+    ul.innerHTML = '';
+    if (totalPages <= 1) return;
+
+    const addBtn = (label, page, extra = '') => {
+      const li = document.createElement('li');
+      li.className = 'page-item';
+      const btn = document.createElement('button');
+      btn.className = `page-btn ${extra}`.trim();
+      btn.innerHTML = label;
+      if (!extra) btn.addEventListener('click', () => { currentPage = page; fetchBookings(); });
+      li.appendChild(btn);
+      ul.appendChild(li);
+    };
+
+    addBtn('<i class="bi bi-chevron-left"></i>', pageIndex - 1, pageIndex === 0 ? 'disabled' : '');
+    getPageNumbers(pageIndex + 1, totalPages).forEach(p => {
+      if (p === '...') addBtn('…', -1, 'ellipsis');
+      else addBtn(String(p), p - 1, p === pageIndex + 1 ? 'active' : '');
+    });
+    addBtn('<i class="bi bi-chevron-right"></i>', pageIndex + 1, pageIndex === totalPages - 1 ? 'disabled' : '');
+  }
+
+  function getPageNumbers(current, total) {
+    if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+    const pages = [1];
+    if (current > 4) pages.push('...');
+    const s = Math.max(2, current - 1), e = Math.min(total - 1, current + 1);
+    for (let i = s; i <= e; i++) pages.push(i);
+    if (current < total - 3) pages.push('...');
+    pages.push(total);
+    return pages;
+  }
+
+  /* ============================================================
+     LỌC / SẮP XẾP / TÌM KIẾM
+     ============================================================ */
+  function sortBy(col) {
+    if (sortCol === col) sortAsc = !sortAsc;
+    else { sortCol = col; sortAsc = true; }
+    currentPage = 0;
+    fetchBookings();
+  }
+
+  function updateSortUI() {
+    document.querySelectorAll('th.sortable').forEach(th => {
+      th.classList.remove('sort-active');
+      const icon = th.querySelector('.sort-icon');
+      if (icon) icon.className = 'bi bi-arrow-down-up sort-icon';
+    });
+    const th = document.querySelector(`th.sortable[data-sort="${sortCol}"]`);
+    if (th) {
+      th.classList.add('sort-active');
+      const icon = th.querySelector('.sort-icon');
+      if (icon) icon.className = sortAsc ? 'bi bi-arrow-up-short sort-icon' : 'bi bi-arrow-down-short sort-icon';
+    }
+  }
+
+  function onFilterChange() {
+    const filtering = document.getElementById('filterBookingStatus').value !== ''
+            || document.getElementById('filterPaymentStatus').value !== ''
+            || document.getElementById('filterFromDate').value !== ''
+            || document.getElementById('filterToDate').value !== '';
+    document.getElementById('btnClearFilterWrapper').style.display = filtering ? '' : 'none';
+    currentPage = 0;
+    fetchBookings();
+  }
+
+  function clearFilters() {
+    document.getElementById('filterBookingStatus').value = '';
+    document.getElementById('filterPaymentStatus').value = '';
+    document.getElementById('filterFromDate').value = '';
+    document.getElementById('filterToDate').value = '';
+    onFilterChange();
+  }
+
+  function onPerPageChange(val) {
+    perPage = parseInt(val);
+    currentPage = 0;
+    fetchBookings();
+  }
+
+  function onSearchInput(val) {
+    searchKeyword = val.trim();
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => { currentPage = 0; fetchBookings(); }, 400);
+  }
+
+  /* ============================================================
+     2. CHI TIẾT ĐƠN
+     GET /api/admin/bookings/{id}
+     ============================================================ */
+  async function viewBooking(id) {
+    const modal = new bootstrap.Modal(document.getElementById('viewBookingModal'));
+    document.getElementById('viewLoading').style.display = '';
+    document.getElementById('viewBookingBody').style.display = 'none';
+    document.getElementById('btnExportParticipants').style.display = 'none';
+    document.getElementById('viewBookingCode').textContent = '';
+    modal.show();
+
+    try {
+      const res = await fetch(`/api/admin/bookings/${id}`, { headers: authHeaders() });
+      const result = await res.json();
+
+      if (!res.ok || !result.success) throw new Error(result.message || 'Không tải được dữ liệu');
+
+      const d = result.data;
+      document.getElementById('viewBookingCode').textContent = d.bookingCode;
+      renderDetail(d);
+
+      // Nút xuất danh sách đoàn — chỉ hiện khi đơn có hành khách
+      const btnExport = document.getElementById('btnExportParticipants');
+      if (d.participants && d.participants.length > 0) {
+        btnExport.style.display = '';
+        btnExport.onclick = () => exportParticipants(d.bookingId, d.bookingCode);
+      }
+
+      document.getElementById('viewLoading').style.display = 'none';
+      document.getElementById('viewBookingBody').style.display = '';
+    } catch (e) {
+      console.error(e);
+      document.getElementById('viewLoading').style.display = 'none';
+      const body = document.getElementById('viewBookingBody');
+      body.innerHTML = `<div class="text-center text-danger py-3">
+          <i class="bi bi-exclamation-triangle me-1"></i>Không thể tải dữ liệu. Vui lòng thử lại.
+        </div>`;
+      body.style.display = '';
+    }
+  }
+
+  function renderDetail(d) {
+    const bs = BOOKING_STATUS[d.bookingStatus] || { label: d.bookingStatus, cls: '', icon: '' };
+    const ps = PAYMENT_STATUS[d.bookingPaymentStatus] || { label: d.bookingPaymentStatus, cls: '', icon: '' };
+    const ss = SCHEDULE_STATUS[d.scheduleStatus] || { label: d.scheduleStatus, cls: '' };
+
+    // Cảnh báo khi lịch đã hủy nhưng đơn vẫn còn hiệu lực
+    const scheduleWarn = (d.scheduleStatus === 'CANCELLED' && d.bookingStatus !== 'CANCELLED')
+            ? `<div class="alert alert-warning py-2 small mb-3">
+           <i class="bi bi-exclamation-triangle me-1"></i>
+           Lịch khởi hành đã bị hủy nhưng đơn này vẫn còn hiệu lực — cần xử lý hoàn tiền cho khách.
+         </div>` : '';
+
+    const cancelInfo = d.bookingStatus === 'CANCELLED'
+            ? `<div class="alert alert-secondary py-2 small mb-3">
+           <i class="bi bi-info-circle me-1"></i>
+           <b>Đã hủy lúc ${fmtDateTime(d.cancelledAt)}.</b>
+           ${d.cancellationReason ? '<br>Lý do: ' + escapeHtml(d.cancellationReason) : ''}
+         </div>` : '';
+
+    const participants = (d.participants || []).map((p, idx) => `
+      <div class="participant-row">
+        <div class="participant-index">${idx + 1}</div>
+        <div class="flex-grow-1">
+          <div class="fw-semibold small">
+            ${escapeHtml(p.fullName)}
+            ${p.primary ? '<span class="badge badge-primary-guest ms-1">Đại diện đoàn</span>' : ''}
+            ${p.singleRoom ? '<span class="badge badge-single-room ms-1">Phòng đơn</span>' : ''}
+          </div>
+          <div class="text-muted" style="font-size:.76rem;">
+            ${PARTICIPANT_TYPE[p.participantType] || p.participantType}
+            ${p.gender ? ' · ' + (GENDER_LABEL[p.gender] || p.gender) : ''}
+            ${p.dateOfBirth ? ' · ' + fmtDate(p.dateOfBirth) : ''}
+            ${p.identityNumber ? ` · ${IDENTITY_LABEL[p.identityType] || ''} ${escapeHtml(p.identityNumber)}` : ''}
+          </div>
+        </div>
+        <span class="badge bg-light text-dark border" style="font-size:.7rem;">
+          ${DOC_STATUS[p.documentStatus] || p.documentStatus}
+        </span>
+      </div>`).join('');
+
+    document.getElementById('viewBookingBody').innerHTML = `
+      ${scheduleWarn}${cancelInfo}
+
+      <div class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom flex-wrap">
+        <div>
+          <div class="detail-label">Trạng thái đơn</div>
+          <span class="badge ${bs.cls}"><i class="bi ${bs.icon} me-1"></i>${bs.label}</span>
+        </div>
+        <div>
+          <div class="detail-label">Thanh toán</div>
+          <span class="badge ${ps.cls}"><i class="bi ${ps.icon} me-1"></i>${ps.label}</span>
+        </div>
+        <div class="ms-auto text-end">
+          <div class="detail-label">Đặt lúc</div>
+          <div class="detail-value">${fmtDateTime(d.bookingDate)}</div>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-md-6">
+          <div class="detail-section-title"><i class="bi bi-person me-1"></i>Khách đặt</div>
+          <div class="mb-3">
+            <div class="detail-label">Họ tên</div>
+            <div class="detail-value">${escapeHtml(d.customerName)}</div>
+          </div>
+          <div class="mb-3">
+            <div class="detail-label">Liên hệ</div>
+            <div class="detail-value">${escapeHtml(d.customerPhone || '—')}</div>
+            <div class="detail-value">${escapeHtml(d.customerEmail || '—')}</div>
+          </div>
+          ${d.specialRequests ? `
+          <div class="mb-3">
+            <div class="detail-label">Yêu cầu đặc biệt</div>
+            <div class="text-secondary small" style="line-height:1.6;">${escapeHtml(d.specialRequests)}</div>
+          </div>` : ''}
+        </div>
+
+        <div class="col-md-6">
+          <div class="detail-section-title"><i class="bi bi-map me-1"></i>Chuyến đi</div>
+          <div class="mb-3">
+            <div class="detail-label">Tour</div>
+            <div class="detail-value">${escapeHtml(d.tourCode)} — ${escapeHtml(d.tourName)}</div>
+          </div>
+          <div class="mb-3">
+            <div class="detail-label">Thời gian</div>
+            <div class="detail-value">${fmtDate(d.departureDate)} → ${fmtDate(d.returnDate)}</div>
+            <div class="text-muted" style="font-size:.78rem;">${d.durationDays} ngày ${d.durationNights} đêm</div>
+          </div>
+          <div>
+            <div class="detail-label">Trạng thái lịch</div>
+            <div><span class="badge ${ss.cls}">${ss.label}</span></div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="my-3">
+
+      <div class="detail-section-title"><i class="bi bi-cash-stack me-1"></i>Chi tiết thanh toán</div>
+      <div class="row g-4">
+        <div class="col-md-6">
+          <div class="money-row">
+            <span class="text-muted">Người lớn × ${d.totalAdults}</span>
+            <span>${fmtMoney(d.adultPriceAtBooking)} / khách</span>
+          </div>
+          ${d.totalChildren > 0 ? `
+          <div class="money-row">
+            <span class="text-muted">Trẻ em × ${d.totalChildren}</span>
+            <span>${fmtMoney(d.childPriceAtBooking)} / khách</span>
+          </div>` : ''}
+          ${d.totalInfants > 0 ? `
+          <div class="money-row">
+            <span class="text-muted">Em bé × ${d.totalInfants}</span>
+            <span>${fmtMoney(d.infantPriceAtBooking)} / khách</span>
+          </div>` : ''}
+          ${d.singleRoomCount > 0 ? `
+          <div class="money-row">
+            <span class="text-muted">Phụ thu phòng đơn (${d.singleRoomCount} phòng)</span>
+            <span>${fmtMoney(d.singleRoomSurchargeAtBooking)} / phòng</span>
+          </div>` : ''}
+        </div>
+        <div class="col-md-6">
+          <div class="money-row">
+            <span class="text-muted">Tạm tính</span>
+            <span>${fmtMoney(d.totalAmount)}</span>
+          </div>
+          <div class="money-row">
+            <span class="text-muted">Giảm giá</span>
+            <span>${d.discountAmount > 0 ? '- ' + fmtMoney(d.discountAmount) : '—'}</span>
+          </div>
+          <div class="money-row">
+            <span class="text-muted">Đổi điểm${d.pointsRedeemed > 0 ? ` (${d.pointsRedeemed} điểm)` : ''}</span>
+            <span>${d.pointsDiscountAmount > 0 ? '- ' + fmtMoney(d.pointsDiscountAmount) : '—'}</span>
+          </div>
+          <div class="money-row total">
+            <span>Thành tiền</span>
+            <span>${fmtMoney(d.finalAmount)}</span>
+          </div>
+        </div>
+      </div>
+
+      <hr class="my-3">
+
+      <div class="detail-section-title">
+        <i class="bi bi-people me-1"></i>Danh sách hành khách (${(d.participants || []).length})
+      </div>
+      ${participants || '<div class="text-muted small fst-italic">Chưa có thông tin hành khách.</div>'}
+    `;
+  }
+
+  /* ============================================================
+     3. XÁC NHẬN ĐƠN
+     PATCH /api/admin/bookings/{id}/confirm
+     ============================================================ */
+  async function confirmBooking(id, code, bookingPaymentStatus) {
+    const isUnpaid = bookingPaymentStatus === 'PENDING' || bookingPaymentStatus === 'FAILED';
+
+    const warnBlock = isUnpaid
+            ? `<div class="alert alert-warning py-2 small mt-3 mb-0 text-start">
+           <i class="bi bi-exclamation-triangle me-1"></i>
+           Khách <b>${bookingPaymentStatus === 'FAILED' ? 'thanh toán thất bại' : 'chưa thanh toán'}</b>.
+           Xác nhận nghĩa là giữ chỗ trước khi nhận tiền — công ty chịu rủi ro nếu khách bỏ chuyến.
+         </div>`
+            : bookingPaymentStatus === 'PARTIAL'
+                    ? `<div class="alert alert-info py-2 small mt-3 mb-0 text-start">
+           <i class="bi bi-info-circle me-1"></i>
+           Khách mới <b>thanh toán một phần</b> (đặt cọc). Nhớ nhắc khách trả nốt trước ngày khởi hành.
+         </div>`
+                    : '';
+
+    const res = await Swal.fire({
+      icon: isUnpaid ? 'warning' : 'question',
+      title: 'Xác nhận đơn đặt?',
+      html: `Đơn <b>${code}</b> sẽ chuyển sang trạng thái <b>Đã xác nhận</b>.<br>
+             <span class="text-muted small">Chỗ đã được giữ cho khách từ lúc đặt.</span>
+             ${warnBlock}`,
+      showCancelButton: true,
+      confirmButtonColor: isUnpaid ? '#f57f17' : '#2e7d32',
+      confirmButtonText: isUnpaid
+              ? '<i class="bi bi-check2-all me-1"></i>Vẫn xác nhận'
+              : '<i class="bi bi-check2-all me-1"></i>Xác nhận',
+      cancelButtonText: 'Đóng'
+    });
+    if (!res.isConfirmed) return;
+
+    await callAction(`/api/admin/bookings/${id}/confirm`, 'PATCH', null,
+            'Đã xác nhận đơn', 'Không thể xác nhận đơn');
+  }
+
+  /* ============================================================
+     4. HOÀN THÀNH ĐƠN
+     PATCH /api/admin/bookings/{id}/complete
+     ============================================================ */
+  async function completeBooking(id, code) {
+    const res = await Swal.fire({
+      icon: 'question',
+      title: 'Đánh dấu hoàn thành?',
+      html: `Đơn <b>${code}</b> sẽ chuyển sang <b>Đã hoàn thành</b>.<br>
+             <span class="text-muted small">Chỉ thực hiện khi đoàn đã kết thúc chuyến đi.</span>`,
+      showCancelButton: true,
+      confirmButtonColor: '#4154f1',
+      confirmButtonText: '<i class="bi bi-flag me-1"></i>Hoàn thành',
+      cancelButtonText: 'Đóng'
+    });
+    if (!res.isConfirmed) return;
+
+    await callAction(`/api/admin/bookings/${id}/complete`, 'PATCH', null,
+            'Đã hoàn thành đơn', 'Không thể hoàn thành đơn');
+  }
+
+  /* ============================================================
+     5. HỦY ĐƠN
+     PATCH /api/admin/bookings/{id}/cancel
+     ============================================================ */
+  async function cancelBooking(id, code) {
+    const res = await Swal.fire({
+      icon: 'warning',
+      title: 'Hủy đơn đặt?',
+      html: `Đơn <b>${code}</b> sẽ bị hủy và <b>hoàn lại chỗ</b> cho lịch khởi hành.<br>
+             <span class="text-muted small">Nếu khách đã thanh toán, cần xử lý hoàn tiền riêng.</span>`,
+      input: 'textarea',
+      inputLabel: 'Lý do hủy',
+      inputPlaceholder: 'VD: Khách yêu cầu hủy, không đủ số lượng tối thiểu...',
+      inputAttributes: { 'aria-label': 'Lý do hủy' },
+      inputValidator: (value) => {
+        if (!value || !value.trim()) return 'Vui lòng nhập lý do hủy';
+      },
+      showCancelButton: true,
+      confirmButtonColor: '#dc3545',
+      confirmButtonText: '<i class="bi bi-x-circle me-1"></i>Xác nhận hủy',
+      cancelButtonText: 'Đóng'
+    });
+    if (!res.isConfirmed) return;
+
+    await callAction(`/api/admin/bookings/${id}/cancel`, 'PATCH',
+            { reason: res.value.trim() }, 'Đã hủy đơn', 'Không thể hủy đơn');
+  }
+
+  /** Gọi chung cho 3 thao tác đổi trạng thái */
+  async function callAction(url, method, body, successTitle, errorTitle) {
+    try {
+      const options = { method, headers: authHeaders({ 'Content-Type': 'application/json' }) };
+      if (body) options.body = JSON.stringify(body);
+
+      const res = await fetch(url, options);
+      const result = await res.json();
+
+      if (res.ok && result.success) {
+        fetchBookings();
+        showSuccess(successTitle, result.data ? result.data.bookingCode : '');
+      } else {
+        showError(errorTitle, result.message);
+      }
+    } catch (e) {
+      console.error(e);
+      showError('Lỗi hệ thống', 'Không thể kết nối đến máy chủ!');
+    }
+  }
+
+  /* ============================================================
+     6. XUẤT EXCEL DANH SÁCH ĐƠN
+     GET /api/admin/bookings/export
+     ============================================================ */
+  async function exportToExcel() {
+    const params = new URLSearchParams();
+    const bookingStatusVal = document.getElementById('filterBookingStatus').value;
+    const paymentStatusVal = document.getElementById('filterPaymentStatus').value;
+    const fromDateVal      = document.getElementById('filterFromDate').value;
+    const toDateVal        = document.getElementById('filterToDate').value;
+
+    if (bookingStatusVal) params.set('bookingStatus', bookingStatusVal);
+    if (paymentStatusVal) params.set('bookingPaymentStatus', paymentStatusVal);
+    if (fromDateVal)      params.set('fromDate', fromDateVal);
+    if (toDateVal)        params.set('toDate', toDateVal);
+    if (searchKeyword)    params.set('keyword', searchKeyword);
+
+    const query = params.toString();
+    await downloadFile(`/api/admin/bookings/export${query ? '?' + query : ''}`,
+            'Don_dat_tour.xlsx', 'Xuất Excel thành công!');
+  }
+
+  /* ============================================================
+     7. XUẤT DANH SÁCH ĐOÀN CỦA MỘT ĐƠN
+     GET /api/admin/bookings/{id}/participants/export
+     ============================================================ */
+  async function exportParticipants(bookingId, bookingCode) {
+    await downloadFile(`/api/admin/bookings/${bookingId}/participants/export`,
+            `Danh_sach_doan_${bookingCode}.xlsx`, 'Xuất danh sách đoàn thành công!');
+  }
+
+  /** Tải file nhị phân kèm token, đọc tên file từ Content-Disposition */
+  async function downloadFile(url, fallbackName, successMsg) {
+    Swal.fire({
+      title: 'Đang tạo file Excel...',
+      html: 'Vui lòng chờ trong giây lát.',
+      allowOutsideClick: false,
+      didOpen: () => { Swal.showLoading(); }
+    });
+
+    try {
+      const res = await fetch(url, { headers: authHeaders() });
+      if (!res.ok) throw new Error('Lỗi từ server');
+
+      const blob = await res.blob();
+      let fileName = fallbackName;
+      const disposition = res.headers.get('Content-Disposition');
+      if (disposition && disposition.includes('filename')) {
+        const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+        if (matches?.[1]) {
+          let raw = matches[1].trim();
+          // Bóc tiền tố utf-8'' TRƯỚC khi xóa dấu nháy
+          if (raw.toLowerCase().startsWith("utf-8''")) {
+            fileName = decodeURIComponent(raw.substring(7));
+          } else {
+            fileName = raw.replace(/['"]/g, '');
+          }
+        }
+      }
+
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl; a.download = fileName;
+      document.body.appendChild(a); a.click(); a.remove();
+      window.URL.revokeObjectURL(blobUrl);
+
+      Swal.close();
+      showSuccess(successMsg);
+    } catch (e) {
+      console.error(e);
+      showError('Lỗi xuất file', 'Không thể tải file Excel lúc này!');
+    }
+  }
+</script>
+
+</body>
+</html>

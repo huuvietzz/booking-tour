@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Danh Sách Tour - Tour Du Lịch</title>
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+
+  <link href="assets/img/favicon.png" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+  <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+  <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
+
+  <link href="assets/css/main.css" rel="stylesheet">
+  <link href="assets/css/auth-ui.css" rel="stylesheet">
+  <link href="assets/css/header-white.css" rel="stylesheet">
+</head>
+
+<body class="tours-page">
+
+<header id="header" class="header d-flex align-items-center fixed-top">
+  <div class="header-container container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+
+    <a href="index.html" class="logo d-flex align-items-center me-auto me-xl-0">
+      <img src="assets/img/logo.webp" alt="Booking Tour">
+    </a>
+
+    <nav id="navmenu" class="navmenu">
+      <ul>
+        <li><a href="index.html" class="active">Trang chủ</a></li>
+        <li><a href="about.html">Về chúng tôi</a></li>
+        <li><a href="destinations.html">Điểm đến</a></li>
+        <li><a href="tours.html">Tours</a></li>
+        <li><a href="contact.html">Liên hệ</a></li>
+      </ul>
+      <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+    </nav>
+
+    <!-- Đã thay đổi href và text của nút này -->
+    <a class="btn-getstarted" href="pages-login.html">Đăng nhập</a>
+
+  </div>
+</header>
+
+  <main class="main">
+
+    <div class="page-title dark-background" data-aos="fade" style="background-image: url(assets/img/travel/showcase-8.webp);">
+      <div class="container position-relative">
+        <h1>Danh Sách Tour</h1>
+        <p>Khám phá các gói tour đa dạng, được thiết kế tỉ mỉ để mang lại cho bạn những trải nghiệm du lịch tuyệt vời nhất.</p>
+        <nav class="breadcrumbs">
+          <ol>
+            <li><a href="index.html">Trang chủ</a></li>
+            <li class="current">Tours</li>
+          </ol>
+        </nav>
+      </div>
+    </div><section id="travel-tours" class="travel-tours section">
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="row">
+          <div class="col-lg-8 mx-auto text-center mb-5">
+            <h2>Tìm Chuyến Đi Hoàn Hảo Của Bạn</h2>
+            <p>Khám phá những trải nghiệm du lịch khó quên với bộ sưu tập tour tuyển chọn của chúng tôi. Tìm kiếm theo điểm đến, phong cách du lịch hoặc ngày khởi hành để tìm ra cuộc phiêu lưu hoàn hảo dành cho bạn.</p>
+          </div>
+        </div>
+
+        <div class="row mb-5" data-aos="fade-up" data-aos-delay="200">
+          <div class="col-12">
+            <div class="tour-filters">
+              <div class="row">
+                <div class="col-lg-3 col-md-6 mb-3">
+                  <select class="form-select">
+                    <option value="">Chọn Điểm Đến</option>
+                    <option value="paris">Paris</option>
+                    <option value="bali">Bali</option>
+                    <option value="tokyo">Tokyo</option>
+                    <option value="rome">Rome</option>
+                    <option value="thailand">Thái Lan</option>
+                  </select>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-3">
+                  <select class="form-select">
+                    <option value="">Loại Tour</option>
+                    <option value="adventure">Mạo Hiểm</option>
+                    <option value="luxury">Sang Trọng</option>
+                    <option value="family">Gia Đình</option>
+                    <option value="cultural">Văn Hóa</option>
+                    <option value="beach">Biển Đảo</option>
+                  </select>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-3">
+                  <select class="form-select">
+                    <option value="">Thời Lượng</option>
+                    <option value="1-3">1-3 Ngày</option>
+                    <option value="4-7">4-7 Ngày</option>
+                    <option value="8-14">8-14 Ngày</option>
+                    <option value="15+">15+ Ngày</option>
+                  </select>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-3">
+                  <select class="form-select">
+                    <option value="">Mức Giá</option>
+                    <option value="0-500">$0 - $500</option>
+                    <option value="500-1000">$500 - $1,000</option>
+                    <option value="1000-2000">$1,000 - $2,000</option>
+                    <option value="2000+">Trên $2,000</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mb-5" data-aos="fade-up" data-aos-delay="300">
+          <div class="col-12">
+            <h3 class="section-subtitle mb-4">Tour Nổi Bật</h3>
+            <div class="featured-tours-slider swiper init-swiper">
+              <script type="application/json" class="swiper-config">
+                {
+                  "loop": true,
+                  "speed": 600,
+                  "autoplay": {
+                    "delay": 5000
+                  },
+                  "slidesPerView": 1,
+                  "spaceBetween": 30,
+                  "pagination": {
+                    "el": ".swiper-pagination",
+                    "type": "bullets",
+                    "clickable": true
+                  },
+                  "breakpoints": {
+                    "768": {
+                      "slidesPerView": 2
+                    },
+                    "1200": {
+                      "slidesPerView": 3
+                    }
+                  }
+                }
+              </script>
+              <div class="swiper-wrapper">
+                <div class="swiper-slide">
+                  <div class="featured-tour-card">
+                    <div class="tour-image">
+                      <img src="assets/img/travel/tour-15.webp" alt="Bali Adventure" class="img-fluid">
+                      <div class="tour-badge">Bán Chạy Nhất</div>
+                    </div>
+                    <div class="tour-content">
+                      <h4>Phiêu Lưu Tại Bali</h4>
+                      <p>Khám phá vẻ đẹp huyền bí của Bali với các chuyến thăm đền thờ, leo núi lửa và bãi biển hoang sơ.</p>
+                      <div class="tour-meta">
+                        <span class="duration"><i class="bi bi-clock"></i> 7 Ngày</span>
+                        <span class="price">Từ $899</span>
+                      </div>
+                      <a href="tour-details.html" class="btn btn-primary">Xem Chi Tiết</a>
+                    </div>
+                  </div>
+                </div>
+                <div class="swiper-slide">
+                  <div class="featured-tour-card">
+                    <div class="tour-image">
+                      <img src="assets/img/travel/tour-22.webp" alt="Paris Romance" class="img-fluid">
+                      <div class="tour-badge">Sang Trọng</div>
+                    </div>
+                    <div class="tour-content">
+                      <h4>Paris Lãng Mạn</h4>
+                      <p>Trải nghiệm kinh đô ánh sáng với nơi lưu trú cao cấp và những bữa tối độc quyền.</p>
+                      <div class="tour-meta">
+                        <span class="duration"><i class="bi bi-clock"></i> 5 Ngày</span>
+                        <span class="price">Từ $1299</span>
+                      </div>
+                      <a href="tour-details.html" class="btn btn-primary">Xem Chi Tiết</a>
+                    </div>
+                  </div>
+                </div>
+                <div class="swiper-slide">
+                  <div class="featured-tour-card">
+                    <div class="tour-image">
+                      <img src="assets/img/travel/tour-8.webp" alt="Tokyo Culture" class="img-fluid">
+                      <div class="tour-badge">Mới</div>
+                    </div>
+                    <div class="tour-content">
+                      <h4>Văn Hóa Tokyo</h4>
+                      <p>Đắm mình trong văn hóa Nhật Bản, từ trà đạo truyền thống đến cuộc sống đô thị hiện đại.</p>
+                      <div class="tour-meta">
+                        <span class="duration"><i class="bi bi-clock"></i> 10 Ngày</span>
+                        <span class="price">Từ $1599</span>
+                      </div>
+                      <a href="tour-details.html" class="btn btn-primary">Xem Chi Tiết</a>
+                    </div>
+                  </div>
+                </div>
+                <div class="swiper-slide">
+                  <div class="featured-tour-card">
+                    <div class="tour-image">
+                      <img src="assets/img/travel/tour-14.webp" alt="Norwegian Fjords" class="img-fluid">
+                      <div class="tour-badge">Phổ Biến</div>
+                    </div>
+                    <div class="tour-content">
+                      <h4>Du Thuyền Vịnh Na Uy</h4>
+                      <p>Đi thuyền qua các vịnh hẹp hùng vĩ và chứng kiến phong cảnh tuyệt đẹp của bờ biển Na Uy.</p>
+                      <div class="tour-meta">
+                        <span class="duration"><i class="bi bi-clock"></i> 9 Ngày</span>
+                        <span class="price">Từ $1899</span>
+                      </div>
+                      <a href="tour-details.html" class="btn btn-primary">Xem Chi Tiết</a>
+                    </div>
+                  </div>
+                </div>
+                <div class="swiper-slide">
+                  <div class="featured-tour-card">
+                    <div class="tour-image">
+                      <img src="assets/img/travel/tour-7.webp" alt="Egyptian Adventure" class="img-fluid">
+                      <div class="tour-badge">Văn Hóa</div>
+                    </div>
+                    <div class="tour-content">
+                      <h4>Khám Phá Ai Cập Cổ Đại</h4>
+                      <p>Hành trình xuyên thời gian thăm kim tự tháp, đền đài và đi thuyền trên sông Nile huyền thoại.</p>
+                      <div class="tour-meta">
+                        <span class="duration"><i class="bi bi-clock"></i> 8 Ngày</span>
+                        <span class="price">Từ $1149</span>
+                      </div>
+                      <a href="tour-details.html" class="btn btn-primary">Xem Chi Tiết</a>
+                    </div>
+                  </div>
+                </div>
+                <div class="swiper-slide">
+                  <div class="featured-tour-card">
+                    <div class="tour-image">
+                      <img src="assets/img/travel/tour-19.webp" alt="Costa Rica Adventure" class="img-fluid">
+                      <div class="tour-badge">Mạo Hiểm</div>
+                    </div>
+                    <div class="tour-content">
+                      <h4>Du Lịch Sinh Thái Costa Rica</h4>
+                      <p>Trải nghiệm tour đu dây rừng nhiệt đới, ngắm động vật hoang dã và bãi biển nguyên sơ.</p>
+                      <div class="tour-meta">
+                        <span class="duration"><i class="bi bi-clock"></i> 6 Ngày</span>
+                        <span class="price">Từ $749</span>
+                      </div>
+                      <a href="tour-details.html" class="btn btn-primary">Xem Chi Tiết</a>
+                    </div>
+                  </div>
+                </div>
+                <div class="swiper-slide">
+                  <div class="featured-tour-card">
+                    <div class="tour-image">
+                      <img src="assets/img/travel/tour-2.webp" alt="Greek Islands" class="img-fluid">
+                      <div class="tour-badge">Mùa Hè</div>
+                    </div>
+                    <div class="tour-content">
+                      <h4>Hành Trình Đảo Hy Lạp</h4>
+                      <p>Khám phá các hòn đảo Hy Lạp tuyệt đẹp, từ hoàng hôn Santorini đến cuộc sống về đêm Mykonos.</p>
+                      <div class="tour-meta">
+                        <span class="duration"><i class="bi bi-clock"></i> 11 Ngày</span>
+                        <span class="price">Từ $1399</span>
+                      </div>
+                      <a href="tour-details.html" class="btn btn-primary">Xem Chi Tiết</a>
+                    </div>
+                  </div>
+                </div>
+                <div class="swiper-slide">
+                  <div class="featured-tour-card">
+                    <div class="tour-image">
+                      <img src="assets/img/travel/tour-25.webp" alt="Patagonia Trek" class="img-fluid">
+                      <div class="tour-badge">Thử Thách</div>
+                    </div>
+                    <div class="tour-content">
+                      <h4>Đi Bộ Đường Dài Patagonia</h4>
+                      <p>Thử thách bản thân tại một trong những vùng hoang dã vĩ đại cuối cùng với sông băng và đỉnh núi.</p>
+                      <div class="tour-meta">
+                        <span class="duration"><i class="bi bi-clock"></i> 12 Ngày</span>
+                        <span class="price">Từ $2299</span>
+                      </div>
+                      <a href="tour-details.html" class="btn btn-primary">Xem Chi Tiết</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="swiper-pagination"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mb-5" data-aos="fade-up" data-aos-delay="400">
+          <div class="col-12">
+            <h3 class="section-subtitle mb-4">Duyệt Theo Danh Mục</h3>
+            <div class="row">
+              <div class="col-lg-2 col-md-4 col-6 mb-3">
+                <div class="category-card">
+                  <div class="category-icon">
+                    <i class="bi bi-compass"></i>
+                  </div>
+                  <h5>Mạo Hiểm</h5>
+                </div>
+              </div>
+              <div class="col-lg-2 col-md-4 col-6 mb-3">
+                <div class="category-card">
+                  <div class="category-icon">
+                    <i class="bi bi-gem"></i>
+                  </div>
+                  <h5>Sang Trọng</h5>
+                </div>
+              </div>
+              <div class="col-lg-2 col-md-4 col-6 mb-3">
+                <div class="category-card">
+                  <div class="category-icon">
+                    <i class="bi bi-people"></i>
+                  </div>
+                  <h5>Gia Đình</h5>
+                </div>
+              </div>
+              <div class="col-lg-2 col-md-4 col-6 mb-3">
+                <div class="category-card">
+                  <div class="category-icon">
+                    <i class="bi bi-palette"></i>
+                  </div>
+                  <h5>Văn Hóa</h5>
+                </div>
+              </div>
+              <div class="col-lg-2 col-md-4 col-6 mb-3">
+                <div class="category-card">
+                  <div class="category-icon">
+                    <i class="bi bi-sun"></i>
+                  </div>
+                  <h5>Biển Đảo</h5>
+                </div>
+              </div>
+              <div class="col-lg-2 col-md-4 col-6 mb-3">
+                <div class="category-card">
+                  <div class="category-icon">
+                    <i class="bi bi-building"></i>
+                  </div>
+                  <h5>Thành Phố</h5>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mb-5" data-aos="fade-up" data-aos-delay="500">
+          <div class="col-12">
+            <div class="special-offers">
+              <h3 class="section-subtitle mb-4">Ưu Đãi Giờ Chót</h3>
+              <div class="row">
+                <div class="col-lg-6 mb-4">
+                  <div class="offer-banner">
+                    <div class="offer-content">
+                      <div class="discount-badge">GIẢM 30%</div>
+                      <h4>Du Thuyền Địa Trung Hải</h4>
+                      <p>Khám phá Ý, Hy Lạp và Tây Ban Nha với chỗ ở sang trọng và ẩm thực cao cấp.</p>
+                      <span class="urgency">Chỉ còn 3 chỗ!</span>
+                      <a href="booking.html" class="btn btn-accent">Đặt Ngay</a>
+                    </div>
+                    <div class="offer-image">
+                      <img src="assets/img/travel/misc-12.webp" alt="Cruise" class="img-fluid">
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                  <div class="offer-banner">
+                    <div class="offer-content">
+                      <div class="discount-badge">GIẢM 25%</div>
+                      <h4>Safari Châu Phi</h4>
+                      <p>Chứng kiến cuộc di cư vĩ đại và gặp gỡ động vật hoang dã tuyệt đẹp trong môi trường tự nhiên.</p>
+                      <span class="urgency">Ưu đãi có hạn!</span>
+                      <a href="booking.html" class="btn btn-accent">Đặt Ngay</a>
+                    </div>
+                    <div class="offer-image">
+                      <img src="assets/img/travel/misc-8.webp" alt="Safari" class="img-fluid">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row" data-aos="fade-up" data-aos-delay="600">
+          <div class="col-12">
+            <h3 class="section-subtitle mb-4">Tất Cả Các Tour</h3>
+            <div class="row">
+              <div class="col-lg-4 col-md-6 mb-4">
+                <div class="tour-card">
+                  <div class="tour-image">
+                    <img src="assets/img/travel/tour-3.webp" alt="Swiss Alps" class="img-fluid">
+                    <div class="tour-price">$749</div>
+                  </div>
+                  <div class="tour-content">
+                    <h4>Phiêu Lưu Dãy Alps Thụy Sĩ</h4>
+                    <p>Trải nghiệm quang cảnh núi non ngoạn mục và những ngôi làng quyến rũ ở trung tâm Thụy Sĩ.</p>
+                    <div class="tour-details">
+                      <span><i class="bi bi-clock"></i> 6 Ngày</span>
+                      <span><i class="bi bi-star-fill"></i> 4.8 (124 đánh giá)</span>
+                    </div>
+                    <a href="#" class="btn btn-outline-primary">Xem Tour</a>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-4 col-md-6 mb-4">
+                <div class="tour-card">
+                  <div class="tour-image">
+                    <img src="assets/img/travel/tour-11.webp" alt="Iceland" class="img-fluid">
+                    <div class="tour-price">$1199</div>
+                  </div>
+                  <div class="tour-content">
+                    <h4>Săn Bắc Cực Quang Iceland</h4>
+                    <p>Theo đuổi cực quang và khám phá hang động băng, mạch nước phun và thác nước hùng vĩ.</p>
+                    <div class="tour-details">
+                      <span><i class="bi bi-clock"></i> 8 Ngày</span>
+                      <span><i class="bi bi-star-fill"></i> 4.9 (89 đánh giá)</span>
+                    </div>
+                    <a href="#" class="btn btn-outline-primary">Xem Tour</a>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-4 col-md-6 mb-4">
+                <div class="tour-card">
+                  <div class="tour-image">
+                    <img src="assets/img/travel/tour-18.webp" alt="Morocco" class="img-fluid">
+                    <div class="tour-price">$899</div>
+                  </div>
+                  <div class="tour-content">
+                    <h4>Ma Thuật Morocco</h4>
+                    <p>Khám phá các medina cổ kính, sa mạc Sahara và những khu chợ sôi động tại điểm đến kỳ thú này.</p>
+                    <div class="tour-details">
+                      <span><i class="bi bi-clock"></i> 9 Ngày</span>
+                      <span><i class="bi bi-star-fill"></i> 4.7 (156 đánh giá)</span>
+                    </div>
+                    <a href="#" class="btn btn-outline-primary">Xem Tour</a>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-4 col-md-6 mb-4">
+                <div class="tour-card">
+                  <div class="tour-image">
+                    <img src="assets/img/travel/tour-5.webp" alt="Peru" class="img-fluid">
+                    <div class="tour-price">$1399</div>
+                  </div>
+                  <div class="tour-content">
+                    <h4>Thám Hiểm Machu Picchu Peru</h4>
+                    <p>Đi bộ trên Đường mòn Inca huyền thoại và khám phá thành phố đã mất Machu Picchu.</p>
+                    <div class="tour-details">
+                      <span><i class="bi bi-clock"></i> 12 Ngày</span>
+                      <span><i class="bi bi-star-fill"></i> 4.9 (203 đánh giá)</span>
+                    </div>
+                    <a href="#" class="btn btn-outline-primary">Xem Tour</a>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-4 col-md-6 mb-4">
+                <div class="tour-card">
+                  <div class="tour-image">
+                    <img src="assets/img/travel/tour-26.webp" alt="Vietnam" class="img-fluid">
+                    <div class="tour-price">$679</div>
+                  </div>
+                  <div class="tour-content">
+                    <h4>Khám Phá Việt Nam</h4>
+                    <p>Từ Hà Nội nhộn nhịp đến Vịnh Hạ Long thanh bình, khám phá cảnh quan đa dạng của Việt Nam.</p>
+                    <div class="tour-details">
+                      <span><i class="bi bi-clock"></i> 10 Ngày</span>
+                      <span><i class="bi bi-star-fill"></i> 4.6 (178 đánh giá)</span>
+                    </div>
+                    <a href="#" class="btn btn-outline-primary">Xem Tour</a>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-4 col-md-6 mb-4">
+                <div class="tour-card">
+                  <div class="tour-image">
+                    <img src="assets/img/travel/tour-13.webp" alt="Australia" class="img-fluid">
+                    <div class="tour-price">$1799</div>
+                  </div>
+                  <div class="tour-content">
+                    <h4>Tiêu Điểm Úc</h4>
+                    <p>Khám phá Sydney, Melbourne và Rạn san hô Great Barrier trong chuyến đi toàn diện này.</p>
+                    <div class="tour-details">
+                      <span><i class="bi bi-clock"></i> 14 Ngày</span>
+                      <span><i class="bi bi-star-fill"></i> 4.8 (95 đánh giá)</span>
+                    </div>
+                    <a href="#" class="btn btn-outline-primary">Xem Tour</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row" data-aos="fade-up" data-aos-delay="700">
+          <div class="col-12">
+            <div class="cta-section text-center">
+              <h3>Chưa Biết Chọn Tour Nào?</h3>
+              <p>Các chuyên gia du lịch của chúng tôi sẵn sàng giúp bạn tìm ra tour hoàn hảo dựa trên sở thích và ngân sách của bạn.</p>
+              <div class="cta-buttons">
+                <a href="#" class="btn btn-primary me-3">Liên Hệ Chuyên Gia</a>
+                <a href="#" class="btn btn-outline-primary">Làm Trắc Nghiệm Du Lịch</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </section></main>
+
+  <footer id="footer" class="footer position-relative dark-background">
+    <div class="container footer-top">
+      <div class="row gy-4">
+        <div class="col-lg-4 col-md-6 footer-about">
+          <a href="index.html" class="d-flex align-items-center">
+            <span class="sitename">VietTrip</span>
+          </a>
+          <div class="footer-contact pt-3">
+            <p>Số 123 Đường Cầu Diễn</p>
+            <p>Phú Diễn, Bắc Từ Liêm</p>
+            <p class="mt-3"><strong>Hotline:</strong> <span>+84 123 456 789</span></p>
+            <p><strong>Email:</strong> <span>lienhe@example.com</span></p>
+          </div>
+        </div>
+
+        <div class="col-lg-2 col-md-3 footer-links">
+          <h4>Liên Kết Nhanh</h4>
+          <ul>
+            <li><i class="bi bi-chevron-right"></i> <a href="index.html">Trang chủ</a></li>
+            <li><i class="bi bi-chevron-right"></i> <a href="about.html">Về chúng tôi</a></li>
+            <li><i class="bi bi-chevron-right"></i> <a href="services.html">Dịch vụ</a></li>
+            <li><i class="bi bi-chevron-right"></i> <a href="terms.html">Điều khoản dịch vụ</a></li>
+            <li><i class="bi bi-chevron-right"></i> <a href="privacy.html">Chính sách bảo mật</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-2 col-md-3 footer-links">
+          <h4>Dịch Vụ Của Chúng Tôi</h4>
+          <ul>
+            <li><i class="bi bi-chevron-right"></i> <a href="#">Tour Trong Nước</a></li>
+            <li><i class="bi bi-chevron-right"></i> <a href="#">Tour Quốc Tế</a></li>
+            <li><i class="bi bi-chevron-right"></i> <a href="#">Đặt Vé Máy Bay</a></li>
+            <li><i class="bi bi-chevron-right"></i> <a href="#">Đặt Phòng Khách Sạn</a></li>
+            <li><i class="bi bi-chevron-right"></i> <a href="#">Tư Vấn Visa</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-4 col-md-12">
+          <h4>Kết Nối Với Chúng Tôi</h4>
+          <p>Theo dõi chúng tôi trên mạng xã hội để cập nhật những hành trình thú vị và chia sẻ khoảnh khắc đáng nhớ.</p>
+          <div class="social-links d-flex">
+            <a href=""><i class="bi bi-twitter-x"></i></a>
+            <a href=""><i class="bi bi-facebook"></i></a>
+            <a href=""><i class="bi bi-instagram"></i></a>
+            <a href=""><i class="bi bi-linkedin"></i></a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="container copyright text-center mt-4">
+      <p>© Bản quyền thuộc về <strong class="sitename">VietTrip</strong>. Bảo lưu mọi quyền.</p>
+    </div>
+
+  </footer>
+
+  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <div id="preloader"></div>
+
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/php-email-form/validate.js"></script>
+  <script src="assets/vendor/aos/aos.js"></script>
+  <script src="assets/vendor/purecounter/purecounter_vanilla.js"></script>
+  <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
+  <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+  <script src="assets/vendor/imagesloaded/imagesloaded.pkgd.min.js"></script>
+  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
+
+  <script src="assets/js/main.js"></script>
+  <script src="assets/js/auth-ui.js"></script>
+
+</body>
+
+</html>

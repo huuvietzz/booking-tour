@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Điểm Đến - Tour Du Lịch</title>
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+
+  <link href="assets/img/favicon.png" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+  <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+  <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
+
+  <link href="assets/css/main.css" rel="stylesheet">
+  <link href="assets/css/auth-ui.css" rel="stylesheet">
+  <link href="assets/css/header-white.css" rel="stylesheet">
+</head>
+
+<body class="destinations-page">
+
+<header id="header" class="header d-flex align-items-center fixed-top">
+  <div class="header-container container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+
+    <a href="index.html" class="logo d-flex align-items-center me-auto me-xl-0">
+      <img src="assets/img/logo.webp" alt="Booking Tour">
+    </a>
+
+    <nav id="navmenu" class="navmenu">
+      <ul>
+        <li><a href="index.html" class="active">Trang chủ</a></li>
+        <li><a href="about.html">Về chúng tôi</a></li>
+        <li><a href="destinations.html">Điểm đến</a></li>
+        <li><a href="tours.html">Tours</a></li>
+        <li><a href="contact.html">Liên hệ</a></li>
+      </ul>
+      <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+    </nav>
+
+    <!-- Đã thay đổi href và text của nút này -->
+    <a class="btn-getstarted" href="pages-login.html">Đăng nhập</a>
+
+  </div>
+</header>
+
+  <main class="main">
+
+    <div class="page-title dark-background" data-aos="fade" style="background-image: url(assets/img/travel/showcase-8.webp);">
+      <div class="container position-relative">
+        <h1>Điểm Đến</h1>
+        <p>Khám phá những địa điểm tuyệt đẹp trên khắp thế giới và tìm nguồn cảm hứng cho chuyến phiêu lưu tiếp theo của bạn.</p>
+        <nav class="breadcrumbs">
+          <ol>
+            <li><a href="index.html">Trang chủ</a></li>
+            <li class="current">Điểm đến</li>
+          </ol>
+        </nav>
+      </div>
+    </div><section id="travel-destinations" class="travel-destinations section">
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="row">
+          <div class="col-lg-8 mx-auto text-center">
+            <h2>Khám Phá Những Trải Nghiệm Du Lịch Đầy Mê Hoặc</h2>
+            <p class="mb-5">Từ nguồn năng lượng sôi động của các thành phố hiện đại đến vẻ đẹp thanh bình của thiên nhiên hoang sơ, hãy bắt đầu hành trình đến những điểm đến quyến rũ nhất hành tinh. Chúng tôi ở đây để giúp bạn tạo nên những kỷ niệm sẽ tồn tại suốt đời.</p>
+          </div>
+        </div>
+
+        <div class="isotope-layout" data-default-filter="*" data-layout="masonry" data-sort="original-order">
+          <ul class="destination-filters isotope-filters" data-aos="fade-up" data-aos-delay="200">
+            <li data-filter="*" class="filter-active">Tất Cả</li>
+            <li data-filter=".filter-tropical">Nhiệt Đới</li>
+            <li data-filter=".filter-mountain">Núi Cao</li>
+            <li data-filter=".filter-urban">Thành Phố</li>
+            <li data-filter=".filter-historical">Di Sản</li>
+            <li data-filter=".filter-coastal">Biển Đảo</li>
+          </ul><div class="row gy-4 isotope-container" data-aos="fade-up" data-aos-delay="300">
+
+            <div class="col-lg-4 col-md-6 destination-item isotope-item filter-coastal">
+              <a href="destination-details.html" class="destination-tile">
+                <div class="tile-image">
+                  <img src="assets/img/travel/destination-2.webp" alt="Maldives" class="img-fluid" loading="lazy">
+                  <div class="overlay-content">
+                    <span class="destination-tag luxury">Thiên Đường</span>
+                    <div class="destination-info">
+                      <h4>Maldives</h4>
+                      <p>Quần đảo bình dị với làn nước xanh ngọc bích và những khu nghỉ dưỡng trên mặt nước đầy quyến rũ.</p>
+                      <div class="destination-stats">
+                        <span class="tours-available"><i class="bi bi-map"></i> 15 Gói Tour</span>
+                        <span class="starting-price">Từ $2,450</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </div><div class="col-lg-4 col-md-6 destination-item isotope-item filter-historical">
+              <a href="destination-details.html" class="destination-tile">
+                <div class="tile-image">
+                  <img src="assets/img/travel/destination-4.webp" alt="Rome, Italy" class="img-fluid" loading="lazy">
+                  <div class="overlay-content">
+                    <span class="destination-tag cultural">Lịch Sử</span>
+                    <div class="destination-info">
+                      <h4>Rome, Ý</h4>
+                      <p>Thành phố vĩnh hằng, nơi những tàn tích cổ đại gặp gỡ nghệ thuật Phục hưng ngoạn mục.</p>
+                      <div class="destination-stats">
+                        <span class="tours-available"><i class="bi bi-map"></i> 18 Chuyến Đi</span>
+                        <span class="starting-price">Từ $1,320</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </div><div class="col-lg-4 col-md-6 destination-item isotope-item filter-mountain">
+              <a href="destination-details.html" class="destination-tile">
+                <div class="tile-image">
+                  <img src="assets/img/travel/destination-6.webp" alt="Swiss Alps" class="img-fluid" loading="lazy">
+                  <div class="overlay-content">
+                    <span class="destination-tag adventure">Núi Tuyết</span>
+                    <div class="destination-info">
+                      <h4>Dãy Alps Thụy Sĩ</h4>
+                      <p>Những đỉnh núi hùng vĩ và những ngôi làng trên núi nguyên sơ đang chờ bạn khám phá.</p>
+                      <div class="destination-stats">
+                        <span class="tours-available"><i class="bi bi-map"></i> 10 Hành Trình</span>
+                        <span class="starting-price">Từ $1,980</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </div><div class="col-lg-4 col-md-6 destination-item isotope-item filter-tropical">
+              <a href="destination-details.html" class="destination-tile">
+                <div class="tile-image">
+                  <img src="assets/img/travel/destination-8.webp" alt="Costa Rica" class="img-fluid" loading="lazy">
+                  <div class="overlay-content">
+                    <span class="destination-tag nature">Sinh Thái</span>
+                    <div class="destination-info">
+                      <h4>Costa Rica</h4>
+                      <p>Rừng mưa nhiệt đới tươi tốt, động vật hoang dã phong phú và trải nghiệm du lịch sinh thái có trách nhiệm.</p>
+                      <div class="destination-stats">
+                        <span class="tours-available"><i class="bi bi-map"></i> 14 Thám Hiểm</span>
+                        <span class="starting-price">Từ $1,650</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </div><div class="col-lg-4 col-md-6 destination-item isotope-item filter-urban">
+              <a href="destination-details.html" class="destination-tile">
+                <div class="tile-image">
+                  <img src="assets/img/travel/destination-10.webp" alt="Dubai, UAE" class="img-fluid" loading="lazy">
+                  <div class="overlay-content">
+                    <span class="destination-tag modern">Phồn Hoa</span>
+                    <div class="destination-info">
+                      <h4>Dubai, UAE</h4>
+                      <p>Đường chân trời rực rỡ nơi tầm nhìn tương lai gặp gỡ sự nồng hậu Ả Rập đích thực.</p>
+                      <div class="destination-stats">
+                        <span class="tours-available"><i class="bi bi-map"></i> 20 Hành Trình</span>
+                        <span class="starting-price">Từ $1,470</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </div><div class="col-lg-4 col-md-6 destination-item isotope-item filter-coastal">
+              <a href="destination-details.html" class="destination-tile">
+                <div class="tile-image">
+                  <img src="assets/img/travel/destination-12.webp" alt="Amalfi Coast, Italy" class="img-fluid" loading="lazy">
+                  <div class="overlay-content">
+                    <span class="destination-tag romantic">Quyến Rũ</span>
+                    <div class="destination-info">
+                      <h4>Bờ Biển Amalfi</h4>
+                      <p>Những vách đá ấn tượng và những ngôi làng đẹp như tranh vẽ nằm trên bờ biển Địa Trung Hải xanh thẳm.</p>
+                      <div class="destination-stats">
+                        <span class="tours-available"><i class="bi bi-map"></i> 13 Kỳ Nghỉ</span>
+                        <span class="starting-price">Từ $1,850</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </div><div class="col-lg-4 col-md-6 destination-item isotope-item filter-tropical">
+              <a href="destination-details.html" class="destination-tile">
+                <div class="tile-image">
+                  <img src="assets/img/travel/destination-14.webp" alt="Thailand" class="img-fluid" loading="lazy">
+                  <div class="overlay-content">
+                    <span class="destination-tag popular">Sôi Động</span>
+                    <div class="destination-info">
+                      <h4>Thái Lan</h4>
+                      <p>Những ngôi chùa dát vàng, bãi biển hoang sơ và những khu chợ đường phố nhộn nhịp đang chờ đón.</p>
+                      <div class="destination-stats">
+                        <span class="tours-available"><i class="bi bi-map"></i> 22 Gói Tour</span>
+                        <span class="starting-price">Từ $1,100</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </div><div class="col-lg-4 col-md-6 destination-item isotope-item filter-mountain">
+              <a href="destination-details.html" class="destination-tile">
+                <div class="tile-image">
+                  <img src="assets/img/travel/destination-16.webp" alt="Nepal Himalayas" class="img-fluid" loading="lazy">
+                  <div class="overlay-content">
+                    <span class="destination-tag trekking">Leo Núi</span>
+                    <div class="destination-info">
+                      <h4>Himalaya Nepal</h4>
+                      <p>Ngôi nhà của những đỉnh núi cao nhất thế giới và những thánh địa Phật giáo cổ kính, thanh bình.</p>
+                      <div class="destination-stats">
+                        <span class="tours-available"><i class="bi bi-map"></i> 8 Chuyến Đi</span>
+                        <span class="starting-price">Từ $2,300</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </div><div class="col-lg-4 col-md-6 destination-item isotope-item filter-historical">
+              <a href="destination-details.html" class="destination-tile">
+                <div class="tile-image">
+                  <img src="assets/img/travel/destination-18.webp" alt="Egypt Pyramids" class="img-fluid" loading="lazy">
+                  <div class="overlay-content">
+                    <span class="destination-tag ancient">Vĩnh Cửu</span>
+                    <div class="destination-info">
+                      <h4>Ai Cập</h4>
+                      <p>Những kỳ quan vĩnh cửu của các pharaoh và dòng chảy hùng vĩ của sông Nile.</p>
+                      <div class="destination-stats">
+                        <span class="tours-available"><i class="bi bi-map"></i> 16 Thám Hiểm</span>
+                        <span class="starting-price">Từ $1,750</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </div><div class="col-lg-4 col-md-6 destination-item isotope-item filter-urban">
+              <a href="destination-details.html" class="destination-tile">
+                <div class="tile-image">
+                  <img src="assets/img/travel/destination-20.webp" alt="Singapore" class="img-fluid" loading="lazy">
+                  <div class="overlay-content">
+                    <span class="destination-tag family">Gia Đình</span>
+                    <div class="destination-info">
+                      <h4>Singapore</h4>
+                      <p>Thành phố vườn hiện đại, nổi tiếng với kiến trúc táo bạo và nền ẩm thực đa dạng.</p>
+                      <div class="destination-stats">
+                        <span class="tours-available"><i class="bi bi-map"></i> 17 Cuộc Phiêu Lưu</span>
+                        <span class="starting-price">Từ $1,399</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </div></div></div>
+
+        <div class="row mt-5">
+          <div class="col-lg-10 mx-auto text-center" data-aos="fade-up" data-aos-delay="400">
+            <div class="planning-assistance">
+              <div class="assistance-content">
+                <h3>Hãy Để Chúng Tôi Giúp Bạn Lên Kế Hoạch Hoàn Hảo</h3>
+                <p>Bạn chưa biết điểm đến nào phù hợp với mong muốn của mình? Các chuyên gia tư vấn du lịch dày dạn kinh nghiệm của chúng tôi sẵn sàng thiết kế một lịch trình riêng biệt dành cho bạn.</p>
+                <div class="assistance-actions">
+                  <a href="#" class="btn btn-primary">Nhận Tư Vấn Miễn Phí</a>
+                  <a href="#" class="btn btn-outline">Xem Tất Cả Các Tour</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </section></main>
+
+  <footer id="footer" class="footer position-relative dark-background">
+    <div class="container footer-top">
+      <div class="row gy-4">
+        <div class="col-lg-4 col-md-6 footer-about">
+          <a href="index.html" class="d-flex align-items-center">
+            <span class="sitename">VietTrip</span>
+          </a>
+          <div class="footer-contact pt-3">
+            <p>Số 123 Đường Cầu Diễn</p>
+            <p>Phú Diễn, Bắc Từ Liêm</p>
+            <p class="mt-3"><strong>Hotline:</strong> <span>+84 123 456 789</span></p>
+            <p><strong>Email:</strong> <span>lienhe@example.com</span></p>
+          </div>
+        </div>
+
+        <div class="col-lg-2 col-md-3 footer-links">
+          <h4>Liên Kết Nhanh</h4>
+          <ul>
+            <li><i class="bi bi-chevron-right"></i> <a href="index.html">Trang chủ</a></li>
+            <li><i class="bi bi-chevron-right"></i> <a href="about.html">Về chúng tôi</a></li>
+            <li><i class="bi bi-chevron-right"></i> <a href="services.html">Dịch vụ</a></li>
+            <li><i class="bi bi-chevron-right"></i> <a href="terms.html">Điều khoản dịch vụ</a></li>
+            <li><i class="bi bi-chevron-right"></i> <a href="privacy.html">Chính sách bảo mật</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-2 col-md-3 footer-links">
+          <h4>Dịch Vụ Của Chúng Tôi</h4>
+          <ul>
+            <li><i class="bi bi-chevron-right"></i> <a href="#">Tour Trong Nước</a></li>
+            <li><i class="bi bi-chevron-right"></i> <a href="#">Tour Quốc Tế</a></li>
+            <li><i class="bi bi-chevron-right"></i> <a href="#">Đặt Vé Máy Bay</a></li>
+            <li><i class="bi bi-chevron-right"></i> <a href="#">Đặt Phòng Khách Sạn</a></li>
+            <li><i class="bi bi-chevron-right"></i> <a href="#">Tư Vấn Visa</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-4 col-md-12">
+          <h4>Kết Nối Với Chúng Tôi</h4>
+          <p>Theo dõi chúng tôi trên mạng xã hội để cập nhật những hành trình thú vị và chia sẻ khoảnh khắc đáng nhớ.</p>
+          <div class="social-links d-flex">
+            <a href=""><i class="bi bi-twitter-x"></i></a>
+            <a href=""><i class="bi bi-facebook"></i></a>
+            <a href=""><i class="bi bi-instagram"></i></a>
+            <a href=""><i class="bi bi-linkedin"></i></a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="container copyright text-center mt-4">
+      <p>© Bản quyền thuộc về <strong class="sitename">VietTrip</strong>. Bảo lưu mọi quyền.</p>
+    </div>
+
+  </footer>
+
+  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <div id="preloader"></div>
+
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/php-email-form/validate.js"></script>
+  <script src="assets/vendor/aos/aos.js"></script>
+  <script src="assets/vendor/purecounter/purecounter_vanilla.js"></script>
+  <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
+  <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+  <script src="assets/vendor/imagesloaded/imagesloaded.pkgd.min.js"></script>
+  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
+
+  <script src="assets/js/main.js"></script>
+
+  <script src="assets/js/auth-ui.js"></script>
+
+</body>
+
+</html>

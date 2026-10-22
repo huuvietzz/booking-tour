@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Tài khoản của tôi - VietTrip</title>
+
+    <link href="assets/img/favicon.png" rel="icon">
+    <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700&family=Raleway:ital,wght@0,300;0,400;0,500;0,600;0,700&display=swap" rel="stylesheet">
+
+    <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+
+    <link href="assets/css/main.css" rel="stylesheet">
+    <link href="assets/css/auth-ui.css" rel="stylesheet">
+    <link href="assets/css/header-white.css" rel="stylesheet">
+
+    <style>
+        .profile-page {
+            background-color: #f6f7f9;
+            min-height: 100vh;
+        }
+
+        /* Thẻ bên trái: avatar + menu */
+        .profile-sidebar {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 1px 10px rgba(0, 0, 0, .05);
+            overflow: hidden;
+            position: sticky;
+            top: calc(var(--header-height) + 24px);
+        }
+
+        .profile-sidebar-head {
+            padding: 28px 20px 24px;
+            text-align: center;
+            border-bottom: 1px solid #eef0f2;
+        }
+
+        /* ===== AVATAR ===== */
+        .avatar-wrap {
+            position: relative;
+            width: 96px;
+            height: 96px;
+            margin: 0 auto 10px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .avatar-wrap:focus-visible {
+            outline: 3px solid color-mix(in srgb, var(--accent-color), transparent 60%);
+            outline-offset: 3px;
+        }
+
+        /* Avatar mặc định (hình người rỗng kiểu Facebook) */
+        .profile-avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            overflow: hidden;
+            background-color: #e4e6eb;
+        }
+
+        .profile-avatar-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            display: block;
+            box-shadow: 0 0 0 3px #fff, 0 2px 10px rgba(0, 0, 0, .12);
+        }
+
+        /* Lớp phủ icon máy ảnh khi rê chuột / đang tải lên */
+        .avatar-overlay {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, .45);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            opacity: 0;
+            transition: opacity .2s;
+        }
+
+        .avatar-wrap:hover .avatar-overlay,
+        .avatar-wrap.uploading .avatar-overlay {
+            opacity: 1;
+        }
+
+        .avatar-wrap.uploading {
+            pointer-events: none;
+        }
+
+        .avatar-actions {
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .avatar-actions button {
+            border: 0;
+            background: none;
+            padding: 0;
+            color: var(--accent-color);
+            font-weight: 500;
+        }
+
+        .avatar-actions button:hover {
+            text-decoration: underline;
+        }
+
+        .avatar-actions .btn-remove {
+            color: #dc3545;
+        }
+
+        .avatar-msg {
+            font-size: 12.5px;
+            margin-bottom: 10px;
+        }
+
+        .profile-name {
+            font-weight: 600;
+            font-size: 17px;
+            margin-bottom: 2px;
+        }
+
+        .profile-email {
+            font-size: 13px;
+            color: #6c757d;
+            word-break: break-all;
+        }
+
+        .profile-nav .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 22px;
+            color: #495057;
+            font-size: 15px;
+            border: 0;
+            border-left: 3px solid transparent;
+            border-radius: 0;
+            width: 100%;
+            text-align: left;
+            background: none;
+        }
+
+        .profile-nav .nav-link i {
+            font-size: 18px;
+        }
+
+        .profile-nav .nav-link:hover {
+            background-color: #f8f9fa;
+            color: var(--accent-color);
+        }
+
+        .profile-nav .nav-link.active {
+            background-color: color-mix(in srgb, var(--accent-color), transparent 92%);
+            border-left-color: var(--accent-color);
+            color: var(--accent-color);
+            font-weight: 500;
+        }
+
+        .profile-nav .nav-link.text-danger:hover {
+            color: #dc3545;
+            background-color: #fff5f5;
+        }
+
+        /* Thẻ nội dung bên phải */
+        .profile-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 1px 10px rgba(0, 0, 0, .05);
+            padding: 28px 32px 32px;
+        }
+
+        .profile-card-title {
+            font-weight: 600;
+            font-size: 19px;
+            margin-bottom: 4px;
+        }
+
+        .profile-card-desc {
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 24px;
+        }
+
+        .profile-card .form-label {
+            font-weight: 500;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .profile-card .form-control,
+        .profile-card .form-select {
+            border-radius: 8px;
+            padding: .6rem .9rem;
+            font-size: .95rem;
+            border-color: #dee2e6;
+        }
+
+        .profile-card .form-control:focus,
+        .profile-card .form-select:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 .2rem color-mix(in srgb, var(--accent-color), transparent 88%);
+        }
+
+        .profile-card .form-control:disabled {
+            background-color: #f1f3f5;
+            color: #6c757d;
+        }
+
+        .btn-accent {
+            background-color: var(--accent-color);
+            color: #fff;
+            border-radius: 8px;
+            padding: .6rem 1.6rem;
+            font-weight: 500;
+            border: none;
+        }
+
+        .btn-accent:hover {
+            background-color: color-mix(in srgb, var(--accent-color), #000 12%);
+            color: #fff;
+        }
+
+        .btn-accent:disabled {
+            opacity: .6;
+        }
+
+        .password-wrap {
+            position: relative;
+        }
+
+        .password-wrap .form-control {
+            padding-right: 2.75rem;
+        }
+
+        .password-wrap .toggle-eye {
+            position: absolute;
+            top: 50%;
+            right: .9rem;
+            transform: translateY(-50%);
+            border: 0;
+            background: transparent;
+            color: #6c757d;
+            padding: 0;
+            line-height: 1;
+            z-index: 5;
+        }
+
+        .confirm-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background-color: #fdeaea;
+            color: #dc3545;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin: 0 auto 16px;
+        }
+
+        .confirm-modal .btn {
+            border-radius: 8px;
+            padding: .55rem 1rem;
+            font-weight: 500;
+        }
+
+        @media (max-width: 991.98px) {
+            .profile-sidebar {
+                position: static;
+                margin-bottom: 20px;
+            }
+
+            .profile-card {
+                padding: 22px 18px 26px;
+            }
+        }
+    </style>
+</head>
+
+<body class="profile-page">
+
+<header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="header-container container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+
+        <a href="index.html" class="logo d-flex align-items-center me-auto me-xl-0">
+            <img src="assets/img/logo.webp" alt="VietTrip">
+        </a>
+
+        <nav id="navmenu" class="navmenu">
+            <ul>
+                <li><a href="index.html">Trang chủ</a></li>
+                <li><a href="about.html">Về chúng tôi</a></li>
+                <li><a href="destinations.html">Điểm đến</a></li>
+                <li><a href="tours.html">Tours</a></li>
+                <li><a href="contact.html">Liên hệ</a></li>
+            </ul>
+            <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+        </nav>
+
+        <a class="btn-getstarted" href="pages-login.html">Đăng nhập</a>
+
+    </div>
+</header>
+
+<main class="main">
+    <div class="container py-4">
+
+        <!-- Đang tải hồ sơ -->
+        <div id="pageLoading" class="text-center py-5">
+            <div class="spinner-border text-primary"></div>
+            <p class="text-muted mt-3 mb-0">Đang tải thông tin tài khoản...</p>
+        </div>
+
+        <div id="pageContent" class="row g-4 d-none">
+
+            <!-- ================= SIDEBAR ================= -->
+            <div class="col-lg-3">
+                <div class="profile-sidebar">
+
+                    <div class="profile-sidebar-head">
+
+                        <!-- Bấm vào avatar để chọn ảnh mới -->
+                        <div class="avatar-wrap" id="avatarWrap" role="button" tabindex="0"
+                             title="Đổi ảnh đại diện" aria-label="Đổi ảnh đại diện">
+                            <div class="profile-avatar" id="sidebarAvatar"></div>
+                            <img class="profile-avatar-img d-none" id="sidebarAvatarImg" alt="Ảnh đại diện">
+                            <div class="avatar-overlay" id="avatarOverlay">
+                                <i class="bi bi-camera"></i>
+                            </div>
+                        </div>
+
+                        <input type="file" id="avatarInput" accept="image/jpeg,image/png,image/webp" hidden>
+
+                        <div class="avatar-actions">
+                            <button type="button" id="changeAvatarBtn">Đổi ảnh</button>
+                            <span class="text-muted mx-1 d-none" id="avatarActionSep">·</span>
+                            <button type="button" class="btn-remove d-none" id="removeAvatarBtn">Xoá ảnh</button>
+                        </div>
+
+                        <div class="avatar-msg d-none" id="avatarMsg"></div>
+
+                        <div class="profile-name" id="sidebarName">—</div>
+                        <div class="profile-email" id="sidebarEmail">—</div>
+                    </div>
+
+                    <div class="profile-nav nav flex-column" role="tablist">
+                        <button class="nav-link active" data-bs-toggle="tab"
+                                data-bs-target="#tab-info" type="button" role="tab">
+                            <i class="bi bi-person"></i> Thông tin cá nhân
+                        </button>
+                        <button class="nav-link" data-bs-toggle="tab"
+                                data-bs-target="#tab-password" type="button" role="tab">
+                            <i class="bi bi-shield-lock"></i> Đổi mật khẩu
+                        </button>
+                        <a class="nav-link" href="my-bookings.html">
+                            <i class="bi bi-journal-text"></i> Đơn đặt tour
+                        </a>
+                        <a class="nav-link" href="favorites.html">
+                            <i class="bi bi-heart"></i> Tour yêu thích
+                        </a>
+                        <button class="nav-link text-danger" type="button" id="logoutBtn">
+                            <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ================= NỘI DUNG ================= -->
+            <div class="col-lg-9">
+                <div class="tab-content">
+
+                    <!-- ---------- Tab: Thông tin cá nhân ---------- -->
+                    <div class="tab-pane fade show active" id="tab-info" role="tabpanel">
+                        <div class="profile-card">
+
+                            <h5 class="profile-card-title">Thông tin cá nhân</h5>
+                            <p class="profile-card-desc">
+                                Cập nhật thông tin để điền nhanh khi đặt tour.
+                            </p>
+
+                            <div class="alert d-none" id="infoAlert" role="alert"></div>
+
+                            <form class="row g-3" id="profileForm" novalidate>
+
+                                <div class="col-md-6">
+                                    <label for="fullName" class="form-label">
+                                        Họ và tên <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" id="fullName" maxlength="255" required>
+                                    <div class="invalid-feedback" id="fullNameFeedback">Vui lòng nhập họ tên</div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="phoneNumber" class="form-label">
+                                        Số điện thoại <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="tel" class="form-control" id="phoneNumber" maxlength="10" required>
+                                    <div class="invalid-feedback" id="phoneNumberFeedback">
+                                        Số điện thoại phải gồm 10 chữ số, bắt đầu bằng 0
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="email" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="email" disabled>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label for="dateOfBirth" class="form-label">Ngày sinh</label>
+                                    <input type="date" class="form-control" id="dateOfBirth">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label for="gender" class="form-label">Giới tính</label>
+                                    <select class="form-select" id="gender">
+                                        <option value="">-- Chọn --</option>
+                                        <option value="MALE">Nam</option>
+                                        <option value="FEMALE">Nữ</option>
+                                        <option value="OTHER">Khác</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="address" class="form-label">Địa chỉ</label>
+                                    <input type="text" class="form-control" id="address" maxlength="255">
+                                </div>
+
+                                <div class="col-12 mt-4 d-flex gap-2">
+                                    <button type="submit" class="btn btn-accent" id="saveBtn">
+                                        <span class="spinner-border spinner-border-sm d-none" id="saveSpinner"></span>
+                                        <span id="saveText">Lưu thay đổi</span>
+                                    </button>
+                                    <button type="button" class="btn btn-light" id="resetBtn">Hoàn tác</button>
+                                </div>
+
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- ---------- Tab: Đổi mật khẩu ---------- -->
+                    <div class="tab-pane fade" id="tab-password" role="tabpanel">
+                        <div class="profile-card">
+
+                            <h5 class="profile-card-title">Đổi mật khẩu</h5>
+                            <p class="profile-card-desc">
+                                Nhập mật khẩu hiện tại để xác nhận đây là bạn.
+                            </p>
+
+                            <div class="alert d-none" id="pwAlert" role="alert"></div>
+
+                            <form class="row g-3" id="passwordForm" novalidate style="max-width: 460px;">
+
+                                <div class="col-12">
+                                    <label for="currentPassword" class="form-label">
+                                        Mật khẩu hiện tại <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="password-wrap">
+                                        <input type="password" class="form-control" id="currentPassword" required>
+                                        <button class="toggle-eye" type="button"
+                                                data-toggle-password="currentPassword" tabindex="-1">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div class="invalid-feedback d-block d-none" id="currentPasswordFeedback"></div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="newPassword" class="form-label">
+                                        Mật khẩu mới <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="password-wrap">
+                                        <input type="password" class="form-control" id="newPassword"
+                                               placeholder="Ít nhất 6 ký tự" required>
+                                        <button class="toggle-eye" type="button"
+                                                data-toggle-password="newPassword" tabindex="-1">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div class="invalid-feedback d-block d-none" id="newPasswordFeedback"></div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="confirmPassword" class="form-label">
+                                        Nhập lại mật khẩu mới <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="password-wrap">
+                                        <input type="password" class="form-control" id="confirmPassword" required>
+                                        <button class="toggle-eye" type="button"
+                                                data-toggle-password="confirmPassword" tabindex="-1">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div class="invalid-feedback d-block d-none" id="confirmPasswordFeedback"></div>
+                                </div>
+
+                                <div class="col-12 mt-4">
+                                    <button type="submit" class="btn btn-accent" id="pwBtn">
+                                        <span class="spinner-border spinner-border-sm d-none" id="pwSpinner"></span>
+                                        <span id="pwText">Đổi mật khẩu</span>
+                                    </button>
+                                </div>
+
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modal xác nhận đăng xuất -->
+    <div class="modal fade confirm-modal" id="logoutModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content border-0" style="border-radius: 14px;">
+                <div class="modal-body text-center px-4 py-4">
+                    <div class="confirm-icon"><i class="bi bi-box-arrow-right"></i></div>
+                    <h6 class="fw-semibold mb-2">Đăng xuất</h6>
+                    <p class="text-secondary small mb-4">Bạn có chắc muốn đăng xuất khỏi tài khoản?</p>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-light flex-fill" data-bs-dismiss="modal">Huỷ</button>
+                        <button type="button" class="btn btn-danger flex-fill" id="confirmLogoutBtn">Đăng xuất</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer id="footer" class="footer position-relative dark-background">
+    <div class="container footer-top">
+        <div class="row gy-4">
+            <div class="col-lg-4 col-md-6 footer-about">
+                <a href="index.html" class="d-flex align-items-center">
+                    <span class="sitename">VietTrip</span>
+                </a>
+                <div class="footer-contact pt-3">
+                    <p>Số 123 Đường Cầu Diễn</p>
+                    <p>Phú Diễn, Bắc Từ Liêm</p>
+                    <p class="mt-3"><strong>Hotline:</strong> <span>+84 123 456 789</span></p>
+                    <p><strong>Email:</strong> <span>lienhe@example.com</span></p>
+                </div>
+            </div>
+
+            <div class="col-lg-2 col-md-3 footer-links">
+                <h4>Liên Kết Nhanh</h4>
+                <ul>
+                    <li><i class="bi bi-chevron-right"></i> <a href="#">Trang chủ</a></li>
+                    <li><i class="bi bi-chevron-right"></i> <a href="#">Về chúng tôi</a></li>
+                    <li><i class="bi bi-chevron-right"></i> <a href="#">Dịch vụ</a></li>
+                    <li><i class="bi bi-chevron-right"></i> <a href="#">Điều khoản dịch vụ</a></li>
+                    <li><i class="bi bi-chevron-right"></i> <a href="#">Chính sách bảo mật</a></li>
+                </ul>
+            </div>
+
+            <div class="col-lg-2 col-md-3 footer-links">
+                <h4>Dịch Vụ Của Chúng Tôi</h4>
+                <ul>
+                    <li><i class="bi bi-chevron-right"></i> <a href="#">Tour Trong Nước</a></li>
+                    <li><i class="bi bi-chevron-right"></i> <a href="#">Tour Quốc Tế</a></li>
+                    <li><i class="bi bi-chevron-right"></i> <a href="#">Đặt Vé Máy Bay</a></li>
+                    <li><i class="bi bi-chevron-right"></i> <a href="#">Đặt Phòng Khách Sạn</a></li>
+                    <li><i class="bi bi-chevron-right"></i> <a href="#">Tư Vấn Visa</a></li>
+                </ul>
+            </div>
+
+            <div class="col-lg-4 col-md-12">
+                <h4>Kết Nối Với Chúng Tôi</h4>
+                <p>Theo dõi chúng tôi trên mạng xã hội để cập nhật những hành trình thú vị và chia sẻ khoảnh khắc đáng nhớ.</p>
+                <div class="social-links d-flex">
+                    <a href=""><i class="bi bi-twitter-x"></i></a>
+                    <a href=""><i class="bi bi-facebook"></i></a>
+                    <a href=""><i class="bi bi-instagram"></i></a>
+                    <a href=""><i class="bi bi-linkedin"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container copyright text-center mt-4">
+        <p>© Bản quyền thuộc về <strong class="sitename">VietTrip</strong>. Bảo lưu mọi quyền.</p>
+    </div>
+</footer>
+
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+<div id="preloader"></div>
+
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/main.js"></script>
+<script src="assets/js/auth-ui.js"></script>
+
+<script>
+    // Chưa đăng nhập thì đá về trang login ngay
+    const currentUser = AuthUI.requireLogin();
+
+    const PHONE_REGEX       = /^0[0-9]{9}$/;
+    const AVATAR_TYPES      = ['image/jpeg', 'image/png', 'image/webp'];
+    const AVATAR_MAX_BYTES  = 2 * 1024 * 1024;   // khớp spring.servlet.multipart.max-file-size
+    let originalProfile = null;   // để nút "Hoàn tác"
+
+    // ---------- Tiện ích ----------
+    function $(id) { return document.getElementById(id); }
+
+    function showAlert(boxId, type, message) {
+        const box = $(boxId);
+        box.className = 'alert alert-' + type;
+        box.textContent = message;
+        box.classList.remove('d-none');
+        box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function hideAlert(boxId) {
+        $(boxId).classList.add('d-none');
+    }
+
+    function setFieldError(id, message) {
+        const input = $(id);
+        const feedback = $(id + 'Feedback');
+        if (message) {
+            input.classList.add('is-invalid');
+            if (feedback) {
+                feedback.textContent = message;
+                feedback.classList.remove('d-none');
+            }
+        } else {
+            input.classList.remove('is-invalid');
+            if (feedback) feedback.classList.add('d-none');
+        }
+    }
+
+    /** Body lỗi không chắc là JSON (vd: 413, 500 từ trang /error) nên parse an toàn */
+    async function readJson(res) {
+        try { return await res.json(); } catch (_) { return null; }
+    }
+
+    function errorMessage(json, fallback) {
+        if (json && json.errors && json.errors.length) return json.errors.join(' • ');
+        return (json && json.message) || fallback;
+    }
+
+    // Xem/ẩn mật khẩu
+    document.querySelectorAll('[data-toggle-password]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const input = $(btn.dataset.togglePassword);
+            const icon = btn.querySelector('i');
+            const hidden = input.type === 'password';
+            input.type = hidden ? 'text' : 'password';
+            icon.className = hidden ? 'bi bi-eye-slash' : 'bi bi-eye';
+        });
+    });
+
+    // =====================================================================
+    // AVATAR
+    // =====================================================================
+
+    /** Hiện ảnh nếu có avatarUrl, không thì hiện hình người rỗng mặc định */
+    function renderAvatar(avatarUrl) {
+        const img    = $('sidebarAvatarImg');
+        const letter = $('sidebarAvatar');
+
+        if (avatarUrl) {
+            img.src = avatarUrl;
+            img.classList.remove('d-none');
+            letter.classList.add('d-none');
+        } else {
+            img.removeAttribute('src');
+            img.classList.add('d-none');
+            letter.classList.remove('d-none');
+            letter.innerHTML = AuthUI.avatarInnerHtml(null);   // hình người rỗng
+        }
+
+        $('removeAvatarBtn').classList.toggle('d-none', !avatarUrl);
+        $('avatarActionSep').classList.toggle('d-none', !avatarUrl);
+
+        renderHeaderAvatar(avatarUrl);
+    }
+
+    // File ảnh mất / URL sai → hiện hình người rỗng thay vì icon ảnh vỡ     ← THÊM TỪ ĐÂY
+    $('sidebarAvatarImg').addEventListener('error', () => {
+        $('sidebarAvatarImg').classList.add('d-none');
+        $('sidebarAvatar').classList.remove('d-none');
+        $('sidebarAvatar').innerHTML = AuthUI.avatarInnerHtml(null);
+    });
+
+    /** Đồng bộ avatar trên header + localStorage để các trang khác dùng được */
+    function renderHeaderAvatar(avatarUrl) {
+        if (avatarUrl) localStorage.setItem('avatarUrl', avatarUrl);
+        else localStorage.removeItem('avatarUrl');
+
+        const el = document.querySelector('.btn-user .user-avatar');
+        if (el) el.innerHTML = AuthUI.avatarInnerHtml(avatarUrl);
+    }
+
+    function showAvatarMsg(type, message) {
+        const box = $('avatarMsg');
+        box.className = 'avatar-msg ' + (type === 'success' ? 'text-success' : 'text-danger');
+        box.textContent = message;
+    }
+
+    function hideAvatarMsg() {
+        $('avatarMsg').className = 'avatar-msg d-none';
+    }
+
+    function setAvatarLoading(loading) {
+        $('avatarWrap').classList.toggle('uploading', loading);
+        $('avatarOverlay').innerHTML = loading
+            ? '<span class="spinner-border spinner-border-sm"></span>'
+            : '<i class="bi bi-camera"></i>';
+        $('changeAvatarBtn').disabled = loading;
+        $('removeAvatarBtn').disabled = loading;
+    }
+
+    /**
+     * Header CHỈ có Authorization. KHÔNG dùng AuthUI.authHeaders() vì nó gắn sẵn
+     * Content-Type: application/json, đè mất "multipart/form-data; boundary=..."
+     * mà trình duyệt tự tạo cho FormData → backend báo "not a multipart request".
+     */
+    function tokenHeader() {
+        return { 'Authorization': 'Bearer ' + localStorage.getItem('token') };
+    }
+
+    function openFilePicker() {
+        hideAvatarMsg();
+        $('avatarInput').click();
+    }
+
+    $('avatarWrap').addEventListener('click', openFilePicker);
+    $('changeAvatarBtn').addEventListener('click', openFilePicker);
+    $('avatarWrap').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFilePicker(); }
+    });
+
+    $('avatarInput').addEventListener('change', () => {
+        const file = $('avatarInput').files[0];
+        $('avatarInput').value = '';   // reset để chọn lại đúng file cũ vẫn bắt được sự kiện
+        if (file) uploadAvatar(file);
+    });
+
+    async function uploadAvatar(file) {
+        // Kiểm tra trước ở client cho nhanh, server vẫn kiểm lại
+        if (!AVATAR_TYPES.includes(file.type)) {
+            showAvatarMsg('error', 'Chỉ chấp nhận ảnh JPG, PNG hoặc WEBP');
+            return;
+        }
+        if (file.size > AVATAR_MAX_BYTES) {
+            showAvatarMsg('error', 'Ảnh không được vượt quá 2MB');
+            return;
+        }
+
+        // Xem trước ngay, không đợi server
+        const previewUrl = URL.createObjectURL(file);
+        const img = $('sidebarAvatarImg');
+        img.src = previewUrl;
+        img.classList.remove('d-none');
+        $('sidebarAvatar').classList.add('d-none');
+
+        setAvatarLoading(true);
+
+        const formData = new FormData();
+        formData.append('file', file);   // tên "file" khớp @RequestParam("file")
+
+        try {
+            const res = await fetch('/api/users/account-info/avatar', {
+                method: 'POST',
+                headers: tokenHeader(),
+                body: formData
+            });
+
+            if (res.status === 401) { AuthUI.logout(); return; }
+            const json = await readJson(res);
+
+            if (res.ok && json && json.success) {
+                // Chỉ cập nhật avatar, KHÔNG gọi fillForm để giữ nguyên những gì
+                // user đang gõ dở trong form thông tin
+                originalProfile = Object.assign({}, originalProfile, { avatarUrl: json.data.avatarUrl });
+                renderAvatar(originalProfile.avatarUrl);
+            } else {
+                renderAvatar(originalProfile.avatarUrl);   // quay về ảnh cũ
+                showAvatarMsg('error', errorMessage(json,
+                    res.status === 413 ? 'Ảnh không được vượt quá 2MB' : 'Không tải được ảnh lên'));
+            }
+        } catch (err) {
+            renderAvatar(originalProfile.avatarUrl);
+            showAvatarMsg('error', 'Không kết nối được tới máy chủ.');
+        } finally {
+            URL.revokeObjectURL(previewUrl);
+            setAvatarLoading(false);
+        }
+    }
+
+    // ---------- Xoá ảnh ----------
+    $('removeAvatarBtn').addEventListener('click', async () => {
+        hideAvatarMsg();
+        setAvatarLoading(true);
+
+        try {
+            const res = await fetch('/api/users/account-info/avatar', {
+                method: 'DELETE',
+                headers: tokenHeader()
+            });
+
+            if (res.status === 401) { AuthUI.logout(); return; }
+            const json = await readJson(res);
+
+            if (res.ok && json && json.success) {
+                originalProfile = Object.assign({}, originalProfile, { avatarUrl: null });
+                renderAvatar(null);
+            } else {
+                showAvatarMsg('error', errorMessage(json, 'Không xoá được ảnh'));
+            }
+        } catch (err) {
+            showAvatarMsg('error', 'Không kết nối được tới máy chủ.');
+        } finally {
+            setAvatarLoading(false);
+        }
+    });
+
+    // =====================================================================
+    // THÔNG TIN CÁ NHÂN
+    // =====================================================================
+
+    function fillForm(u) {
+        originalProfile = u;
+
+        $('fullName').value    = u.fullName || '';
+        $('phoneNumber').value = u.phoneNumber || '';
+        $('email').value       = u.email || '';
+        $('address').value     = u.address || '';
+        $('dateOfBirth').value = u.dateOfBirth || '';
+        $('gender').value      = u.gender || '';
+
+        renderAvatar(u.avatarUrl);
+        $('sidebarName').textContent  = u.fullName || 'Tài khoản';
+        $('sidebarEmail').textContent = u.email || '';
+
+        // Đồng bộ lại localStorage, phòng khi tên vừa đổi
+        localStorage.setItem('fullName', u.fullName || '');
+        localStorage.setItem('email', u.email || '');
+    }
+
+    async function loadProfile() {
+        try {
+            const res = await fetch('/api/users/account-info', { headers: AuthUI.authHeaders() });
+
+            // Token hết hạn hoặc không hợp lệ
+            if (res.status === 401 || res.status === 403) {
+                AuthUI.logout();
+                return;
+            }
+
+            const json = await readJson(res);
+
+            if (json && json.success) {
+                fillForm(json.data);
+                $('pageLoading').classList.add('d-none');
+                $('pageContent').classList.remove('d-none');
+            } else {
+                $('pageLoading').innerHTML = '';
+                const p = document.createElement('p');
+                p.className = 'text-danger mb-0';
+                p.textContent = errorMessage(json, 'Không tải được thông tin tài khoản.');
+                $('pageLoading').appendChild(p);
+            }
+        } catch (err) {
+            $('pageLoading').innerHTML =
+                '<p class="text-danger mb-0">Không kết nối được tới máy chủ.</p>';
+        }
+    }
+
+    $('profileForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        hideAlert('infoAlert');
+        setFieldError('fullName', null);
+        setFieldError('phoneNumber', null);
+
+        const fullName = $('fullName').value.trim();
+        const phone    = $('phoneNumber').value.trim();
+
+        let valid = true;
+        if (!fullName) {
+            setFieldError('fullName', 'Vui lòng nhập họ tên');
+            valid = false;
+        }
+        if (!PHONE_REGEX.test(phone)) {
+            setFieldError('phoneNumber', 'Số điện thoại phải gồm 10 chữ số, bắt đầu bằng 0');
+            valid = false;
+        }
+        if (!valid) return;
+
+        const payload = {
+            fullName:    fullName,
+            phoneNumber: phone,
+            address:     $('address').value.trim() || null,
+            dateOfBirth: $('dateOfBirth').value || null,
+            gender:      $('gender').value || null
+        };
+
+        $('saveBtn').disabled = true;
+        $('saveSpinner').classList.remove('d-none');
+        $('saveText').textContent = 'Đang lưu...';
+
+        try {
+            const res = await fetch('/api/users/account-info', {
+                method: 'PUT',
+                headers: AuthUI.authHeaders(),
+                body: JSON.stringify(payload)
+            });
+
+            if (res.status === 401) { AuthUI.logout(); return; }
+            const json = await readJson(res);
+
+            if (res.ok && json && json.success) {
+                fillForm(json.data);
+                showAlert('infoAlert', 'success', json.message);
+                // Cập nhật lại tên trên header mà không cần tải lại trang
+                const nameEl = document.querySelector('.btn-user .user-name');
+                if (nameEl) nameEl.textContent = json.data.fullName;
+            } else {
+                showAlert('infoAlert', 'danger', errorMessage(json, 'Cập nhật thất bại'));
+            }
+        } catch (err) {
+            showAlert('infoAlert', 'danger', 'Không kết nối được tới máy chủ.');
+        } finally {
+            $('saveBtn').disabled = false;
+            $('saveSpinner').classList.add('d-none');
+            $('saveText').textContent = 'Lưu thay đổi';
+        }
+    });
+
+    $('resetBtn').addEventListener('click', () => {
+        if (originalProfile) fillForm(originalProfile);
+        hideAlert('infoAlert');
+        setFieldError('fullName', null);
+        setFieldError('phoneNumber', null);
+    });
+
+    // =====================================================================
+    // ĐỔI MẬT KHẨU
+    // =====================================================================
+
+    $('passwordForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        hideAlert('pwAlert');
+        ['currentPassword', 'newPassword', 'confirmPassword']
+            .forEach(id => setFieldError(id, null));
+
+        const current = $('currentPassword').value;
+        const newPw   = $('newPassword').value;
+        const confirm = $('confirmPassword').value;
+
+        let valid = true;
+        if (!current) {
+            setFieldError('currentPassword', 'Vui lòng nhập mật khẩu hiện tại');
+            valid = false;
+        }
+        if (newPw.length < 6) {
+            setFieldError('newPassword', 'Mật khẩu phải có ít nhất 6 ký tự');
+            valid = false;
+        } else if (newPw === current) {
+            setFieldError('newPassword', 'Mật khẩu mới phải khác mật khẩu hiện tại');
+            valid = false;
+        }
+        if (confirm !== newPw) {
+            setFieldError('confirmPassword', 'Mật khẩu nhập lại không khớp');
+            valid = false;
+        }
+        if (!valid) return;
+
+        $('pwBtn').disabled = true;
+        $('pwSpinner').classList.remove('d-none');
+        $('pwText').textContent = 'Đang xử lý...';
+
+        try {
+            const res = await fetch('/api/users/account-info/password', {
+                method: 'PUT',
+                headers: AuthUI.authHeaders(),
+                body: JSON.stringify({
+                    currentPassword: current,
+                    newPassword:     newPw,
+                    confirmPassword: confirm
+                })
+            });
+
+            if (res.status === 401) { AuthUI.logout(); return; }
+            const json = await readJson(res);
+
+            if (res.ok && json && json.success) {
+                $('passwordForm').reset();
+                showAlert('pwAlert', 'success', json.message);
+            } else {
+                showAlert('pwAlert', 'danger', errorMessage(json, 'Đổi mật khẩu thất bại'));
+            }
+        } catch (err) {
+            showAlert('pwAlert', 'danger', 'Không kết nối được tới máy chủ.');
+        } finally {
+            $('pwBtn').disabled = false;
+            $('pwSpinner').classList.add('d-none');
+            $('pwText').textContent = 'Đổi mật khẩu';
+        }
+    });
+
+    // ---------- Đăng xuất ----------
+    const logoutModal = new bootstrap.Modal($('logoutModal'));
+
+    $('logoutBtn').addEventListener('click', () => logoutModal.show());
+    $('confirmLogoutBtn').addEventListener('click', () => AuthUI.logout());
+
+    loadProfile();
+</script>
+
+</body>
+</html>

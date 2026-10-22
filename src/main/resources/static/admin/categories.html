@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Quản lý Danh mục - Admin</title>
+
+    <link href="assets/img/favicon.png" rel="icon">
+    <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+    <link href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Nunito:300,400,600,700|Poppins:300,400,500,600,700" rel="stylesheet">
+    <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+    <link href="assets/css/style.css" rel="stylesheet">
+
+    <script src="assets/js/admin-auth.js"></script>
+    <script>AdminAuth.requireLogin();</script>
+
+    <style>
+        /* ===== PAGINATION ===== */
+        .custom-pagination-wrapper {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 2px 4px; flex-wrap: wrap; gap: 10px;
+        }
+        .pagination-info { font-size: .82rem; color: #6c757d; white-space: nowrap; }
+        .pagination-info span { font-weight: 600; color: #333; }
+        .custom-pagination { display: flex; align-items: center; gap: 4px; list-style: none; margin: 0; padding: 0; }
+        .custom-pagination .page-item { display: flex; }
+        .custom-pagination .page-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            min-width: 34px; height: 34px; padding: 0 10px;
+            font-size: .82rem; font-weight: 500; color: #4154f1;
+            background: #fff; border: 1.5px solid #c8cef7; border-radius: 6px;
+            cursor: pointer; transition: background .15s, border-color .15s; line-height: 1; user-select: none;
+        }
+        .custom-pagination .page-btn:hover:not(.active):not(.disabled):not(.ellipsis) {
+            background: #eef0fd; border-color: #4154f1;
+        }
+        .custom-pagination .page-btn.active {
+            background: #4154f1; border-color: #4154f1; color: #fff; font-weight: 700;
+            box-shadow: 0 2px 8px rgba(65, 84, 241, .25); pointer-events: none;
+        }
+        .custom-pagination .page-btn.disabled {
+            color: #b8bfd8; border-color: #e6e9f5; background: #f7f8fc; pointer-events: none;
+        }
+        .custom-pagination .page-btn.ellipsis {
+            border: none; background: transparent; color: #9aa0bc; pointer-events: none; min-width: 24px;
+        }
+
+        /* ===== LOADING OVERLAY ===== */
+        .table-wrapper { position: relative; }
+        #tableLoadingOverlay {
+            display: none; position: absolute; inset: 0;
+            background: rgba(255, 255, 255, .7); z-index: 10;
+            align-items: center; justify-content: center;
+        }
+        #tableLoadingOverlay.show { display: flex; }
+
+        /* ===== ẢNH TRONG BẢNG ===== */
+        .cat-thumb {
+            width: 48px; height: 48px; border-radius: 50%;
+            object-fit: cover; border: 1px solid #e3e6f0; display: block;
+        }
+        .cat-thumb-empty {
+            width: 48px; height: 48px; border-radius: 50%; border: 1px dashed #d0d5e2;
+            background: #f8f9fc; color: #b0b6c8;
+            display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+        }
+
+        /* ===== BADGE TRẠNG THÁI ===== */
+        .badge-active   { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+        .badge-inactive { background: #f5f5f5; color: #616161; border: 1px solid #bdbdbd; }
+
+        /* ===== CÔNG TẮC TRẠNG THÁI TRONG BẢNG ===== */
+        .status-switch { position: relative; display: inline-block; width: 52px; height: 28px; vertical-align: middle; }
+        .status-switch input { position: absolute; opacity: 0; width: 0; height: 0; }
+        .status-switch .slider {
+            position: absolute; inset: 0; cursor: pointer;
+            background: #cfd4dc; border-radius: 999px; transition: background .2s;
+        }
+        .status-switch .slider::before {
+            content: ""; position: absolute; left: 3px; top: 3px;
+            width: 22px; height: 22px; border-radius: 50%; background: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
+            background-repeat: no-repeat; background-position: center; background-size: 14px;
+            transition: transform .2s;
+        }
+        .status-switch input:checked + .slider { background: #1e9e4a; }
+        .status-switch input:checked + .slider::before {
+            transform: translateX(24px);
+            /* vòng tròn xanh có dấu tích bên trong nút trắng */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='8' fill='%231e9e4a'/%3E%3Cpath d='M4.5 8.2l2.3 2.3 4.7-4.8' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+        }
+        .status-switch input:focus-visible + .slider { outline: 2px solid #4154f1; outline-offset: 2px; }
+        .status-switch input:disabled + .slider { opacity: .6; cursor: progress; }
+
+        .order-pill {
+            display: inline-flex; align-items: center; justify-content: center;
+            min-width: 32px; height: 28px; padding: 0 8px; border-radius: 6px;
+            background: #eef0fd; color: #4154f1; font-weight: 700; font-size: .85rem;
+        }
+
+        /* ===== ẢNH TRONG FORM ===== */
+        .image-picker {
+            width: 100%; height: 180px; border: 2px dashed #c8cef7; border-radius: 8px;
+            background: #f8f9fe; display: flex; align-items: center; justify-content: center;
+            overflow: hidden; cursor: pointer; position: relative;
+        }
+        .image-picker:hover { border-color: #4154f1; }
+        .image-picker img { width: 100%; height: 100%; object-fit: cover; }
+        .image-picker .placeholder-text { color: #8a93b5; font-size: .88rem; text-align: center; }
+        .image-picker .placeholder-text i { font-size: 2rem; display: block; margin-bottom: 6px; }
+
+        /* ===== MODAL XEM ===== */
+        .detail-label { font-size: .78rem; color: #6c757d; margin-bottom: 2px; }
+        .detail-value { font-weight: 600; color: #333; font-size: .92rem; overflow-wrap: anywhere; }
+        #viewImage { width: 100%; max-height: 220px; object-fit: cover; border-radius: 8px; border: 1px solid #e3e6f0; }
+
+        /* ===== SẮP XẾP THEO CỘT ===== */
+        .sort-btn {
+            border: 0; background: none; padding: 0; font: inherit; font-weight: inherit; color: inherit;
+            display: inline-flex; align-items: center; gap: 4px; cursor: pointer;
+        }
+        .sort-btn:hover { color: #4154f1; }
+        .sort-btn:focus-visible { outline: 2px solid #4154f1; outline-offset: 2px; border-radius: 4px; }
+        .sort-btn .sort-icon { font-size: .8rem; color: #adb5bd; opacity: 0; transition: opacity .15s; }
+        .sort-btn:hover .sort-icon { opacity: .6; }
+        .sort-btn.sort-active { color: #4154f1; }
+        .sort-btn.sort-active .sort-icon { opacity: 1; color: #4154f1; font-size: 1rem; }
+    </style>
+</head>
+
+<body>
+
+<!-- ======================= HEADER ======================= -->
+<header id="header" class="header fixed-top d-flex align-items-center">
+    <div class="d-flex align-items-center justify-content-between">
+        <a href="index.html" class="logo d-flex align-items-center">
+            <img src="assets/img/logo.png" alt="">
+            <span class="d-none d-lg-block">VietTrip Admin</span>
+        </a>
+        <i class="bi bi-list toggle-sidebar-btn"></i>
+    </div>
+    <nav class="header-nav ms-auto">
+        <ul class="d-flex align-items-center">
+            <li class="nav-item dropdown pe-3">
+                <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
+                    <img src="assets/img/profile-img.jpg" alt="Profile" class="rounded-circle">
+                    <span class="d-none d-md-block dropdown-toggle ps-2" data-admin-name></span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
+                    <li class="dropdown-header"><h6 data-admin-name></h6><span data-admin-role></span></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item d-flex align-items-center" href="profile.html">
+                        <i class="bi bi-person"></i><span>Hồ sơ</span>
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item d-flex align-items-center" href="#" data-admin-logout>
+                        <i class="bi bi-box-arrow-right"></i><span>Đăng xuất</span>
+                    </a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+</header>
+<script>AdminAuth.renderUser();</script>
+
+<!-- ======================= SIDEBAR ======================= -->
+<aside id="sidebar" class="sidebar">
+    <ul class="sidebar-nav" id="sidebar-nav">
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="index.html"><i class="bi bi-grid"></i><span>Bảng điều khiển</span></a>
+        </li>
+
+        <li class="nav-heading">Kinh doanh</li>
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="bookings.html"><i class="bi bi-cart-check"></i><span>Quản lý đặt tour</span></a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="payments.html"><i class="bi bi-credit-card"></i><span>Quản lý thanh toán</span></a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="promotions.html"><i class="bi bi-tags"></i><span>Quản lý khuyến mãi</span></a>
+        </li>
+
+        <li class="nav-heading">Sản phẩm</li>
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="tours.html"><i class="bi bi-map"></i><span>Quản lý tour</span></a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="tour-schedules.html"><i class="bi bi-calendar-event"></i><span>Quản lý lịch khởi hành</span></a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="locations.html"><i class="bi bi-geo-alt"></i><span>Quản lý địa điểm</span></a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="categories.html"><i class="bi bi-bookmarks"></i><span>Quản lý danh mục</span></a>
+        </li>
+
+        <li class="nav-heading">Quản lý chung</li>
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="customers.html"><i class="bi bi-people"></i><span>Quản lý khách hàng</span></a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="reviews.html"><i class="bi bi-star"></i><span>Quản lý đánh giá</span></a>
+        </li>
+        <li class="nav-item" data-admin-only>
+            <a class="nav-link collapsed" href="staff.html"><i class="bi bi-person-badge"></i><span>Quản lý nhân viên</span></a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="report-revenue.html"><i class="bi bi-bar-chart"></i><span>Báo cáo thống kê</span></a>
+        </li>
+    </ul>
+</aside>
+
+<!-- ======================= NỘI DUNG ======================= -->
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h1>Quản lý Danh mục</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="index.html">Trang chủ</a></li>
+                <li class="breadcrumb-item">Sản phẩm</li>
+                <li class="breadcrumb-item active">Danh mục</li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section">
+        <div class="card">
+            <div class="card-body">
+
+                <!-- Tiêu đề + nút Thêm -->
+                <div class="d-flex justify-content-between align-items-center mt-3 mb-3 flex-wrap gap-2">
+                    <h5 class="card-title p-0 m-0">Danh sách danh mục tour</h5>
+                    <button type="button" class="btn btn-primary" onclick="openCreateModal()">
+                        <i class="bi bi-plus-lg me-1"></i>Thêm danh mục
+                    </button>
+                </div>
+
+                <!-- Bộ lọc: Hiển thị → Trạng thái → Tìm kiếm -->
+                <div class="d-flex flex-wrap align-items-end gap-3 mb-3 pb-3 border-bottom">
+                    <div>
+                        <label class="form-label text-muted small mb-1" for="selectPerPage">Hiển thị</label>
+                        <select class="form-select form-select-sm" id="selectPerPage" onchange="onPerPageChange(this.value)" style="min-width: 95px;">
+                            <option value="5">5 mục</option>
+                            <option value="10" selected>10 mục</option>
+                            <option value="20">20 mục</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label text-muted small mb-1" for="filterStatus">Trạng thái</label>
+                        <select class="form-select form-select-sm" id="filterStatus" onchange="onFilterChange()" style="min-width: 170px;">
+                            <option value="">Tất cả</option>
+                            <option value="true">Đã kích hoạt</option>
+                            <option value="false">Chưa kích hoạt</option>
+                        </select>
+                    </div>
+                    <div id="btnClearFilterWrap" class="d-none">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearFilters()">
+                            <i class="bi bi-x-circle me-1"></i>Xoá bộ lọc
+                        </button>
+                    </div>
+                    <div class="ms-auto">
+                        <label class="form-label text-muted small mb-1" for="searchInput">Tìm kiếm</label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                            <input type="text" class="form-control border-start-0" id="searchInput"
+                                   placeholder="Tên danh mục..." oninput="onSearchInput(this.value)"
+                                   style="min-width: 240px;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bảng -->
+                <div class="table-wrapper">
+                    <div id="tableLoadingOverlay">
+                        <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Đang tải...</span></div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle" style="min-width: 720px;">
+                            <thead>
+                            <tr>
+                                <th style="width: 90px;">Hình ảnh</th>
+                                <th>
+                                    <button type="button" class="sort-btn" data-sort="categoryName" onclick="sortBy('categoryName')">
+                                        Tên danh mục <i class="bi bi-arrow-down-up sort-icon"></i>
+                                    </button>
+                                </th>
+                                <th class="text-center" style="width: 110px;">
+                                    <button type="button" class="sort-btn" data-sort="displayOrder" onclick="sortBy('displayOrder')">
+                                        Thứ tự <i class="bi bi-arrow-down-up sort-icon"></i>
+                                    </button>
+                                </th>
+                                <th class="text-center" style="width: 160px;">Trạng thái</th>
+                                <th class="text-center" style="width: 120px;">Hành động</th>
+                            </tr>
+                            </thead>
+                            <tbody id="categoryListBody">
+                            <tr><td colspan="5" class="text-center py-4">Đang tải dữ liệu...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Phân trang -->
+                <div class="custom-pagination-wrapper">
+                    <div class="pagination-info" id="paginationInfo">—</div>
+                    <ul class="custom-pagination" id="paginationControls"></ul>
+                </div>
+
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- ======================= MODAL THÊM / SỬA ======================= -->
+<div class="modal fade" id="categoryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="modalTitle">Thêm danh mục</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body">
+                <form id="categoryForm" class="row g-3" novalidate>
+                    <input type="hidden" id="categoryId">
+
+                    <!-- Cột trái: thông tin -->
+                    <div class="col-md-7">
+                        <div class="mb-3">
+                            <label class="form-label" for="categoryName">Tên danh mục <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="categoryName" maxlength="255">
+                            <div class="invalid-feedback" id="categoryNameFeedback"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="slug">Slug <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="slug" maxlength="255">
+                            <div class="invalid-feedback" id="slugFeedback"></div>
+                            <div class="form-text">Tự sinh từ tên danh mục.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="displayOrder">Thứ tự hiển thị <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="displayOrder" min="1" step="1" style="max-width: 160px;">
+                            <div class="invalid-feedback" id="displayOrderFeedback"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="description">Mô tả</label>
+                            <textarea class="form-control" id="description" rows="4"></textarea>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-3">
+                            <label class="form-label mb-0" for="isActive">Kích hoạt</label>
+                            <div class="form-check form-switch m-0 ps-0">
+                                <input class="form-check-input ms-0" type="checkbox" id="isActive" checked
+                                       style="width: 2.5em; height: 1.25em;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cột phải: ảnh -->
+                    <div class="col-md-5">
+                        <label class="form-label">Hình ảnh</label>
+                        <div class="image-picker" id="imagePicker" role="button" tabindex="0" title="Chọn ảnh">
+                            <img id="imagePreview" class="d-none" alt="Ảnh danh mục">
+                            <div class="placeholder-text" id="imagePlaceholder">
+                                <i class="bi bi-image"></i>Bấm để chọn ảnh<br>
+                                <small>JPG, PNG, WEBP · tối đa 5MB</small>
+                            </div>
+                        </div>
+                        <input type="file" id="imageInput" accept="image/jpeg,image/png,image/webp" hidden>
+                        <div class="d-flex gap-2 mt-2">
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="btnPickImage">
+                                <i class="bi bi-upload me-1"></i>Chọn ảnh
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger d-none" id="btnRemoveImage">
+                                <i class="bi bi-trash me-1"></i>Xóa ảnh
+                            </button>
+                        </div>
+                        <div class="small text-danger mt-1 d-none" id="imageError"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Huỷ</button>
+                <button type="button" class="btn btn-primary" id="btnSave" onclick="saveCategory()">
+                    <span class="spinner-border spinner-border-sm d-none" id="saveSpinner"></span>
+                    <span id="saveText">Lưu</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ======================= MODAL XEM ======================= -->
+<div class="modal fade" id="viewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="background: #4154f1;">
+                <h5 class="modal-title text-white fw-bold"><i class="bi bi-bookmarks me-2"></i>Chi tiết danh mục</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body">
+                <div id="viewLoading" class="text-center py-4">
+                    <div class="spinner-border text-primary"></div>
+                </div>
+                <div id="viewBody" class="d-none">
+                    <div class="mb-3" id="viewImageWrap">
+                        <img id="viewImage" alt="Ảnh danh mục">
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="detail-label">Tên danh mục</div>
+                            <div class="detail-value" id="viewName"></div>
+                        </div>
+                        <div class="col-12">
+                            <div class="detail-label">Slug</div>
+                            <div class="detail-value text-primary" id="viewSlug"></div>
+                        </div>
+                        <div class="col-6">
+                            <div class="detail-label">Thứ tự hiển thị</div>
+                            <div class="detail-value" id="viewOrder"></div>
+                        </div>
+                        <div class="col-6">
+                            <div class="detail-label">Trạng thái</div>
+                            <div id="viewStatus"></div>
+                        </div>
+                        <div class="col-12">
+                            <div class="detail-label">Mô tả</div>
+                            <div class="text-secondary small" id="viewDesc" style="white-space: pre-line;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-warning" id="btnEditFromView">
+                    <i class="bi bi-pencil-square me-1"></i>Sửa
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/main.js"></script>
+
+<script>
+    /* ============================================================
+       STATE
+       ============================================================ */
+    const API = '/api/admin/categories';
+    const IMAGE_TYPES     = ['image/jpeg', 'image/png', 'image/webp'];
+    const IMAGE_MAX_BYTES = 5 * 1024 * 1024;   // khớp FileStorageService.MAX_IMAGE_SIZE
+
+    let currentPage   = 0;      // Spring đếm trang từ 0
+    let perPage       = 10;
+    let searchKeyword = '';
+    let searchTimer   = null;
+    let sortCol = 'displayOrder';   // mặc định: theo thứ tự hiển thị
+    let sortAsc = true;
+    let userSorted = false;         // chưa bấm tiêu đề cột nào → không tô xanh cột nào
+
+    // Trạng thái form ảnh
+    let originalImageUrl = null;    // ảnh đang có khi mở form sửa
+    let imageRemoved     = false;   // admin bấm "Bỏ ảnh"
+    let previewObjectUrl = null;
+
+    // true = admin đã tự sửa slug → ngừng tự cập nhật theo tên
+    let slugEditedByHand = false;
+
+    const categoryModal = new bootstrap.Modal(document.getElementById('categoryModal'));
+    const viewModal     = new bootstrap.Modal(document.getElementById('viewModal'));
+
+    function $(id) { return document.getElementById(id); }
+
+    /* ============================================================
+       TIỆN ÍCH
+       ============================================================ */
+    function escapeHtml(str) {
+        return String(str ?? '').replace(/[&<>"']/g, c =>
+            ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    /** Giống SlugUtils.toSlug ở backend: "Tour Hạ Long" → "tour-ha-long" */
+    function toSlug(text) {
+        return (text || '').trim()
+            .replace(/đ/g, 'd').replace(/Đ/g, 'D')       // NFD không tách được "đ"
+            .normalize('NFD').replace(/\p{M}+/gu, '')    // bỏ dấu
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+    }
+
+    function statusBadge(isActive) {
+        return isActive
+            ? '<span class="badge badge-active">Đã kích hoạt</span>'
+            : '<span class="badge badge-inactive">Chưa kích hoạt</span>';
+    }
+
+    async function readJson(res) {
+        try { return await res.json(); } catch (_) { return null; }
+    }
+
+    function errorMessage(json, fallback) {
+        if (json && json.errors && json.errors.length) return json.errors.join(' • ');
+        return (json && json.message) || fallback;
+    }
+
+    /** Thông báo nhỏ góc trên bên phải, tự ẩn, không chặn thao tác */
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true
+    });
+
+    function showToast(message, icon = 'success') {
+        Toast.fire({ icon, title: message });
+    }
+
+    function showLoading(show) { $('tableLoadingOverlay').classList.toggle('show', show); }
+
+    function setFieldError(id, message) {
+        $(id).classList.toggle('is-invalid', !!message);
+        const fb = $(id + 'Feedback');
+        if (fb) fb.textContent = message || '';
+    }
+
+    function clearFormErrors() {
+        ['categoryName', 'slug', 'displayOrder'].forEach(id => setFieldError(id, null));
+        $('imageError').classList.add('d-none');
+    }
+
+    /* ============================================================
+       1. DANH SÁCH: GET /api/admin/categories
+       ============================================================ */
+    async function fetchCategories() {
+        showLoading(true);
+        updateClearButton();
+
+        const params = new URLSearchParams({
+            page: currentPage, size: perPage,
+            sortBy: sortCol, sortDir: sortAsc ? 'asc' : 'desc'
+        });
+        if (searchKeyword) params.set('keyword', searchKeyword);
+        const status = $('filterStatus').value;
+        if (status !== '') params.set('isActive', status);   // "Tất cả" thì không gửi
+
+        try {
+            const res = await fetch(`${API}?${params}`, { headers: AdminAuth.authHeaders() });
+            if (res.status === 401) return AdminAuth.logout();
+            const json = await readJson(res);
+
+            if (res.ok && json && json.success) {
+                const { content, page } = json.data;
+
+                // Trang hiện tại trống (vd vừa lọc) mà không phải trang đầu → lùi 1 trang
+                if (content.length === 0 && currentPage > 0) {
+                    currentPage--;
+                    return fetchCategories();
+                }
+
+                renderRows(content);
+                updateSortUI();
+                renderPagination(page.totalElements, page.totalPages, page.number, page.size);
+            } else {
+                showTableError(errorMessage(json, 'Không tải được danh sách danh mục.'));
+            }
+        } catch (e) {
+            console.error(e);
+            showTableError('Không kết nối được tới máy chủ.');
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    function renderRows(rows) {
+        const tbody = $('categoryListBody');
+
+        if (!rows.length) {
+            const filtering = searchKeyword || $('filterStatus').value !== '';
+            tbody.innerHTML = `
+                <tr><td colspan="5" class="text-center text-muted py-5">
+                    <i class="bi bi-inbox fs-3 d-block mb-2 opacity-50"></i>
+                    ${filtering ? 'Không có danh mục nào khớp bộ lọc.' : 'Chưa có danh mục nào. Bấm "Thêm danh mục" để tạo.'}
+                </td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = rows.map(c => `
+            <tr>
+                <td>
+                    ${c.imageUrl
+            ? `<img src="${escapeHtml(c.imageUrl)}" alt="" class="cat-thumb"
+                                onerror="this.outerHTML='<div class=&quot;cat-thumb-empty&quot;><i class=&quot;bi bi-image&quot;></i></div>'">`
+            : '<div class="cat-thumb-empty"><i class="bi bi-image"></i></div>'}
+                </td>
+                <td>
+                    <span class="fw-semibold text-dark">${escapeHtml(c.categoryName)}</span>
+                </td>
+                <td class="text-center"><span class="order-pill">${c.displayOrder ?? '—'}</span></td>
+                <td class="text-center">
+                    <label class="status-switch" title="${c.isActive ? 'Đang hiển thị, bấm để ẩn' : 'Đang ẩn, bấm để hiển thị'}">
+                        <input type="checkbox" ${c.isActive ? 'checked' : ''}
+                               aria-label="Trạng thái ${escapeHtml(c.categoryName)}"
+                               onchange="toggleStatus(${c.categoryId}, this)">
+                        <span class="slider"></span>
+                    </label>
+                </td>
+                <td class="text-center">
+                    <div class="d-flex justify-content-center gap-1">
+                        <button class="btn btn-sm btn-outline-info" title="Xem chi tiết"
+                                onclick="viewCategory(${c.categoryId})"><i class="bi bi-eye"></i></button>
+                        <button class="btn btn-sm btn-outline-warning" title="Sửa"
+                                onclick="openEditModal(${c.categoryId})"><i class="bi bi-pencil-square"></i></button>
+                    </div>
+                </td>
+            </tr>`).join('');
+    }
+
+    /* ============================================================
+       BẬT / TẮT TRẠNG THÁI: PATCH /api/admin/categories/{id}/status?active=
+       ============================================================ */
+    async function toggleStatus(id, input) {
+        const active = input.checked;
+        input.disabled = true;
+
+        try {
+            const res = await fetch(`${API}/${id}/status?active=${active}`, {
+                method: 'PATCH',
+                headers: AdminAuth.authHeaders()
+            });
+            if (res.status === 401) return AdminAuth.logout();
+            const json = await readJson(res);
+
+            if (res.ok && json && json.success) {
+                input.closest('label').title = active ? 'Đang hiển thị, bấm để ẩn' : 'Đang ẩn, bấm để hiển thị';
+                // Đang lọc theo trạng thái → dòng vừa đổi không còn khớp bộ lọc, tải lại bảng
+                if ($('filterStatus').value !== '') fetchCategories();
+            } else {
+                input.checked = !active;   // trả công tắc về như cũ
+                Swal.fire({
+                    icon: 'error', title: 'Không đổi được trạng thái',
+                    text: errorMessage(json, 'Vui lòng thử lại.')   // vd: "Thứ tự hiển thị đã tồn tại"
+                });
+            }
+        } catch (e) {
+            console.error(e);
+            input.checked = !active;
+            Swal.fire({ icon: 'error', title: 'Không đổi được trạng thái', text: 'Không kết nối được tới máy chủ.' });
+        } finally {
+            input.disabled = false;
+        }
+    }
+
+    function showTableError(msg) {
+        $('categoryListBody').innerHTML =
+            `<tr><td colspan="5" class="text-center text-danger py-4">
+                <i class="bi bi-exclamation-triangle me-2"></i>${escapeHtml(msg)}
+             </td></tr>`;
+        $('paginationInfo').textContent = '—';
+        $('paginationControls').innerHTML = '';
+    }
+
+    /* ============================================================
+       PHÂN TRANG
+       ============================================================ */
+    function renderPagination(total, totalPages, pageIndex, size) {
+        const start = total === 0 ? 0 : pageIndex * size + 1;
+        const end   = Math.min((pageIndex + 1) * size, total);
+
+        $('paginationInfo').innerHTML = total === 0
+            ? 'Không có mục nào'
+            : `Hiển thị <span>${start}–${end}</span> trong tổng số <span>${total}</span> danh mục`;
+
+        const ul = $('paginationControls');
+        ul.innerHTML = '';
+        if (totalPages <= 1) return;
+
+        const addBtn = (label, page, extra = '') => {
+            const li = document.createElement('li');
+            li.className = 'page-item';
+            const btn = document.createElement('button');
+            btn.className = `page-btn ${extra}`.trim();
+            btn.innerHTML = label;
+            if (!extra) btn.addEventListener('click', () => { currentPage = page; fetchCategories(); });
+            li.appendChild(btn);
+            ul.appendChild(li);
+        };
+
+        addBtn('<i class="bi bi-chevron-left"></i>', pageIndex - 1, pageIndex === 0 ? 'disabled' : '');
+        getPageNumbers(pageIndex + 1, totalPages).forEach(p => {
+            if (p === '...') addBtn('…', -1, 'ellipsis');
+            else addBtn(String(p), p - 1, p === pageIndex + 1 ? 'active' : '');
+        });
+        addBtn('<i class="bi bi-chevron-right"></i>', pageIndex + 1, pageIndex === totalPages - 1 ? 'disabled' : '');
+    }
+
+    function getPageNumbers(current, total) {
+        if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+        const pages = [1];
+        if (current > 4) pages.push('...');
+        for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) pages.push(i);
+        if (current < total - 3) pages.push('...');
+        pages.push(total);
+        return pages;
+    }
+
+    /* ============================================================
+       TÌM KIẾM / LỌC
+       ============================================================ */
+    function onSearchInput(val) {
+        searchKeyword = val.trim();
+        updateClearButton();   // hiện / ẩn nút ngay khi gõ, không chờ tải xong
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => { currentPage = 0; fetchCategories(); }, 400);   // đợi ngừng gõ
+    }
+
+    function onFilterChange() { currentPage = 0; fetchCategories(); }
+
+    function onPerPageChange(val) { perPage = parseInt(val, 10); currentPage = 0; fetchCategories(); }
+
+    /** Đang khác trạng thái ban đầu → hiện nút "Xoá bộ lọc" */
+    function updateClearButton() {
+        const filtering = $('filterStatus').value !== '' || searchKeyword !== '' || userSorted;
+        $('btnClearFilterWrap').classList.toggle('d-none', !filtering);
+    }
+
+    /** Về như lúc mới mở trang: bỏ trạng thái, bỏ tìm kiếm, bỏ sắp xếp (giữ số mục/trang) */
+    function clearFilters() {
+        clearTimeout(searchTimer);
+        $('filterStatus').value = '';
+        $('searchInput').value  = '';
+        searchKeyword = '';
+        sortCol    = 'displayOrder';
+        sortAsc    = true;
+        userSorted = false;
+        currentPage = 0;
+        fetchCategories();
+    }
+
+    /** Bấm cùng cột → đổi chiều; bấm cột khác (hoặc bấm lần đầu) → chuyển sang cột đó, tăng dần */
+    function sortBy(col) {
+        if (userSorted && sortCol === col) sortAsc = !sortAsc;
+        else { sortCol = col; sortAsc = true; }
+        userSorted = true;
+        currentPage = 0;
+        fetchCategories();
+    }
+
+    function updateSortUI() {
+        document.querySelectorAll('.sort-btn').forEach(btn => {
+            const active = userSorted && btn.dataset.sort === sortCol;
+            btn.classList.toggle('sort-active', active);
+            btn.querySelector('.sort-icon').className = active
+                ? `bi ${sortAsc ? 'bi-arrow-up-short' : 'bi-arrow-down-short'} sort-icon`
+                : 'bi bi-arrow-down-up sort-icon';
+            btn.closest('th').setAttribute('aria-sort', active ? (sortAsc ? 'ascending' : 'descending') : 'none');
+        });
+    }
+    /* ============================================================
+       2. XEM CHI TIẾT: GET /api/admin/categories/{id}
+       ============================================================ */
+    async function loadCategory(id) {
+        const res = await fetch(`${API}/${id}`, { headers: AdminAuth.authHeaders() });
+        if (res.status === 401) { AdminAuth.logout(); throw new Error('unauthorized'); }
+        const json = await readJson(res);
+        if (!res.ok || !json || !json.success) throw new Error(errorMessage(json, 'Không tải được danh mục.'));
+        return json.data;
+    }
+
+    async function viewCategory(id) {
+        $('viewLoading').classList.remove('d-none');
+        $('viewBody').classList.add('d-none');
+        viewModal.show();
+
+        try {
+            const c = await loadCategory(id);
+
+            $('viewImageWrap').classList.toggle('d-none', !c.imageUrl);
+            if (c.imageUrl) $('viewImage').src = c.imageUrl;
+
+            $('viewName').textContent    = c.categoryName;
+            $('viewSlug').textContent    = c.slug;
+            $('viewOrder').textContent   = c.displayOrder ?? '—';
+            $('viewStatus').innerHTML    = statusBadge(c.isActive);
+            $('viewDesc').textContent    = c.description || 'Chưa có mô tả.';
+
+            $('btnEditFromView').onclick = () => { viewModal.hide(); openEditModal(id); };
+
+            $('viewLoading').classList.add('d-none');
+            $('viewBody').classList.remove('d-none');
+        } catch (e) {
+            if (e.message === 'unauthorized') return;
+            viewModal.hide();
+            Swal.fire({ icon: 'error', title: 'Không xem được danh mục', text: e.message });
+        }
+    }
+
+    /* ============================================================
+       3. FORM THÊM / SỬA
+       ============================================================ */
+    function resetForm() {
+        $('categoryForm').reset();
+        $('categoryId').value = '';
+        $('isActive').checked = true;
+        clearFormErrors();
+
+        originalImageUrl = null;
+        imageRemoved     = false;
+        $('imageInput').value = '';
+        showImagePreview(null);
+    }
+
+    function openCreateModal() {
+        resetForm();
+        slugEditedByHand = false;           // thêm mới: slug tự chạy theo tên
+        $('modalTitle').textContent = 'Thêm danh mục';
+        $('saveText').textContent   = 'Thêm';
+        categoryModal.show();
+    }
+
+    async function openEditModal(id) {
+        try {
+            const c = await loadCategory(id);
+            resetForm();
+
+            $('categoryId').value    = c.categoryId;
+            $('categoryName').value  = c.categoryName || '';
+            $('slug').value          = c.slug || '';
+            $('displayOrder').value  = c.displayOrder ?? '';
+            $('description').value   = c.description || '';
+            $('isActive').checked    = !!c.isActive;
+
+            // Slug cũ có thể do admin tự đặt → sửa tên KHÔNG ghi đè slug (đổi slug = đổi URL)
+            slugEditedByHand = true;
+
+            originalImageUrl = c.imageUrl || null;
+            showImagePreview(originalImageUrl);
+
+            $('modalTitle').textContent = 'Sửa danh mục';
+            $('saveText').textContent   = 'Lưu thay đổi';
+            categoryModal.show();
+        } catch (e) {
+            if (e.message === 'unauthorized') return;
+            Swal.fire({ icon: 'error', title: 'Không mở được danh mục', text: e.message });
+        }
+    }
+
+    // ----- Slug tự sinh theo tên -----
+    $('categoryName').addEventListener('input', () => {
+        setFieldError('categoryName', null);
+        if (!slugEditedByHand) $('slug').value = toSlug($('categoryName').value);
+    });
+
+    $('slug').addEventListener('input', () => {
+        setFieldError('slug', null);
+        // Xoá trống ô slug → quay lại tự sinh theo tên
+        slugEditedByHand = $('slug').value.trim() !== '';
+    });
+
+    $('slug').addEventListener('blur', () => {
+        if ($('slug').value.trim()) $('slug').value = toSlug($('slug').value);
+        else if (!slugEditedByHand) $('slug').value = toSlug($('categoryName').value);
+    });
+
+    $('displayOrder').addEventListener('input', () => setFieldError('displayOrder', null));
+
+    // ----- Ảnh -----
+    function showImagePreview(url) {
+        const hasImage = !!url;
+        $('imagePreview').classList.toggle('d-none', !hasImage);
+        $('imagePlaceholder').classList.toggle('d-none', hasImage);
+        if (hasImage) $('imagePreview').src = url; else $('imagePreview').removeAttribute('src');
+        $('btnRemoveImage').classList.toggle('d-none', !hasImage);
+    }
+
+    function openFilePicker() { $('imageInput').click(); }
+
+    $('imagePicker').addEventListener('click', openFilePicker);
+    $('btnPickImage').addEventListener('click', openFilePicker);
+    $('imagePicker').addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFilePicker(); }
+    });
+
+    $('imageInput').addEventListener('change', () => {
+        const file = $('imageInput').files[0];
+        $('imageError').classList.add('d-none');
+        if (!file) return;
+
+        if (!IMAGE_TYPES.includes(file.type)) {
+            $('imageInput').value = '';
+            return showImageError('Chỉ chấp nhận ảnh JPG, PNG hoặc WEBP.');
+        }
+        if (file.size > IMAGE_MAX_BYTES) {
+            $('imageInput').value = '';
+            return showImageError('Ảnh không được vượt quá 5MB.');
+        }
+
+        if (previewObjectUrl) URL.revokeObjectURL(previewObjectUrl);
+        previewObjectUrl = URL.createObjectURL(file);
+        imageRemoved = false;              // chọn ảnh mới thì không còn là "bỏ ảnh"
+        showImagePreview(previewObjectUrl);
+    });
+
+    $('btnRemoveImage').addEventListener('click', () => {
+        $('imageInput').value = '';
+        imageRemoved = !!originalImageUrl; // chỉ cần báo server khi danh mục đang có ảnh
+        showImagePreview(null);
+    });
+
+    function showImageError(msg) {
+        $('imageError').textContent = msg;
+        $('imageError').classList.remove('d-none');
+    }
+
+    /* ============================================================
+       4. LƯU: POST / PUT multipart (data + image)
+       ============================================================ */
+    function setSaving(saving) {
+        $('btnSave').disabled = saving;
+        $('saveSpinner').classList.toggle('d-none', !saving);
+    }
+
+    async function saveCategory() {
+        clearFormErrors();
+
+        const id           = $('categoryId').value;
+        const isUpdate     = id !== '';
+        const categoryName = $('categoryName').value.trim();
+        const slug         = toSlug($('slug').value || categoryName);
+        const orderRaw     = $('displayOrder').value.trim();
+        const displayOrder = Number(orderRaw);
+
+        let valid = true;
+        if (!categoryName) { setFieldError('categoryName', 'Vui lòng nhập tên danh mục'); valid = false; }
+        if (!slug)         { setFieldError('slug', 'Slug không hợp lệ'); valid = false; }
+        if (!orderRaw || !Number.isInteger(displayOrder) || displayOrder < 1) {
+            setFieldError('displayOrder', 'Thứ tự là số nguyên, bắt đầu từ 1'); valid = false;
+        }
+        if (!valid) return;
+
+        $('slug').value = slug;
+
+        const payload = {
+            categoryName: categoryName,
+            slug:         slug,
+            description:  $('description').value.trim() || null,
+            displayOrder: displayOrder,
+            isActive:     $('isActive').checked
+        };
+
+        const fd = new FormData();
+        // Phần JSON PHẢI là Blob application/json để Spring đọc vào @RequestPart("data")
+        fd.append('data', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
+
+        const file = $('imageInput').files[0];
+        if (file) fd.append('image', file);
+        if (isUpdate && imageRemoved && !file) fd.append('removeImage', 'true');
+
+        setSaving(true);
+        try {
+            const res = await fetch(isUpdate ? `${API}/${id}` : API, {
+                method: isUpdate ? 'PUT' : 'POST',
+                // CHỈ token. Không đặt Content-Type: trình duyệt tự thêm boundary cho multipart
+                headers: { 'Authorization': 'Bearer ' + AdminAuth.getToken() },
+                body: fd
+            });
+            if (res.status === 401) return AdminAuth.logout();
+            const json = await readJson(res);
+
+            if (res.ok && json && json.success) {
+                categoryModal.hide();
+                if (!isUpdate) currentPage = 0;   // thêm mới → về trang đầu; sửa → giữ trang
+                await fetchCategories();
+                showToast(isUpdate ? 'Đã lưu thay đổi' : 'Thêm danh mục thành công!');
+                return;
+            }
+
+            // Lỗi gắn đúng ô nếu nhận ra, còn lại báo chung
+            const msg = errorMessage(json, res.status === 413 ? 'Ảnh vượt quá dung lượng cho phép.' : 'Lưu danh mục thất bại.');
+            if (/slug/i.test(msg))              setFieldError('slug', msg);
+            else if (/thứ tự/i.test(msg))       setFieldError('displayOrder', msg);
+            else if (/ảnh|file/i.test(msg))     showImageError(msg);
+            else Swal.fire({ icon: 'error', title: 'Không lưu được', text: msg });
+
+        } catch (e) {
+            console.error(e);
+            Swal.fire({ icon: 'error', title: 'Không lưu được', text: 'Không kết nối được tới máy chủ.' });
+        } finally {
+            setSaving(false);
+        }
+    }
+
+    // Đóng form → giải phóng ảnh xem trước
+    $('categoryModal').addEventListener('hidden.bs.modal', () => {
+        if (previewObjectUrl) { URL.revokeObjectURL(previewObjectUrl); previewObjectUrl = null; }
+    });
+
+    fetchCategories();
+</script>
+
+</body>
+</html>

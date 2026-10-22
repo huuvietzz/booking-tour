@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+    <title>Xác thực email - Booking Tour</title>
+
+    <link href="assets/img/favicon.png" rel="icon">
+    <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+    <link href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+    <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+
+    <link href="assets/css/style.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f6f7f9;
+        }
+
+        .verify-wrapper {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .verify-card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, .06);
+            padding: 3rem 3rem 2.5rem;
+        }
+
+        .status-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem auto;
+        }
+
+        .status-icon i {
+            font-size: 2.5rem;
+            color: #fff;
+            line-height: 1;
+        }
+
+        .icon-success { background-color: #2eca6a; }
+        .icon-error   { background-color: #f99b24; }
+
+        .btn-pill {
+            border-radius: 999px;
+            padding: .8rem 1rem;
+            font-weight: 600;
+        }
+
+        @media (max-width: 575.98px) {
+            .verify-card { padding: 2rem 1.25rem; }
+        }
+    </style>
+</head>
+
+<body>
+
+<main class="py-5">
+    <div class="container verify-wrapper">
+
+        <div class="text-center mb-4">
+            <a href="index.html" class="logo d-inline-flex align-items-center text-decoration-none">
+                <img src="assets/img/logo.png" alt="" height="48">
+                <span class="ms-2 fs-3 fw-bold">Booking Tour</span>
+            </a>
+        </div>
+
+        <div class="verify-card text-center">
+
+            <!-- Trạng thái 1: đang gọi API -->
+            <div id="loadingState">
+                <div class="spinner-border text-primary mb-3" style="width:3rem;height:3rem;"></div>
+                <p class="text-muted mb-0">Đang xác thực email của bạn...</p>
+            </div>
+
+            <!-- Trạng thái 2: thành công -->
+            <div id="successState" class="d-none">
+                <div class="status-icon icon-success">
+                    <i class="bi bi-check-lg"></i>
+                </div>
+                <h5 class="fw-bold mb-3">Xác thực thành công</h5>
+                <p class="text-secondary mb-4" id="successMessage"></p>
+                <p class="text-muted small mb-4">
+                    Đang chuyển tới trang đăng nhập sau <span id="countdown">3</span> giây...
+                </p>
+                <a href="pages-login.html?verified=true" class="btn btn-primary btn-pill w-100">
+                    Đăng nhập ngay
+                </a>
+            </div>
+
+            <!-- Trạng thái 3: thất bại -->
+            <div id="errorState" class="d-none">
+                <div class="status-icon icon-error">
+                    <i class="bi bi-exclamation"></i>
+                </div>
+                <h5 class="fw-bold mb-3">Xác thực không thành công</h5>
+                <p class="text-secondary mb-4" id="errorMessage"></p>
+                <p class="text-muted small mb-4">
+                    Link xác thực chỉ dùng được một lần và có hiệu lực trong 24 giờ.
+                    Nếu link đã hết hạn, vui lòng đăng ký lại bằng chính email này để nhận link mới.
+                </p>
+                <a href="pages-register.html" class="btn btn-primary btn-pill w-100 mb-2">
+                    Về trang đăng ký
+                </a>
+                <a href="pages-login.html" class="btn btn-outline-secondary btn-pill w-100">
+                    Về trang đăng nhập
+                </a>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Token nằm trên query string của link trong email, người dùng không phải nhập
+    const token = new URLSearchParams(window.location.search).get('token');
+
+    const loadingState = document.getElementById('loadingState');
+    const successState = document.getElementById('successState');
+    const errorState   = document.getElementById('errorState');
+
+    function showSuccess(message) {
+        loadingState.classList.add('d-none');
+        successState.classList.remove('d-none');
+        document.getElementById('successMessage').textContent = message;
+
+        // Đếm ngược rồi tự chuyển sang trang đăng nhập
+        let seconds = 3;
+        const el = document.getElementById('countdown');
+        const timer = setInterval(() => {
+            seconds--;
+            el.textContent = seconds;
+            if (seconds <= 0) {
+                clearInterval(timer);
+                window.location.href = 'pages-login.html?verified=true';
+            }
+        }, 1000);
+    }
+
+    function showError(message) {
+        loadingState.classList.add('d-none');
+        errorState.classList.remove('d-none');
+        document.getElementById('errorMessage').textContent = message;
+    }
+
+    async function verify() {
+        if (!token) {
+            showError('Link không hợp lệ: thiếu mã xác thực.');
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/auth/verify-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: token })
+            });
+            const json = await res.json();
+
+            if (json.success) {
+                showSuccess(json.message);
+            } else {
+                // INVALID_TOKEN / TOKEN_EXPIRED / TOKEN_ALREADY_USED
+                showError(json.message || 'Link xác thực không hợp lệ hoặc đã hết hạn.');
+            }
+        } catch (err) {
+            showError('Không kết nối được tới máy chủ. Vui lòng thử lại.');
+        }
+    }
+
+    verify();
+</script>
+
+</body>
+</html>

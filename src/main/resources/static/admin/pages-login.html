@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>Đăng nhập quản trị - VietTrip</title>
+
+  <!-- Favicons -->
+  <link href="assets/img/favicon.png" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Nunito:300,400,600,700|Poppins:300,400,500,600,700" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- Template Main CSS File -->
+  <link href="assets/css/style.css" rel="stylesheet">
+
+  <script src="assets/js/admin-auth.js"></script>
+  <script>
+    // Đã đăng nhập (token còn hạn, đúng role) thì vào thẳng trang quản trị.
+    // Không lặp vô hạn vì index.html kiểm tra bằng đúng hàm này.
+    if (AdminAuth.isLoggedIn()) location.replace('index.html');
+  </script>
+
+  <style>
+    .password-toggle {
+      border-left: 0;
+      background: #fff;
+    }
+    .password-toggle:focus {
+      box-shadow: none;
+    }
+    #yourPassword {
+      border-right: 0;
+    }
+  </style>
+</head>
+
+<body>
+
+<main>
+  <div class="container">
+
+    <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center">
+
+            <div class="d-flex justify-content-center py-4">
+              <a href="pages-login.html" class="logo d-flex align-items-center w-auto">
+                <img src="assets/img/logo.png" alt="">
+                <span class="d-none d-lg-block">VietTrip Admin</span>
+              </a>
+            </div>
+
+            <div class="card mb-3 w-100">
+              <div class="card-body">
+
+                <div class="pt-4 pb-2">
+                  <h5 class="card-title text-center pb-0 fs-4">Đăng nhập quản trị</h5>
+                  <p class="text-center small">Nhập email và mật khẩu để đăng nhập</p>
+                </div>
+
+                <form class="row g-3 needs-validation" id="loginForm" novalidate>
+
+                  <div class="col-12">
+                    <label for="yourEmail" class="form-label">Email</label>
+                    <input type="email" name="email" class="form-control" id="yourEmail"
+                           autocomplete="username" required autofocus>
+                    <div class="invalid-feedback">Vui lòng nhập email hợp lệ.</div>
+                  </div>
+
+                  <div class="col-12">
+                    <label for="yourPassword" class="form-label">Mật khẩu</label>
+                    <div class="input-group has-validation">
+                      <input type="password" name="password" class="form-control" id="yourPassword"
+                             autocomplete="current-password" required>
+                      <button class="btn btn-outline-secondary password-toggle" type="button"
+                              id="togglePassword" tabindex="-1" aria-label="Hiện mật khẩu">
+                        <i class="bi bi-eye"></i>
+                      </button>
+                      <div class="invalid-feedback">Vui lòng nhập mật khẩu.</div>
+                    </div>
+                  </div>
+
+                  <div class="col-12">
+                    <div class="alert alert-danger py-2 small mb-0 d-none" id="loginError" role="alert"></div>
+                  </div>
+
+                  <div class="col-12">
+                    <button class="btn btn-primary w-100" type="submit" id="btnLogin">
+                      <span class="spinner-border spinner-border-sm d-none" id="loginSpinner" aria-hidden="true"></span>
+                      <span id="loginText">Đăng nhập</span>
+                    </button>
+                  </div>
+                </form>
+
+              </div>
+            </div>
+
+            <div class="credits">
+              Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  const BACKOFFICE_ROLES = ['ADMIN', 'STAFF'];
+  const HOME_PAGE = 'index.html';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const form     = document.getElementById('loginForm');
+    const emailEl  = document.getElementById('yourEmail');
+    const pwEl     = document.getElementById('yourPassword');
+    const errorBox = document.getElementById('loginError');
+    const btn      = document.getElementById('btnLogin');
+    const spinner  = document.getElementById('loginSpinner');
+    const btnText  = document.getElementById('loginText');
+
+    function showError(msg) {
+      errorBox.textContent = msg;
+      errorBox.classList.remove('d-none');
+    }
+
+    function setLoading(loading) {
+      btn.disabled = loading;
+      spinner.classList.toggle('d-none', !loading);
+      btnText.textContent = loading ? 'Đang đăng nhập...' : 'Đăng nhập';
+    }
+
+    // Xem / ẩn mật khẩu
+    document.getElementById('togglePassword').addEventListener('click', function () {
+      const hidden = pwEl.type === 'password';
+      pwEl.type = hidden ? 'text' : 'password';
+      this.querySelector('i').className = hidden ? 'bi bi-eye-slash' : 'bi bi-eye';
+    });
+
+    // Gõ lại thì ẩn lỗi cũ
+    [emailEl, pwEl].forEach(el => el.addEventListener('input', () => errorBox.classList.add('d-none')));
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorBox.classList.add('d-none');
+
+      emailEl.value = emailEl.value.trim();
+      if (!form.checkValidity()) {
+        form.classList.add('was-validated');
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        const res = await fetch('/api/auth/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: emailEl.value, password: pwEl.value })
+        });
+
+        // Body lỗi không chắc là JSON, nên parse an toàn
+        let json = null;
+        try { json = await res.json(); } catch (_) { /* bỏ qua */ }
+
+        if (res.ok && json && json.success) {
+          const data = json.data;
+
+          if (!BACKOFFICE_ROLES.includes(data.role)) {
+            showError('Tài khoản không có quyền truy cập trang quản trị.');
+            return;
+          }
+
+          AdminAuth.saveSession(data);
+          location.replace(HOME_PAGE);
+          return;
+        }
+
+        if (json && json.errors && json.errors.length) {
+          showError(json.errors.join(' • '));              // lỗi @Valid
+        } else if (json && json.message) {
+          showError(json.message);                         // sai mật khẩu, tài khoản bị khoá...
+        } else {
+          showError('Đăng nhập thất bại (mã lỗi ' + res.status + ').');
+        }
+        pwEl.value = '';
+        pwEl.focus();
+      } catch (err) {
+        showError('Không kết nối được tới máy chủ. Vui lòng thử lại.');
+      } finally {
+        setLoading(false);
+      }
+    });
+  });
+</script>
+
+</body>
+
+</html>

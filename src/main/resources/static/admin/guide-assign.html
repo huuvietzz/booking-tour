@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Phân công Hướng dẫn viên - Admin</title>
+
+  <link href="assets/img/favicon.png" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+  <link href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
+  <link href="assets/css/style.css" rel="stylesheet">
+
+  <script src="assets/js/admin-auth.js"></script>
+  <script>AdminAuth.requireLogin();</script>
+
+  <style>
+    /* ===== CUSTOM PAGINATION ===== */
+    .custom-pagination-wrapper {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 2px 4px 2px; flex-wrap: wrap; gap: 10px;
+    }
+    .pagination-info { font-size: 0.82rem; color: #6c757d; white-space: nowrap; }
+    .pagination-info span { font-weight: 600; color: #333; }
+    .custom-pagination {
+      display: flex; align-items: center; gap: 4px;
+      list-style: none; margin: 0; padding: 0;
+    }
+    .custom-pagination .page-item { display: flex; }
+    .custom-pagination .page-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 34px; height: 34px; padding: 0 10px;
+      font-size: 0.82rem; font-weight: 500; color: #4154f1;
+      background: #fff; border: 1.5px solid #c8cef7;
+      border-radius: 6px; cursor: pointer;
+      transition: background .15s, border-color .15s, color .15s, box-shadow .15s;
+      line-height: 1; user-select: none;
+    }
+    .custom-pagination .page-btn:hover:not(.active):not(.disabled):not(.ellipsis) {
+      background: #eef0fd; border-color: #4154f1;
+    }
+    .custom-pagination .page-btn.active {
+      background: #4154f1; border-color: #4154f1; color: #fff;
+      font-weight: 700; box-shadow: 0 2px 8px rgba(65,84,241,.25);
+      cursor: default; pointer-events: none;
+    }
+    .custom-pagination .page-btn.disabled {
+      color: #b8bfd8; border-color: #e6e9f5; background: #f7f8fc;
+      cursor: not-allowed; pointer-events: none;
+    }
+    .custom-pagination .page-btn.ellipsis {
+      border: none; background: transparent; color: #9aa0bc;
+      cursor: default; pointer-events: none; min-width: 24px;
+    }
+
+    /* ===== LOADING OVERLAY ===== */
+    .table-wrapper { position: relative; }
+    #tableLoadingOverlay {
+      display: none; position: absolute; inset: 0;
+      background: rgba(255,255,255,.7); z-index: 10;
+      align-items: center; justify-content: center; border-radius: 4px;
+    }
+    #tableLoadingOverlay.show { display: flex; }
+
+    /* ===== SCROLLBAR ===== */
+    .table-responsive { scrollbar-width: thin; scrollbar-color: #cbd0d5 #f8f9fa; }
+    .table-responsive::-webkit-scrollbar { height: 8px; }
+    .table-responsive::-webkit-scrollbar-track { background: #f8f9fa; border-radius: 4px; }
+    .table-responsive::-webkit-scrollbar-thumb { background: #cbd0d5; border-radius: 4px; }
+    .table-responsive::-webkit-scrollbar-thumb:hover { background: #aab2bd; }
+
+    /* ===== SORTING ===== */
+    th.sortable { cursor: pointer; user-select: none; transition: color .2s; }
+    th.sortable:hover { color: #4154f1; }
+    th.sortable .sort-icon { margin-left: 4px; color: #adb5bd; font-size: .8rem; opacity: 0; transition: all .2s; }
+    th.sortable:hover .sort-icon { opacity: .5; }
+    th.sortable.sort-active { color: #4154f1; }
+    th.sortable.sort-active .sort-icon { opacity: 1; font-weight: bold; font-size: 1.1rem; }
+
+    /* ===== BADGES ===== */
+    .badge-available  { background:#e8f5e9; color:#2e7d32; border:1px solid #a5d6a7; }
+    .badge-full       { background:#fce4ec; color:#c62828; border:1px solid #ef9a9a; }
+    .badge-cancelled  { background:#f5f5f5; color:#616161; border:1px solid #bdbdbd; }
+    .badge-lead       { background:#e8eaf6; color:#283593; border:1px solid #9fa8da; }
+    .badge-assistant  { background:#e0f7fa; color:#00695c; border:1px solid #80deea; }
+    .badge-guide-active    { background:#e8f5e9; color:#2e7d32; border:1px solid #a5d6a7; }
+    .badge-guide-on-leave  { background:#fff8e1; color:#f57f17; border:1px solid #ffe082; }
+    .badge-guide-suspended { background:#fce4ec; color:#c62828; border:1px solid #ef9a9a; }
+    .badge-guide-inactive  { background:#f5f5f5; color:#616161; border:1px solid #bdbdbd; }
+
+    /* ===== AVATAR ===== */
+    .guide-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      object-fit: cover; border: 2px solid #e0e0e0; flex-shrink: 0;
+    }
+    .guide-avatar-placeholder {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: #e8eaf6; color: #4154f1;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: .85rem; font-weight: 700; border: 2px solid #c5cae9; flex-shrink: 0;
+    }
+    .guide-avatar-lg {
+      width: 60px; height: 60px; border-radius: 50%;
+      object-fit: cover;
+      background: #e8eaf6; color: #4154f1;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; font-weight: 700; border: 2px solid #c5cae9; flex-shrink: 0;
+    }
+
+    /* ===== SELECT OPTION BỊ KHÓA ===== */
+    select option:disabled { color: #adb5bd; font-style: italic; }
+
+    /* ===== SELECT ĐỔI VAI TRÒ TRONG BẢNG ===== */
+    .role-select {
+      font-size: .78rem; padding: 3px 24px 3px 8px;
+      height: auto; border-color: #dee2e6; cursor: pointer;
+    }
+    .role-select:focus { border-color: #4154f1; box-shadow: none; }
+
+    /* ===== MODAL CHI TIẾT ===== */
+    #viewAssignModal .modal-body { overflow-wrap: break-word; word-break: break-word; }
+    .detail-label { font-size: .78rem; color: #6c757d; margin-bottom: 2px; }
+    .detail-value { font-weight: 600; color: #333; font-size: .92rem; }
+    .detail-section-title {
+      font-size: .75rem; font-weight: 700; letter-spacing: .5px;
+      text-transform: uppercase; color: #4154f1; margin-bottom: 10px;
+    }
+    .slot-bar { height: 6px; background: #e9ecef; border-radius: 3px; overflow: hidden; margin-top: 5px; }
+    .slot-bar-fill { height: 100%; background: #4154f1; border-radius: 3px; }
+    .teammate-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 10px; background: #f8f9fa; border-radius: 6px; margin-bottom: 6px;
+    }
+
+    /* ===== EXPORT BUTTON ===== */
+    .btn-export {
+      background: #e8f5e9; color: #2e7d32;
+      border: 1.5px solid #a5d6a7;
+      font-size: 0.82rem; font-weight: 600;
+      padding: 5px 14px; border-radius: 6px;
+      cursor: pointer; transition: all .15s;
+      display: inline-flex; align-items: center; gap: 5px;
+    }
+    .btn-export:hover { background: #c8e6c9; border-color: #66bb6a; }
+
+    /* ===== FORM HINT ===== */
+    .form-hint { font-size: .78rem; color: #6c757d; font-style: italic; margin-top: 4px; }
+    .schedule-preview {
+      background: #f8f9fa; border-left: 3px solid #4154f1;
+      border-radius: 4px; padding: 10px 12px; font-size: .82rem; margin-top: 8px;
+    }
+  </style>
+</head>
+
+<body>
+<header id="header" class="header fixed-top d-flex align-items-center">
+  <div class="d-flex align-items-center justify-content-between">
+    <a href="index.html" class="logo d-flex align-items-center">
+      <img src="assets/img/logo.png" alt="">
+      <span class="d-none d-lg-block">NiceAdmin</span>
+    </a>
+    <i class="bi bi-list toggle-sidebar-btn"></i>
+  </div>
+  <div class="search-bar">
+    <form class="search-form d-flex align-items-center" method="POST" action="#">
+      <input type="text" name="query" placeholder="Tìm kiếm nhanh..." title="Enter search keyword">
+      <button type="submit" title="Search"><i class="bi bi-search"></i></button>
+    </form>
+  </div>
+  <nav class="header-nav ms-auto">
+    <ul class="d-flex align-items-center">
+      <li class="nav-item dropdown pe-3">
+        <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
+          <img src="assets/img/profile-img.jpg" alt="Profile" class="rounded-circle">
+          <span class="d-none d-md-block dropdown-toggle ps-2" data-admin-name>Admin User</span>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
+          <li class="dropdown-header"><h6 data-admin-name>Admin User</h6><span data-admin-role>Hệ thống quản trị</span></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item d-flex align-items-center" href="#" id="btnLogout" data-admin-logout>
+            <i class="bi bi-box-arrow-right"></i><span>Đăng xuất</span>
+          </a></li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+</header>
+
+<aside id="sidebar" class="sidebar">
+  <ul class="sidebar-nav" id="sidebar-nav">
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="index.html"><i class="bi bi-grid"></i><span>Bảng điều khiển</span></a>
+    </li>
+    <li class="nav-heading">Lữ hành</li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="locations.html"><i class="bi bi-geo-alt"></i><span>Điểm đến</span></a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" data-bs-target="#tours-nav" data-bs-toggle="collapse" href="#">
+        <i class="bi bi-map"></i><span>Tour</span><i class="bi bi-chevron-down ms-auto"></i>
+      </a>
+      <ul id="tours-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+        <li><a href="tours.html"><i class="bi bi-circle"></i><span>Danh sách Tour</span></a></li>
+        <li><a href="tour-schedules.html"><i class="bi bi-circle"></i><span>Lịch khởi hành</span></a></li>
+      </ul>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-bs-target="#guides-nav" data-bs-toggle="collapse" href="#">
+        <i class="bi bi-person-badge"></i><span>Hướng dẫn viên</span><i class="bi bi-chevron-down ms-auto"></i>
+      </a>
+      <ul id="guides-nav" class="nav-content collapse show" data-bs-parent="#sidebar-nav">
+        <li><a href="guides.html"><i class="bi bi-circle"></i><span>Danh sách HDV</span></a></li>
+        <li><a href="guide-assign.html" class="active"><i class="bi bi-circle"></i><span>Phân công</span></a></li>
+      </ul>
+    </li>
+    <li class="nav-heading">Vận hành</li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" data-bs-target="#bookings-nav" data-bs-toggle="collapse" href="#">
+        <i class="bi bi-cart-check"></i><span>Đơn hàng</span><i class="bi bi-chevron-down ms-auto"></i>
+      </a>
+      <ul id="bookings-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+        <li><a href="bookings.html"><i class="bi bi-circle"></i><span>Tất cả đơn đặt</span></a></li>
+        <li><a href="booking-pending.html"><i class="bi bi-circle"></i><span>Chờ xác nhận</span></a></li>
+        <li><a href="booking-refunds.html"><i class="bi bi-circle"></i><span>Hủy &amp; Hoàn tiền</span></a></li>
+      </ul>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="payments.html">
+        <i class="bi bi-credit-card"></i><span>Thanh toán</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" data-bs-target="#promotions-nav" data-bs-toggle="collapse" href="#">
+        <i class="bi bi-tags"></i><span>Khuyến mãi</span><i class="bi bi-chevron-down ms-auto"></i>
+      </a>
+      <ul id="promotions-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+        <li><a href="promotions.html"><i class="bi bi-circle"></i><span>Chương trình KM</span></a></li>
+        <li><a href="coupons.html"><i class="bi bi-circle"></i><span>Mã giảm giá</span></a></li>
+      </ul>
+    </li>
+
+    <li class="nav-heading">Khách hàng & Tương tác</li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" data-bs-target="#customers-nav" data-bs-toggle="collapse" href="#">
+        <i class="bi bi-people"></i><span>Khách hàng</span><i class="bi bi-chevron-down ms-auto"></i>
+      </a>
+      <ul id="customers-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+        <li><a href="customers.html"><i class="bi bi-circle"></i><span>Danh sách khách</span></a></li>
+        <li><a href="customer-tiers.html"><i class="bi bi-circle"></i><span>Hạng thành viên</span></a></li>
+      </ul>
+    </li>
+    <li class="nav-item"><a class="nav-link collapsed" href="reviews.html"><i class="bi bi-star"></i><span>Đánh giá & Phản hồi</span></a></li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" data-bs-target="#reports-nav" data-bs-toggle="collapse" href="#">
+        <i class="bi bi-bar-chart"></i><span>Báo cáo</span><i class="bi bi-chevron-down ms-auto"></i>
+      </a>
+      <ul id="reports-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+        <li><a href="report-revenue.html"><i class="bi bi-circle"></i><span>Thống kê doanh thu</span></a></li>
+        <li><a href="report-growth.html"><i class="bi bi-circle"></i><span>Biểu đồ tăng trưởng</span></a></li>
+      </ul>
+    </li>
+  </ul>
+</aside>
+
+<main id="main" class="main">
+
+  <div class="pagetitle">
+    <h1>Phân công Hướng dẫn viên</h1>
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="index.html">Trang chủ</a></li>
+        <li class="breadcrumb-item">Hướng dẫn viên</li>
+        <li class="breadcrumb-item active">Phân công</li>
+      </ol>
+    </nav>
+  </div>
+
+  <section class="section">
+    <div class="row">
+
+      <!-- ==================== FORM TẠO PHÂN CÔNG ==================== -->
+      <div class="col-lg-4">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title mt-3">Tạo phân công mới</h5>
+
+            <div id="formError" class="alert alert-danger d-none small py-2"></div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold">Lịch khởi hành <span class="text-danger">*</span></label>
+              <select class="form-select" id="selectSchedule" onchange="onScheduleChange()">
+                <option value="" selected disabled>Đang tải...</option>
+              </select>
+              <div class="invalid-feedback">Vui lòng chọn lịch khởi hành.</div>
+              <div id="schedulePreview"></div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold">Hướng dẫn viên <span class="text-danger">*</span></label>
+              <select class="form-select" id="selectGuide" disabled>
+                <option value="" selected disabled>-- Chọn lịch khởi hành trước --</option>
+              </select>
+              <div class="invalid-feedback">Vui lòng chọn hướng dẫn viên.</div>
+              <div class="form-hint" id="guideHint">HDV bận lịch hoặc đang nghỉ sẽ bị khóa, kèm lý do.</div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold">Vai trò <span class="text-danger">*</span></label>
+              <div class="d-flex mt-2">
+                <div class="form-check me-4">
+                  <input class="form-check-input" type="radio" name="guideRole" id="roleLead" value="LEAD_GUIDE" checked>
+                  <label class="form-check-label" for="roleLead">HDV chính</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="guideRole" id="roleAssistant" value="ASSISTANT_GUIDE">
+                  <label class="form-check-label" for="roleAssistant">Phụ tá</label>
+                </div>
+              </div>
+              <div class="form-hint" id="roleHint">Mỗi chuyến chỉ có một HDV chính.</div>
+            </div>
+
+            <button type="button" class="btn btn-primary w-100" id="btnSave"
+                    style="background:#4154f1;border:none;" onclick="submitAssign()">
+              <i class="bi bi-person-check-fill me-1"></i> Lưu phân công
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== BẢNG PHÂN CÔNG ==================== -->
+      <div class="col-lg-8">
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mt-3 mb-4 flex-wrap gap-2">
+              <h5 class="card-title p-0 m-0">Danh sách phân công</h5>
+              <button class="btn-export" onclick="exportToExcel()" title="Xuất danh sách ra file Excel">
+                <i class="bi bi-file-earmark-excel"></i> Xuất Excel
+              </button>
+            </div>
+
+            <div class="d-flex flex-wrap align-items-end gap-3 mb-3 pb-3 border-bottom">
+              <div>
+                <label class="form-label text-muted small mb-1"><i class="bi bi-activity me-1"></i>Trạng thái lịch</label>
+                <select class="form-select form-select-sm" id="filterStatus" onchange="onFilterChange()" style="min-width:150px;">
+                  <option value="">Tất cả</option>
+                  <option value="AVAILABLE">Mở bán</option>
+                  <option value="FULL">Hết chỗ</option>
+                  <option value="CANCELLED">Đã hủy</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label text-muted small mb-1"><i class="bi bi-person-badge me-1"></i>Vai trò</label>
+                <select class="form-select form-select-sm" id="filterRole" onchange="onFilterChange()" style="min-width:140px;">
+                  <option value="">Tất cả</option>
+                  <option value="LEAD_GUIDE">HDV chính</option>
+                  <option value="ASSISTANT_GUIDE">Phụ tá</option>
+                </select>
+              </div>
+              <div id="btnClearFilterWrapper" style="display:none;">
+                <button class="btn btn-sm btn-outline-secondary" onclick="clearFilters()">
+                  <i class="bi bi-x-circle me-1"></i>Xóa bộ lọc
+                </button>
+              </div>
+              <div class="ms-auto">
+                <label class="form-label text-muted small mb-1">Hiển thị</label>
+                <select class="form-select form-select-sm" id="selectPerPage" onchange="onPerPageChange(this.value)" style="min-width:95px;">
+                  <option value="5">5 mục</option>
+                  <option value="10" selected>10 mục</option>
+                  <option value="20">20 mục</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label text-muted small mb-1">Tìm kiếm</label>
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                  <input type="text" class="form-control border-start-0" id="searchInput"
+                         placeholder="Tên HDV, mã tour..." oninput="onSearchInput(this.value)" style="min-width:180px;">
+                </div>
+              </div>
+            </div>
+
+            <div class="table-wrapper">
+              <div id="tableLoadingOverlay">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Đang tải...</span>
+                </div>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-hover align-middle" style="min-width:700px;">
+                  <thead>
+                  <tr>
+                    <th class="sortable text-nowrap" style="width:5%;" data-sort="assignmentId" onclick="sortBy('assignmentId')">
+                      ID <i class="bi bi-arrow-down-up sort-icon"></i>
+                    </th>
+                    <th class="sortable" style="min-width:190px;" data-sort="departureDate" onclick="sortBy('departureDate')">
+                      Lịch trình <i class="bi bi-arrow-down-up sort-icon"></i>
+                    </th>
+                    <th class="sortable" style="min-width:170px;" data-sort="guideName" onclick="sortBy('guideName')">
+                      Hướng dẫn viên <i class="bi bi-arrow-down-up sort-icon"></i>
+                    </th>
+                    <th style="min-width:130px;">Vai trò</th>
+                    <th class="text-nowrap text-center" style="min-width:100px;">Trạng thái lịch</th>
+                    <th class="text-center text-nowrap" style="min-width:90px;">Hành động</th>
+                  </tr>
+                  </thead>
+                  <tbody id="assignListBody">
+                  <tr><td colspan="6" class="text-center py-4">Đang tải dữ liệu...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="custom-pagination-wrapper">
+              <div class="pagination-info" id="paginationInfo">—</div>
+              <ul class="custom-pagination" id="paginationControls"></ul>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<footer id="footer" class="footer">
+  <div class="copyright">&copy; Copyright <strong><span>NiceAdmin</span></strong>. All Rights Reserved</div>
+</footer>
+
+<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+
+<!-- ============================================================
+     MODAL: CHI TIẾT PHÂN CÔNG
+     ============================================================ -->
+<div class="modal fade" id="viewAssignModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header" style="background:#4154f1;">
+        <h5 class="modal-title text-white fw-bold">
+          <i class="bi bi-clipboard-check me-2"></i>Chi tiết phân công <span id="viewAssignId"></span>
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="viewLoading" class="text-center py-4">
+          <div class="spinner-border text-primary" role="status"></div>
+          <div class="mt-2 text-muted small">Đang tải dữ liệu...</div>
+        </div>
+        <div id="viewAssignBody" style="display:none;"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/main.js"></script>
+
+<script>
+  /* ============================================================
+     STATE
+     ============================================================ */
+  let currentPage   = 0;
+  let perPage       = 10;
+  let sortCol       = '';
+  let sortAsc       = true;
+  const DEFAULT_SORT = 'departureDate';
+  let searchKeyword = '';
+  let searchTimer   = null;
+
+  // Cache danh sách lịch để dựng khung xem trước mà không gọi lại API
+  let scheduleOptions = [];
+
+  /* ============================================================
+     HẰNG SỐ HIỂN THỊ
+     ============================================================ */
+  const SCHEDULE_STATUS = {
+    AVAILABLE: { label: 'Mở bán',  cls: 'badge-available' },
+    FULL:      { label: 'Hết chỗ', cls: 'badge-full' },
+    CANCELLED: { label: 'Đã hủy',  cls: 'badge-cancelled' },
+  };
+
+  const GUIDE_STATUS = {
+    ACTIVE:    { label: 'Đang làm việc', cls: 'badge-guide-active' },
+    ON_LEAVE:  { label: 'Nghỉ phép',     cls: 'badge-guide-on-leave' },
+    SUSPENDED: { label: 'Bị khóa',       cls: 'badge-guide-suspended' },
+    INACTIVE:  { label: 'Đã nghỉ việc',  cls: 'badge-guide-inactive' },
+  };
+
+  const ROLE_LABEL = {
+    LEAD_GUIDE:      { label: 'HDV chính', cls: 'badge-lead' },
+    ASSISTANT_GUIDE: { label: 'Phụ tá',    cls: 'badge-assistant' },
+  };
+
+  function authHeaders(extra = {}) {
+    return { 'Authorization': `Bearer ${localStorage.getItem('token')}`, ...extra };
+  }
+
+  /* ============================================================
+     BOOT
+     ============================================================ */
+  document.addEventListener('DOMContentLoaded', () => {
+    // Tên người đang đăng nhập trên thanh header
+    const userData = JSON.parse(localStorage.getItem('user'));
+    if (userData) {
+      document.querySelectorAll('.nav-profile span, .dropdown-header h6')
+              .forEach(el => el.innerText = userData.fullName);
+      const roleEl = document.querySelector('.dropdown-header span');
+      if (roleEl) roleEl.innerText = userData.role;
+    }
+
+    loadScheduleOptions();
+    fetchAssignments();
+  });
+
+  /* ============================================================
+     TIỆN ÍCH
+     ============================================================ */
+  function fmtDate(val) {
+    if (!val) return '—';
+    if (Array.isArray(val)) {
+      const [y, m, d] = val;
+      return `${String(d).padStart(2,'0')}/${String(m).padStart(2,'0')}/${y}`;
+    }
+    const [y, m, d] = String(val).split('T')[0].split('-');
+    return `${d}/${m}/${y}`;
+  }
+
+  function fmtDateTime(val) {
+    if (!val) return '—';
+    if (Array.isArray(val)) {
+      const [y, mo, d, h = 0, mi = 0] = val;
+      return `${String(d).padStart(2,'0')}/${String(mo).padStart(2,'0')}/${y} ${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')}`;
+    }
+    const dt = new Date(val);
+    return dt.toLocaleString('vi-VN', {
+      day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
+  }
+
+  function initials(name) {
+    return (name || '?').split(' ').map(w => w[0]).slice(-2).join('').toUpperCase();
+  }
+
+  function avatarHtml(url, name, size = 'sm') {
+    const cls = size === 'lg' ? 'guide-avatar-lg' : 'guide-avatar';
+    const phCls = size === 'lg' ? 'guide-avatar-lg' : 'guide-avatar-placeholder';
+    return url
+            ? `<img src="${url}" class="${cls}" alt="${escapeHtml(name)}">`
+            : `<div class="${phCls}">${initials(name)}</div>`;
+  }
+
+  function escapeHtml(str) {
+    return String(str ?? '').replace(/[&<>"']/g, c =>
+            ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  function showLoading(show) {
+    document.getElementById('tableLoadingOverlay').classList.toggle('show', show);
+  }
+
+  function showSuccess(title, text) {
+    Swal.fire({ icon: 'success', title, text, showConfirmButton: false, timer: 1600 });
+  }
+
+  function showFormError(msg) {
+    const el = document.getElementById('formError');
+    el.textContent = msg;
+    el.classList.remove('d-none');
+  }
+
+  function hideFormError() {
+    document.getElementById('formError').classList.add('d-none');
+  }
+
+  /* ============================================================
+     1. DROPDOWN LỊCH KHỞI HÀNH
+     GET /api/admin/tour-schedules/options
+     ============================================================ */
+  async function loadScheduleOptions() {
+    const sel = document.getElementById('selectSchedule');
+    try {
+      const res = await fetch('/api/admin/tour-schedules/options', { headers: authHeaders() });
+      const result = await res.json();
+
+      if (!res.ok || !result.success) throw new Error(result.message || 'Không tải được lịch khởi hành');
+
+      scheduleOptions = result.data || [];
+
+      if (scheduleOptions.length === 0) {
+        sel.innerHTML = '<option value="" selected disabled>Chưa có lịch khởi hành sắp tới</option>';
+        return;
+      }
+
+      sel.innerHTML = '<option value="" selected disabled>-- Chọn chuyến đi --</option>';
+      scheduleOptions.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.scheduleId;
+        opt.textContent = `${s.tourCode} — ${s.tourName} (${fmtDate(s.departureDate)})`;
+        if (s.status === 'CANCELLED') {
+          opt.disabled = true;
+          opt.textContent += ' — đã hủy';
+        }
+        sel.appendChild(opt);
+      });
+    } catch (e) {
+      console.error(e);
+      sel.innerHTML = '<option value="" selected disabled>Lỗi tải lịch khởi hành</option>';
+      showFormError('Không tải được danh sách lịch khởi hành. Thử tải lại trang.');
+    }
+  }
+
+  /* ============================================================
+     2. DROPDOWN HDV — phụ thuộc lịch đã chọn
+     GET /api/admin/schedule-guides/available-guides
+     ============================================================ */
+  async function onScheduleChange() {
+    const scheduleId = document.getElementById('selectSchedule').value;
+    document.getElementById('selectSchedule').classList.remove('is-invalid');
+    hideFormError();
+
+    renderSchedulePreview(scheduleId);
+
+    const sel = document.getElementById('selectGuide');
+    sel.innerHTML = '<option value="" selected disabled>Đang tải hướng dẫn viên...</option>';
+    sel.disabled = true;
+    sel.classList.remove('is-invalid');
+
+    try {
+      const res = await fetch(
+              `/api/admin/schedule-guides/available-guides?scheduleId=${scheduleId}&includeUnavailable=true`,
+              { headers: authHeaders() });
+      const result = await res.json();
+
+      if (!res.ok || !result.success) throw new Error(result.message || 'Không tải được hướng dẫn viên');
+
+      renderGuideOptions(result.data || []);
+      refreshRoleHint(scheduleId);
+    } catch (e) {
+      console.error(e);
+      sel.innerHTML = '<option value="" selected disabled>Lỗi tải hướng dẫn viên</option>';
+      document.getElementById('guideHint').textContent = 'Không tải được danh sách. Thử chọn lại lịch khởi hành.';
+    }
+  }
+
+  function renderSchedulePreview(scheduleId) {
+    const s = scheduleOptions.find(x => x.scheduleId === Number(scheduleId));
+    if (!s) { document.getElementById('schedulePreview').innerHTML = ''; return; }
+
+    const filled = s.availableSlots > 0 ? Math.round(s.bookedSlots / s.availableSlots * 100) : 0;
+    document.getElementById('schedulePreview').innerHTML = `
+      <div class="schedule-preview">
+        <div class="d-flex justify-content-between mb-1">
+          <span class="text-muted">Thời gian</span>
+          <span class="fw-semibold">${fmtDate(s.departureDate)} → ${fmtDate(s.returnDate)}</span>
+        </div>
+        <div class="d-flex justify-content-between">
+          <span class="text-muted">Số chỗ đã đặt</span>
+          <span class="fw-semibold">${s.bookedSlots}/${s.availableSlots}</span>
+        </div>
+        <div class="slot-bar"><div class="slot-bar-fill" style="width:${filled}%"></div></div>
+      </div>`;
+  }
+
+  function renderGuideOptions(guides) {
+    const sel = document.getElementById('selectGuide');
+    sel.innerHTML = '<option value="" selected disabled>-- Chọn hướng dẫn viên --</option>';
+    sel.disabled = false;
+
+    const available = guides.filter(g => g.available);
+    const blocked   = guides.filter(g => !g.available);
+
+    if (available.length) {
+      const group = document.createElement('optgroup');
+      group.label = `Rảnh lịch (${available.length})`;
+      available.forEach(g => {
+        const opt = document.createElement('option');
+        opt.value = g.guideId;
+        opt.textContent = g.specialization ? `${g.fullName} — ${g.specialization}` : g.fullName;
+        group.appendChild(opt);
+      });
+      sel.appendChild(group);
+    }
+
+    if (blocked.length) {
+      const group = document.createElement('optgroup');
+      group.label = `Không khả dụng (${blocked.length})`;
+      blocked.forEach(g => {
+        const opt = document.createElement('option');
+        opt.value = g.guideId;
+        opt.disabled = true;
+        opt.textContent = `${g.fullName} — ${g.unavailableReason}`;
+        group.appendChild(opt);
+      });
+      sel.appendChild(group);
+    }
+
+    document.getElementById('guideHint').textContent = available.length === 0
+            ? 'Không còn HDV nào rảnh cho chuyến này.'
+            : `${available.length} HDV rảnh lịch, ${blocked.length} người không khả dụng.`;
+  }
+
+  /* Chuyến đã có HDV chính chưa — dùng API danh sách lọc theo vai trò */
+  async function refreshRoleHint(scheduleId) {
+    const hintEl = document.getElementById('roleHint');
+    hintEl.textContent = 'Mỗi chuyến chỉ có một HDV chính.';
+
+    try {
+      const res = await fetch('/api/admin/schedule-guides?page=0&size=200&role=LEAD_GUIDE',
+              { headers: authHeaders() });
+      const result = await res.json();
+      if (!res.ok || !result.success) return;
+
+      // API lọc theo vai trò nhưng không theo scheduleId, nên đối chiếu ở client
+      const hasLead = (result.data.content || []).some(x => x.scheduleId === Number(scheduleId));
+
+      if (hasLead) {
+        hintEl.innerHTML = '<span class="text-warning"><i class="bi bi-exclamation-triangle me-1"></i>Chuyến này đã có HDV chính — chỉ thêm được phụ tá.</span>';
+        document.getElementById('roleAssistant').checked = true;
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  /* ============================================================
+     3. LƯU PHÂN CÔNG
+     POST /api/admin/schedule-guides
+     ============================================================ */
+  async function submitAssign() {
+    const schedEl = document.getElementById('selectSchedule');
+    const guideEl = document.getElementById('selectGuide');
+    [schedEl, guideEl].forEach(el => el.classList.remove('is-invalid'));
+    hideFormError();
+
+    let valid = true;
+    if (!schedEl.value) { schedEl.classList.add('is-invalid'); valid = false; }
+    if (!guideEl.value) { guideEl.classList.add('is-invalid'); valid = false; }
+    if (!valid) return;
+
+    const btn = document.getElementById('btnSave');
+    const originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Đang lưu...';
+
+    const payload = {
+      scheduleId: parseInt(schedEl.value),
+      guideId:    parseInt(guideEl.value),
+      role:       document.querySelector('input[name="guideRole"]:checked').value
+    };
+
+    try {
+      const res = await fetch('/api/admin/schedule-guides', {
+        method: 'POST',
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(payload)
+      });
+      const result = await res.json();
+
+      if (res.ok && result.success) {
+        const d = result.data;
+        resetForm();
+        currentPage = 0;
+        fetchAssignments();
+        showSuccess('Đã lưu phân công', `${d.guideName} — ${ROLE_LABEL[d.role].label} — ${d.tourCode}`);
+      } else {
+        // Backend trả lý do cụ thể: trùng lịch, đã có trong chuyến, đã có HDV chính...
+        showFormError(result.message || 'Không thể lưu phân công. Vui lòng thử lại.');
+      }
+    } catch (e) {
+      console.error(e);
+      showFormError('Lỗi kết nối đến máy chủ!');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
+    }
+  }
+
+  function resetForm() {
+    document.getElementById('selectSchedule').value = '';
+    document.getElementById('schedulePreview').innerHTML = '';
+    const sel = document.getElementById('selectGuide');
+    sel.innerHTML = '<option value="" selected disabled>-- Chọn lịch khởi hành trước --</option>';
+    sel.disabled = true;
+    document.getElementById('roleLead').checked = true;
+    document.getElementById('roleHint').textContent = 'Mỗi chuyến chỉ có một HDV chính.';
+    document.getElementById('guideHint').textContent = 'HDV bận lịch hoặc đang nghỉ sẽ bị khóa, kèm lý do.';
+  }
+
+  /* ============================================================
+     4. BẢNG DANH SÁCH
+     GET /api/admin/schedule-guides
+     ============================================================ */
+  async function fetchAssignments() {
+    showLoading(true);
+
+    const params = new URLSearchParams();
+    params.set('page',    currentPage);
+    params.set('size',    perPage);
+    params.set('sortBy',  sortCol || DEFAULT_SORT);
+    params.set('sortDir', sortAsc ? 'asc' : 'desc');
+
+    const statusVal = document.getElementById('filterStatus').value;
+    const roleVal   = document.getElementById('filterRole').value;
+    if (statusVal)     params.set('status', statusVal);
+    if (roleVal)       params.set('role', roleVal);
+    if (searchKeyword) params.set('keyword', searchKeyword);
+
+    try {
+      const res = await fetch(`/api/admin/schedule-guides?${params.toString()}`, { headers: authHeaders() });
+      const result = await res.json();
+
+      if (res.ok && result.success) {
+        const data     = result.data;
+        const pageInfo = data.page;
+
+        // Xóa hết mục ở trang cuối thì lùi về trang trước
+        if (data.content.length === 0 && currentPage > 0) {
+          currentPage--;
+          fetchAssignments();
+          return;
+        }
+
+        renderRows(data.content);
+        renderPagination(pageInfo.totalElements, pageInfo.totalPages, pageInfo.number, pageInfo.size);
+      } else {
+        showTableError('Không thể tải dữ liệu: ' + (result.message || ''));
+      }
+    } catch (e) {
+      console.error(e);
+      showTableError('Lỗi kết nối đến máy chủ!');
+    } finally {
+      showLoading(false);
+    }
+  }
+
+  function renderRows(rows) {
+    const tbody = document.getElementById('assignListBody');
+
+    if (!rows || rows.length === 0) {
+      const filtering = searchKeyword
+              || document.getElementById('filterStatus').value
+              || document.getElementById('filterRole').value;
+      tbody.innerHTML = `
+        <tr><td colspan="6" class="text-center py-5" style="background:#f8f9fa;">
+          <i class="bi bi-clipboard-x d-block mb-3" style="font-size:3rem;color:#ced4da;"></i>
+          <h6 class="fw-bold text-secondary mb-1">${filtering ? 'Không có phân công nào khớp' : 'Chưa có phân công nào'}</h6>
+          <span class="text-muted small">${filtering ? 'Thử bỏ bớt bộ lọc hoặc từ khóa.' : 'Dùng biểu mẫu bên trái để tạo phân công đầu tiên.'}</span>
+        </td></tr>`;
+      updateSortUI();
+      return;
+    }
+
+    tbody.innerHTML = rows.map(r => {
+      const st = SCHEDULE_STATUS[r.scheduleStatus] || { label: r.scheduleStatus, cls: '' };
+      const warn = r.guideStatus !== 'ACTIVE'
+              ? `<i class="bi bi-exclamation-triangle-fill text-warning ms-1"
+              title="HDV hiện đang ${(GUIDE_STATUS[r.guideStatus]?.label || '').toLowerCase()}"></i>`
+              : '';
+      const safeName = escapeHtml(r.guideName).replace(/'/g, "\\'");
+
+      return `
+        <tr>
+          <td><span class="text-muted small">${r.assignmentId}</span></td>
+          <td>
+            <span class="text-primary fw-bold">${escapeHtml(r.tourCode)}</span>
+            <div class="small text-truncate" style="max-width:180px;" title="${escapeHtml(r.tourName)}">${escapeHtml(r.tourName)}</div>
+            <small class="text-muted">${fmtDate(r.departureDate)} - ${fmtDate(r.returnDate)}</small>
+          </td>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              ${avatarHtml(r.guideAvatarUrl, r.guideName)}
+              <span class="fw-semibold">${escapeHtml(r.guideName)}</span>${warn}
+            </div>
+          </td>
+          <td>
+            <select class="form-select form-select-sm role-select"
+                    onchange="changeRole(${r.assignmentId}, this.value, this)" title="Đổi vai trò">
+              <option value="LEAD_GUIDE" ${r.role === 'LEAD_GUIDE' ? 'selected' : ''}>HDV chính</option>
+              <option value="ASSISTANT_GUIDE" ${r.role === 'ASSISTANT_GUIDE' ? 'selected' : ''}>Phụ tá</option>
+            </select>
+          </td>
+          <td class="text-center"><span class="badge ${st.cls}">${st.label}</span></td>
+          <td class="text-center">
+            <div class="d-flex gap-1 justify-content-center">
+              <button class="btn btn-sm btn-outline-info" title="Xem chi tiết"
+                      onclick="viewAssignment(${r.assignmentId})"><i class="bi bi-eye"></i></button>
+              <button class="btn btn-sm btn-outline-danger" title="Gỡ phân công"
+                      onclick="removeAssignment(${r.assignmentId}, '${safeName}', '${escapeHtml(r.tourCode)}')">
+                <i class="bi bi-trash"></i></button>
+            </div>
+          </td>
+        </tr>`;
+    }).join('');
+
+    updateSortUI();
+  }
+
+  function showTableError(msg) {
+    document.getElementById('assignListBody').innerHTML =
+            `<tr><td colspan="6" class="text-center text-danger py-4">
+         <i class="bi bi-exclamation-triangle me-2"></i>${msg}
+       </td></tr>`;
+    document.getElementById('paginationInfo').innerHTML = '—';
+    document.getElementById('paginationControls').innerHTML = '';
+  }
+
+  /* ============================================================
+     PHÂN TRANG
+     ============================================================ */
+  function renderPagination(total, totalPages, pageIndex, size) {
+    const start = total === 0 ? 0 : pageIndex * size + 1;
+    const end   = Math.min((pageIndex + 1) * size, total);
+
+    document.getElementById('paginationInfo').innerHTML = total === 0
+            ? 'Không có mục nào'
+            : `Hiển thị <span>${start}–${end}</span> trong tổng số <span>${total}</span> mục`;
+
+    const ul = document.getElementById('paginationControls');
+    ul.innerHTML = '';
+    if (totalPages <= 1) return;
+
+    const addBtn = (label, page, extra = '') => {
+      const li = document.createElement('li');
+      li.className = 'page-item';
+      const btn = document.createElement('button');
+      btn.className = `page-btn ${extra}`.trim();
+      btn.innerHTML = label;
+      if (!extra) btn.addEventListener('click', () => { currentPage = page; fetchAssignments(); });
+      li.appendChild(btn);
+      ul.appendChild(li);
+    };
+
+    addBtn('<i class="bi bi-chevron-left"></i>', pageIndex - 1, pageIndex === 0 ? 'disabled' : '');
+    getPageNumbers(pageIndex + 1, totalPages).forEach(p => {
+      if (p === '...') addBtn('…', -1, 'ellipsis');
+      else addBtn(String(p), p - 1, p === pageIndex + 1 ? 'active' : '');
+    });
+    addBtn('<i class="bi bi-chevron-right"></i>', pageIndex + 1, pageIndex === totalPages - 1 ? 'disabled' : '');
+  }
+
+  function getPageNumbers(current, total) {
+    if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+    const pages = [1];
+    if (current > 4) pages.push('...');
+    const s = Math.max(2, current - 1), e = Math.min(total - 1, current + 1);
+    for (let i = s; i <= e; i++) pages.push(i);
+    if (current < total - 3) pages.push('...');
+    pages.push(total);
+    return pages;
+  }
+
+  /* ============================================================
+     LỌC / SẮP XẾP / TÌM KIẾM
+     ============================================================ */
+  function sortBy(col) {
+    if (sortCol === col) sortAsc = !sortAsc;
+    else { sortCol = col; sortAsc = true; }
+    currentPage = 0;
+    fetchAssignments();
+  }
+
+  function updateSortUI() {
+    document.querySelectorAll('th.sortable').forEach(th => {
+      th.classList.remove('sort-active');
+      const icon = th.querySelector('.sort-icon');
+      if (icon) icon.className = 'bi bi-arrow-down-up sort-icon';
+    });
+    const th = document.querySelector(`th.sortable[data-sort="${sortCol}"]`);
+    if (th) {
+      th.classList.add('sort-active');
+      const icon = th.querySelector('.sort-icon');
+      if (icon) icon.className = sortAsc ? 'bi bi-arrow-up-short sort-icon' : 'bi bi-arrow-down-short sort-icon';
+    }
+  }
+
+  function onFilterChange() {
+    const filtering = document.getElementById('filterStatus').value !== ''
+            || document.getElementById('filterRole').value !== '';
+    document.getElementById('btnClearFilterWrapper').style.display = filtering ? '' : 'none';
+    currentPage = 0;
+    fetchAssignments();
+  }
+
+  function clearFilters() {
+    document.getElementById('filterStatus').value = '';
+    document.getElementById('filterRole').value = '';
+    onFilterChange();
+  }
+
+  function onPerPageChange(val) {
+    perPage = parseInt(val);
+    currentPage = 0;
+    fetchAssignments();
+  }
+
+  function onSearchInput(val) {
+    searchKeyword = val.trim();
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => { currentPage = 0; fetchAssignments(); }, 400);
+  }
+
+  /* ============================================================
+     5. ĐỔI VAI TRÒ
+     PATCH /api/admin/schedule-guides/{id}/role
+     ============================================================ */
+  async function changeRole(assignmentId, role, selectEl) {
+    const previous = role === 'LEAD_GUIDE' ? 'ASSISTANT_GUIDE' : 'LEAD_GUIDE';
+    selectEl.disabled = true;
+
+    try {
+      const res = await fetch(`/api/admin/schedule-guides/${assignmentId}/role`, {
+        method: 'PATCH',
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ role })
+      });
+      const result = await res.json();
+
+      if (res.ok && result.success) {
+        showSuccess('Đã đổi vai trò', `${result.data.guideName} — ${ROLE_LABEL[result.data.role].label}`);
+      } else {
+        selectEl.value = previous;   // thao tác bị từ chối, trả select về giá trị cũ
+        Swal.fire({
+          icon: 'error',
+          title: 'Không thể đổi vai trò',
+          text: result.message || 'Vui lòng thử lại.'
+        });
+      }
+    } catch (e) {
+      console.error(e);
+      selectEl.value = previous;
+      Swal.fire({ icon: 'error', title: 'Lỗi hệ thống', text: 'Không thể kết nối đến máy chủ!' });
+    } finally {
+      selectEl.disabled = false;
+    }
+  }
+
+  /* ============================================================
+     6. CHI TIẾT PHÂN CÔNG
+     GET /api/admin/schedule-guides/{id}
+     ============================================================ */
+  async function viewAssignment(id) {
+    const modal = new bootstrap.Modal(document.getElementById('viewAssignModal'));
+    document.getElementById('viewLoading').style.display = '';
+    document.getElementById('viewAssignBody').style.display = 'none';
+    document.getElementById('viewAssignId').textContent = `#${id}`;
+    modal.show();
+
+    try {
+      const res = await fetch(`/api/admin/schedule-guides/${id}`, { headers: authHeaders() });
+      const result = await res.json();
+
+      if (!res.ok || !result.success) throw new Error(result.message || 'Không tải được dữ liệu');
+
+      renderDetail(result.data);
+      document.getElementById('viewLoading').style.display = 'none';
+      document.getElementById('viewAssignBody').style.display = '';
+    } catch (e) {
+      console.error(e);
+      document.getElementById('viewLoading').style.display = 'none';
+      const body = document.getElementById('viewAssignBody');
+      body.innerHTML = `<div class="text-center text-danger py-3">
+          <i class="bi bi-exclamation-triangle me-1"></i>Không thể tải dữ liệu. Vui lòng thử lại.
+        </div>`;
+      body.style.display = '';
+    }
+  }
+
+  function renderDetail(d) {
+    const st = SCHEDULE_STATUS[d.scheduleStatus] || { label: d.scheduleStatus, cls: '' };
+    const gs = GUIDE_STATUS[d.guideStatus] || { label: d.guideStatus, cls: '' };
+    const rl = ROLE_LABEL[d.role];
+    const filled = d.availableSlots > 0 ? Math.round(d.bookedSlots / d.availableSlots * 100) : 0;
+    const rating = parseFloat(d.guideRating) || 0;
+
+    const teammates = (d.teammates || []).map(t => `
+      <div class="teammate-row">
+        ${avatarHtml(t.guideAvatarUrl, t.guideName)}
+        <div class="flex-grow-1">
+          <div class="fw-semibold small">${escapeHtml(t.guideName)}</div>
+          <div class="text-muted" style="font-size:.76rem;">${escapeHtml(t.guidePhoneNumber || '—')}</div>
+        </div>
+        <span class="badge ${ROLE_LABEL[t.role].cls}">${ROLE_LABEL[t.role].label}</span>
+      </div>`).join('');
+
+    const scheduleWarn = d.scheduleStatus === 'CANCELLED'
+            ? `<div class="alert alert-warning py-2 small mb-3">
+           <i class="bi bi-exclamation-triangle me-1"></i>
+           Chuyến này đã hủy nhưng phân công vẫn còn — nên gỡ để dữ liệu khớp thực tế.
+         </div>` : '';
+
+    const guideWarn = d.guideStatus !== 'ACTIVE'
+            ? `<div class="alert alert-warning py-2 small mb-3">
+           <i class="bi bi-exclamation-triangle me-1"></i>
+           ${escapeHtml(d.guideName)} đang ở trạng thái "${gs.label}". Cần tìm người thay.
+         </div>` : '';
+
+    document.getElementById('viewAssignBody').innerHTML = `
+      ${scheduleWarn}${guideWarn}
+
+      <div class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom">
+        ${avatarHtml(d.guideAvatarUrl, d.guideName, 'lg')}
+        <div>
+          <h5 class="mb-1 fw-bold">${escapeHtml(d.guideName)}</h5>
+          <span class="badge ${rl.cls}">${rl.label}</span>
+          <span class="badge ${gs.cls} ms-1">${gs.label}</span>
+        </div>
+        <div class="ms-auto text-end">
+          <div class="detail-label">Phân công lúc</div>
+          <div class="detail-value">${fmtDateTime(d.assignedAt)}</div>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-md-6">
+          <div class="detail-section-title"><i class="bi bi-map me-1"></i>Chuyến đi</div>
+          <div class="mb-3">
+            <div class="detail-label">Tour</div>
+            <div class="detail-value">${escapeHtml(d.tourCode)} — ${escapeHtml(d.tourName)}</div>
+          </div>
+          <div class="mb-3">
+            <div class="detail-label">Thời gian</div>
+            <div class="detail-value">${fmtDate(d.departureDate)} → ${fmtDate(d.returnDate)}</div>
+            <div class="text-muted" style="font-size:.78rem;">
+              ${d.durationDays} ngày ${d.durationNights} đêm · ${d.tourType === 'DOMESTIC' ? 'Trong nước' : 'Quốc tế'}
+            </div>
+          </div>
+          <div class="mb-3">
+            <div class="detail-label">Trạng thái lịch</div>
+            <div><span class="badge ${st.cls}">${st.label}</span></div>
+          </div>
+          <div>
+            <div class="detail-label">Số chỗ đã đặt</div>
+            <div class="detail-value">${d.bookedSlots}/${d.availableSlots} khách</div>
+            <div class="slot-bar"><div class="slot-bar-fill" style="width:${filled}%"></div></div>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="detail-section-title"><i class="bi bi-person-badge me-1"></i>Hướng dẫn viên</div>
+          <div class="mb-3">
+            <div class="detail-label">Liên hệ</div>
+            <div class="detail-value">${escapeHtml(d.guidePhoneNumber || '—')}</div>
+            <div class="detail-value">${escapeHtml(d.guideEmail || '—')}</div>
+          </div>
+          <div class="mb-3">
+            <div class="detail-label">Chuyên môn</div>
+            <div class="detail-value">${escapeHtml(d.guideSpecialization || 'Chưa cập nhật')}</div>
+          </div>
+          <div class="mb-3">
+            <div class="detail-label">Ngôn ngữ</div>
+            <div class="detail-value">${escapeHtml(d.guideLanguages || 'Chưa cập nhật')}</div>
+          </div>
+          <div class="row">
+            <div class="col-6">
+              <div class="detail-label">Kinh nghiệm</div>
+              <div class="detail-value">${d.guideExperienceYears != null ? d.guideExperienceYears + ' năm' : '—'}</div>
+            </div>
+            <div class="col-6">
+              <div class="detail-label">Đánh giá</div>
+              <div class="detail-value">${rating.toFixed(1)}
+                <i class="bi bi-star-fill" style="color:#ffc107;font-size:.8rem;"></i>
+                <span class="text-muted fw-normal" style="font-size:.78rem;">· ${d.guideTotalTours || 0} tour</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="my-3">
+
+      <div class="detail-section-title"><i class="bi bi-people me-1"></i>Đội ngũ cùng chuyến</div>
+      ${teammates || '<div class="text-muted small fst-italic">Chưa có HDV nào khác trong chuyến này.</div>'}
+    `;
+  }
+
+  /* ============================================================
+     7. GỠ PHÂN CÔNG
+     DELETE /api/admin/schedule-guides/{id}
+     ============================================================ */
+  async function removeAssignment(id, guideName, tourCode) {
+    const confirm = await Swal.fire({
+      icon: 'warning',
+      title: 'Gỡ phân công?',
+      html: `Gỡ <b>${guideName}</b> khỏi chuyến <b>${tourCode}</b>.<br>
+             <span class="text-muted small">HDV sẽ rảnh lịch trở lại trong khoảng thời gian này.</span>`,
+      showCancelButton: true,
+      confirmButtonColor: '#dc3545',
+      confirmButtonText: '<i class="bi bi-trash me-1"></i>Gỡ phân công',
+      cancelButtonText: 'Hủy bỏ'
+    });
+    if (!confirm.isConfirmed) return;
+
+    try {
+      const res = await fetch(`/api/admin/schedule-guides/${id}`, {
+        method: 'DELETE',
+        headers: authHeaders()
+      });
+      const result = await res.json();
+
+      if (res.ok && result.success) {
+        fetchAssignments();
+
+        // Dropdown HDV có thể đã đổi, dựng lại nếu form đang mở một lịch
+        if (document.getElementById('selectSchedule').value) onScheduleChange();
+
+        showSuccess('Đã gỡ phân công');
+      } else {
+        Swal.fire({ icon: 'error', title: 'Không thể gỡ', text: result.message || 'Vui lòng thử lại.' });
+      }
+    } catch (e) {
+      console.error(e);
+      Swal.fire({ icon: 'error', title: 'Lỗi hệ thống', text: 'Không thể kết nối đến máy chủ!' });
+    }
+  }
+
+  /* ============================================================
+     8. XUẤT EXCEL
+     GET /api/admin/schedule-guides/export
+     ============================================================ */
+  async function exportToExcel() {
+    Swal.fire({
+      title: 'Đang tạo file Excel...',
+      html: 'Vui lòng chờ trong giây lát.',
+      allowOutsideClick: false,
+      didOpen: () => { Swal.showLoading(); }
+    });
+
+    // Dùng đúng bộ lọc đang áp dụng trên bảng
+    const params = new URLSearchParams();
+    const statusVal = document.getElementById('filterStatus').value;
+    const roleVal   = document.getElementById('filterRole').value;
+    if (statusVal)     params.set('status', statusVal);
+    if (roleVal)       params.set('role', roleVal);
+    if (searchKeyword) params.set('keyword', searchKeyword);
+
+    const query = params.toString();
+    const url = `/api/admin/schedule-guides/export${query ? '?' + query : ''}`;
+
+    try {
+      const res = await fetch(url, { headers: authHeaders() });
+      if (!res.ok) throw new Error('Lỗi từ server');
+
+      const blob = await res.blob();
+      let fileName = `Phan_cong_HDV_${new Date().toISOString().slice(0, 10)}.xlsx`;
+      const disposition = res.headers.get('Content-Disposition');
+      if (disposition && disposition.includes('filename')) {
+        const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+        if (matches?.[1]) {
+          let raw = matches[1].trim();
+          // Phải bóc tiền tố utf-8'' TRƯỚC khi xóa dấu nháy, không thì startsWith luôn sai
+          if (raw.toLowerCase().startsWith("utf-8''")) {
+            fileName = decodeURIComponent(raw.substring(7));
+          } else {
+            fileName = raw.replace(/['"]/g, '');
+          }
+        }
+      }
+
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl; a.download = fileName;
+      document.body.appendChild(a); a.click(); a.remove();
+      window.URL.revokeObjectURL(blobUrl);
+
+      Swal.close();
+      showSuccess('Xuất Excel thành công!');
+    } catch (e) {
+      console.error(e);
+      Swal.fire({ icon: 'error', title: 'Lỗi xuất file', text: 'Không thể tải file Excel lúc này!' });
+    }
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Quản lý Tour - Admin</title>
+
+  <link href="assets/img/favicon.png" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+  <link href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Nunito:300,400,600,700|Poppins:300,400,500,600,700" rel="stylesheet">
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/css/style.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css" rel="stylesheet">
+
+  <script src="assets/js/admin-auth.js"></script>
+  <script>AdminAuth.requireLogin();</script>
+
+  <style>
+    /* ===== PAGINATION ===== */
+    .custom-pagination-wrapper {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 2px 4px; flex-wrap: wrap; gap: 10px;
+    }
+    .pagination-info { font-size: .82rem; color: #6c757d; white-space: nowrap; }
+    .pagination-info span { font-weight: 600; color: #333; }
+    .custom-pagination { display: flex; align-items: center; gap: 4px; list-style: none; margin: 0; padding: 0; }
+    .custom-pagination .page-item { display: flex; }
+    .custom-pagination .page-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 34px; height: 34px; padding: 0 10px;
+      font-size: .82rem; font-weight: 500; color: #4154f1;
+      background: #fff; border: 1.5px solid #c8cef7; border-radius: 6px;
+      cursor: pointer; transition: background .15s, border-color .15s; line-height: 1; user-select: none;
+    }
+    .custom-pagination .page-btn:hover:not(.active):not(.disabled):not(.ellipsis) { background: #eef0fd; border-color: #4154f1; }
+    .custom-pagination .page-btn.active {
+      background: #4154f1; border-color: #4154f1; color: #fff; font-weight: 700;
+      box-shadow: 0 2px 8px rgba(65, 84, 241, .25); pointer-events: none;
+    }
+    .custom-pagination .page-btn.disabled { color: #b8bfd8; border-color: #e6e9f5; background: #f7f8fc; pointer-events: none; }
+    .custom-pagination .page-btn.ellipsis { border: none; background: transparent; color: #9aa0bc; pointer-events: none; min-width: 24px; }
+
+    /* ===== LOADING OVERLAY ===== */
+    .table-wrapper { position: relative; }
+    #tableLoadingOverlay {
+      display: none; position: absolute; inset: 0;
+      background: rgba(255, 255, 255, .7); z-index: 10;
+      align-items: center; justify-content: center;
+    }
+    #tableLoadingOverlay.show { display: flex; }
+
+    /* ===== ẢNH ĐẠI DIỆN TRONG BẢNG ===== */
+    .tour-thumb { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 1px solid #e3e6f0; display: block; }
+    .tour-thumb-empty {
+      width: 48px; height: 48px; border-radius: 50%; border: 1px dashed #d0d5e2;
+      background: #f8f9fc; color: #b0b6c8;
+      display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+    }
+
+    .tour-code {
+      background: #f1f3f9; color: #5a6a85; padding: 2px 6px;
+      border-radius: 4px; font-size: .8rem; font-family: monospace; white-space: nowrap;
+    }
+    .price-text { font-weight: 600; color: #333; white-space: nowrap; }
+    .hidden-warning { font-size: .75rem; color: #b26a00; }
+
+    /* ===== CÔNG TẮC TRẠNG THÁI ===== */
+    .status-switch { position: relative; display: inline-block; width: 52px; height: 28px; vertical-align: middle; }
+    .status-switch input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .status-switch .slider { position: absolute; inset: 0; cursor: pointer; background: #cfd4dc; border-radius: 999px; transition: background .2s; }
+    .status-switch .slider::before {
+      content: ""; position: absolute; left: 3px; top: 3px;
+      width: 22px; height: 22px; border-radius: 50%; background: #fff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
+      background-repeat: no-repeat; background-position: center; background-size: 14px;
+      transition: transform .2s;
+    }
+    .status-switch input:checked + .slider { background: #1e9e4a; }
+    .status-switch input:checked + .slider::before {
+      transform: translateX(24px);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='8' fill='%231e9e4a'/%3E%3Cpath d='M4.5 8.2l2.3 2.3 4.7-4.8' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    }
+    .status-switch input:focus-visible + .slider { outline: 2px solid #4154f1; outline-offset: 2px; }
+    .status-switch input:disabled + .slider { opacity: .6; cursor: progress; }
+
+    /* ===== NÚT LỌC + CHIP BỘ LỌC ===== */
+    .btn-filter { position: relative; height: 31px; width: 38px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+    .btn-filter .filter-count {
+      position: absolute; top: -7px; right: -7px; font-size: .68rem; min-width: 18px;
+      padding: 2px 5px; border-radius: 10px;
+    }
+    .active-filter-bar {
+      display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+      padding: 10px 2px; border-top: 1px solid #ebeef4; font-size: .85rem; color: #555;
+    }
+    .filter-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #eef0fd; color: #4154f1; border: 1px solid #d5dafb;
+      border-radius: 6px; padding: 2px 4px 2px 10px; font-size: .8rem;
+    }
+    .filter-chip button { border: 0; background: none; color: inherit; padding: 0 4px; line-height: 1; }
+    .filter-chip button:hover { color: #dc3545; }
+    .btn-clear-all { border: 0; background: none; color: #6c757d; margin-left: auto; padding: 2px 6px; }
+    .btn-clear-all:hover { color: #dc3545; }
+
+    /* ===== Ô CHỌN CÓ TÌM KIẾM (Choices.js) — chỉnh cho giống form-select của Bootstrap ===== */
+    #filterModal .choices { margin-bottom: 0; }
+    #filterModal .choices__inner {
+      min-height: 38px; padding: 4px 10px; background: #fff;
+      border: 1px solid #dee2e6; border-radius: .375rem; font-size: 1rem;
+    }
+    #filterModal .choices.is-focused .choices__inner,
+    #filterModal .choices.is-open .choices__inner { border-color: #86b7fe; box-shadow: 0 0 0 .25rem rgba(13, 110, 253, .15); }
+    #filterModal .choices__list--single { padding: 4px 16px 4px 2px; }
+    #filterModal .choices__placeholder { opacity: 1; color: #6c757d; }
+    #filterModal .choices__list--dropdown, #filterModal .choices__list[aria-expanded] {
+      border-radius: .375rem; box-shadow: 0 6px 20px rgba(0, 0, 0, .1); z-index: 20;
+    }
+    #filterModal .choices__list--dropdown .choices__item--selectable.is-highlighted { background: #eef0fd; }
+    #filterModal .choices__input--cloned { font-size: .95rem; }
+    #filterModal .choices[data-type*=select-one] .choices__button { opacity: .5; margin-right: 22px; }
+    #filterModal .choices[data-type*=select-one] .choices__button:hover { opacity: 1; }
+
+    /* ===== SẮP XẾP THEO CỘT ===== */
+    .sort-btn {
+      border: 0; background: none; padding: 0; font: inherit; font-weight: inherit; color: inherit;
+      display: inline-flex; align-items: center; gap: 4px; cursor: pointer; white-space: nowrap;
+    }
+    .sort-btn:hover { color: #4154f1; }
+    .sort-btn:focus-visible { outline: 2px solid #4154f1; outline-offset: 2px; border-radius: 4px; }
+    .sort-btn .sort-icon { font-size: .8rem; color: #adb5bd; opacity: 0; transition: opacity .15s; }
+    .sort-btn:hover .sort-icon { opacity: .6; }
+    .sort-btn.sort-active { color: #4154f1; }
+    .sort-btn.sort-active .sort-icon { opacity: 1; color: #4154f1; font-size: 1rem; }
+
+    /* Tên tour dài: tối đa 2 dòng, phần dư thành "…", rê chuột xem tên đầy đủ */
+    .tour-name {
+      display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2;
+      overflow: hidden; overflow-wrap: anywhere;
+      max-width: 340px; line-height: 1.35; font-weight: 600; color: #212529;
+    }
+
+    /* ===== BẢNG: tiêu đề + cột ngắn không xuống dòng, thiếu chỗ thì cuộn ngang ===== */
+    #tourTable th { white-space: nowrap; }
+    #tourTable .cell-nowrap {
+      white-space: nowrap; max-width: 180px;
+      overflow: hidden; text-overflow: ellipsis;   /* tên danh mục / địa điểm quá dài → "…" */
+    }
+
+    /* ===== BADGE DANH MỤC / ĐỊA ĐIỂM ===== */
+    .tag {
+      display: inline-flex; align-items: center; gap: 4px; max-width: 170px;
+      padding: 3px 10px; border-radius: 6px; font-size: .8rem; font-weight: 500;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; vertical-align: middle;
+    }
+    .tag-category { background: #eef0fd; color: #3f51d9; border: 1px solid #d5dafb; }
+    .tag-location { background: #f3f4f6; color: #4b5563; border: 1px solid #e5e7eb; }
+    .tag-muted    { background: #fff8e6; color: #9a6700; border: 1px solid #f5dfa8; }   /* danh mục / địa điểm đang ẩn */
+  </style>
+</head>
+
+<body>
+
+<!-- ======================= HEADER ======================= -->
+<header id="header" class="header fixed-top d-flex align-items-center">
+  <div class="d-flex align-items-center justify-content-between">
+    <a href="index.html" class="logo d-flex align-items-center">
+      <img src="assets/img/logo.png" alt="">
+      <span class="d-none d-lg-block">VietTrip Admin</span>
+    </a>
+    <i class="bi bi-list toggle-sidebar-btn"></i>
+  </div>
+  <nav class="header-nav ms-auto">
+    <ul class="d-flex align-items-center">
+      <li class="nav-item dropdown pe-3">
+        <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
+          <img src="assets/img/profile-img.jpg" alt="Profile" class="rounded-circle">
+          <span class="d-none d-md-block dropdown-toggle ps-2" data-admin-name></span>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
+          <li class="dropdown-header"><h6 data-admin-name></h6><span data-admin-role></span></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item d-flex align-items-center" href="profile.html">
+            <i class="bi bi-person"></i><span>Hồ sơ</span>
+          </a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item d-flex align-items-center" href="#" data-admin-logout>
+            <i class="bi bi-box-arrow-right"></i><span>Đăng xuất</span>
+          </a></li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+</header>
+<script>AdminAuth.renderUser();</script>
+
+<!-- ======================= SIDEBAR ======================= -->
+<aside id="sidebar" class="sidebar">
+  <ul class="sidebar-nav" id="sidebar-nav">
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="index.html"><i class="bi bi-grid"></i><span>Bảng điều khiển</span></a>
+    </li>
+
+    <li class="nav-heading">Kinh doanh</li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="bookings.html"><i class="bi bi-cart-check"></i><span>Quản lý đặt tour</span></a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="payments.html"><i class="bi bi-credit-card"></i><span>Quản lý thanh toán</span></a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="promotions.html"><i class="bi bi-tags"></i><span>Quản lý khuyến mãi</span></a>
+    </li>
+
+    <li class="nav-heading">Sản phẩm</li>
+    <li class="nav-item">
+      <!-- data-pages: trang tour-form.html cũng tô sáng mục này -->
+      <a class="nav-link collapsed" href="tours.html" data-pages="tour-form.html"><i class="bi bi-map"></i><span>Quản lý tour</span></a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="tour-schedules.html"><i class="bi bi-calendar-event"></i><span>Quản lý lịch khởi hành</span></a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="locations.html"><i class="bi bi-geo-alt"></i><span>Quản lý địa điểm</span></a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="categories.html"><i class="bi bi-bookmarks"></i><span>Quản lý danh mục</span></a>
+    </li>
+
+    <li class="nav-heading">Quản lý chung</li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="customers.html"><i class="bi bi-people"></i><span>Quản lý khách hàng</span></a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="reviews.html"><i class="bi bi-star"></i><span>Quản lý đánh giá</span></a>
+    </li>
+    <li class="nav-item" data-admin-only>
+      <a class="nav-link collapsed" href="staff.html"><i class="bi bi-person-badge"></i><span>Quản lý nhân viên</span></a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="report-revenue.html"><i class="bi bi-bar-chart"></i><span>Báo cáo thống kê</span></a>
+    </li>
+  </ul>
+</aside>
+
+<!-- ======================= NỘI DUNG ======================= -->
+<main id="main" class="main">
+  <div class="pagetitle">
+    <h1>Quản lý Tour</h1>
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="index.html">Trang chủ</a></li>
+        <li class="breadcrumb-item">Sản phẩm</li>
+        <li class="breadcrumb-item active">Tour</li>
+      </ol>
+    </nav>
+  </div>
+
+  <section class="section">
+    <div class="card">
+      <div class="card-body">
+
+        <!-- Tiêu đề + nút Thêm -->
+        <div class="d-flex justify-content-between align-items-center mt-3 mb-3 flex-wrap gap-2">
+          <h5 class="card-title p-0 m-0">Danh sách tour</h5>
+          <a href="tour-form.html" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>Thêm tour
+          </a>
+        </div>
+
+        <!-- Thanh công cụ: Hiển thị (trái) · Tìm kiếm + nút Lọc (phải) -->
+        <div class="d-flex flex-wrap align-items-end gap-3 mb-2">
+          <div>
+            <label class="form-label text-muted small mb-1" for="selectPerPage">Hiển thị</label>
+            <select class="form-select form-select-sm" id="selectPerPage" onchange="onPerPageChange(this.value)" style="min-width: 95px;">
+              <option value="5">5 mục</option>
+              <option value="10" selected>10 mục</option>
+              <option value="20">20 mục</option>
+            </select>
+          </div>
+          <div class="ms-auto d-flex align-items-end gap-2">
+            <div>
+              <label class="form-label text-muted small mb-1" for="searchInput">Tìm kiếm</label>
+              <div class="input-group input-group-sm">
+                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                <input type="text" class="form-control border-start-0" id="searchInput"
+                       placeholder="Mã, tên tour..." oninput="onSearchInput(this.value)"
+                       style="min-width: 240px;">
+              </div>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-secondary btn-filter" title="Bộ lọc"
+                    aria-label="Mở bộ lọc" onclick="openFilterModal()">
+              <i class="bi bi-funnel"></i>
+              <span class="badge bg-primary filter-count d-none" id="filterCount">0</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Bộ lọc đang áp dụng -->
+        <div class="active-filter-bar d-none" id="activeFilterBar">
+          <span>Bộ lọc đang kích hoạt</span>
+          <span class="d-flex flex-wrap gap-2" id="activeChips"></span>
+          <button type="button" class="btn-clear-all" title="Xoá tất cả bộ lọc" onclick="clearFilters()">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+        <div class="border-bottom mb-3"></div>
+
+        <!-- Bảng -->
+        <div class="table-wrapper">
+          <div id="tableLoadingOverlay">
+            <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Đang tải...</span></div>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle" id="tourTable" style="min-width: 1120px;">
+              <thead>
+              <tr>
+                <th style="width: 90px;">Ảnh</th>
+                <th style="width: 120px;">
+                  <button type="button" class="sort-btn" data-sort="tourCode" onclick="sortBy('tourCode')">
+                    Mã tour <i class="bi bi-arrow-down-up sort-icon"></i>
+                  </button>
+                </th>
+                <th style="min-width: 220px;">
+                  <button type="button" class="sort-btn" data-sort="tourName" onclick="sortBy('tourName')">
+                    Tên tour <i class="bi bi-arrow-down-up sort-icon"></i>
+                  </button>
+                </th>
+                <th style="width: 150px;">Danh mục</th>
+                <th style="width: 140px;">Địa điểm</th>
+                <th class="text-end" style="width: 140px;">
+                  <button type="button" class="sort-btn" data-sort="basePrice" onclick="sortBy('basePrice')">
+                    Giá cơ bản <i class="bi bi-arrow-down-up sort-icon"></i>
+                  </button>
+                </th>
+                <th class="text-center" style="width: 110px;">Trạng thái</th>
+                <th class="text-center" style="width: 170px;">Hành động</th>
+              </tr>
+              </thead>
+              <tbody id="tourListBody">
+              <tr><td colspan="8" class="text-center py-4">Đang tải dữ liệu...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Phân trang -->
+        <div class="custom-pagination-wrapper">
+          <div class="pagination-info" id="paginationInfo">—</div>
+          <ul class="custom-pagination" id="paginationControls"></ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ======================= MODAL BỘ LỌC ======================= -->
+<div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="filterModalTitle">Bộ lọc</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label" for="filterCategory">Danh mục</label>
+            <select class="form-select" id="filterCategory" onchange="onFilterChange()">
+              <option value="">Tất cả</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="filterLocation">Địa điểm</label>
+            <select class="form-select" id="filterLocation" onchange="onFilterChange()">
+              <option value="">Tất cả</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="filterStatus">Trạng thái</label>
+            <select class="form-select" id="filterStatus" onchange="onFilterChange()">
+              <option value="">Tất cả</option>
+              <option value="true">Đã kích hoạt</option>
+              <option value="false">Chưa kích hoạt</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="filterClass">Dòng tour</label>
+            <select class="form-select" id="filterClass" onchange="onFilterChange()">
+              <option value="">Tất cả</option>
+              <option value="BUDGET">Tiết kiệm</option>
+              <option value="STANDARD">Tiêu chuẩn</option>
+              <option value="PREMIUM">Cao cấp</option>
+              <option value="GOOD_PRICE">Giá tốt</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="filterFeatured">Tour nổi bật</label>
+            <select class="form-select" id="filterFeatured" onchange="onFilterChange()">
+              <option value="">Tất cả</option>
+              <option value="true">Nổi bật</option>
+              <option value="false">Không nổi bật</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="filterMinPrice">Khoảng giá (₫)</label>
+            <div class="input-group">
+              <input type="text" class="form-control" id="filterMinPrice" inputmode="numeric"
+                     autocomplete="off" maxlength="19" placeholder="Từ" aria-label="Giá từ">
+              <span class="input-group-text">–</span>
+              <input type="text" class="form-control" id="filterMaxPrice" inputmode="numeric"
+                     autocomplete="off" maxlength="19" placeholder="Đến" aria-label="Giá đến">
+            </div>
+          </div>
+          <div class="col-12 d-none" id="priceRangeError">
+            <div class="small text-danger"><i class="bi bi-exclamation-circle me-1"></i>Giá từ không được lớn hơn giá đến.</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer justify-content-start">
+        <button type="button" class="btn btn-danger" onclick="clearFilters()">Đặt lại bộ lọc</button>
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/scripts/choices.min.js"></script>
+<script src="assets/js/main.js"></script>
+
+<script>
+  /* ============================================================
+     STATE
+     ============================================================ */
+  const API = '/api/admin/tours';
+
+  let currentPage   = 0;
+  let perPage       = 10;
+  let searchKeyword = '';
+  let searchTimer   = null;
+  let sortCol    = 'createdAt';   // mặc định: tour mới tạo lên đầu
+  let sortAsc    = false;
+  let userSorted = false;         // chưa bấm tiêu đề cột → không tô xanh
+
+  function $(id) { return document.getElementById(id); }
+
+  // Các bộ lọc trong form lọc: id ô chọn → nhãn hiển thị trên chip
+  const FILTERS = [
+    { id: 'filterCategory', label: 'Danh mục',     param: 'categoryId' },
+    { id: 'filterLocation', label: 'Địa điểm',     param: 'locationId' },
+    { id: 'filterStatus',   label: 'Trạng thái',   param: 'isActive'   },
+    { id: 'filterClass',    label: 'Dòng tour',    param: 'tourClass'  },
+    { id: 'filterFeatured', label: 'Tour nổi bật', param: 'isFeatured' },
+    { id: 'filterMinPrice', label: 'Giá từ',       param: 'minPrice', format: 'price' },
+    { id: 'filterMaxPrice', label: 'Giá đến',      param: 'maxPrice', format: 'price' }
+  ];
+
+  /* ============================================================
+     TIỆN ÍCH
+     ============================================================ */
+  function escapeHtml(str) {
+    return String(str ?? '').replace(/[&<>"']/g, c =>
+            ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  const moneyFmt = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 });
+  function fmtMoney(v) { return v == null ? '—' : moneyFmt.format(v); }
+
+  /** "3500000" → "3.500.000" */
+  function formatThousands(digits) {
+    return String(digits).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  }
+
+  /** Giá trị gửi lên API: ô giá → chỉ lấy chữ số, ô chọn → giữ nguyên */
+  function filterValue(f) {
+    const v = $(f.id).value;
+    return f.format === 'price' ? v.replace(/\D/g, '') : v;
+  }
+
+  async function readJson(res) {
+    try { return await res.json(); } catch (_) { return null; }
+  }
+
+  function errorMessage(json, fallback) {
+    if (json && json.errors && json.errors.length) return json.errors.join(' • ');
+    return (json && json.message) || fallback;
+  }
+
+  const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 2000, timerProgressBar: true });
+  function showToast(message, icon = 'success') { Toast.fire({ icon, title: message }); }
+
+  function showLoading(show) { $('tableLoadingOverlay').classList.toggle('show', show); }
+
+  /** "Hạ Long" → "ha long": dùng để tìm không dấu trong ô chọn */
+  function removeAccents(text) {
+    return String(text || '').replace(/đ/g, 'd').replace(/Đ/g, 'D')
+            .normalize('NFD').replace(/\p{M}+/gu, '').toLowerCase();
+  }
+
+  // Ô chọn có tìm kiếm: id → đối tượng Choices
+  const choicesMap = {};
+
+  function makeSearchableSelect(id) {
+    choicesMap[id] = new Choices($(id), {
+      searchPlaceholderValue: 'Bắt đầu gõ để tìm kiếm...',
+      noResultsText: 'Không tìm thấy kết quả',
+      noChoicesText: 'Không có lựa chọn',
+      itemSelectText: '',
+      removeItemButton: true,        // nút × để bỏ lựa chọn
+      shouldSort: false,             // giữ thứ tự từ server (danh mục theo thứ tự hiển thị, địa điểm theo tên)
+      searchResultLimit: 50,
+      searchFields: ['label', 'customProperties'],   // customProperties = tên đã bỏ dấu
+      fuseOptions: { threshold: 0.3 }
+    });
+  }
+
+  /** Nhãn đang chọn của một ô lọc (ô thường hoặc ô Choices) */
+  function selectedLabel(id) {
+    if (choicesMap[id]) {
+      const item = choicesMap[id].getValue();
+      return item ? item.label : '';
+    }
+    const sel = $(id);
+    return sel.options[sel.selectedIndex].text;
+  }
+
+  /** Đưa một ô lọc về "Tất cả" */
+  function resetSelect(id) {
+    if (choicesMap[id]) {
+      choicesMap[id].removeActiveItems();
+      choicesMap[id].setChoiceByValue('');
+    }
+    $(id).value = '';
+  }
+
+  /* ============================================================
+     DROPDOWN DANH MỤC / ĐỊA ĐIỂM (lấy cả mục đang ẩn để admin lọc được)
+     ============================================================ */
+  async function loadFilterOptions() {
+    try {
+      const [catRes, locRes] = await Promise.all([
+        fetch('/api/admin/categories?page=0&size=100&sortBy=displayOrder&sortDir=asc', { headers: AdminAuth.authHeaders() }),
+        fetch('/api/admin/locations?page=0&size=100&sortBy=locationName&sortDir=asc',  { headers: AdminAuth.authHeaders() })
+      ]);
+      if (catRes.status === 401 || locRes.status === 401) return AdminAuth.logout();
+
+      const cat = await readJson(catRes);
+      const loc = await readJson(locRes);
+
+      if (cat && cat.success) {
+        cat.data.content.forEach(c => $('filterCategory').insertAdjacentHTML('beforeend',
+                `<option value="${c.categoryId}" data-custom-properties="${escapeHtml(removeAccents(c.categoryName))}">`
+                + `${escapeHtml(c.categoryName)}${c.isActive ? '' : ' (đang ẩn)'}</option>`));
+      }
+      if (loc && loc.success) {
+        loc.data.content.forEach(l => $('filterLocation').insertAdjacentHTML('beforeend',
+                `<option value="${l.locationId}" data-custom-properties="${escapeHtml(removeAccents(l.locationName))}">`
+                + `${escapeHtml(l.locationName)}${l.isActive ? '' : ' (đang ẩn)'}</option>`));
+      }
+    } catch (e) {
+      console.error('Không tải được danh mục / địa điểm', e);
+    } finally {
+      // Khởi tạo SAU khi đã có option: Choices đọc danh sách option lúc khởi tạo
+      makeSearchableSelect('filterCategory');
+      makeSearchableSelect('filterLocation');
+    }
+  }
+
+  /* ============================================================
+     1. DANH SÁCH: GET /api/admin/tours
+     ============================================================ */
+  async function fetchTours() {
+    showLoading(true);
+    updateFilterUI();
+
+    const params = new URLSearchParams({
+      page: currentPage, size: perPage,
+      sortBy: sortCol, sortDir: sortAsc ? 'asc' : 'desc'
+    });
+    if (searchKeyword) params.set('keyword', searchKeyword);
+    FILTERS.forEach(f => { const v = filterValue(f); if (v !== '') params.set(f.param, v); });
+
+    try {
+      const res = await fetch(`${API}?${params}`, { headers: AdminAuth.authHeaders() });
+      if (res.status === 401) return AdminAuth.logout();
+      const json = await readJson(res);
+
+      if (res.ok && json && json.success) {
+        const { content, page } = json.data;
+
+        if (content.length === 0 && currentPage > 0) {   // trang trống (vd vừa xoá dòng cuối) → lùi 1 trang
+          currentPage--;
+          return fetchTours();
+        }
+
+        renderRows(content);
+        updateSortUI();
+        renderPagination(page.totalElements, page.totalPages, page.number, page.size);
+      } else {
+        showTableError(errorMessage(json, 'Không tải được danh sách tour.'));
+      }
+    } catch (e) {
+      console.error(e);
+      showTableError('Không kết nối được tới máy chủ.');
+    } finally {
+      showLoading(false);
+    }
+  }
+
+  function activeFilters() { return FILTERS.filter(f => filterValue(f) !== ''); }
+
+  function isFiltering() { return searchKeyword !== '' || activeFilters().length > 0; }
+
+  function renderRows(rows) {
+    const tbody = $('tourListBody');
+
+    if (!rows.length) {
+      tbody.innerHTML = `
+                <tr><td colspan="8" class="text-center text-muted py-5">
+                    <i class="bi bi-inbox fs-3 d-block mb-2 opacity-50"></i>
+                    ${isFiltering() ? 'Không có tour nào khớp bộ lọc.' : 'Chưa có tour nào. Bấm "Thêm tour" để tạo.'}
+                </td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = rows.map(t => {
+      // Tour đang bật nhưng danh mục / địa điểm bị ẩn → khách vẫn không thấy (cần BE trả categoryActive / locationActive)
+      const hiddenBy = [t.categoryActive === false && 'danh mục', t.locationActive === false && 'địa điểm'].filter(Boolean);
+      const warning = t.isActive && hiddenBy.length
+              ? `<div class="hidden-warning mt-1"><i class="bi bi-exclamation-triangle me-1"></i>Khách không thấy: ${hiddenBy.join(', ')} đang ẩn</div>`
+              : '';
+
+      return `
+            <tr>
+                <td>
+                    ${t.thumbnailUrl
+              ? `<img src="${escapeHtml(t.thumbnailUrl)}" alt="" class="tour-thumb"
+                                onerror="this.outerHTML='<div class=&quot;tour-thumb-empty&quot;><i class=&quot;bi bi-image&quot;></i></div>'">`
+              : '<div class="tour-thumb-empty"><i class="bi bi-image"></i></div>'}
+                </td>
+                <td><span class="tour-code">${escapeHtml(t.tourCode)}</span></td>
+                <td>
+                   <div class="tour-name" title="${escapeHtml(t.tourName)}">${escapeHtml(t.tourName)}</div>
+                    ${warning}
+                </td>
+                 <td>
+                    ${t.categoryName ? `<span class="tag ${t.categoryActive === false ? 'tag-muted' : 'tag-category'}" title="${escapeHtml(t.categoryName)}">${escapeHtml(t.categoryName)}</span>` : '—'}
+                 </td>
+                <td>
+                    ${t.locationName ? `<span class="tag ${t.locationActive === false ? 'tag-muted' : 'tag-location'}" title="${escapeHtml(t.locationName)}">${escapeHtml(t.locationName)}</span>` : '—'}
+                </td>
+                <td class="text-end"><span class="price-text">${fmtMoney(t.basePrice)}</span></td>
+                <td class="text-center">
+                    <label class="status-switch" title="${t.isActive ? 'Đang hiển thị, bấm để ẩn' : 'Đang ẩn, bấm để hiển thị'}">
+                        <input type="checkbox" ${t.isActive ? 'checked' : ''}
+                               aria-label="Trạng thái ${escapeHtml(t.tourName)}"
+                               onchange="toggleStatus(${t.tourId}, this)">
+                        <span class="slider"></span>
+                    </label>
+                </td>
+                <td class="text-center">
+                    <div class="d-flex justify-content-center gap-1">
+                        <a href="tour-form.html?id=${t.tourId}&view=true" class="btn btn-sm btn-outline-info" title="Xem chi tiết">
+                            <i class="bi bi-eye"></i></a>
+                        <a href="tour-form.html?id=${t.tourId}" class="btn btn-sm btn-outline-warning" title="Sửa">
+                            <i class="bi bi-pencil-square"></i></a>
+                        <a href="tour-schedules.html?tourId=${t.tourId}" class="btn btn-sm btn-outline-primary" title="Lịch khởi hành">
+                            <i class="bi bi-calendar3"></i></a>
+                        <button class="btn btn-sm btn-outline-danger" title="Xoá"
+                                onclick="deleteTour(${t.tourId}, this)" data-name="${escapeHtml(t.tourName)}">
+                            <i class="bi bi-trash"></i></button>
+                    </div>
+                </td>
+            </tr>`;
+    }).join('');
+  }
+
+  function showTableError(msg) {
+    $('tourListBody').innerHTML =
+            `<tr><td colspan="8" class="text-center text-danger py-4">
+                <i class="bi bi-exclamation-triangle me-2"></i>${escapeHtml(msg)}
+             </td></tr>`;
+    $('paginationInfo').textContent = '—';
+    $('paginationControls').innerHTML = '';
+  }
+
+  /* ============================================================
+     2. ẨN / HIỆN: PATCH /api/admin/tours/{id}/status?active=
+     ============================================================ */
+  async function toggleStatus(id, input) {
+    const active = input.checked;
+    input.disabled = true;
+
+    try {
+      const res = await fetch(`${API}/${id}/status?active=${active}`, { method: 'PATCH', headers: AdminAuth.authHeaders() });
+      if (res.status === 401) return AdminAuth.logout();
+      const json = await readJson(res);
+
+      if (res.ok && json && json.success) {
+        input.closest('label').title = active ? 'Đang hiển thị, bấm để ẩn' : 'Đang ẩn, bấm để hiển thị';
+        showToast(active ? 'Đã hiển thị tour' : 'Đã ẩn tour');
+        if ($('filterStatus').value !== '') fetchTours();   // dòng vừa đổi không còn khớp bộ lọc
+      } else {
+        input.checked = !active;
+        Swal.fire({ icon: 'error', title: 'Không đổi được trạng thái', text: errorMessage(json, 'Vui lòng thử lại.') });
+      }
+    } catch (e) {
+      console.error(e);
+      input.checked = !active;
+      Swal.fire({ icon: 'error', title: 'Không đổi được trạng thái', text: 'Không kết nối được tới máy chủ.' });
+    } finally {
+      input.disabled = false;
+    }
+  }
+
+  /* ============================================================
+     3. XOÁ CỨNG: DELETE /api/admin/tours/{id} (chỉ khi chưa có booking)
+     ============================================================ */
+  async function deleteTour(id, btn) {
+    const name = btn.dataset.name;
+    const confirm = await Swal.fire({
+      icon: 'warning',
+      title: 'Xoá vĩnh viễn tour?',
+      html: `Tour <b>${escapeHtml(name)}</b> cùng ảnh, lịch trình và lịch khởi hành sẽ bị xoá vĩnh viễn.<br>
+                   <small class="text-muted">Tour đã có đơn đặt sẽ không xoá được, hãy dùng công tắc để ẩn tour.</small>`,
+      showCancelButton: true,
+      confirmButtonText: 'Xoá vĩnh viễn',
+      cancelButtonText: 'Huỷ',
+      confirmButtonColor: '#dc3545'
+    });
+    if (!confirm.isConfirmed) return;
+
+    btn.disabled = true;
+    try {
+      const res = await fetch(`${API}/${id}`, { method: 'DELETE', headers: AdminAuth.authHeaders() });
+      if (res.status === 401) return AdminAuth.logout();
+      const json = await readJson(res);
+
+      if (res.ok && json && json.success) {
+        showToast('Đã xoá tour');
+        fetchTours();
+      } else {
+        Swal.fire({ icon: 'error', title: 'Không xoá được tour', text: errorMessage(json, 'Vui lòng thử lại.') });
+      }
+    } catch (e) {
+      console.error(e);
+      Swal.fire({ icon: 'error', title: 'Không xoá được tour', text: 'Không kết nối được tới máy chủ.' });
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  /* ============================================================
+     PHÂN TRANG
+     ============================================================ */
+  function renderPagination(total, totalPages, pageIndex, size) {
+    const start = total === 0 ? 0 : pageIndex * size + 1;
+    const end   = Math.min((pageIndex + 1) * size, total);
+
+    $('paginationInfo').innerHTML = total === 0
+            ? 'Không có mục nào'
+            : `Hiển thị <span>${start}–${end}</span> trong tổng số <span>${total}</span> tour`;
+
+    const ul = $('paginationControls');
+    ul.innerHTML = '';
+    if (totalPages <= 1) return;
+
+    const addBtn = (label, page, extra = '') => {
+      const li = document.createElement('li');
+      li.className = 'page-item';
+      const btn = document.createElement('button');
+      btn.className = `page-btn ${extra}`.trim();
+      btn.innerHTML = label;
+      if (!extra) btn.addEventListener('click', () => { currentPage = page; fetchTours(); });
+      li.appendChild(btn);
+      ul.appendChild(li);
+    };
+
+    addBtn('<i class="bi bi-chevron-left"></i>', pageIndex - 1, pageIndex === 0 ? 'disabled' : '');
+    getPageNumbers(pageIndex + 1, totalPages).forEach(p => {
+      if (p === '...') addBtn('…', -1, 'ellipsis');
+      else addBtn(String(p), p - 1, p === pageIndex + 1 ? 'active' : '');
+    });
+    addBtn('<i class="bi bi-chevron-right"></i>', pageIndex + 1, pageIndex === totalPages - 1 ? 'disabled' : '');
+  }
+
+  function getPageNumbers(current, total) {
+    if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+    const pages = [1];
+    if (current > 4) pages.push('...');
+    for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) pages.push(i);
+    if (current < total - 3) pages.push('...');
+    pages.push(total);
+    return pages;
+  }
+
+  /* ============================================================
+     TÌM KIẾM / LỌC / SẮP XẾP
+     ============================================================ */
+  function onSearchInput(val) {
+    searchKeyword = val.trim();
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => { currentPage = 0; fetchTours(); }, 400);
+  }
+
+  function onFilterChange() { currentPage = 0; fetchTours(); }
+
+  function onPerPageChange(val) { perPage = parseInt(val, 10); currentPage = 0; fetchTours(); }
+
+  function openFilterModal() {
+    bootstrap.Modal.getOrCreateInstance($('filterModal')).show();
+  }
+
+  /** Số trên icon lọc + dải chip "Bộ lọc đang kích hoạt" */
+  function updateFilterUI() {
+    const active = activeFilters();
+
+    $('filterCount').textContent = active.length;
+    $('filterCount').classList.toggle('d-none', active.length === 0);
+    $('activeFilterBar').classList.toggle('d-none', active.length === 0);
+
+    $('activeChips').innerHTML = active.map(f => {
+      const text = f.format === 'price' ? `${$(f.id).value} ₫` : selectedLabel(f.id);
+      return `<span class="filter-chip">${escapeHtml(f.label)}: ${escapeHtml(text)}
+                        <button type="button" title="Bỏ bộ lọc này" aria-label="Bỏ bộ lọc ${escapeHtml(f.label)}"
+                                onclick="removeFilter('${f.id}')"><i class="bi bi-x"></i></button>
+                    </span>`;
+    }).join('');
+  }
+
+  function removeFilter(id) {
+    resetSelect(id);
+    onFilterChange();
+  }
+
+  /** Bỏ hết các bộ lọc trong form lọc (giữ nguyên ô tìm kiếm, sắp xếp, số mục / trang) */
+  function clearFilters() {
+    FILTERS.forEach(f => resetSelect(f.id));
+    $('priceRangeError').classList.add('d-none');
+    ['filterMinPrice', 'filterMaxPrice'].forEach(id => $(id).classList.remove('is-invalid'));
+    currentPage = 0;
+    fetchTours();
+  }
+
+  /* ----- Ô giá: gõ tới đâu thêm dấu chấm tới đó, ngừng gõ 0,5 giây mới lọc ----- */
+  let priceTimer = null;
+
+  ['filterMinPrice', 'filterMaxPrice'].forEach(id => {
+    $(id).addEventListener('input', e => {
+      const digits = e.target.value.replace(/\D/g, '').replace(/^0+(?=\d)/, '').slice(0, 15);
+      e.target.value = formatThousands(digits);
+      clearTimeout(priceTimer);
+      priceTimer = setTimeout(onPriceChange, 500);
+    });
+  });
+
+  function onPriceChange() {
+    const min = $('filterMinPrice').value.replace(/\D/g, '');
+    const max = $('filterMaxPrice').value.replace(/\D/g, '');
+    const invalid = min !== '' && max !== '' && Number(min) > Number(max);
+
+    $('priceRangeError').classList.toggle('d-none', !invalid);
+    ['filterMinPrice', 'filterMaxPrice'].forEach(id => $(id).classList.toggle('is-invalid', invalid));
+    if (!invalid) onFilterChange();   // khoảng giá sai → chưa lọc, chờ admin sửa
+  }
+
+  /** Bấm cùng cột → đổi chiều; bấm lần đầu → tăng dần */
+  function sortBy(col) {
+    if (userSorted && sortCol === col) sortAsc = !sortAsc;
+    else { sortCol = col; sortAsc = true; }
+    userSorted = true;
+    currentPage = 0;
+    fetchTours();
+  }
+
+  function updateSortUI() {
+    document.querySelectorAll('.sort-btn').forEach(btn => {
+      const active = userSorted && btn.dataset.sort === sortCol;
+      btn.classList.toggle('sort-active', active);
+      btn.querySelector('.sort-icon').className = active
+              ? `bi ${sortAsc ? 'bi-arrow-up-short' : 'bi-arrow-down-short'} sort-icon`
+              : 'bi bi-arrow-down-up sort-icon';
+      btn.closest('th').setAttribute('aria-sort', active ? (sortAsc ? 'ascending' : 'descending') : 'none');
+    });
+  }
+
+  /* ============================================================
+     KHỞI ĐỘNG
+     ============================================================ */
+  (async () => {
+    // Thông báo từ trang tour-form.html sau khi lưu thành công
+    const flash = sessionStorage.getItem('tour_flash');
+    if (flash) { sessionStorage.removeItem('tour_flash'); showToast(flash); }
+
+    await loadFilterOptions();
+    fetchTours();
+  })();
+</script>
+
+</body>
+</html>

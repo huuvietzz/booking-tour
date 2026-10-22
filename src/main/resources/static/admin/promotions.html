@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>Khuyến mãi & Mã giảm giá - Admin</title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">
+
+  <link href="assets/img/favicon.png" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <link href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
+  <link href="assets/vendor/quill/quill.snow.css" rel="stylesheet">
+  <link href="assets/vendor/quill/quill.bubble.css" rel="stylesheet">
+  <link href="assets/vendor/remixicon/remixicon.css" rel="stylesheet">
+  <link href="assets/vendor/simple-datatables/style.css" rel="stylesheet">
+  <link href="assets/css/style.css" rel="stylesheet">
+
+  <script src="assets/js/admin-auth.js"></script>
+  <script>AdminAuth.requireLogin();</script>
+  <style>
+
+  </style>
+</head>
+
+<body>
+<header id="header" class="header fixed-top d-flex align-items-center">
+
+  <div class="d-flex align-items-center justify-content-between">
+    <a href="index.html" class="logo d-flex align-items-center">
+      <img src="assets/img/logo.png" alt="">
+      <span class="d-none d-lg-block">VietTrip Admin</span>
+    </a>
+    <i class="bi bi-list toggle-sidebar-btn"></i>
+  </div>
+
+  <div class="search-bar">
+    <form class="search-form d-flex align-items-center" method="POST" action="#">
+      <input type="text" name="query" placeholder="Tìm kiếm nhanh..." title="Nhập từ khóa tìm kiếm">
+      <button type="submit" title="Search"><i class="bi bi-search"></i></button>
+    </form>
+  </div>
+
+  <nav class="header-nav ms-auto">
+    <ul class="d-flex align-items-center">
+      <li class="nav-item d-block d-lg-none">
+        <a class="nav-link nav-icon search-bar-toggle " href="#">
+          <i class="bi bi-search"></i>
+        </a>
+      </li>
+      <li class="nav-item dropdown pe-3">
+        <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
+          <img src="assets/img/profile-img.jpg" alt="Profile" class="rounded-circle">
+          <span class="d-none d-md-block dropdown-toggle ps-2" data-admin-name></span>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
+          <li class="dropdown-header"><h6 data-admin-name></h6><span data-admin-role></span></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item d-flex align-items-center" href="profile.html">
+            <i class="bi bi-person"></i><span>Hồ sơ của tôi</span>
+          </a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item d-flex align-items-center" href="#" id="btnLogout" data-admin-logout>
+            <i class="bi bi-box-arrow-right"></i><span>Đăng xuất</span>
+          </a></li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+</header>
+
+<aside id="sidebar" class="sidebar">
+  <ul class="sidebar-nav" id="sidebar-nav">
+
+    <li class="nav-item">
+      <a class="nav-link" href="index.html">
+        <i class="bi bi-grid"></i><span>Bảng điều khiển</span>
+      </a>
+    </li>
+
+    <!-- ================= KINH DOANH ================= -->
+    <li class="nav-heading">Kinh doanh</li>
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="bookings.html">
+        <i class="bi bi-cart-check"></i><span>Quản lý đặt tour</span>
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="payments.html">
+        <i class="bi bi-credit-card"></i><span>Quản lý thanh toán</span>
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="promotions.html">
+        <i class="bi bi-tags"></i><span>Quản lý khuyến mãi</span>
+      </a>
+    </li>
+
+    <!-- ================= SẢN PHẨM ================= -->
+    <li class="nav-heading">Sản phẩm</li>
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="tours.html">
+        <i class="bi bi-map"></i><span>Quản lý tour</span>
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="tour-schedules.html">
+        <i class="bi bi-calendar-event"></i><span>Quản lý lịch khởi hành</span>
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="locations.html">
+        <i class="bi bi-geo-alt"></i><span>Quản lý địa điểm</span>
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="categories.html">
+        <i class="bi bi-bookmarks"></i><span>Quản lý danh mục</span>
+      </a>
+    </li>
+
+    <!-- ================= QUẢN LÝ CHUNG ================= -->
+    <li class="nav-heading">Quản lý chung</li>
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="customers.html">
+        <i class="bi bi-people"></i><span>Quản lý khách hàng</span>
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="reviews.html">
+        <i class="bi bi-star"></i><span>Quản lý đánh giá</span>
+      </a>
+    </li>
+
+    <!-- Chỉ ADMIN thấy: admin-auth.js gỡ phần tử này nếu là STAFF -->
+    <li class="nav-item" data-admin-only>
+      <a class="nav-link collapsed" href="staff.html">
+        <i class="bi bi-person-badge"></i><span>Quản lý nhân viên</span>
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="report-revenue.html">
+        <i class="bi bi-bar-chart"></i><span>Báo cáo thống kê</span>
+      </a>
+    </li>
+
+  </ul>
+</aside>
+
+<main id="main" class="main">
+
+  <div class="pagetitle">
+    <h1>Khuyến mãi & Mã giảm giá</h1>
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="index.html">Trang chủ</a></li>
+        <li class="breadcrumb-item">Vận hành</li>
+        <li class="breadcrumb-item active">Chương trình KM</li>
+      </ol>
+    </nav>
+  </div>
+
+  <section class="section">
+    <div class="row">
+      <div class="col-lg-12">
+
+        <div class="card">
+          <div class="card-body">
+
+            <div class="d-flex justify-content-between align-items-center mt-3 mb-4">
+              <h5 class="card-title p-0 m-0">Quản lý Chương trình Khuyến mãi</h5>
+              <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPromotionModal">
+                <i class="bi bi-tag-fill me-1"></i> Tạo Mã Khuyến mãi
+              </button>
+            </div>
+
+            <table class="table datatable table-hover align-middle">
+              <thead>
+              <tr>
+                <th scope="col">Mã KM (Code)</th>
+                <th scope="col">Tên chương trình</th>
+                <th scope="col">Mức giảm & Điều kiện</th>
+                <th scope="col">Thời gian áp dụng</th>
+                <th scope="col">Lượt dùng (Đã dùng/Tổng)</th>
+                <th scope="col">Trạng thái</th>
+                <th scope="col" class="text-center">Hành động</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td><span class="badge bg-warning text-dark fs-6 border border-warning border-2 border-dashed">SUMMER2026</span></td>
+                <td class="fw-bold">Chào hè rực rỡ 2026</td>
+                <td>
+                  <span class="text-danger fw-bold">-10%</span> <br>
+                  <small class="text-muted">Đơn tối thiểu: 5,000,000 đ</small><br>
+                  <small class="text-muted">Giảm tối đa: 1,000,000 đ</small>
+                </td>
+                <td>
+                  <small>Từ: 01/05/2026</small><br>
+                  <small>Đến: 31/08/2026</small>
+                </td>
+                <td>
+                  <div class="d-flex align-items-center mb-1">
+                    <span class="me-2 small">45 / 100</span>
+                  </div>
+                  <div class="progress" style="height: 6px;">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: 45%" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                </td>
+                <td><span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Đang chạy</span></td>
+                <td class="text-center">
+                  <button type="button" class="btn btn-sm btn-info text-white" title="Xem chi tiết"><i class="bi bi-eye"></i></button>
+                  <button type="button" class="btn btn-sm btn-warning text-dark" title="Sửa"><i class="bi bi-pencil-square"></i></button>
+                  <button type="button" class="btn btn-sm btn-danger" title="Khóa"><i class="bi bi-lock"></i></button>
+                </td>
+              </tr>
+
+              <tr>
+                <td><span class="badge bg-warning text-dark fs-6 border border-warning border-2 border-dashed">NEWUSER500</span></td>
+                <td class="fw-bold">Ưu đãi khách hàng mới</td>
+                <td>
+                  <span class="text-danger fw-bold">-500,000 đ</span> <br>
+                  <small class="text-muted">Đơn tối thiểu: 2,000,000 đ</small>
+                </td>
+                <td>
+                  <small>Từ: 01/01/2026</small><br>
+                  <small>Đến: 31/12/2026</small>
+                </td>
+                <td>
+                  <div class="d-flex align-items-center mb-1">
+                    <span class="me-2 small text-danger">495 / 500</span>
+                  </div>
+                  <div class="progress" style="height: 6px;">
+                    <div class="progress-bar bg-danger" role="progressbar" style="width: 99%" aria-valuenow="99" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                  <small class="text-danger">Sắp hết lượt!</small>
+                </td>
+                <td><span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Đang chạy</span></td>
+                <td class="text-center">
+                  <button type="button" class="btn btn-sm btn-info text-white" title="Xem chi tiết"><i class="bi bi-eye"></i></button>
+                  <button type="button" class="btn btn-sm btn-warning text-dark" title="Sửa"><i class="bi bi-pencil-square"></i></button>
+                  <button type="button" class="btn btn-sm btn-danger" title="Khóa"><i class="bi bi-lock"></i></button>
+                </td>
+              </tr>
+
+              <tr>
+                <td><span class="badge bg-secondary text-light fs-6 border border-secondary border-2 border-dashed">TET2026</span></td>
+                <td class="fw-bold text-muted">Vui xuân đón Tết 2026</td>
+                <td>
+                  <span class="text-muted fw-bold">-15%</span> <br>
+                  <small class="text-muted">Đơn tối thiểu: 10,000,000 đ</small>
+                </td>
+                <td>
+                  <small class="text-muted">Từ: 15/01/2026</small><br>
+                  <small class="text-muted">Đến: 28/02/2026</small>
+                </td>
+                <td>
+                  <div class="d-flex align-items-center mb-1">
+                    <span class="me-2 small text-muted">200 / 200</span>
+                  </div>
+                  <div class="progress" style="height: 6px;">
+                    <div class="progress-bar bg-secondary" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                </td>
+                <td><span class="badge bg-secondary"><i class="bi bi-clock-history me-1"></i> Đã kết thúc</span></td>
+                <td class="text-center">
+                  <button type="button" class="btn btn-sm btn-info text-white" title="Xem chi tiết"><i class="bi bi-eye"></i></button>
+                  <button type="button" class="btn btn-sm btn-warning text-dark" title="Sửa" disabled><i class="bi bi-pencil-square"></i></button>
+                  <button type="button" class="btn btn-sm btn-success" title="Mở lại"><i class="bi bi-unlock"></i></button>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</main>
+<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+<script src="assets/vendor/apexcharts/apexcharts.min.js"></script>
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="assets/vendor/chart.js/chart.umd.js"></script>
+<script src="assets/vendor/echarts/echarts.min.js"></script>
+<script src="assets/vendor/quill/quill.js"></script>
+<script src="assets/vendor/simple-datatables/simple-datatables.js"></script>
+<script src="assets/vendor/tinymce/tinymce.min.js"></script>
+<script src="assets/vendor/php-email-form/validate.js"></script>
+
+<script src="assets/js/main.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const userData = JSON.parse(localStorage.getItem('user'));
+    if (userData) {
+      const nameElements = document.querySelectorAll('.nav-profile span, .dropdown-header h6');
+      nameElements.forEach(el => el.innerText = userData.fullName);
+
+      const roleElement = document.querySelector('.dropdown-header span');
+      if (roleElement) roleElement.innerText = userData.role;
+    }
+  });
+</script>
+
+</body>
+
+</html>

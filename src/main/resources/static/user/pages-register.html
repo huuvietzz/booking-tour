@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>Đăng ký tài khoản - Booking Tour</title>
+
+  <link href="assets/img/favicon.png" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <link href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+
+  <link href="assets/css/style.css" rel="stylesheet">
+
+  <style>
+    body {
+      background-color: #f6f7f9;
+    }
+
+    .register-wrapper {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .register-card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 20px rgba(0, 0, 0, .06);
+      padding: 2.5rem 3rem 2rem;
+    }
+
+    /* Ô nhập bo tròn, nền xám nhạt */
+    .register-card .form-control {
+      background-color: #f1f3f5;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      padding: .75rem 1.25rem;
+      font-size: .95rem;
+    }
+
+    .register-card .form-control:focus {
+      background-color: #fff;
+      border-color: #4154f1;
+      box-shadow: 0 0 0 .2rem rgba(65, 84, 241, .12);
+    }
+
+    .register-card .form-control.is-invalid {
+      background-color: #fff;
+      border-color: #dc3545;
+    }
+
+    .register-card .form-label {
+      font-weight: 600;
+      font-size: .95rem;
+      margin-bottom: .5rem;
+    }
+
+    /* Nút con mắt lồng trong ô bo tròn */
+    .password-wrap {
+      position: relative;
+    }
+
+    .password-wrap .form-control {
+      padding-right: 3rem;
+    }
+
+    .password-wrap .toggle-eye {
+      position: absolute;
+      top: 1.35rem;
+      right: 1rem;
+      transform: translateY(-50%);
+      border: 0;
+      background: transparent;
+      color: #6c757d;
+      padding: 0;
+      line-height: 1;
+      z-index: 5;
+    }
+
+    .btn-pill {
+      border-radius: 999px;
+      padding: .8rem 1rem;
+      font-weight: 600;
+    }
+
+    .invalid-feedback {
+      padding-left: 1.25rem;
+    }
+
+    /* Khối thông báo lỗi / thành công dạng nền hồng chữ đỏ */
+    .custom-msg-box {
+      background-color: #fce4e4; /* Màu hồng nhạt */
+      color: #cc0000;          /* Chữ đỏ */
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+    }
+
+    /* THÊM MỚI */
+    .custom-msg-box.msg-success {
+      background-color: #e3f8ec;
+      color: #1a7f45;
+    }
+
+    .custom-msg-box i {
+      margin-right: 8px;
+      font-size: 1.1rem;
+    }
+
+    @media (max-width: 575.98px) {
+      .register-card {
+        padding: 1.75rem 1.25rem 1.5rem;
+      }
+    }
+
+    /* Ngăn nút outline-secondary đổi màu nền khi hover */
+    .btn-outline-secondary:hover,
+    .btn-outline-secondary:focus,
+    .btn-outline-secondary:active {
+      background-color: transparent !important;
+      color: #495057 !important;
+      border-color: #6c757d !important;
+    }
+  </style>
+</head>
+
+<body>
+
+<main class="py-5">
+  <div class="container register-wrapper">
+
+    <div class="text-center mb-4">
+      <a href="index.html" class="logo d-inline-flex align-items-center text-decoration-none">
+        <img src="assets/img/logo.png" alt="" height="48">
+        <span class="ms-2 fs-3 fw-bold">Booking Tour</span>
+      </a>
+    </div>
+
+    <div class="register-card">
+
+      <h4 class="text-center fw-bold mb-2">Đăng ký tài khoản</h4>
+      <p class="text-center text-muted small mb-4">
+        Quý khách vui lòng điền thông tin vào mẫu bên dưới để đăng ký thành viên.
+        Xin chân thành cảm ơn quý khách.
+      </p>
+
+      <!-- Không dùng class needs-validation, tự quản lý validate thủ công -->
+      <form class="row g-3" id="registerForm" novalidate>
+
+        <!-- Hàng 1: Họ tên | Số điện thoại -->
+        <div class="col-md-6">
+          <label for="fullName" class="form-label">
+            Họ tên <span class="text-danger">(*)</span>
+          </label>
+          <input type="text" class="form-control" id="fullName"
+                 placeholder="Ví dụ: Nguyễn Văn A" maxlength="255" required>
+          <div class="invalid-feedback" id="fullNameFeedback">
+            Vui lòng nhập họ tên
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <label for="phoneNumber" class="form-label">
+            Số điện thoại <span class="text-danger">(*)</span>
+          </label>
+          <input type="tel" class="form-control" id="phoneNumber"
+                 placeholder="Ví dụ: 0901234567" maxlength="10" required>
+          <div class="invalid-feedback" id="phoneNumberFeedback">
+            Số điện thoại phải gồm 10 chữ số, bắt đầu bằng số 0
+          </div>
+        </div>
+
+        <!-- Hàng 2: Email | Địa chỉ -->
+        <div class="col-md-6">
+          <label for="email" class="form-label">
+            Email <span class="text-danger">(*)</span>
+          </label>
+          <input type="email" class="form-control" id="email"
+                 placeholder="Ví dụ: email@example.com" maxlength="255" required>
+          <div class="invalid-feedback" id="emailFeedback">
+            Vui lòng nhập email hợp lệ
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <label for="address" class="form-label">Địa chỉ</label>
+          <input type="text" class="form-control" id="address"
+                 placeholder="Ví dụ: 190 Pasteur, Phường Xuân Hoà, TP.HCM" maxlength="255">
+        </div>
+
+        <!-- Hàng 3: Mật khẩu | Nhập lại mật khẩu -->
+        <div class="col-md-6">
+          <label for="password" class="form-label">
+            Mật khẩu <span class="text-danger">(*)</span>
+          </label>
+          <div class="password-wrap">
+            <input type="password" class="form-control" id="password"
+                   placeholder="Nhập mật khẩu" required>
+            <button class="toggle-eye" type="button"
+                    data-toggle-password="password" tabindex="-1">
+              <i class="bi bi-eye"></i>
+            </button>
+            <div class="invalid-feedback" id="passwordFeedback">
+              Mật khẩu phải có ít nhất 6 ký tự
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <label for="confirmPassword" class="form-label">
+            Nhập lại mật khẩu mới <span class="text-danger">(*)</span>
+          </label>
+          <div class="password-wrap">
+            <input type="password" class="form-control" id="confirmPassword"
+                   placeholder="Nhập lại mật khẩu mới" required>
+            <button class="toggle-eye" type="button"
+                    data-toggle-password="confirmPassword" tabindex="-1">
+              <i class="bi bi-eye"></i>
+            </button>
+            <div class="invalid-feedback" id="confirmPasswordFeedback">
+              Mật khẩu nhập lại không khớp
+            </div>
+          </div>
+        </div>
+
+        <!-- Khối hiển thị thông báo thành công / thất bại -->
+        <div class="col-12 mt-3 d-none" id="resultMessageBox">
+          <div class="custom-msg-box">
+            <i class="bi bi-dot"></i> <span id="resultMessageText">Đăng ký thành công. Vui lòng kiểm tra email để xác nhận tài khoản</span>
+          </div>
+        </div>
+
+        <!-- Điều khoản -->
+        <div class="col-12 mt-4 text-start">
+          <div class="form-check d-inline-block text-start">
+            <input class="form-check-input" type="checkbox" id="termsAccepted" required>
+            <label class="form-check-label small" for="termsAccepted">
+              Tôi đồng ý với <a href="#">Chính sách bảo vệ dữ liệu cá nhân</a>
+              và <a href="#">Các điều khoản</a>
+            </label>
+          </div>
+        </div>
+
+        <!-- Nút -->
+        <div class="col-12 mt-4">
+          <!-- Bị vô hiệu hóa mặc định -->
+          <button class="btn btn-primary btn-pill w-100 mb-3" type="submit" id="submitBtn" disabled>
+            <span class="spinner-border spinner-border-sm d-none" id="submitSpinner"></span>
+            <span id="submitText">Hoàn tất đăng ký</span>
+          </button>
+
+          <a href="pages-login.html" class="btn btn-outline-secondary btn-pill w-100" style="color: #495057;">
+            <i class="bi bi-arrow-left me-1"></i> Quay lại đăng nhập
+          </a>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</main>
+
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  const form       = document.getElementById('registerForm');
+  const submitBtn  = document.getElementById('submitBtn');
+  const submitText = document.getElementById('submitText');
+  const spinner    = document.getElementById('submitSpinner');
+  const terms      = document.getElementById('termsAccepted');
+
+  const resultBox  = document.getElementById('resultMessageBox');
+  const resultText = document.getElementById('resultMessageText');
+
+  // Khai báo các ô input
+  const fullNameInput   = document.getElementById('fullName');
+  const phoneInput      = document.getElementById('phoneNumber');
+  const emailInput      = document.getElementById('email');
+  const addressInput    = document.getElementById('address');
+  const passwordInput   = document.getElementById('password');
+  const confirmInput    = document.getElementById('confirmPassword');
+
+  // Regex kiểm tra
+  const PHONE_REGEX = /^0[0-9]{9}$/; // Bắt đầu bằng 0, theo sau là 9 số (tổng 10 số)
+  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  // ---------- Hàm kiểm tra tổng thể bật/tắt nút Submit ----------
+  function checkFormState() {
+    const isFullNameValid = fullNameInput.value.trim() !== '';
+    const isPhoneValid    = PHONE_REGEX.test(phoneInput.value.trim());
+    const isEmailValid    = EMAIL_REGEX.test(emailInput.value.trim());
+    const isPassValid     = passwordInput.value.length >= 6;
+    const isConfirmValid  = (confirmInput.value === passwordInput.value) && isPassValid;
+    const isTermsValid    = terms.checked;
+
+    // Phải nhập đủ/đúng tất cả các trường bắt buộc + Tích điều khoản mới bật nút
+    const isAllValid = isFullNameValid && isPhoneValid && isEmailValid && isPassValid && isConfirmValid && isTermsValid;
+    submitBtn.disabled = !isAllValid;
+  }
+
+  // ---------- Xử lý hiển thị chữ đỏ / Xóa chữ đỏ theo thời gian thực ----------
+
+  // 1. Họ Tên
+  fullNameInput.addEventListener('blur', function() {
+    if (this.value.trim() === '') this.classList.add('is-invalid'); // Báo đỏ nếu để trống rời đi
+  });
+  fullNameInput.addEventListener('input', function() {
+    if (this.value.trim() !== '') this.classList.remove('is-invalid'); // Mất đỏ khi nhập
+    checkFormState();
+  });
+
+  // 2. Số điện thoại
+  phoneInput.addEventListener('blur', function() {
+    if (!PHONE_REGEX.test(this.value.trim())) this.classList.add('is-invalid');
+  });
+  phoneInput.addEventListener('input', function() {
+    if (PHONE_REGEX.test(this.value.trim())) this.classList.remove('is-invalid');
+    checkFormState();
+  });
+
+  // 3. Email
+  emailInput.addEventListener('blur', function() {
+    if (!EMAIL_REGEX.test(this.value.trim())) this.classList.add('is-invalid');
+  });
+  emailInput.addEventListener('input', function() {
+    if (EMAIL_REGEX.test(this.value.trim())) this.classList.remove('is-invalid');
+    checkFormState();
+  });
+
+  // 4. Mật khẩu
+  passwordInput.addEventListener('blur', function() {
+    if (this.value.length < 6) this.classList.add('is-invalid');
+  });
+  passwordInput.addEventListener('input', function() {
+    if (this.value.length >= 6) this.classList.remove('is-invalid');
+
+    // Khi sửa mật khẩu, kiểm tra chéo ngay ô Nhập lại mật khẩu nếu đã có dữ liệu
+    if (confirmInput.value !== '') {
+      if (confirmInput.value !== this.value) {
+        confirmInput.classList.add('is-invalid');
+      } else {
+        confirmInput.classList.remove('is-invalid');
+      }
+    }
+    checkFormState();
+  });
+
+  // 5. Xác nhận mật khẩu
+  confirmInput.addEventListener('blur', function() {
+    if (this.value === '' || this.value !== passwordInput.value) this.classList.add('is-invalid');
+  });
+  confirmInput.addEventListener('input', function() {
+    if (this.value !== '' && this.value === passwordInput.value && this.value.length >= 6) {
+      this.classList.remove('is-invalid');
+    }
+    checkFormState();
+  });
+
+  // 6. Checkbox điều khoản
+  terms.addEventListener('change', checkFormState);
+
+  // ---------- Xem/Ẩn mật khẩu ----------
+  document.querySelectorAll('[data-toggle-password]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const input = document.getElementById(btn.dataset.togglePassword);
+      const icon  = btn.querySelector('i');
+      const isHidden = input.type === 'password';
+      input.type = isHidden ? 'text' : 'password';
+      icon.className = isHidden ? 'bi bi-eye-slash' : 'bi bi-eye';
+    });
+  });
+
+  // ---------- Utilities ----------
+  function showMessage(htmlText, isSuccess) {
+    const box = resultBox.querySelector('.custom-msg-box');
+    box.classList.toggle('msg-success', isSuccess === true);
+    box.querySelector('i').className = isSuccess
+            ? 'bi bi-check-circle-fill'
+            : 'bi bi-exclamation-circle-fill';
+
+    resultText.innerHTML = htmlText;
+    resultBox.classList.remove('d-none');
+    resultBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function setLoading(loading) {
+    if (loading) {
+      submitBtn.disabled = true;
+    } else {
+      checkFormState();
+    }
+    spinner.classList.toggle('d-none', !loading);
+    submitText.textContent = loading ? 'Đang xử lý...' : 'Hoàn tất đăng ký';
+  }
+
+  // ---------- Gửi Form ----------
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    resultBox.classList.add('d-none'); // Ẩn thông báo cũ (nếu có)
+    form.classList.remove('was-validated');
+
+    const payload = {
+      fullName:        fullNameInput.value.trim(),
+      phoneNumber:     phoneInput.value.trim(),
+      email:           emailInput.value.trim(),
+      address:         addressInput.value.trim() || null,
+      password:        passwordInput.value,
+      confirmPassword: confirmInput.value,
+      termsAccepted:   terms.checked
+    };
+
+    setLoading(true);
+
+    try {
+      const res  = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const json = await res.json();
+
+      if (json.success) {
+        showMessage(json.message, true);              // <- thêm true
+        Array.from(form.elements).forEach(el => el.disabled = true);
+        return;
+      }
+
+      if (json.errors && json.errors.length) {
+        showMessage('<strong>' + json.message + '</strong><br>'
+                + json.errors.join('<br>'), false); // <- thêm false
+      } else {
+        showMessage(json.message || 'Đăng ký thất bại.', false);
+      }
+    } catch (err) {
+      showMessage('Không kết nối được tới máy chủ. Vui lòng thử lại.', false);
+    } finally {
+      setLoading(false);
+    }
+  });
+</script>
+
+</body>
+</html>

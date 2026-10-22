@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Hướng dẫn viên - Admin</title>
+  <link href="assets/img/favicon.png" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+  <link href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
+  <link href="assets/css/style.css" rel="stylesheet">
+
+  <script src="assets/js/admin-auth.js"></script>
+  <script>AdminAuth.requireLogin();</script>
+
+  <style>
+    /* ===== CUSTOM PAGINATION ===== */
+    .custom-pagination-wrapper {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 2px 4px 2px; flex-wrap: wrap; gap: 10px;
+    }
+    .pagination-info { font-size: 0.82rem; color: #6c757d; white-space: nowrap; }
+    .pagination-info span { font-weight: 600; color: #333; }
+    .custom-pagination {
+      display: flex; align-items: center; gap: 4px;
+      list-style: none; margin: 0; padding: 0;
+    }
+    .custom-pagination .page-item { display: flex; }
+    .custom-pagination .page-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 34px; height: 34px; padding: 0 10px;
+      font-size: 0.82rem; font-weight: 500; color: #4154f1;
+      background: #fff; border: 1.5px solid #c8cef7;
+      border-radius: 6px; cursor: pointer;
+      transition: background .15s, border-color .15s, color .15s, box-shadow .15s;
+      line-height: 1; user-select: none; text-decoration: none;
+    }
+    .custom-pagination .page-btn:hover:not(.active):not(.disabled):not(.ellipsis) {
+      background: #eef0fd; border-color: #4154f1; color: #4154f1;
+    }
+    .custom-pagination .page-btn.active {
+      background: #4154f1; border-color: #4154f1; color: #fff;
+      font-weight: 700; box-shadow: 0 2px 8px rgba(65,84,241,.25);
+      cursor: default; pointer-events: none;
+    }
+    .custom-pagination .page-btn.disabled {
+      color: #b8bfd8; border-color: #e6e9f5; background: #f7f8fc;
+      cursor: not-allowed; pointer-events: none;
+    }
+    .custom-pagination .page-btn.ellipsis {
+      border: none; background: transparent; color: #9aa0bc;
+      cursor: default; pointer-events: none; min-width: 24px; letter-spacing: 1px;
+    }
+    .custom-pagination .page-btn i { font-size: 0.88rem; }
+
+    /* ===== LOADING OVERLAY ===== */
+    .table-wrapper { position: relative; }
+    #tableLoadingOverlay {
+      display: none; position: absolute; inset: 0;
+      background: rgba(255,255,255,0.7); z-index: 10;
+      align-items: center; justify-content: center; border-radius: 4px;
+    }
+    #tableLoadingOverlay.show { display: flex; }
+
+    /* ===== SCROLLBAR ===== */
+    .table-responsive { scrollbar-width: thin; scrollbar-color: #cbd0d5 #f8f9fa; }
+    .table-responsive::-webkit-scrollbar { height: 8px; }
+    .table-responsive::-webkit-scrollbar-track { background: #f8f9fa; border-radius: 4px; }
+    .table-responsive::-webkit-scrollbar-thumb { background: #cbd0d5; border-radius: 4px; }
+    .table-responsive::-webkit-scrollbar-thumb:hover { background: #aab2bd; }
+
+    /* ===== SORTING ===== */
+    th.sortable { cursor: pointer; user-select: none; transition: color 0.2s; }
+    th.sortable:hover { color: #4154f1; }
+    th.sortable .sort-icon { margin-left: 4px; color: #adb5bd; font-size: 0.8rem; opacity: 0; transition: all 0.2s; }
+    th.sortable:hover .sort-icon { opacity: 0.5; }
+    th.sortable.sort-active { color: #4154f1; }
+    th.sortable.sort-active .sort-icon { opacity: 1; font-weight: bold; font-size: 1.1rem; }
+
+    /* ===== STATUS BADGES ===== */
+    .badge-active     { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+    .badge-on-leave   { background: #fff8e1; color: #f57f17; border: 1px solid #ffe082; }
+    .badge-suspended  { background: #fce4ec; color: #c62828; border: 1px solid #ef9a9a; }
+    .badge-inactive   { background: #f5f5f5; color: #616161; border: 1px solid #bdbdbd; }
+
+    /* ===== SWEET ALERT ===== */
+    .swal-custom-title { font-family: 'Nunito', sans-serif !important; color: #444; font-weight: 700; font-size: 1.5rem; }
+    .swal-custom-html  { font-family: 'Open Sans', sans-serif !important; color: #666; font-size: 1rem; }
+
+    /* ===== AVATAR ===== */
+    .guide-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      object-fit: cover; border: 2px solid #e0e0e0;
+    }
+    .guide-avatar-placeholder {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: #e8eaf6; color: #4154f1;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 1rem; font-weight: 700; border: 2px solid #c5cae9;
+    }
+
+    /* ===== RATING ===== */
+    .rating-stars { color: #ffc107; font-size: 0.8rem; }
+    .rating-text  { font-size: 0.82rem; color: #555; font-weight: 600; }
+
+    /* ===== VIEW MODAL - TRÁNH TRÀN CHỮ DÀI ===== */
+    #viewGuideModal .modal-body {
+      overflow-wrap: break-word;
+      word-break: break-word;
+    }
+
+    /* ===== ROW INACTIVE ===== */
+    tr.row-inactive td:not(:last-child) { opacity: 0.55; }
+
+    /* ===== EXPORT BUTTON ===== */
+    .btn-export {
+      background: #e8f5e9; color: #2e7d32;
+      border: 1.5px solid #a5d6a7;
+      font-size: 0.82rem; font-weight: 600;
+      padding: 5px 14px; border-radius: 6px;
+      cursor: pointer; transition: all .15s;
+      display: inline-flex; align-items: center; gap: 5px;
+    }
+    .btn-export:hover { background: #c8e6c9; border-color: #66bb6a; }
+  </style>
+</head>
+
+<body>
+
+<header id="header" class="header fixed-top d-flex align-items-center">
+  <div class="d-flex align-items-center justify-content-between">
+    <a href="index.html" class="logo d-flex align-items-center">
+      <img src="assets/img/logo.png" alt="">
+      <span class="d-none d-lg-block">NiceAdmin</span>
+    </a>
+    <i class="bi bi-list toggle-sidebar-btn"></i>
+  </div>
+  <div class="search-bar">
+    <form class="search-form d-flex align-items-center" method="POST" action="#">
+      <input type="text" name="query" placeholder="Tìm kiếm nhanh" title="Enter search keyword">
+      <button type="submit" title="Search"><i class="bi bi-search"></i></button>
+    </form>
+  </div>
+  <nav class="header-nav ms-auto">
+    <ul class="d-flex align-items-center">
+      <li class="nav-item dropdown pe-3">
+        <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
+          <img src="assets/img/profile-img.jpg" alt="Profile" class="rounded-circle">
+          <span class="d-none d-md-block dropdown-toggle ps-2" data-admin-name>Admin User</span>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
+          <li class="dropdown-header"><h6 data-admin-name>Admin User</h6><span data-admin-role>Hệ thống quản trị</span></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item d-flex align-items-center" href="#" id="btnLogout" data-admin-logout>
+            <i class="bi bi-box-arrow-right"></i><span>Đăng xuất</span>
+          </a></li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+</header>
+
+<aside id="sidebar" class="sidebar">
+  <ul class="sidebar-nav" id="sidebar-nav">
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="index.html">
+        <i class="bi bi-grid"></i><span>Bảng điều khiển</span>
+      </a>
+    </li>
+
+    <li class="nav-heading">Lữ hành</li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="locations.html">
+        <i class="bi bi-geo-alt"></i><span>Điểm đến</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" data-bs-target="#tours-nav" data-bs-toggle="collapse" href="#">
+        <i class="bi bi-map"></i><span>Tour</span><i class="bi bi-chevron-down ms-auto"></i>
+      </a>
+      <ul id="tours-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+        <li><a href="tours.html"><i class="bi bi-circle"></i><span>Danh sách Tour</span></a></li>
+        <li><a href="tour-schedules.html"><i class="bi bi-circle"></i><span>Lịch khởi hành</span></a></li>
+      </ul>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-bs-target="#guides-nav" data-bs-toggle="collapse" href="#">
+        <i class="bi bi-person-badge"></i><span>Hướng dẫn viên</span><i class="bi bi-chevron-down ms-auto"></i>
+      </a>
+      <ul id="guides-nav" class="nav-content collapse show" data-bs-parent="#sidebar-nav">
+        <li><a href="guides.html" class="active"><i class="bi bi-circle"></i><span>Danh sách HDV</span></a></li>
+        <li><a href="guide-assign.html"><i class="bi bi-circle"></i><span>Phân công</span></a></li>
+      </ul>
+    </li>
+
+    <li class="nav-heading">Vận hành</li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" data-bs-target="#bookings-nav" data-bs-toggle="collapse" href="#">
+        <i class="bi bi-cart-check"></i><span>Đơn hàng</span><i class="bi bi-chevron-down ms-auto"></i>
+      </a>
+      <ul id="bookings-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+        <li><a href="bookings.html"><i class="bi bi-circle"></i><span>Tất cả đơn đặt</span></a></li>
+        <li><a href="booking-pending.html"><i class="bi bi-circle"></i><span>Chờ xác nhận</span></a></li>
+        <li><a href="booking-refunds.html"><i class="bi bi-circle"></i><span>Hủy & Hoàn tiền</span></a></li>
+      </ul>
+    </li>
+    <li class="nav-item"><a class="nav-link collapsed" href="payments.html"><i class="bi bi-credit-card"></i><span>Thanh toán</span></a></li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" data-bs-target="#promotions-nav" data-bs-toggle="collapse" href="#">
+        <i class="bi bi-tags"></i><span>Khuyến mãi</span><i class="bi bi-chevron-down ms-auto"></i>
+      </a>
+      <ul id="promotions-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+        <li><a href="promotions.html"><i class="bi bi-circle"></i><span>Chương trình KM</span></a></li>
+        <li><a href="coupons.html"><i class="bi bi-circle"></i><span>Mã giảm giá</span></a></li>
+      </ul>
+    </li>
+
+    <li class="nav-heading">Khách hàng & Tương tác</li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" data-bs-target="#customers-nav" data-bs-toggle="collapse" href="#">
+        <i class="bi bi-people"></i><span>Khách hàng</span><i class="bi bi-chevron-down ms-auto"></i>
+      </a>
+      <ul id="customers-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+        <li><a href="customers.html"><i class="bi bi-circle"></i><span>Danh sách khách</span></a></li>
+        <li><a href="customer-tiers.html"><i class="bi bi-circle"></i><span>Hạng thành viên</span></a></li>
+      </ul>
+    </li>
+    <li class="nav-item"><a class="nav-link collapsed" href="reviews.html"><i class="bi bi-star"></i><span>Đánh giá & Phản hồi</span></a></li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" data-bs-target="#reports-nav" data-bs-toggle="collapse" href="#">
+        <i class="bi bi-bar-chart"></i><span>Báo cáo</span><i class="bi bi-chevron-down ms-auto"></i>
+      </a>
+      <ul id="reports-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+        <li><a href="report-revenue.html"><i class="bi bi-circle"></i><span>Thống kê doanh thu</span></a></li>
+        <li><a href="report-growth.html"><i class="bi bi-circle"></i><span>Biểu đồ tăng trưởng</span></a></li>
+      </ul>
+    </li>
+  </ul>
+</aside>
+
+<main id="main" class="main">
+  <div class="pagetitle">
+    <h1>Hướng dẫn viên</h1>
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="index.html">Trang chủ</a></li>
+        <li class="breadcrumb-item">Hướng dẫn viên</li>
+        <li class="breadcrumb-item active">Danh sách HDV</li>
+      </ol>
+    </nav>
+  </div>
+
+  <section class="section">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="card">
+          <div class="card-body">
+
+            <!-- HEADER -->
+            <div class="d-flex justify-content-between align-items-center mt-3 mb-4 flex-wrap gap-2">
+              <h5 class="card-title p-0 m-0">Quản lý Hướng dẫn viên</h5>
+              <div class="d-flex gap-2">
+                <button type="button" class="btn-export" onclick="exportExcel()">
+                  <i class="bi bi-file-earmark-excel"></i> Xuất Excel
+                </button>
+                <button type="button" class="btn btn-primary" style="background-color:#4154f1;border:none;"
+                        onclick="openAddModal()">
+                  <i class="bi bi-person-plus me-1"></i> Thêm HDV mới
+                </button>
+              </div>
+            </div>
+
+            <!-- FILTER BAR -->
+            <div class="d-flex flex-wrap align-items-end gap-3 mb-3 pb-3 border-bottom">
+              <div>
+                <label class="form-label text-muted small mb-1">
+                  <i class="bi bi-activity me-1"></i>Trạng thái
+                </label>
+                <select class="form-select form-select-sm" id="filterStatus" onchange="onFilterChange()" style="min-width:170px;">
+                  <option value="">Tất cả trạng thái</option>
+                  <option value="ACTIVE">Đang làm việc</option>
+                  <option value="ON_LEAVE">Nghỉ phép</option>
+                  <option value="SUSPENDED">Bị khóa</option>
+                  <option value="INACTIVE">Đã nghỉ việc</option>
+                </select>
+              </div>
+
+              <!-- THÊM MỚI -->
+              <div>
+                <label class="form-label text-muted small mb-1">
+                  <i class="bi bi-clock-history me-1"></i>Kinh nghiệm
+                </label>
+                <select class="form-select form-select-sm" id="filterExperience" onchange="onFilterChange()" style="min-width:160px;">
+                  <option value="">Tất cả</option>
+                  <option value="under1">Dưới 1 năm</option>
+                  <option value="1to5">1 – 5 năm</option>
+                  <option value="above5">Trên 5 năm</option>
+                </select>
+              </div>
+
+              <div id="btnClearFilterWrapper" style="display:none;" class="align-self-end">
+                <button class="btn btn-sm btn-outline-secondary" onclick="clearFilters()">
+                  <i class="bi bi-x-circle me-1"></i>Xóa bộ lọc
+                </button>
+              </div>
+              <div class="ms-auto">
+                <label class="form-label text-muted small mb-1">Hiển thị</label>
+                <select class="form-select form-select-sm" id="customPerPage" onchange="onPerPageChange(this.value)" style="min-width:100px;">
+                  <option value="5">5 mục</option>
+                  <option value="10" selected>10 mục</option>
+                  <option value="20">20 mục</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label text-muted small mb-1">Tìm kiếm</label>
+                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-white border-end-0">
+                                        <i class="bi bi-search text-muted"></i>
+                                    </span>
+                  <input type="text" class="form-control border-start-0" id="customSearch"
+                         placeholder="Tên, email, SĐT, chuyên môn..." oninput="onSearchInput(this.value)"
+                         style="min-width:220px;">
+                </div>
+              </div>
+            </div>
+
+            <!-- TABLE -->
+            <div class="table-wrapper">
+              <div id="tableLoadingOverlay">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Đang tải...</span>
+                </div>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-hover align-middle" id="guideTable">
+                  <thead>
+                  <tr>
+                    <th class="sortable text-nowrap" style="width:5%;" data-sort="guideId" onclick="sortBy('guideId')">
+                      ID <i class="bi bi-arrow-down-up sort-icon"></i>
+                    </th>
+                    <th style="width:4%;"></th>
+                    <th class="sortable" style="min-width:180px;" data-sort="fullName" onclick="sortBy('fullName')">
+                      Họ tên <i class="bi bi-arrow-down-up sort-icon"></i>
+                    </th>
+                    <th class="sortable" style="min-width:180px;" data-sort="email" onclick="sortBy('email')">
+                      Email <i class="bi bi-arrow-down-up sort-icon"></i>
+                    </th>
+                    <th class="text-nowrap" style="width:12%;">Số điện thoại</th>
+                    <th class="text-nowrap" style="min-width:140px;">Chuyên môn</th>
+                    <th class="text-nowrap" style="width:8%;">Kinh nghiệm</th>
+                    <th class="sortable text-nowrap" style="width:8%;" data-sort="rating" onclick="sortBy('rating')">
+                      Đánh giá <i class="bi bi-arrow-down-up sort-icon"></i>
+                    </th>
+                    <th class="text-nowrap" style="width:11%;">Trạng thái</th>
+                    <th class="text-center text-nowrap" style="width:9%;">Hành động</th>
+                  </tr>
+                  </thead>
+                  <tbody id="guideListBody">
+                  <tr><td colspan="10" class="text-center py-4">Đang tải dữ liệu...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- PAGINATION -->
+            <div class="custom-pagination-wrapper" id="paginationWrapper">
+              <div class="pagination-info" id="paginationInfo">—</div>
+              <ul class="custom-pagination" id="paginationControls"></ul>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer id="footer" class="footer">
+  <div class="copyright">&copy; Copyright <strong><span>NiceAdmin</span></strong>. All Rights Reserved</div>
+</footer>
+
+<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+
+<!-- ============================================================
+     MODAL: THÊM HDV
+     ============================================================ -->
+<div class="modal fade" id="addGuideModal" tabindex="-1" aria-labelledby="addGuideModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header" style="background:#4154f1;">
+        <h5 class="modal-title text-white fw-bold" id="addGuideModalLabel">
+          <i class="bi bi-person-plus me-2"></i>Thêm Hướng dẫn viên
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="addFormError" class="alert alert-danger d-none small py-2"></div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">
+            Họ tên <span class="text-danger">*</span>
+          </label>
+          <input type="text" class="form-control" id="addFullName"
+                 placeholder="VD: Nguyễn Văn A">
+          <div class="invalid-feedback">Vui lòng nhập họ tên.</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">
+            Email <span class="text-danger">*</span>
+          </label>
+          <input type="email" class="form-control" id="addEmail"
+                 placeholder="VD: hdv@example.com">
+          <div class="invalid-feedback">Vui lòng nhập email hợp lệ.</div>
+          <div class="form-text text-muted small">
+            <i class="bi bi-info-circle me-1"></i>
+            Mật khẩu mặc định: <b>Tour@2024</b> — HDV tự đổi sau khi đăng nhập
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Số điện thoại</label>
+          <input type="text" class="form-control" id="addPhoneNumber" placeholder="VD: 0912345678">
+          <div class="invalid-feedback">Số điện thoại phải bắt đầu bằng 0 và có 10 chữ số.</div>
+        </div>
+
+        <hr class="my-3">
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Ngôn ngữ</label>
+          <input type="text" class="form-control" id="addLanguages"
+                 placeholder="VD: Tiếng Việt, Tiếng Anh, Tiếng Pháp">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Chuyên môn</label>
+          <input type="text" class="form-control" id="addSpecialization"
+                 placeholder="VD: Miền Bắc, Tour biển">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Số năm kinh nghiệm</label>
+          <input type="number" class="form-control" id="addExperienceYears"
+                 min="0" placeholder="VD: 3">
+          <div class="invalid-feedback">Số năm kinh nghiệm không được âm.</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Giới thiệu bản thân</label>
+          <textarea class="form-control" id="addBio" rows="3"
+                    placeholder="Mô tả ngắn về kinh nghiệm, thế mạnh..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+        <button type="button" class="btn btn-primary px-4" id="btnConfirmAdd"
+                onclick="submitAddGuide()" style="background:#4154f1;border:none;">
+          <i class="bi bi-plus-circle me-1"></i>Thêm HDV
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     MODAL: CHỈNH SỬA HDV
+     ============================================================ -->
+<div class="modal fade" id="editGuideModal" tabindex="-1" aria-labelledby="editGuideModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header" style="background:#4154f1;">
+        <h5 class="modal-title text-white fw-bold" id="editGuideModalLabel">
+          <i class="bi bi-pencil-square me-2"></i>Chỉnh sửa HDV <span id="editModalGuideId"></span>
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="editFormError" class="alert alert-danger d-none small py-2"></div>
+        <div id="editFormLoading" class="text-center py-4">
+          <div class="spinner-border text-primary" role="status"></div>
+          <div class="mt-2 text-muted small">Đang tải dữ liệu...</div>
+        </div>
+        <div id="editFormBody" style="display:none;">
+          <input type="hidden" id="editGuideId">
+
+          <!-- THÔNG TIN TÀI KHOẢN -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">
+              Họ tên <span class="text-danger">*</span>
+            </label>
+            <input type="text" class="form-control" id="editFullName" placeholder="VD: Nguyễn Văn A">
+            <div class="invalid-feedback">Vui lòng nhập họ tên.</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">
+              Email <span class="text-danger">*</span>
+            </label>
+            <input type="email" class="form-control" id="editEmail" placeholder="VD: hdv@example.com">
+            <div class="invalid-feedback">Vui lòng nhập email hợp lệ.</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Số điện thoại</label>
+            <input type="text" class="form-control" id="editPhoneNumber" placeholder="VD: 0912345678">
+            <div class="invalid-feedback">Số điện thoại phải bắt đầu bằng 0 và có 10 chữ số.</div>
+          </div>
+
+          <hr class="my-3">
+
+          <!-- THÔNG TIN NGHỀ NGHIỆP -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Ngôn ngữ</label>
+            <input type="text" class="form-control" id="editLanguages" placeholder="VD: Tiếng Việt, Tiếng Anh">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Chuyên môn</label>
+            <input type="text" class="form-control" id="editSpecialization" placeholder="VD: Miền Bắc">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Số năm kinh nghiệm</label>
+            <input type="number" class="form-control" id="editExperienceYears" min="0">
+            <div class="invalid-feedback">Số năm kinh nghiệm không được âm.</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Giới thiệu bản thân</label>
+            <textarea class="form-control" id="editBio" rows="3"></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Trạng thái</label>
+            <select class="form-select" id="editStatus">
+              <option value="ACTIVE">Đang làm việc</option>
+              <option value="ON_LEAVE">Nghỉ phép</option>
+              <option value="SUSPENDED">Bị khóa</option>
+              <option value="INACTIVE">Đã nghỉ việc</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+        <button type="button" class="btn btn-primary px-4" id="btnConfirmEdit"
+                onclick="submitEditGuide()" style="background:#4154f1;border:none;">
+          <i class="bi bi-save me-1"></i>Lưu thay đổi
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ============================================================
+     MODAL: XEM CHI TIẾT HDV
+     ============================================================ -->
+<div class="modal fade" id="viewGuideModal" tabindex="-1" aria-labelledby="viewGuideModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header" style="background:#4154f1;">
+        <h5 class="modal-title text-white fw-bold" id="viewGuideModalLabel">
+          <i class="bi bi-person-badge me-2"></i>Chi tiết Hướng dẫn viên <span id="viewModalGuideId"></span>
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="viewFormLoading" class="text-center py-4">
+          <div class="spinner-border text-primary" role="status"></div>
+          <div class="mt-2 text-muted small">Đang tải dữ liệu...</div>
+        </div>
+        <div id="viewFormBody" style="display:none;">
+
+          <!-- Avatar + Tên -->
+          <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+            <div id="viewAvatarWrapper"></div>
+            <div>
+              <h5 class="mb-1 fw-bold" id="viewFullName"></h5>
+              <div id="viewStatusBadge"></div>
+            </div>
+            <div class="ms-auto text-end">
+              <div class="text-muted small mb-1">Đánh giá</div>
+              <div id="viewRating"></div>
+            </div>
+          </div>
+
+          <!-- Thông tin liên hệ -->
+          <div class="row g-3 mb-3">
+            <div class="col-6">
+              <div class="text-muted small mb-1"><i class="bi bi-envelope me-1"></i>Email</div>
+              <div class="fw-semibold" id="viewEmail"></div>
+            </div>
+            <div class="col-6 ps-5">
+              <div class="text-muted small mb-1"><i class="bi bi-telephone me-1"></i>Số điện thoại</div>
+              <div class="fw-semibold" id="viewPhone"></div>
+            </div>
+          </div>
+
+          <!-- Chuyên môn + Ngôn ngữ -->
+          <div class="row g-3 mb-3">
+            <div class="col-6">
+              <div class="text-muted small mb-1"><i class="bi bi-briefcase me-1"></i>Chuyên môn</div>
+              <div class="fw-semibold" id="viewSpecialization"></div>
+            </div>
+            <div class="col-6 ps-5">
+              <div class="text-muted small mb-1"><i class="bi bi-translate me-1"></i>Ngôn ngữ</div>
+              <div class="fw-semibold" id="viewLanguages"></div>
+            </div>
+          </div>
+
+          <!-- Kinh nghiệm + Số tour -->
+          <div class="row g-3 mb-3">
+            <div class="col-6">
+              <div class="text-muted small mb-1"><i class="bi bi-clock-history me-1"></i>Kinh nghiệm</div>
+              <div class="fw-semibold" id="viewExperience"></div>
+            </div>
+            <div class="col-6 ps-5">
+              <div class="text-muted small mb-1"><i class="bi bi-map me-1"></i>Tổng số tour</div>
+              <div class="fw-semibold" id="viewTotalTours"></div>
+            </div>
+          </div>
+
+          <!-- Bio -->
+          <div class="mb-3">
+            <div class="text-muted small mb-1"><i class="bi bi-person-lines-fill me-1"></i>Giới thiệu</div>
+            <div id="viewBio" class="text-secondary" style="line-height:1.6;"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/main.js"></script>
+
+<script>
+  // ============================================================
+  //  STATE
+  // ============================================================
+  let currentPage   = 0;
+  let perPage       = 10;
+  let sortCol       = '';
+  let sortAsc       = false;
+  let searchKeyword = '';
+  let searchTimer   = null;
+
+  let totalPages    = 0;
+  let totalElements = 0;
+
+  // ============================================================
+  //  BOOT
+  // ============================================================
+  document.addEventListener('DOMContentLoaded', () => {
+    fetchPage();
+  });
+
+  // ============================================================
+  //  FETCH PAGE
+  // ============================================================
+  async function fetchPage() {
+    showLoading(true);
+    const token = localStorage.getItem('token');
+
+    const params = new URLSearchParams();
+    params.set('page',    currentPage);
+    params.set('size',    perPage);
+    params.set('sortBy',  sortCol || 'guideId');
+    params.set('sortDir', sortAsc ? 'asc' : 'desc');
+
+    const statusVal = document.getElementById('filterStatus').value;
+    const experienceVal = document.getElementById('filterExperience').value;
+
+    if (statusVal) params.set('status', statusVal);
+    if (experienceVal) params.set('experience', experienceVal);
+    if (searchKeyword) params.set('keyword', searchKeyword);
+
+    try {
+      const response = await fetch(`/api/admin/tour-guides?${params.toString()}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        const data     = result.data;
+        const pageInfo = data.page;
+        totalPages    = pageInfo.totalPages;
+        totalElements = pageInfo.totalElements;
+
+        if (data.content.length === 0 && currentPage > 0) {
+          currentPage--;
+          fetchPage();
+          return;
+        }
+
+        renderRows(data.content);
+        renderPagination(pageInfo.totalElements, pageInfo.totalPages, pageInfo.number, pageInfo.size);
+      } else {
+        showTableError('Không thể tải dữ liệu: ' + (result.message || ''));
+      }
+    } catch (err) {
+      console.error(err);
+      showTableError('Lỗi kết nối đến máy chủ!');
+    } finally {
+      showLoading(false);
+    }
+  }
+
+  // ============================================================
+  //  RENDER ROWS
+  // ============================================================
+  function renderRows(guides) {
+    const tbody = document.getElementById('guideListBody');
+    tbody.innerHTML = '';
+
+    if (!guides || guides.length === 0) {
+      const isFiltering = searchKeyword || document.getElementById('filterStatus').value !== '';
+      const emptyMsg = isFiltering ? 'Không tìm thấy kết quả nào!' : 'Chưa có hướng dẫn viên nào';
+      const subMsg   = isFiltering ? 'Vui lòng thử lại với bộ lọc khác.' : 'Bấm "Thêm HDV mới" để tạo hướng dẫn viên đầu tiên.';
+
+      tbody.innerHTML = `
+                <tr>
+                    <td colspan="10" class="text-center py-5" style="background-color:#f8f9fa;">
+                        <div class="py-4">
+                            <i class="bi bi-person-x d-block mb-3" style="font-size:3rem;color:#ced4da;"></i>
+                            <h6 class="fw-bold text-secondary mb-1">${emptyMsg}</h6>
+                            <span class="text-muted small">${subMsg}</span>
+                        </div>
+                    </td>
+                </tr>`;
+      updateSortUI();
+      return;
+    }
+
+    guides.forEach(g => {
+      const isInactive = g.status === 'INACTIVE';
+
+      // Avatar
+      let avatarHtml;
+      if (g.avatarUrl) {
+        avatarHtml = `<img src="${g.avatarUrl}" class="guide-avatar" alt="${g.fullName}">`;
+      } else {
+        const initials = (g.fullName || '?').split(' ').map(w => w[0]).slice(-2).join('').toUpperCase();
+        avatarHtml = `<div class="guide-avatar-placeholder">${initials}</div>`;
+      }
+
+      // Rating
+      const rating = parseFloat(g.rating) || 0;
+      const stars  = Math.round(rating);
+      let starsHtml = '';
+      for (let i = 1; i <= 5; i++) {
+        starsHtml += `<i class="bi bi-star${i <= stars ? '-fill' : ''} rating-stars"></i>`;
+      }
+      const ratingHtml = `<span class="rating-text me-1">${rating.toFixed(1)}</span>${starsHtml}`;
+
+      // Status badge
+      const statusMap = {
+        ACTIVE:    `<span class="badge badge-active"><i class="bi bi-check-circle me-1"></i>Đang làm việc</span>`,
+        ON_LEAVE:  `<span class="badge badge-on-leave"><i class="bi bi-clock me-1"></i>Nghỉ phép</span>`,
+        SUSPENDED: `<span class="badge badge-suspended"><i class="bi bi-slash-circle me-1"></i>Bị khóa</span>`,
+        INACTIVE:  `<span class="badge badge-inactive"><i class="bi bi-x-circle me-1"></i>Đã nghỉ việc</span>`,
+      };
+      const statusBadge = statusMap[g.status] || g.status;
+
+      const escapedName = (g.fullName || '').replace(/'/g, "\\'");
+
+      // Actions
+      let actionsHtml = `
+    <div class="d-none d-md-flex gap-1 justify-content-center align-items-center">
+        <button class="btn btn-sm btn-outline-info" title="Xem chi tiết" onclick="viewGuide(${g.guideId})">
+            <i class="bi bi-eye"></i>
+        </button>
+        <button class="btn btn-sm btn-outline-dark" title="Chỉnh sửa" onclick="openEditModal(${g.guideId})">
+            <i class="bi bi-pencil-square"></i>
+        </button>
+        <button class="btn btn-sm btn-outline-danger" title="Xóa HDV" onclick="deleteGuide(${g.guideId}, '${escapedName}')">
+            <i class="bi bi-trash"></i>
+        </button>
+    </div>
+    <div class="d-flex d-md-none justify-content-center">
+        <div class="dropdown">
+            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                <i class="bi bi-three-dots-vertical"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                <li><a class="dropdown-item" href="#" onclick="viewGuide(${g.guideId})">
+                    <i class="bi bi-eye me-2 text-info"></i>Xem chi tiết
+                </a></li>
+                <li><a class="dropdown-item" href="#" onclick="openEditModal(${g.guideId})">
+                    <i class="bi bi-pencil-square me-2 text-dark"></i>Chỉnh sửa
+                </a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-danger" href="#" onclick="deleteGuide(${g.guideId}, '${escapedName}')">
+                    <i class="bi bi-trash me-2"></i>Xóa HDV
+                </a></li>
+            </ul>
+        </div>
+    </div>`;
+
+      const tr = document.createElement('tr');
+      if (isInactive) tr.className = 'row-inactive';
+      tr.dataset.id = g.guideId;
+      tr.innerHTML = `
+                <td><span class="text-muted small">${g.guideId}</span></td>
+                <td>${avatarHtml}</td>
+                <td>
+                    <div class="fw-semibold text-dark">${g.fullName || '—'}</div>
+                </td>
+                <td><span class="text-muted small">${g.email || '—'}</span></td>
+                <td><span class="text-muted small">${g.phoneNumber || '—'}</span></td>
+                <td><span class="small">${g.specialization || '<span class="text-muted">Chưa cập nhật</span>'}</span></td>
+                <td class="text-center"><span class="small">${g.experienceYears != null ? g.experienceYears + ' năm' : '—'}</span></td>
+                <td>${ratingHtml}</td>
+                <td>${statusBadge}</td>
+                <td class="text-center">${actionsHtml}</td>`;
+      tbody.appendChild(tr);
+    });
+
+    updateSortUI();
+  }
+
+  // ============================================================
+  //  PAGINATION
+  // ============================================================
+  function renderPagination(total, totalPgs, pageIndex, size) {
+    const start = total === 0 ? 0 : pageIndex * size + 1;
+    const end   = Math.min((pageIndex + 1) * size, total);
+
+    document.getElementById('paginationInfo').innerHTML = total === 0
+            ? 'Không có mục nào'
+            : `Hiển thị <span>${start}–${end}</span> trong tổng số <span>${total}</span> mục`;
+
+    const ul = document.getElementById('paginationControls');
+    ul.innerHTML = '';
+    if (totalPgs <= 1) return;
+
+    const displayPage = pageIndex + 1;
+
+    const addBtn = (label, zeroBasedPage, extraClass = '') => {
+      const li  = document.createElement('li'); li.className = 'page-item';
+      const btn = document.createElement('button');
+      btn.className = `page-btn ${extraClass}`.trim();
+      btn.innerHTML = label;
+      const canClick = !extraClass.includes('disabled')
+              && !extraClass.includes('active')
+              && !extraClass.includes('ellipsis')
+              && typeof zeroBasedPage === 'number'
+              && !isNaN(zeroBasedPage)
+              && zeroBasedPage >= 0;
+      if (canClick) btn.addEventListener('click', () => goToPage(zeroBasedPage));
+      li.appendChild(btn); ul.appendChild(li);
+    };
+
+    addBtn('<i class="bi bi-chevron-left"></i>', pageIndex - 1, pageIndex === 0 ? 'disabled' : '');
+    getPageNumbers(displayPage, totalPgs).forEach(p => {
+      if (p === '...') addBtn('…', -1, 'ellipsis');
+      else addBtn(String(p), p - 1, p === displayPage ? 'active' : '');
+    });
+    addBtn('<i class="bi bi-chevron-right"></i>', pageIndex + 1, pageIndex === totalPgs - 1 ? 'disabled' : '');
+  }
+
+  function getPageNumbers(current, total) {
+    if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+    const pages = [1];
+    if (current > 4) pages.push('...');
+    const s = Math.max(2, current - 1), e = Math.min(total - 1, current + 1);
+    for (let i = s; i <= e; i++) pages.push(i);
+    if (current < total - 3) pages.push('...');
+    pages.push(total);
+    return pages;
+  }
+
+  function goToPage(page) {
+    if (typeof page !== 'number' || isNaN(page) || page < 0) return;
+    currentPage = page;
+    fetchPage();
+  }
+
+  // ============================================================
+  //  FILTER / SORT / SEARCH
+  // ============================================================
+  function onFilterChange() {
+    checkFilterState();
+    currentPage = 0;
+    fetchPage();
+  }
+
+  function onPerPageChange(val) {
+    perPage = parseInt(val);
+    currentPage = 0;
+    fetchPage();
+  }
+
+  function onSearchInput(val) {
+    searchKeyword = val.trim();
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      currentPage = 0;
+      fetchPage();
+    }, 400);
+  }
+
+  function sortBy(col) {
+    if (sortCol === col) {
+      sortAsc = !sortAsc;
+    } else {
+      sortCol = col;
+      sortAsc = true;
+    }
+    currentPage = 0;
+    fetchPage();
+  }
+
+  function updateSortUI() {
+    document.querySelectorAll('th.sortable').forEach(th => {
+      th.classList.remove('sort-active');
+      const icon = th.querySelector('.sort-icon');
+      if (icon) icon.className = 'bi bi-arrow-down-up sort-icon';
+    });
+    if (sortCol) {
+      const th = document.querySelector(`th.sortable[data-sort="${sortCol}"]`);
+      if (th) {
+        th.classList.add('sort-active');
+        const icon = th.querySelector('.sort-icon');
+        if (icon) icon.className = sortAsc ? 'bi bi-arrow-up-short sort-icon' : 'bi bi-arrow-down-short sort-icon';
+      }
+    }
+  }
+
+  function checkFilterState() {
+    const isFiltering = document.getElementById('filterStatus').value !== ''
+            || document.getElementById('filterExperience').value !== '';
+    document.getElementById('btnClearFilterWrapper').style.display = isFiltering ? '' : 'none';
+  }
+
+  function clearFilters() {
+    document.getElementById('filterStatus').value = '';
+    document.getElementById('filterExperience').value = '';
+    onFilterChange();
+  }
+
+  // ============================================================
+  //  VIEW DETAIL
+  // ============================================================
+  async function viewGuide(id) {
+    const modal = new bootstrap.Modal(document.getElementById('viewGuideModal'));
+    document.getElementById('viewFormLoading').style.display = '';
+    document.getElementById('viewFormBody').style.display    = 'none';
+    document.getElementById('viewModalGuideId').textContent  = `#${id}`;
+    modal.show();
+
+    try {
+      const response = await fetch(`/api/admin/tour-guides/${id}`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        const g = result.data;
+
+        // Avatar
+        let avatarHtml;
+        if (g.avatarUrl) {
+          avatarHtml = `<img src="${g.avatarUrl}" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid #e0e0e0;" alt="${g.fullName}">`;
+        } else {
+          const initials = (g.fullName || '?').split(' ').map(w => w[0]).slice(-2).join('').toUpperCase();
+          avatarHtml = `<div style="width:64px;height:64px;border-radius:50%;background:#e8eaf6;color:#4154f1;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;border:2px solid #c5cae9;">${initials}</div>`;
+        }
+        document.getElementById('viewAvatarWrapper').innerHTML = avatarHtml;
+
+        document.getElementById('viewFullName').textContent = g.fullName || '—';
+
+        // Status badge
+        const statusMap = {
+          ACTIVE:    `<span class="badge badge-active"><i class="bi bi-check-circle me-1"></i>Đang làm việc</span>`,
+          ON_LEAVE:  `<span class="badge badge-on-leave"><i class="bi bi-clock me-1"></i>Nghỉ phép</span>`,
+          SUSPENDED: `<span class="badge badge-suspended"><i class="bi bi-slash-circle me-1"></i>Bị khóa</span>`,
+          INACTIVE:  `<span class="badge badge-inactive"><i class="bi bi-x-circle me-1"></i>Đã nghỉ việc</span>`,
+        };
+        document.getElementById('viewStatusBadge').innerHTML = statusMap[g.status] || g.status;
+
+        // Rating
+        const rating = parseFloat(g.rating) || 0;
+        const stars  = Math.round(rating);
+        let starsHtml = '';
+        for (let i = 1; i <= 5; i++) {
+          starsHtml += `<i class="bi bi-star${i <= stars ? '-fill' : ''} rating-stars"></i>`;
+        }
+        document.getElementById('viewRating').innerHTML = `<span class="fw-bold me-1">${rating.toFixed(1)}</span>${starsHtml}`;
+
+        document.getElementById('viewEmail').textContent        = g.email || '—';
+        document.getElementById('viewPhone').textContent        = g.phoneNumber || '—';
+        document.getElementById('viewSpecialization').textContent = g.specialization || 'Chưa cập nhật';
+        document.getElementById('viewLanguages').textContent    = g.languages || 'Chưa cập nhật';
+        document.getElementById('viewExperience').textContent   = g.experienceYears != null ? `${g.experienceYears} năm` : '—';
+        document.getElementById('viewTotalTours').textContent   = `${g.totalTours || 0} tour`;
+        document.getElementById('viewBio').textContent          = g.bio || 'Chưa có giới thiệu.';
+
+        document.getElementById('viewFormLoading').style.display = 'none';
+        document.getElementById('viewFormBody').style.display    = '';
+      } else {
+        throw new Error(result.message || 'Không tải được dữ liệu');
+      }
+    } catch (e) {
+      console.error(e);
+      document.getElementById('viewFormLoading').style.display = 'none';
+      document.getElementById('viewFormBody').innerHTML =
+              `<div class="text-center text-danger py-3">
+                    <i class="bi bi-exclamation-triangle me-1"></i>Không thể tải dữ liệu. Vui lòng thử lại.
+                 </div>`;
+      document.getElementById('viewFormBody').style.display = '';
+    }
+  }
+
+  // ============================================================
+  //  ADD MODAL
+  // ============================================================
+  async function openAddModal() {
+    // Reset form fields
+    ['addFullName','addEmail','addPhoneNumber',
+      'addLanguages','addSpecialization','addExperienceYears','addBio']
+            .forEach(id => document.getElementById(id).value = '');
+    document.getElementById('addFormError').classList.add('d-none');
+    document.querySelectorAll('#addGuideModal .is-invalid')
+            .forEach(el => el.classList.remove('is-invalid'));
+
+    new bootstrap.Modal(document.getElementById('addGuideModal')).show();
+  }
+
+  async function submitAddGuide() {
+    const fullNameEl  = document.getElementById('addFullName');
+    const emailEl     = document.getElementById('addEmail');
+    const phoneEl     = document.getElementById('addPhoneNumber');
+
+    // Xóa trạng thái lỗi cũ
+    [fullNameEl, emailEl, phoneEl].forEach(el => {
+      el.classList.remove('is-invalid');
+      el.classList.remove('is-valid');
+    });
+    document.getElementById('addFormError').classList.add('d-none');
+
+    let valid = true;
+
+    // Validate họ tên
+    if (!fullNameEl.value.trim()) {
+      fullNameEl.classList.add('is-invalid');
+      fullNameEl.nextElementSibling.textContent = 'Vui lòng nhập họ tên.';
+      valid = false;
+    } else if (fullNameEl.value.trim().length < 2) {
+      fullNameEl.classList.add('is-invalid');
+      fullNameEl.nextElementSibling.textContent = 'Họ tên phải có ít nhất 2 ký tự.';
+      valid = false;
+    }
+
+    // Validate email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailEl.value.trim()) {
+      emailEl.classList.add('is-invalid');
+      // invalid-feedback nằm sau input, trước form-text
+      emailEl.nextElementSibling.textContent = 'Vui lòng nhập email.';
+      valid = false;
+    } else if (!emailRegex.test(emailEl.value.trim())) {
+      emailEl.classList.add('is-invalid');
+      emailEl.nextElementSibling.textContent = 'Vui lòng nhập email hợp lệ.';
+      valid = false;
+    }
+
+    // Validate số điện thoại (nếu có nhập thì kiểm tra)
+    const phoneRegex = /^0[0-9]{9}$/;
+    if (phoneEl.value.trim() && !phoneRegex.test(phoneEl.value.trim())) {
+      phoneEl.classList.add('is-invalid');
+      phoneEl.nextElementSibling.textContent = 'Số điện thoại phải bắt đầu bằng 0 và có 10 chữ số.';
+      valid = false;
+    }
+
+    // Thêm vào submitAddGuide, sau validate phoneNumber
+    const expEl = document.getElementById('addExperienceYears');
+    expEl.classList.remove('is-invalid');
+
+    if (expEl.value !== '' && parseInt(expEl.value) < 0) {
+      expEl.classList.add('is-invalid');
+      valid = false;
+    }
+
+    if (!valid) return;
+
+    const btn = document.getElementById('btnConfirmAdd');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Đang lưu...';
+
+    const payload = {
+      fullName:        fullNameEl.value.trim(),
+      email:           emailEl.value.trim(),
+      phoneNumber:     phoneEl.value.trim() || null,
+      languages:       document.getElementById('addLanguages').value || null,
+      specialization:  document.getElementById('addSpecialization').value || null,
+      experienceYears: document.getElementById('addExperienceYears').value
+              ? parseInt(document.getElementById('addExperienceYears').value) : null,
+      bio:             document.getElementById('addBio').value || null
+    };
+
+    try {
+      const response = await fetch('/api/admin/tour-guides', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(payload)
+      });
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        bootstrap.Modal.getInstance(document.getElementById('addGuideModal')).hide();
+
+        // Reset ô tìm kiếm
+        searchKeyword = '';
+        document.getElementById('customSearch').value = '';
+
+        showSuccess('Thêm hướng dẫn viên thành công!');
+        fetchPage();
+      } else {
+        const msg = result.message || 'Không thể thêm HDV. Vui lòng thử lại.';
+
+        if (msg.includes('Email đã được sử dụng')) {
+          emailEl.classList.add('is-invalid');
+          emailEl.nextElementSibling.textContent = msg;
+        } else if (msg.includes('Số điện thoại')) {
+          phoneEl.classList.add('is-invalid');
+          phoneEl.nextElementSibling.textContent = msg;
+        } else {
+          // Các lỗi khác (không xác định field cụ thể) -> hiện alert chung
+          const errEl = document.getElementById('addFormError');
+          errEl.textContent = msg;
+          errEl.classList.remove('d-none');
+        }
+      }
+    } catch (e) {
+      console.error(e);
+      const errEl = document.getElementById('addFormError');
+      errEl.textContent = 'Lỗi kết nối đến máy chủ!';
+      errEl.classList.remove('d-none');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-plus-circle me-1"></i>Thêm HDV';
+    }
+  }
+
+  // ============================================================
+  //  EDIT MODAL
+  // ============================================================
+  async function openEditModal(id) {
+    const modal = new bootstrap.Modal(document.getElementById('editGuideModal'));
+    document.getElementById('editFormLoading').style.display = '';
+    document.getElementById('editFormBody').style.display    = 'none';
+    document.getElementById('editFormError').classList.add('d-none');
+    document.getElementById('editModalGuideId').textContent  = `#${id}`;
+    document.querySelectorAll('#editGuideModal .is-invalid')
+            .forEach(el => el.classList.remove('is-invalid'));
+    modal.show();
+
+    try {
+      const response = await fetch(`/api/admin/tour-guides/${id}`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        const g = result.data;
+        document.getElementById('editGuideId').value           = g.guideId;
+        document.getElementById('editFullName').value        = g.fullName || '';
+        document.getElementById('editEmail').value           = g.email || '';
+        document.getElementById('editPhoneNumber').value       = g.phoneNumber || '';
+        document.getElementById('editLanguages').value         = g.languages || '';
+        document.getElementById('editSpecialization').value    = g.specialization || '';
+        document.getElementById('editExperienceYears').value   = g.experienceYears != null ? g.experienceYears : '';
+        document.getElementById('editBio').value               = g.bio || '';
+        document.getElementById('editStatus').value            = g.status;
+        document.getElementById('editFormLoading').style.display = 'none';
+        document.getElementById('editFormBody').style.display    = '';
+      } else {
+        throw new Error(result.message || 'Không tải được dữ liệu');
+      }
+    } catch (e) {
+      console.error(e);
+      document.getElementById('editFormLoading').style.display = 'none';
+      const errEl = document.getElementById('editFormError');
+      errEl.textContent = 'Không thể tải dữ liệu HDV. Vui lòng thử lại.';
+      errEl.classList.remove('d-none');
+    }
+  }
+
+  async function submitEditGuide() {
+    const fullNameEl = document.getElementById('editFullName');
+    const emailEl    = document.getElementById('editEmail');
+    const phoneEl    = document.getElementById('editPhoneNumber');
+    const expEl      = document.getElementById('editExperienceYears');
+
+    [fullNameEl, emailEl, phoneEl, expEl].forEach(el => el.classList.remove('is-invalid'));
+    document.getElementById('editFormError').classList.add('d-none');
+
+    let valid = true;
+
+    // Validate họ tên
+    if (!fullNameEl.value.trim()) {
+      fullNameEl.classList.add('is-invalid');
+      fullNameEl.nextElementSibling.textContent = 'Vui lòng nhập họ tên.';
+      valid = false;
+    } else if (fullNameEl.value.trim().length < 2) {
+      fullNameEl.classList.add('is-invalid');
+      fullNameEl.nextElementSibling.textContent = 'Họ tên phải có ít nhất 2 ký tự.';
+      valid = false;
+    }
+
+    // Validate email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailEl.value.trim()) {
+      emailEl.classList.add('is-invalid');
+      emailEl.nextElementSibling.textContent = 'Vui lòng nhập email.';
+      valid = false;
+    } else if (!emailRegex.test(emailEl.value.trim())) {
+      emailEl.classList.add('is-invalid');
+      emailEl.nextElementSibling.textContent = 'Vui lòng nhập email hợp lệ.';
+      valid = false;
+    }
+
+    // Validate số điện thoại
+    const phoneRegex = /^0[0-9]{9}$/;
+    if (phoneEl.value.trim() && !phoneRegex.test(phoneEl.value.trim())) {
+      phoneEl.classList.add('is-invalid');
+      valid = false;
+    }
+
+    // Validate kinh nghiệm
+    if (expEl.value !== '' && parseInt(expEl.value) < 0) {
+      expEl.classList.add('is-invalid');
+      valid = false;
+    }
+
+    if (!valid) return;
+
+    const btn = document.getElementById('btnConfirmEdit');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Đang lưu...';
+
+    const id = document.getElementById('editGuideId').value;
+    const payload = {
+      fullName:        fullNameEl.value.trim(),
+      email:           emailEl.value.trim(),
+      phoneNumber:     phoneEl.value.trim() || null,
+      languages:       document.getElementById('editLanguages').value || null,
+      specialization:  document.getElementById('editSpecialization').value || null,
+      experienceYears: expEl.value ? parseInt(expEl.value) : null,
+      bio:             document.getElementById('editBio').value || null,
+      status:          document.getElementById('editStatus').value
+    };
+
+    try {
+      const response = await fetch(`/api/admin/tour-guides/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(payload)
+      });
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        bootstrap.Modal.getInstance(document.getElementById('editGuideModal')).hide();
+        showSuccess('Cập nhật hướng dẫn viên thành công!');
+        fetchPage();
+      } else {
+        const msg = result.message || 'Không thể cập nhật. Vui lòng thử lại.';
+
+        if (msg.includes('Email đã được sử dụng')) {
+          emailEl.classList.add('is-invalid');
+          emailEl.nextElementSibling.textContent = msg;
+        } else if (msg.includes('Số điện thoại')) {
+          phoneEl.classList.add('is-invalid');
+          phoneEl.nextElementSibling.textContent = msg;
+        } else {
+          const errEl = document.getElementById('editFormError');
+          errEl.textContent = msg;
+          errEl.classList.remove('d-none');
+        }
+      }
+    } catch (e) {
+      console.error(e);
+      const errEl = document.getElementById('editFormError');
+      errEl.textContent = 'Lỗi kết nối đến máy chủ!';
+      errEl.classList.remove('d-none');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-save me-1"></i>Lưu thay đổi';
+    }
+  }
+
+  // ============================================================
+  //  DELETE (soft delete → INACTIVE)
+  // ============================================================
+  async function deleteGuide(id, name) {
+    const res = await Swal.fire({
+      icon: 'warning',
+      title: 'Xóa hướng dẫn viên?',
+      html: `Bạn muốn xóa HDV <b>${name}</b> khỏi hệ thống.<br>
+               <span class="text-muted small">
+                   <i class="bi bi-info-circle me-1"></i>
+                   Nếu HDV đã có lịch sử phân công, hãy đổi trạng thái thành
+                   <b>Đã nghỉ việc</b> thay vì xóa.
+               </span>`,
+      showCancelButton: true,
+      confirmButtonColor: '#dc3545',
+      confirmButtonText: '<i class="bi bi-trash me-1"></i>Xác nhận xóa',
+      cancelButtonText: 'Hủy bỏ',
+      customClass: { title: 'swal-custom-title', htmlContainer: 'swal-custom-html' }
+    });
+    if (!res.isConfirmed) return;
+
+    try {
+      const response = await fetch(`/api/admin/tour-guides/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        showSuccess('Đã xóa hướng dẫn viên!');
+        fetchPage();
+      } else {
+        // Hiển thị lỗi từ backend — bao gồm cả TOUR_GUIDE_HAS_ASSIGNMENTS
+        Swal.fire({
+          icon: 'error',
+          title: 'Không thể xóa!',
+          html: `${result.message}<br><br>
+                       <span class="text-muted small">
+                           Vào <b>Chỉnh sửa</b> → đổi trạng thái thành
+                           <b>Đã nghỉ việc</b> để vô hiệu hóa HDV này.
+                       </span>`,
+          customClass: { title: 'swal-custom-title', htmlContainer: 'swal-custom-html' }
+        });
+      }
+    } catch (e) {
+      console.error(e);
+      Swal.fire({ icon: 'error', title: 'Lỗi hệ thống', text: 'Không thể kết nối đến máy chủ!' });
+    }
+  }
+
+  // ============================================================
+  //  EXPORT EXCEL
+  // ============================================================
+  async function exportExcel() {
+    const btn = document.querySelector('button[onclick="exportExcel()"]');
+    const originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Đang xuất...';
+
+    try {
+      const params = new URLSearchParams();
+
+      const statusVal = document.getElementById('filterStatus').value;
+      if (statusVal) params.set('status', statusVal);
+      const experienceVal = document.getElementById('filterExperience').value;
+      if (experienceVal) params.set('experience', experienceVal);
+      if (searchKeyword) params.set('keyword', searchKeyword);
+
+      const response = await fetch(`/api/admin/tour-guides/export?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Xuất file thất bại');
+      }
+
+      // Lấy tên file từ header nếu có, không thì dùng mặc định
+      const disposition = response.headers.get('Content-Disposition');
+      let fileName = 'Danh_sach_HDV.xlsx';
+      if (disposition && disposition.includes('filename')) {
+        const match = disposition.match(/filename\*?=(?:utf-8'')?([^;]+)/i);
+        if (match) fileName = decodeURIComponent(match[1].replace(/['"]/g, ''));
+      }
+
+      // Tạo blob và download
+      const blob = await response.blob();
+      const url  = window.URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+
+      showSuccess('Xuất Excel thành công!');
+    } catch (e) {
+      console.error(e);
+      Swal.fire({
+        icon: 'error',
+        title: 'Xuất thất bại!',
+        text: 'Không thể xuất file Excel. Vui lòng thử lại.',
+        customClass: { title: 'swal-custom-title' }
+      });
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
+    }
+  }
+
+  // ============================================================
+  //  UTILS
+  // ============================================================
+  function showSuccess(title) {
+    Swal.fire({
+      icon: 'success', title, showConfirmButton: false, timer: 1500,
+      customClass: { title: 'swal-custom-title' }
+    });
+  }
+
+  function fmtDateTime(val) {
+    if (!val) return '—';
+    if (Array.isArray(val)) {
+      const [y, mo, d, h = 0, mi = 0] = val;
+      return `${String(d).padStart(2,'0')}/${String(mo).padStart(2,'0')}/${y} ${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')}`;
+    }
+    const dt = new Date(val);
+    return dt.toLocaleString('vi-VN', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+  }
+
+  function showLoading(show) {
+    document.getElementById('tableLoadingOverlay').classList.toggle('show', show);
+  }
+
+  function showTableError(msg) {
+    document.getElementById('guideListBody').innerHTML =
+            `<tr><td colspan="10" class="text-center text-danger py-4">
+                <i class="bi bi-exclamation-triangle me-2"></i>${msg}
+             </td></tr>`;
+    document.getElementById('paginationInfo').innerHTML = '—';
+    document.getElementById('paginationControls').innerHTML = '';
+  }
+</script>
+
+</body>
+</html>

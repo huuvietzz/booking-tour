@@ -1,0 +1,126 @@
+/* assets/css/header-white.css
+   Header trắng đặc, full width — thay cho kiểu glass bo tròn của template.
+   Nhúng SAU main.css và auth-ui.css:
+   <link href="assets/css/header-white.css" rel="stylesheet">  */
+
+:root {
+    --header-height: 76px;
+}
+
+/* ---------- Thanh header ---------- */
+.header,
+.index-page .header,
+.header.scrolled {
+    background-color: #fff !important;
+    box-shadow: 0 1px 12px rgba(0, 0, 0, .08);
+    padding: 0;
+    height: var(--header-height);
+    transition: box-shadow .3s;
+}
+
+/* Bỏ nền mờ + bo tròn của container bên trong.
+   max-width: 100% để logo sát mép trái, nút tài khoản sát mép phải —
+   không bị bó trong container-xl (1320px) như mặc định của Bootstrap. */
+.header .header-container,
+.index-page .header .header-container {
+    background-color: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 0 40px !important;
+    margin: 0 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    height: 100%;
+}
+
+/* ---------- Logo ảnh ---------- */
+.header .logo img {
+    max-height: 44px;
+    width: auto;
+    margin-right: 0;
+}
+
+.header .logo h1.sitename {
+    color: #1a1a1a;
+}
+
+/* ---------- Menu: chữ tối trên nền trắng ---------- */
+.header .navmenu > ul > li > a,
+.index-page .header .navmenu > ul > li > a {
+    color: #3a3a3a !important;
+    font-weight: 500;
+    padding: 18px 16px;
+    transition: color .2s;
+}
+
+.header .navmenu > ul > li > a:hover,
+.header .navmenu > ul > li > a.active,
+.index-page .header .navmenu > ul > li > a:hover,
+.index-page .header .navmenu > ul > li > a.active {
+    color: var(--accent-color) !important;
+}
+
+/* Gạch chân mục đang mở */
+.header .navmenu > ul > li > a.active::before {
+    background-color: var(--accent-color);
+}
+
+/* Icon menu trên mobile */
+.header .mobile-nav-toggle {
+    color: #3a3a3a !important;
+}
+
+/* ---------- Nút đăng nhập ---------- */
+.header .btn-getstarted {
+    background-color: var(--accent-color);
+    color: #fff;
+    border-radius: 999px;
+    padding: 10px 24px;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.header .btn-getstarted:hover {
+    background-color: color-mix(in srgb, var(--accent-color), #000 12%);
+    color: #fff;
+}
+
+/* ---------- Đẩy nội dung xuống dưới header ---------- */
+/* Header là fixed-top, nền giờ đặc nên phải chừa chỗ, nếu không
+   phần đầu của hero bị che khuất. */
+.index-page .main,
+.main {
+    padding-top: var(--header-height);
+}
+
+/* Hero video vẫn chiếm trọn phần còn lại của màn hình */
+.index-page .travel-hero {
+    min-height: calc(100vh - var(--header-height));
+}
+
+@media (max-width: 1199.98px) {
+    :root {
+        --header-height: 68px;
+    }
+
+    .header .logo img {
+        max-height: 38px;
+    }
+
+    .header .btn-getstarted {
+        padding: 8px 18px;
+        font-size: 14px;
+    }
+
+    .header .header-container {
+        padding: 0 16px !important;
+    }
+
+    /* Menu mobile dạng panel, giữ chữ tối */
+    .navmenu ul a,
+    .navmenu ul a:focus {
+        color: #3a3a3a;
+    }
+}

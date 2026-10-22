@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Trang chủ</title>
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+
+  <!-- Favicons -->
+  <link href="assets/img/favicon.png" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+  <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+  <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link href="assets/css/main.css" rel="stylesheet">
+  <link href="assets/css/auth-ui.css" rel="stylesheet">
+  <link href="assets/css/header-white.css" rel="stylesheet">
+
+  <!-- =======================================================
+  * Template Name: Tour
+  * Template URL: https://bootstrapmade.com/tour-bootstrap-travel-website-template/
+  * Updated: Jul 01 2025 with Bootstrap v5.3.7
+  * Author: BootstrapMade.com
+  * License: https://bootstrapmade.com/license/
+  ======================================================== -->
+</head>
+
+<body class="index-page">
+
+<header id="header" class="header d-flex align-items-center fixed-top">
+  <div class="header-container container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+
+    <a href="index.html" class="logo d-flex align-items-center me-auto me-xl-0">
+      <img src="assets/img/logo.webp" alt="Booking Tour">
+    </a>
+
+    <nav id="navmenu" class="navmenu">
+      <ul>
+        <li><a href="index.html" class="active">Trang chủ</a></li>
+        <li><a href="about.html">Về chúng tôi</a></li>
+        <li><a href="destinations.html">Điểm đến</a></li>
+        <li><a href="tours.html">Tours</a></li>
+        <li><a href="contact.html">Liên hệ</a></li>
+      </ul>
+      <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+    </nav>
+
+    <!-- Đã thay đổi href và text của nút này -->
+    <a class="btn-getstarted" href="pages-login.html">Đăng nhập</a>
+
+  </div>
+</header>
+
+  <main class="main">
+
+    <!-- Travel Hero Section -->
+    <section id="travel-hero" class="travel-hero section dark-background">
+
+      <div class="hero-background">
+        <video autoplay="" muted="" loop="">
+          <source src="assets/img/travel/video-2.mp4" type="video/mp4">
+        </video>
+        <div class="hero-overlay"></div>
+      </div>
+
+      <div class="container position-relative">
+        <div class="row align-items-center">
+          <div class="col-lg-7">
+            <div class="hero-text" data-aos="fade-up" data-aos-delay="100">
+              <h1 class="hero-title">Khám phá hành trình hoàn hảo của bạn</h1>
+              <p class="hero-subtitle">Hãy cùng chúng tôi đặt chân đến những vùng đất mới, trải nghiệm văn hóa độc đáo và lưu giữ những khoảnh khắc đáng nhớ. Chúng tôi cam kết mang lại cho bạn những chuyến đi an toàn, thú vị với chi phí hợp lý nhất để hành trình của bạn trở nên trọn vẹn</p>
+              <div class="hero-buttons">
+                <a href="#" class="btn btn-primary me-3">Bắt đầu khám phá</a>
+                <a href="#" class="btn btn-outline">Xem danh sách tour</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-5">
+            <div class="booking-form-wrapper" data-aos="fade-left" data-aos-delay="200">
+              <div class="booking-form">
+                <h3 class="form-title">Lên kế hoạch cho chuyến đi</h3>
+                <form action="" class="">
+                  <div class="form-group mb-3">
+                    <label for="destination">Điểm đến</label>
+                    <select name="destination" id="destination" class="form-select" required="">
+                      <option value="">Chọn điểm đến của bạn</option>
+                      <option value="europe">Châu Âu</option>
+                      <option value="asia">Châu Á</option>
+                      <option value="america">Châu Mỹ</option>
+                      <option value="africa">Châu Phi</option>
+                      <option value="oceania">Châu Đại Dương</option>
+                    </select>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="form-group mb-3">
+                        <label for="checkin">Ngày khởi hành</label>
+                        <input type="date" name="checkin" id="checkin" class="form-control" required="">
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-group mb-3">
+                        <label for="checkout">Ngày trở về</label>
+                        <input type="date" name="checkout" id="checkout" class="form-control" required="">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="form-group mb-3">
+                        <label for="adults">Người lớn</label>
+                        <select name="adults" id="adults" class="form-select" required="">
+                          <option value="1">1 Người lớn</option>
+                          <option value="2">2 Người lớn</option>
+                          <option value="3">3 Người lớn</option>
+                          <option value="4">4+ Người lớn</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-group mb-3">
+                        <label for="children">Trẻ em</label>
+                        <select name="children" id="children" class="form-select">
+                          <option value="0">Không có trẻ em</option>
+                          <option value="1">1 Trẻ em</option>
+                          <option value="2">2 Trẻ em</option>
+                          <option value="3">3+ Trẻ em</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-group mb-3">
+                    <label for="tour-type">Loại tour</label>
+                    <select name="tour_type" id="tour-type" class="form-select" required="">
+                      <option value="adventure">Mạo hiểm</option>
+                      <option value="cultural">Văn hóa</option>
+                      <option value="relaxation">Nghỉ dưỡng</option>
+                      <option value="family">Gia đình</option>
+                      <option value="luxury">Cao cấp</option>
+                    </select>
+                  </div>
+
+                  <button type="submit" class="btn btn-primary w-100">Tìm chuyến đi lý tưởng</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section><!-- /Travel Hero Section -->
+
+    <!-- Why Us Section -->
+    <section id="why-us" class="why-us section">
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <!-- About Us Content -->
+        <div class="row align-items-center mb-5">
+          <div class="col-lg-6" data-aos="fade-right" data-aos-delay="200">
+            <div class="content">
+              <h3>An Tâm Khám Phá Thế Giới</h3>
+              <p>Chúng tôi hiểu rằng mỗi chuyến đi không chỉ là việc di chuyển, mà là hành trình kiến tạo những kỷ niệm vô giá. Với cam kết về sự an toàn và chất lượng dịch vụ hàng đầu, chúng tôi mang đến cho bạn sự tự tin để chinh phục những vùng đất mới lạ.</p>
+              <p>Đội ngũ chuyên gia tận tâm của chúng tôi luôn đồng hành cùng bạn từ khâu lên ý tưởng đến khi kết thúc hành trình. Mọi chi tiết nhỏ đều được chăm chút kỹ lưỡng để đảm bảo bạn có được những trải nghiệm du lịch trọn vẹn và đẳng cấp nhất.</p>
+              <div class="stats-row">
+                <div class="stat-item">
+                  <span data-purecounter-start="0" data-purecounter-end="1200" data-purecounter-duration="2" class="purecounter">0</span>
+                  <div class="stat-label">Khách Hàng Hài Lòng</div>
+                </div>
+                <div class="stat-item">
+                  <span data-purecounter-start="0" data-purecounter-end="85" data-purecounter-duration="2" class="purecounter">0</span>
+                  <div class="stat-label">Quốc Gia Đã Đến</div>
+                </div>
+                <div class="stat-item">
+                  <span data-purecounter-start="0" data-purecounter-end="15" data-purecounter-duration="2" class="purecounter">0</span>
+                  <div class="stat-label">Năm Kinh Nghiệm</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6" data-aos="fade-left" data-aos-delay="300">
+            <div class="about-image">
+              <img src="assets/img/travel/showcase-8.webp" alt="Travel Experience" class="img-fluid rounded-4">
+              <div class="experience-badge">
+                <div class="experience-number">15+</div>
+                <div class="experience-text">Năm Khẳng Định <br> Uy Tín</div>
+              </div>
+            </div>
+          </div>
+        </div><!-- End About Us Content -->
+
+        <!-- Why Choose Us -->
+        <div class="why-choose-section">
+        <div class="row justify-content-center">
+          <div class="col-lg-8 text-center mb-5" data-aos="fade-up" data-aos-delay="100">
+            <h3>Vì Sao Chọn Chúng Tôi Cho Chuyến Đi Của Bạn</h3>
+            <p>Khám phá những lý do khiến hàng ngàn du khách tin tưởng lựa chọn chúng tôi làm người bạn đồng hành trên mọi nẻo đường.</p>
+          </div>
+        </div>
+
+        <div class="row g-4">
+          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+            <div class="feature-card">
+              <div class="feature-icon">
+                <i class="bi bi-people-fill"></i>
+              </div>
+              <h4>Chuyên Gia Địa Phương</h4>
+              <p>Đội ngũ hướng dẫn viên bản địa am hiểu sâu sắc về văn hóa, lịch sử, mang đến cho bạn những câu chuyện thú vị nhất.</p>
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="250">
+            <div class="feature-card">
+              <div class="feature-icon">
+                <i class="bi bi-shield-check"></i>
+              </div>
+              <h4>An Toàn & Tin Cậy</h4>
+              <p>Chúng tôi đặt sự an toàn của bạn lên hàng đầu với các tiêu chuẩn bảo vệ nghiêm ngặt và chính sách bảo hiểm toàn diện.</p>
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+            <div class="feature-card">
+              <div class="feature-icon">
+                <i class="bi bi-cash"></i>
+              </div>
+              <h4>Giá Tốt Nhất</h4>
+              <p>Cam kết mức giá cạnh tranh nhất thị trường đi kèm với chất lượng dịch vụ vượt trội, không phát sinh chi phí ẩn.</p>
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="350">
+            <div class="feature-card">
+              <div class="feature-icon">
+                <i class="bi bi-headset"></i>
+              </div>
+              <h4>Hỗ Trợ 24/7</h4>
+              <p>Đội ngũ chăm sóc khách hàng luôn sẵn sàng lắng nghe và giải quyết mọi vấn đề của bạn bất cứ lúc nào, ở bất cứ đâu.</p>
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
+            <div class="feature-card">
+              <div class="feature-icon">
+                <i class="bi bi-geo-alt-fill"></i>
+              </div>
+              <h4>Điểm Đến Toàn Cầu</h4>
+              <p>Hệ thống tour đa dạng phủ sóng khắp các châu lục, đưa bạn đến khám phá những vùng đất mới lạ và kỳ thú nhất.</p>
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="450">
+            <div class="feature-card">
+              <div class="feature-icon">
+                <i class="bi bi-star-fill"></i>
+              </div>
+              <h4>Trải Nghiệm Đẳng Cấp</h4>
+              <p>Tận hưởng dịch vụ chuẩn quốc tế, tiện nghi sang trọng và sự phục vụ tận tâm để mỗi chuyến đi là một kỷ niệm đẹp.</p>
+            </div>
+          </div>
+        </div></div><!-- End Why Choose Us -->
+
+      </div>
+
+    </section><!-- /Why Us Section -->
+
+    <!-- Featured Destinations Section -->
+    <section id="featured-destinations" class="featured-destinations section">
+
+      <div class="container section-title" data-aos="fade-up">
+        <h2>Điểm Đến Nổi Bật</h2>
+        <div><span>Khám Phá</span> <span class="description-title">Các Điểm Đến Hàng Đầu</span></div>
+      </div><div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="row">
+
+          <div class="col-lg-6" data-aos="zoom-in" data-aos-delay="200">
+            <div class="featured-destination">
+              <div class="destination-overlay">
+                <img src="assets/img/travel/destination-3.webp" alt="Tropical Paradise" class="img-fluid">
+                <div class="destination-info">
+                  <span class="destination-tag">Được Yêu Thích Nhất</span>
+                  <h3>Thiên Đường Nhiệt Đới</h3>
+                  <p class="location"><i class="bi bi-geo-alt-fill"></i> Maldives</p>
+                  <p class="description">Những bãi biển nguyên sơ, làn nước trong vắt như pha lê và các biệt thự trên mặt nước sang trọng đang chờ đón bạn tại thiên đường nghỉ dưỡng này.</p>
+                  <div class="destination-meta">
+                    <div class="tours-count">
+                      <i class="bi bi-collection"></i>
+                      <span>22 Gói Tour</span>
+                    </div>
+                    <div class="rating">
+                      <i class="bi bi-star-fill"></i>
+                      <span>4.9 (412)</span>
+                    </div>
+                  </div>
+                  <div class="price-info">
+                    <span class="starting-from">Giá chỉ từ</span>
+                    <span class="amount">$2,150</span>
+                  </div>
+                  <a href="destination-details.html" class="explore-btn">
+                    <span>Khám Phá Ngay</span>
+                    <i class="bi bi-arrow-right"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="row g-3">
+
+              <div class="col-12" data-aos="fade-left" data-aos-delay="300">
+                <div class="compact-destination">
+                  <div class="destination-image">
+                    <img src="assets/img/travel/destination-7.webp" alt="Mountain Adventure" class="img-fluid">
+                    <div class="badge-offer">Giá Tốt Nhất</div>
+                  </div>
+                  <div class="destination-details">
+                    <h4>Chinh Phục Đỉnh Cao</h4>
+                    <p class="location"><i class="bi bi-geo-alt"></i> Nepal</p>
+                    <p class="brief">Những đỉnh núi Himalaya hùng vĩ và các ngôi chùa Phật giáo cổ kính tạo nên một hành trình tâm linh khó quên.</p>
+                    <div class="stats-row">
+                      <span class="tour-count"><i class="bi bi-calendar-check"></i> 16 Tour</span>
+                      <span class="rating"><i class="bi bi-star-fill"></i> 4.8</span>
+                      <span class="price">từ $1,420</span>
+                    </div>
+                    <a href="destination-details.html" class="quick-link">Xem Chi Tiết <i class="bi bi-chevron-right"></i></a>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12" data-aos="fade-left" data-aos-delay="400">
+                <div class="compact-destination">
+                  <div class="destination-image">
+                    <img src="assets/img/travel/destination-11.webp" alt="Cultural Heritage" class="img-fluid">
+                  </div>
+                  <div class="destination-details">
+                    <h4>Di Sản Văn Hóa</h4>
+                    <p class="location"><i class="bi bi-geo-alt"></i> Peru</p>
+                    <p class="brief">Khám phá các nền văn minh cổ đại, những khu chợ đầy màu sắc và các kỳ quan khảo cổ ngay giữa lòng Nam Mỹ.</p>
+                    <div class="stats-row">
+                      <span class="tour-count"><i class="bi bi-calendar-check"></i> 9 Hành Trình</span>
+                      <span class="rating"><i class="bi bi-star-fill"></i> 4.7</span>
+                      <span class="price">từ $980</span>
+                    </div>
+                    <a href="destination-details.html" class="quick-link">Xem Chi Tiết <i class="bi bi-chevron-right"></i></a>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12" data-aos="fade-left" data-aos-delay="500">
+                <div class="compact-destination">
+                  <div class="destination-image">
+                    <img src="assets/img/travel/destination-16.webp" alt="Safari Experience" class="img-fluid">
+                    <div class="badge-offer limited">Sắp Hết Chỗ</div>
+                  </div>
+                  <div class="destination-details">
+                    <h4>Trải Nghiệm Hoang Dã</h4>
+                    <p class="location"><i class="bi bi-geo-alt"></i> Kenya</p>
+                    <p class="brief">Chiêm ngưỡng "Big Five" và trải nghiệm cuộc di cư vĩ đại tại các khu bảo tồn thiên nhiên ngoạn mục nhất Châu Phi.</p>
+                    <div class="stats-row">
+                      <span class="tour-count"><i class="bi bi-calendar-check"></i> 11 Chuyến Safari</span>
+                      <span class="rating"><i class="bi bi-star-fill"></i> 4.9</span>
+                      <span class="price">từ $2,750</span>
+                    </div>
+                    <a href="destination-details.html" class="quick-link">Xem Chi Tiết <i class="bi bi-chevron-right"></i></a>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section><!-- /Featured Destinations Section -->
+
+    <!-- Featured Tours Section -->
+    <section id="featured-tours" class="featured-tours section">
+
+      <div class="container section-title" data-aos="fade-up">
+        <h2>Tour Nổi Bật</h2>
+        <div><span>Khám Phá</span> <span class="description-title">Các Tour Tiêu Biểu</span></div>
+      </div><div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="row gy-4">
+          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+            <div class="tour-card">
+              <div class="tour-image">
+                <img src="assets/img/travel/tour-1.webp" alt="Serene Beach Retreat" class="img-fluid" loading="lazy">
+                <div class="tour-badge">Yêu Thích Nhất</div>
+                <div class="tour-price">$2,150</div>
+              </div>
+              <div class="tour-content">
+                <h4>Kỳ Nghỉ Biển Đảo Thư Thái</h4>
+                <div class="tour-meta">
+                  <span class="duration"><i class="bi bi-clock"></i> 8 Ngày</span>
+                  <span class="group-size"><i class="bi bi-people"></i> Tối đa 6</span>
+                </div>
+                <p>Tận hưởng làn nước trong xanh và bãi cát trắng mịn. Một kỳ nghỉ hoàn hảo để thư giãn, tái tạo năng lượng và hòa mình vào thiên nhiên.</p>
+                <div class="tour-highlights">
+                  <span>Maldives</span>
+                  <span>Seychelles</span>
+                  <span>Bora Bora</span>
+                </div>
+                <div class="tour-action">
+                  <a href="booking.html" class="btn-book">Đặt Ngay</a>
+                  <div class="tour-rating">
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-half"></i>
+                    <span>4.8 (95)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div><div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+            <div class="tour-card">
+              <div class="tour-image">
+                <img src="assets/img/travel/tour-2.webp" alt="Arctic Expedition" class="img-fluid" loading="lazy">
+                <div class="tour-badge limited">Chỉ Còn 3 Chỗ!</div>
+                <div class="tour-price">$5,700</div>
+              </div>
+              <div class="tour-content">
+                <h4>Thám Hiểm Hoang Dã Bắc Cực</h4>
+                <div class="tour-meta">
+                  <span class="duration"><i class="bi bi-clock"></i> 10 Ngày</span>
+                  <span class="group-size"><i class="bi bi-people"></i> Tối đa 8</span>
+                </div>
+                <p>Khám phá vẻ đẹp hùng vĩ của băng tuyết và thiên nhiên hoang sơ. Cơ hội ngắm cực quang và trải nghiệm cuộc sống vùng cực độc đáo.</p>
+                <div class="tour-highlights">
+                  <span>Greenland</span>
+                  <span>Iceland</span>
+                  <span>Na Uy</span>
+                </div>
+                <div class="tour-action">
+                  <a href="booking.html" class="btn-book">Đặt Ngay</a>
+                  <div class="tour-rating">
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star"></i>
+                    <span>4.6 (55)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div><div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
+            <div class="tour-card">
+              <div class="tour-image">
+                <img src="assets/img/travel/tour-4.webp" alt="Desert Safari" class="img-fluid" loading="lazy">
+                <div class="tour-badge new">Mới Ra Mắt</div>
+                <div class="tour-price">$1,400</div>
+              </div>
+              <div class="tour-content">
+                <h4>Khám Phá Sa Mạc Sahara</h4>
+                <div class="tour-meta">
+                  <span class="duration"><i class="bi bi-clock"></i> 5 Ngày</span>
+                  <span class="group-size"><i class="bi bi-people"></i> Tối đa 10</span>
+                </div>
+                <p>Trải nghiệm cưỡi lạc đà ngắm hoàng hôn, ngủ dưới bầu trời đầy sao và khám phá văn hóa du mục truyền thống đầy màu sắc.</p>
+                <div class="tour-highlights">
+                  <span>Morocco</span>
+                  <span>Ai Cập</span>
+                  <span>Dubai</span>
+                </div>
+                <div class="tour-action">
+                  <a href="booking.html" class="btn-book">Đặt Ngay</a>
+                  <div class="tour-rating">
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <span>4.9 (72)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div><div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+            <div class="tour-card">
+              <div class="tour-image">
+                <img src="assets/img/travel/tour-5.webp" alt="Coastal Explorer" class="img-fluid" loading="lazy">
+                <div class="tour-badge">Phổ Biến Nhất</div>
+                <div class="tour-price">$1,980</div>
+              </div>
+              <div class="tour-content">
+                <h4>Du Ngoạn Bờ Biển Địa Trung Hải</h4>
+                <div class="tour-meta">
+                  <span class="duration"><i class="bi bi-clock"></i> 9 Ngày</span>
+                  <span class="group-size"><i class="bi bi-people"></i> Tối đa 15</span>
+                </div>
+                <p>Hành trình sang trọng qua những vùng biển đẹp nhất Châu Âu, thưởng thức ẩm thực tinh tế và thăm thú các di sản văn hóa lâu đời.</p>
+                <div class="tour-highlights">
+                  <span>Hy Lạp</span>
+                  <span>Croatia</span>
+                  <span>Ý</span>
+                </div>
+                <div class="tour-action">
+                  <a href="booking.html" class="btn-book">Đặt Ngay</a>
+                  <div class="tour-rating">
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-half"></i>
+                    <span>4.7 (110)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div><div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+            <div class="tour-card">
+              <div class="tour-image">
+                <img src="assets/img/travel/tour-6.webp" alt="Rainforest Trek" class="img-fluid" loading="lazy">
+                <div class="tour-badge cultural">Du Lịch Xanh</div>
+                <div class="tour-price">$2,650</div>
+              </div>
+              <div class="tour-content">
+                <h4>Thám Hiểm Rừng Mưa Amazon</h4>
+                <div class="tour-meta">
+                  <span class="duration"><i class="bi bi-clock"></i> 12 Ngày</span>
+                  <span class="group-size"><i class="bi bi-people"></i> Tối đa 10</span>
+                </div>
+                <p>Hòa mình vào thiên nhiên hoang dã, khám phá hệ sinh thái đa dạng bậc nhất hành tinh và tìm hiểu văn hóa các bộ tộc bản địa.</p>
+                <div class="tour-highlights">
+                  <span>Brazil</span>
+                  <span>Ecuador</span>
+                  <span>Peru</span>
+                </div>
+                <div class="tour-action">
+                  <a href="booking.html" class="btn-book">Đặt Ngay</a>
+                  <div class="tour-rating">
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star"></i>
+                    <span>4.5 (88)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div><div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
+            <div class="tour-card">
+              <div class="tour-image">
+                <img src="assets/img/travel/tour-8.webp" alt="Patagonian Peaks" class="img-fluid" loading="lazy">
+                <div class="tour-badge adventure">Mạo Hiểm</div>
+                <div class="tour-price">$3,950</div>
+              </div>
+              <div class="tour-content">
+                <h4>Đỉnh Núi & Sông Băng Patagonia</h4>
+                <div class="tour-meta">
+                  <span class="duration"><i class="bi bi-clock"></i> 14 Ngày</span>
+                  <span class="group-size"><i class="bi bi-people"></i> Tối đa 10</span>
+                </div>
+                <p>Chinh phục những đỉnh núi hùng vĩ và sông băng tráng lệ. Thử thách bản thân với những cung đường trekking đẹp nhất thế giới.</p>
+                <div class="tour-highlights">
+                  <span>Argentina</span>
+                  <span>Chile</span>
+                  <span>Ushuaia</span>
+                </div>
+                <div class="tour-action">
+                  <a href="booking.html" class="btn-book">Đặt Ngay</a>
+                  <div class="tour-rating">
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <span>4.9 (60)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div></div>
+
+        <div class="text-center mt-5" data-aos="fade-up" data-aos-delay="500">
+          <a href="tours.html" class="btn-view-all">Xem Tất Cả Các Tour</a>
+        </div>
+
+      </div>
+
+    </section><!-- /Featured Tours Section -->
+
+    <!-- Testimonials Home Section -->
+    <section id="testimonials-home" class="testimonials-home section">
+
+      <div class="container section-title" data-aos="fade-up">
+        <h2>Ý Kiến Khách Hàng</h2>
+        <div><span>Khách Hàng</span> <span class="description-title">Nói Gì Về Chúng Tôi</span></div>
+      </div><div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="swiper init-swiper">
+          <script type="application/json" class="swiper-config">
+            {
+              "loop": true,
+              "speed": 600,
+              "autoplay": {
+                "delay": 5000
+              },
+              "slidesPerView": "auto",
+              "pagination": {
+                "el": ".swiper-pagination",
+                "type": "bullets",
+                "clickable": true
+              },
+              "breakpoints": {
+                "320": {
+                  "slidesPerView": 1,
+                  "spaceBetween": 40
+                },
+                "1200": {
+                  "slidesPerView": 3,
+                  "spaceBetween": 1
+                }
+              }
+            }
+          </script>
+          <div class="swiper-wrapper">
+
+            <div class="swiper-slide">
+              <div class="testimonial-item">
+                <p>
+                  <i class="bi bi-quote quote-icon-left"></i>
+                  <span>Dịch vụ thực sự đẳng cấp và chuyên nghiệp. Đội ngũ hướng dẫn viên rất am hiểu địa phương và chu đáo. Đây chắc chắn là chuyến đi đáng nhớ nhất của công ty chúng tôi trong năm nay.</span>
+                  <i class="bi bi-quote quote-icon-right"></i>
+                </p>
+                <img src="assets/img/person/person-m-9.webp" class="testimonial-img" alt="">
+                <h3>Saul Goodman</h3>
+                <h4>Giám đốc điều hành</h4>
+              </div>
+            </div><div class="swiper-slide">
+              <div class="testimonial-item">
+                <p>
+                  <i class="bi bi-quote quote-icon-left"></i>
+                  <span>Là một người làm nghệ thuật, tôi tìm thấy vô vàn cảm hứng từ những địa điểm tuyệt đẹp mà Tour gợi ý. Lịch trình được sắp xếp tinh tế, giúp tôi tận hưởng trọn vẹn vẻ đẹp của thiên nhiên.</span>
+                  <i class="bi bi-quote quote-icon-right"></i>
+                </p>
+                <img src="assets/img/person/person-f-5.webp" class="testimonial-img" alt="">
+                <h3>Sara Wilsson</h3>
+                <h4>Nhà thiết kế</h4>
+              </div>
+            </div><div class="swiper-slide">
+              <div class="testimonial-item">
+                <p>
+                  <i class="bi bi-quote quote-icon-left"></i>
+                  <span>Sau những ngày làm việc căng thẳng, chuyến đi này thực sự giúp tôi nạp lại năng lượng. Mọi thứ từ khách sạn, ăn uống đến xe đưa đón đều được chuẩn bị hoàn hảo. Rất đáng tiền!</span>
+                  <i class="bi bi-quote quote-icon-right"></i>
+                </p>
+                <img src="assets/img/person/person-f-12.webp" class="testimonial-img" alt="">
+                <h3>Jena Karlis</h3>
+                <h4>Chủ doanh nghiệp</h4>
+              </div>
+            </div><div class="swiper-slide">
+              <div class="testimonial-item">
+                <p>
+                  <i class="bi bi-quote quote-icon-left"></i>
+                  <span>Tôi thích sự linh hoạt trong các gói tour tại đây. Tôi vừa có thể khám phá cùng đoàn, vừa có không gian riêng để trải nghiệm văn hóa địa phương theo cách của mình. Hỗ trợ 24/7 rất tuyệt vời.</span>
+                  <i class="bi bi-quote quote-icon-right"></i>
+                </p>
+                <img src="assets/img/person/person-m-12.webp" class="testimonial-img" alt="">
+                <h3>Matt Brandon</h3>
+                <h4>Freelancer</h4>
+              </div>
+            </div><div class="swiper-slide">
+              <div class="testimonial-item">
+                <p>
+                  <i class="bi bi-quote quote-icon-left"></i>
+                  <span>Trải nghiệm vượt xa mong đợi của gia đình tôi. Các bé nhà tôi rất thích các hoạt động ngoài trời được tổ chức trong tour. Chắc chắn chúng tôi sẽ quay lại vào kỳ nghỉ hè tới.</span>
+                  <i class="bi bi-quote quote-icon-right"></i>
+                </p>
+                <img src="assets/img/person/person-m-13.webp" class="testimonial-img" alt="">
+                <h3>John Larson</h3>
+                <h4>Doanh nhân</h4>
+              </div>
+            </div></div>
+          <div class="swiper-pagination"></div>
+        </div>
+
+      </div>
+
+     </section><!-- /Testimonials Home Section -->
+
+    <!-- Call To Action Section -->
+    <section id="call-to-action" class="call-to-action section light-background">
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="hero-content" data-aos="zoom-in" data-aos-delay="200">
+          <div class="content-wrapper">
+            <div class="badge-wrapper">
+              <span class="promo-badge">Ưu Đãi Có Hạn</span>
+            </div>
+            <h2>Khám Phá Hành Trình Mới Của Bạn</h2>
+            <p>Mở ra cánh cửa đến những vùng đất tuyệt diệu với các gói tour được thiết kế riêng. Từ những bãi biển thơ mộng đến những đỉnh núi hùng vĩ, kỳ nghỉ trong mơ đang chờ đón bạn.</p>
+
+            <div class="action-section">
+              <div class="main-actions">
+                <a href="destinations.html" class="btn btn-explore">
+                  <i class="bi bi-compass"></i>
+                  Khám Phá Ngay
+                </a>
+                <a href="deals.html" class="btn btn-deals">
+                  <i class="bi bi-percent"></i>
+                  Xem Ưu Đãi
+                </a>
+              </div>
+
+              <div class="quick-contact">
+                <span class="contact-label">Cần tư vấn chọn tour?</span>
+                <a href="tel:+1555123456" class="contact-link">
+                  <i class="bi bi-telephone"></i>
+                  Gọi ngay +84 123 456 789
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div class="visual-element">
+            <img src="assets/img/travel/showcase-3.webp" alt="Travel Adventure" class="hero-image" loading="lazy">
+            <div class="image-overlay">
+              <div class="stat-item">
+                <span class="stat-number">500+</span>
+                <span class="stat-label">Điểm Đến</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number">10K+</span>
+                <span class="stat-label">Du Khách Hài Lòng</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="newsletter-section" data-aos="fade-up" data-aos-delay="300">
+          <div class="newsletter-card">
+            <div class="newsletter-content">
+              <div class="newsletter-icon">
+                <i class="bi bi-envelope-heart"></i>
+              </div>
+              <div class="newsletter-text">
+                <h3>Cập Nhật Tin Tức Mới Nhất</h3>
+                <p>Nhận các ưu đãi du lịch độc quyền và cẩm nang điểm đến ngay trong hộp thư của bạn</p>
+              </div>
+            </div>
+
+            <form class="php-email-form newsletter-form" action="forms/newsletter.php" method="post">
+              <div class="form-wrapper">
+                <input type="email" name="email" class="email-input" placeholder="Nhập địa chỉ email của bạn" required="">
+                <button type="submit" class="subscribe-btn">
+                  <i class="bi bi-arrow-right"></i>
+                </button>
+              </div>
+
+              <div class="loading">Đang gửi...</div>
+              <div class="error-message"></div>
+              <div class="sent-message">Đăng ký thành công! Hãy kiểm tra email để nhận ưu đãi.</div>
+
+              <div class="trust-indicators">
+                <i class="bi bi-lock"></i>
+                <span>Cam kết bảo mật thông tin. Hủy đăng ký bất cứ lúc nào.</span>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="benefits-showcase" data-aos="fade-up" data-aos-delay="400">
+          <div class="benefits-header">
+            <h3>Tại Sao Chọn Hành Trình Của Chúng Tôi</h3>
+            <p>Trải nghiệm sự khác biệt với dịch vụ du lịch cao cấp</p>
+          </div>
+
+          <div class="benefits-grid">
+            <div class="benefit-card" data-aos="flip-left" data-aos-delay="450">
+              <div class="benefit-visual">
+                <div class="benefit-icon-wrap">
+                  <i class="bi bi-geo-alt"></i>
+                </div>
+                <div class="benefit-pattern"></div>
+              </div>
+              <div class="benefit-content">
+                <h4>Điểm Đến Tuyển Chọn</h4>
+                <p>Mỗi địa điểm đều được các chuyên gia du lịch lựa chọn kỹ lưỡng để mang lại trải nghiệm chân thực nhất</p>
+              </div>
+            </div>
+
+            <div class="benefit-card" data-aos="flip-left" data-aos-delay="500">
+              <div class="benefit-visual">
+                <div class="benefit-icon-wrap">
+                  <i class="bi bi-award"></i>
+                </div>
+                <div class="benefit-pattern"></div>
+              </div>
+              <div class="benefit-content">
+                <h4>Dịch Vụ Đạt Giải Thưởng</h4>
+                <p>Được công nhận xuất sắc với đánh giá 5 sao và nhiều giải thưởng uy tín trong ngành</p>
+              </div>
+            </div>
+
+            <div class="benefit-card" data-aos="flip-left" data-aos-delay="550">
+              <div class="benefit-visual">
+                <div class="benefit-icon-wrap">
+                  <i class="bi bi-heart"></i>
+                </div>
+                <div class="benefit-pattern"></div>
+              </div>
+              <div class="benefit-content">
+                <h4>Chăm Sóc Tận Tâm</h4>
+                <p>Lịch trình được thiết kế riêng dựa trên sở thích và phong cách du lịch của chính bạn</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </section><!-- /Call To Action Section -->
+
+  </main>
+
+  <footer id="footer" class="footer position-relative dark-background">
+    <div class="container footer-top">
+      <div class="row gy-4">
+        <div class="col-lg-4 col-md-6 footer-about">
+          <a href="index.html" class="d-flex align-items-center">
+            <span class="sitename">VietTrip</span>
+          </a>
+          <div class="footer-contact pt-3">
+            <p>Số 123 Đường Cầu Diễn</p>
+            <p>Phú Diễn, Bắc Từ Liêm</p>
+            <p class="mt-3"><strong>Hotline:</strong> <span>+84 123 456 789</span></p>
+            <p><strong>Email:</strong> <span>lienhe@example.com</span></p>
+          </div>
+        </div>
+
+        <div class="col-lg-2 col-md-3 footer-links">
+          <h4>Liên Kết Nhanh</h4>
+          <ul>
+            <li><i class="bi bi-chevron-right"></i> <a href="#">Trang chủ</a></li>
+            <li><i class="bi bi-chevron-right"></i> <a href="#">Về chúng tôi</a></li>
+            <li><i class="bi bi-chevron-right"></i> <a href="#">Dịch vụ</a></li>
+            <li><i class="bi bi-chevron-right"></i> <a href="#">Điều khoản dịch vụ</a></li>
+            <li><i class="bi bi-chevron-right"></i> <a href="#">Chính sách bảo mật</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-2 col-md-3 footer-links">
+          <h4>Dịch Vụ Của Chúng Tôi</h4>
+          <ul>
+            <li><i class="bi bi-chevron-right"></i> <a href="#">Tour Trong Nước</a></li>
+            <li><i class="bi bi-chevron-right"></i> <a href="#">Tour Quốc Tế</a></li>
+            <li><i class="bi bi-chevron-right"></i> <a href="#">Đặt Vé Máy Bay</a></li>
+            <li><i class="bi bi-chevron-right"></i> <a href="#">Đặt Phòng Khách Sạn</a></li>
+            <li><i class="bi bi-chevron-right"></i> <a href="#">Tư Vấn Visa</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-4 col-md-12">
+          <h4>Kết Nối Với Chúng Tôi</h4>
+          <p>Theo dõi chúng tôi trên mạng xã hội để cập nhật những hành trình thú vị và chia sẻ khoảnh khắc đáng nhớ.</p>
+          <div class="social-links d-flex">
+            <a href=""><i class="bi bi-twitter-x"></i></a>
+            <a href=""><i class="bi bi-facebook"></i></a>
+            <a href=""><i class="bi bi-instagram"></i></a>
+            <a href=""><i class="bi bi-linkedin"></i></a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="container copyright text-center mt-4">
+      <p>© Bản quyền thuộc về <strong class="sitename">VietTrip</strong>. Bảo lưu mọi quyền.</p>
+    </div>
+
+  </footer>
+
+  <!-- Scroll Top -->
+  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Preloader -->
+  <div id="preloader"></div>
+
+  <!-- Vendor JS Files -->
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/php-email-form/validate.js"></script>
+  <script src="assets/vendor/aos/aos.js"></script>
+  <script src="assets/vendor/purecounter/purecounter_vanilla.js"></script>
+  <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
+  <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+  <script src="assets/vendor/imagesloaded/imagesloaded.pkgd.min.js"></script>
+  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
+
+  <!-- Main JS File -->
+  <script src="assets/js/main.js"></script>
+
+  <script src="assets/js/auth-ui.js"></script>
+
+</body>
+
+</html>

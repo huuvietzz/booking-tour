@@ -4,8 +4,7 @@ import com.example.tour.common.constant.Gender;
 import com.example.tour.common.entity.BaseEntity;
 import com.example.tour.user.constant.Role;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,6 +17,9 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name = "users")
 public class User extends BaseEntity implements UserDetails {
     @Id

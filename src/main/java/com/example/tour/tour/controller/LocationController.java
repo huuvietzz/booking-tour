@@ -86,6 +86,13 @@ public class LocationController {
         return ResponseEntity.ok(ApiResponse.success("Lấy chi tiết địa điểm thành công", data));
     }
 
+    // Xoá cứng
+    @DeleteMapping("/admin/locations/{locationId}")
+    public ResponseEntity<ApiResponse<Void>> deleteLocation(@PathVariable Integer locationId) {
+        locationService.deleteLocation(locationId);
+        return ResponseEntity.ok(ApiResponse.success("Xóa địa điểm thành công", null));
+    }
+
     // ======================= API PUBLIC (isActive = true) =======================
 
     // Danh sách địa điểm đang hiển thị (dropdown / bộ lọc phía khách)

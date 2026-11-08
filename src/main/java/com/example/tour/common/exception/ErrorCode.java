@@ -39,6 +39,8 @@ public enum ErrorCode {
     TOUR_HAS_BOOKINGS(400, "Tour đã có đơn đặt, không thể xoá", HttpStatus.BAD_REQUEST),
     CATEGORY_NOT_FOUND(404, "Không tìm thấy danh mục", HttpStatus.NOT_FOUND),
     LOCATION_NOT_FOUND(404, "Không tìm thấy địa điểm", HttpStatus.NOT_FOUND),
+    LOCATION_HAS_TOURS(409, "Địa điểm đang có tour, hãy xoá hoặc chuyển các tour sang địa điểm khác trước", HttpStatus.CONFLICT),
+    CATEGORY_HAS_TOURS(409, "Danh mục đang có tour, hãy xoá hoặc chuyển các tour sang danh mục khác trước", HttpStatus.CONFLICT),
     DISPLAY_ORDER_ALREADY_EXISTS(400, "Thứ tự hiển thị đã tồn tại", HttpStatus.BAD_REQUEST),
     SLUG_ALREADY_EXISTS(400, "Slug đã tồn tại", HttpStatus.BAD_REQUEST),
     INVALID_SLUG(400, "Slug không hợp lệ", HttpStatus.BAD_REQUEST),

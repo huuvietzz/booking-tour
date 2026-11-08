@@ -4,9 +4,9 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>Điểm Đến - Tour Du Lịch</title>
-  <meta name="description" content="">
-  <meta name="keywords" content="">
+  <title>Điểm Đến - VietTrip</title>
+  <meta name="description" content="Các điểm đến du lịch trong nước của VietTrip.">
+  <meta name="keywords" content="điểm đến, du lịch Việt Nam, VietTrip">
 
   <link href="assets/img/favicon.png" rel="icon">
   <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
@@ -24,6 +24,52 @@
   <link href="assets/css/main.css" rel="stylesheet">
   <link href="assets/css/auth-ui.css" rel="stylesheet">
   <link href="assets/css/header-white.css" rel="stylesheet">
+
+  <style>
+    /* Các class "ds-" chỉ dùng cho trang này; thẻ điểm đến dùng lại class của template (destination-tile…) */
+    .ds-toolbar {
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;
+      margin-bottom: 28px;
+    }
+    .ds-count { margin: 0; font-size: 15px; color: #6b7385; }
+    .ds-count b { color: var(--accent-color, #0a5bd3); }
+    .ds-search {
+      display: flex; align-items: center; gap: 10px; min-width: 300px;
+      padding: 10px 18px; border: 1px solid #e6e9f0; border-radius: 999px; background: #fff; color: #6b7385;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .ds-search:focus-within { border-color: var(--accent-color, #0a5bd3); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color, #0a5bd3) 12%, transparent); }
+    .ds-search input { border: 0; outline: 0; flex: 1; min-width: 0; background: none; font-size: 15px; color: #1d2433; }
+    .ds-search button { border: 0; background: none; padding: 0; color: #9aa3b5; display: none; }
+    .ds-search button:hover { color: #d6262c; }
+    @media (max-width: 575.98px) { .ds-search { min-width: 0; width: 100%; } }
+
+    /* Mô tả điểm đến: tối đa 3 dòng */
+    .destination-info p {
+      display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden;
+    }
+    .ds-explore { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
+    .destination-tile:hover .ds-explore i { transform: translateX(4px); }
+    .ds-explore i { transition: transform .2s; }
+
+    /* Ảnh trống / ảnh lỗi */
+    .ds-noimg {
+      width: 100%; aspect-ratio: 4 / 3; display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #dfe8f7, #eef2f9); color: #9aa3b5; font-size: 3rem;
+    }
+
+    /* Khung chờ tải (skeleton) */
+    .ds-skeleton { aspect-ratio: 4 / 3; border-radius: 16px; background: #eef1f6; position: relative; overflow: hidden; }
+    .ds-skeleton::after {
+      content: ""; position: absolute; inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .6), transparent);
+      transform: translateX(-100%); animation: dsShimmer 1.2s infinite;
+    }
+    @keyframes dsShimmer { to { transform: translateX(100%); } }
+
+    .ds-state { text-align: center; padding: 60px 20px; color: #6b7385; }
+    .ds-state i { font-size: 2.6rem; display: block; margin-bottom: 10px; opacity: .5; }
+  </style>
 </head>
 
 <body class="destinations-page">
@@ -32,324 +78,260 @@
   <div class="header-container container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
 
     <a href="index.html" class="logo d-flex align-items-center me-auto me-xl-0">
-      <img src="assets/img/logo.webp" alt="Booking Tour">
+      <img src="assets/img/logo.webp" alt="VietTrip">
     </a>
 
     <nav id="navmenu" class="navmenu">
       <ul>
-        <li><a href="index.html" class="active">Trang chủ</a></li>
+        <!-- Mục đang mở được tô sáng tự động bởi auth-ui.js (highlightNav) -->
+        <li><a href="index.html">Trang chủ</a></li>
         <li><a href="about.html">Về chúng tôi</a></li>
         <li><a href="destinations.html">Điểm đến</a></li>
-        <li><a href="tours.html">Tours</a></li>
+        <li><a href="tours.html" data-pages="tour-details.html,booking.html">Tours</a></li>
         <li><a href="contact.html">Liên hệ</a></li>
       </ul>
       <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
     </nav>
 
-    <!-- Đã thay đổi href và text của nút này -->
     <a class="btn-getstarted" href="pages-login.html">Đăng nhập</a>
 
   </div>
 </header>
 
-  <main class="main">
+<main class="main">
 
-    <div class="page-title dark-background" data-aos="fade" style="background-image: url(assets/img/travel/showcase-8.webp);">
-      <div class="container position-relative">
-        <h1>Điểm Đến</h1>
-        <p>Khám phá những địa điểm tuyệt đẹp trên khắp thế giới và tìm nguồn cảm hứng cho chuyến phiêu lưu tiếp theo của bạn.</p>
-        <nav class="breadcrumbs">
-          <ol>
-            <li><a href="index.html">Trang chủ</a></li>
-            <li class="current">Điểm đến</li>
-          </ol>
-        </nav>
-      </div>
-    </div><section id="travel-destinations" class="travel-destinations section">
+  <div class="page-title dark-background" data-aos="fade" style="background-image: url(assets/img/travel/showcase-8.webp);">
+    <div class="container position-relative">
+      <h1>Điểm Đến</h1>
+      <nav class="breadcrumbs">
+        <ol>
+          <li><a href="index.html">Trang chủ</a></li>
+          <li class="current">Điểm đến</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
 
-      <div class="container" data-aos="fade-up" data-aos-delay="100">
+  <section id="travel-destinations" class="travel-destinations section">
+    <div class="container" data-aos="fade-up" data-aos-delay="100">
 
-        <div class="row">
-          <div class="col-lg-8 mx-auto text-center">
-            <h2>Khám Phá Những Trải Nghiệm Du Lịch Đầy Mê Hoặc</h2>
-            <p class="mb-5">Từ nguồn năng lượng sôi động của các thành phố hiện đại đến vẻ đẹp thanh bình của thiên nhiên hoang sơ, hãy bắt đầu hành trình đến những điểm đến quyến rũ nhất hành tinh. Chúng tôi ở đây để giúp bạn tạo nên những kỷ niệm sẽ tồn tại suốt đời.</p>
-          </div>
+      <div class="row">
+        <div class="col-lg-8 mx-auto text-center">
+          <h2>Việt Nam Có Gì Đẹp?</h2>
+          <p class="mb-5">Từ biển đảo, núi rừng đến những vùng đất di sản – chọn một điểm đến để xem các tour đang mở bán.</p>
         </div>
+      </div>
 
-        <div class="isotope-layout" data-default-filter="*" data-layout="masonry" data-sort="original-order">
-          <ul class="destination-filters isotope-filters" data-aos="fade-up" data-aos-delay="200">
-            <li data-filter="*" class="filter-active">Tất Cả</li>
-            <li data-filter=".filter-tropical">Nhiệt Đới</li>
-            <li data-filter=".filter-mountain">Núi Cao</li>
-            <li data-filter=".filter-urban">Thành Phố</li>
-            <li data-filter=".filter-historical">Di Sản</li>
-            <li data-filter=".filter-coastal">Biển Đảo</li>
-          </ul><div class="row gy-4 isotope-container" data-aos="fade-up" data-aos-delay="300">
+      <!-- Tìm kiếm + số kết quả -->
+      <div class="ds-toolbar">
+        <p class="ds-count" id="dsCount">Đang tải điểm đến…</p>
+        <label class="ds-search">
+          <i class="bi bi-search"></i>
+          <input type="text" id="dsKeyword" placeholder="Tìm điểm đến…" autocomplete="off" aria-label="Tìm điểm đến">
+          <button type="button" id="dsClear" aria-label="Xoá từ khoá"><i class="bi bi-x-circle-fill"></i></button>
+        </label>
+      </div>
 
-            <div class="col-lg-4 col-md-6 destination-item isotope-item filter-coastal">
-              <a href="destination-details.html" class="destination-tile">
-                <div class="tile-image">
-                  <img src="assets/img/travel/destination-2.webp" alt="Maldives" class="img-fluid" loading="lazy">
-                  <div class="overlay-content">
-                    <span class="destination-tag luxury">Thiên Đường</span>
-                    <div class="destination-info">
-                      <h4>Maldives</h4>
-                      <p>Quần đảo bình dị với làn nước xanh ngọc bích và những khu nghỉ dưỡng trên mặt nước đầy quyến rũ.</p>
-                      <div class="destination-stats">
-                        <span class="tours-available"><i class="bi bi-map"></i> 15 Gói Tour</span>
-                        <span class="starting-price">Từ $2,450</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </a>
-            </div><div class="col-lg-4 col-md-6 destination-item isotope-item filter-historical">
-              <a href="destination-details.html" class="destination-tile">
-                <div class="tile-image">
-                  <img src="assets/img/travel/destination-4.webp" alt="Rome, Italy" class="img-fluid" loading="lazy">
-                  <div class="overlay-content">
-                    <span class="destination-tag cultural">Lịch Sử</span>
-                    <div class="destination-info">
-                      <h4>Rome, Ý</h4>
-                      <p>Thành phố vĩnh hằng, nơi những tàn tích cổ đại gặp gỡ nghệ thuật Phục hưng ngoạn mục.</p>
-                      <div class="destination-stats">
-                        <span class="tours-available"><i class="bi bi-map"></i> 18 Chuyến Đi</span>
-                        <span class="starting-price">Từ $1,320</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </a>
-            </div><div class="col-lg-4 col-md-6 destination-item isotope-item filter-mountain">
-              <a href="destination-details.html" class="destination-tile">
-                <div class="tile-image">
-                  <img src="assets/img/travel/destination-6.webp" alt="Swiss Alps" class="img-fluid" loading="lazy">
-                  <div class="overlay-content">
-                    <span class="destination-tag adventure">Núi Tuyết</span>
-                    <div class="destination-info">
-                      <h4>Dãy Alps Thụy Sĩ</h4>
-                      <p>Những đỉnh núi hùng vĩ và những ngôi làng trên núi nguyên sơ đang chờ bạn khám phá.</p>
-                      <div class="destination-stats">
-                        <span class="tours-available"><i class="bi bi-map"></i> 10 Hành Trình</span>
-                        <span class="starting-price">Từ $1,980</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </a>
-            </div><div class="col-lg-4 col-md-6 destination-item isotope-item filter-tropical">
-              <a href="destination-details.html" class="destination-tile">
-                <div class="tile-image">
-                  <img src="assets/img/travel/destination-8.webp" alt="Costa Rica" class="img-fluid" loading="lazy">
-                  <div class="overlay-content">
-                    <span class="destination-tag nature">Sinh Thái</span>
-                    <div class="destination-info">
-                      <h4>Costa Rica</h4>
-                      <p>Rừng mưa nhiệt đới tươi tốt, động vật hoang dã phong phú và trải nghiệm du lịch sinh thái có trách nhiệm.</p>
-                      <div class="destination-stats">
-                        <span class="tours-available"><i class="bi bi-map"></i> 14 Thám Hiểm</span>
-                        <span class="starting-price">Từ $1,650</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </a>
-            </div><div class="col-lg-4 col-md-6 destination-item isotope-item filter-urban">
-              <a href="destination-details.html" class="destination-tile">
-                <div class="tile-image">
-                  <img src="assets/img/travel/destination-10.webp" alt="Dubai, UAE" class="img-fluid" loading="lazy">
-                  <div class="overlay-content">
-                    <span class="destination-tag modern">Phồn Hoa</span>
-                    <div class="destination-info">
-                      <h4>Dubai, UAE</h4>
-                      <p>Đường chân trời rực rỡ nơi tầm nhìn tương lai gặp gỡ sự nồng hậu Ả Rập đích thực.</p>
-                      <div class="destination-stats">
-                        <span class="tours-available"><i class="bi bi-map"></i> 20 Hành Trình</span>
-                        <span class="starting-price">Từ $1,470</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </a>
-            </div><div class="col-lg-4 col-md-6 destination-item isotope-item filter-coastal">
-              <a href="destination-details.html" class="destination-tile">
-                <div class="tile-image">
-                  <img src="assets/img/travel/destination-12.webp" alt="Amalfi Coast, Italy" class="img-fluid" loading="lazy">
-                  <div class="overlay-content">
-                    <span class="destination-tag romantic">Quyến Rũ</span>
-                    <div class="destination-info">
-                      <h4>Bờ Biển Amalfi</h4>
-                      <p>Những vách đá ấn tượng và những ngôi làng đẹp như tranh vẽ nằm trên bờ biển Địa Trung Hải xanh thẳm.</p>
-                      <div class="destination-stats">
-                        <span class="tours-available"><i class="bi bi-map"></i> 13 Kỳ Nghỉ</span>
-                        <span class="starting-price">Từ $1,850</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </a>
-            </div><div class="col-lg-4 col-md-6 destination-item isotope-item filter-tropical">
-              <a href="destination-details.html" class="destination-tile">
-                <div class="tile-image">
-                  <img src="assets/img/travel/destination-14.webp" alt="Thailand" class="img-fluid" loading="lazy">
-                  <div class="overlay-content">
-                    <span class="destination-tag popular">Sôi Động</span>
-                    <div class="destination-info">
-                      <h4>Thái Lan</h4>
-                      <p>Những ngôi chùa dát vàng, bãi biển hoang sơ và những khu chợ đường phố nhộn nhịp đang chờ đón.</p>
-                      <div class="destination-stats">
-                        <span class="tours-available"><i class="bi bi-map"></i> 22 Gói Tour</span>
-                        <span class="starting-price">Từ $1,100</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </a>
-            </div><div class="col-lg-4 col-md-6 destination-item isotope-item filter-mountain">
-              <a href="destination-details.html" class="destination-tile">
-                <div class="tile-image">
-                  <img src="assets/img/travel/destination-16.webp" alt="Nepal Himalayas" class="img-fluid" loading="lazy">
-                  <div class="overlay-content">
-                    <span class="destination-tag trekking">Leo Núi</span>
-                    <div class="destination-info">
-                      <h4>Himalaya Nepal</h4>
-                      <p>Ngôi nhà của những đỉnh núi cao nhất thế giới và những thánh địa Phật giáo cổ kính, thanh bình.</p>
-                      <div class="destination-stats">
-                        <span class="tours-available"><i class="bi bi-map"></i> 8 Chuyến Đi</span>
-                        <span class="starting-price">Từ $2,300</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </a>
-            </div><div class="col-lg-4 col-md-6 destination-item isotope-item filter-historical">
-              <a href="destination-details.html" class="destination-tile">
-                <div class="tile-image">
-                  <img src="assets/img/travel/destination-18.webp" alt="Egypt Pyramids" class="img-fluid" loading="lazy">
-                  <div class="overlay-content">
-                    <span class="destination-tag ancient">Vĩnh Cửu</span>
-                    <div class="destination-info">
-                      <h4>Ai Cập</h4>
-                      <p>Những kỳ quan vĩnh cửu của các pharaoh và dòng chảy hùng vĩ của sông Nile.</p>
-                      <div class="destination-stats">
-                        <span class="tours-available"><i class="bi bi-map"></i> 16 Thám Hiểm</span>
-                        <span class="starting-price">Từ $1,750</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </a>
-            </div><div class="col-lg-4 col-md-6 destination-item isotope-item filter-urban">
-              <a href="destination-details.html" class="destination-tile">
-                <div class="tile-image">
-                  <img src="assets/img/travel/destination-20.webp" alt="Singapore" class="img-fluid" loading="lazy">
-                  <div class="overlay-content">
-                    <span class="destination-tag family">Gia Đình</span>
-                    <div class="destination-info">
-                      <h4>Singapore</h4>
-                      <p>Thành phố vườn hiện đại, nổi tiếng với kiến trúc táo bạo và nền ẩm thực đa dạng.</p>
-                      <div class="destination-stats">
-                        <span class="tours-available"><i class="bi bi-map"></i> 17 Cuộc Phiêu Lưu</span>
-                        <span class="starting-price">Từ $1,399</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </a>
-            </div></div></div>
+      <!-- Lưới điểm đến (dữ liệu từ GET /api/public/locations) -->
+      <div class="row gy-4" id="dsGrid">
+        <div class="col-lg-4 col-md-6"><div class="ds-skeleton"></div></div>
+        <div class="col-lg-4 col-md-6"><div class="ds-skeleton"></div></div>
+        <div class="col-lg-4 col-md-6"><div class="ds-skeleton"></div></div>
+      </div>
 
-        <div class="row mt-5">
-          <div class="col-lg-10 mx-auto text-center" data-aos="fade-up" data-aos-delay="400">
-            <div class="planning-assistance">
-              <div class="assistance-content">
-                <h3>Hãy Để Chúng Tôi Giúp Bạn Lên Kế Hoạch Hoàn Hảo</h3>
-                <p>Bạn chưa biết điểm đến nào phù hợp với mong muốn của mình? Các chuyên gia tư vấn du lịch dày dạn kinh nghiệm của chúng tôi sẵn sàng thiết kế một lịch trình riêng biệt dành cho bạn.</p>
-                <div class="assistance-actions">
-                  <a href="#" class="btn btn-primary">Nhận Tư Vấn Miễn Phí</a>
-                  <a href="#" class="btn btn-outline">Xem Tất Cả Các Tour</a>
-                </div>
+      <div class="row mt-5">
+        <div class="col-lg-10 mx-auto text-center" data-aos="fade-up" data-aos-delay="400">
+          <div class="planning-assistance">
+            <div class="assistance-content">
+              <h3>Chưa Biết Nên Đi Đâu?</h3>
+              <p>Cho chúng tôi biết thời gian và ngân sách của bạn, VietTrip sẽ gợi ý tour phù hợp nhất.</p>
+              <div class="assistance-actions">
+                <a href="contact.html" class="btn btn-primary">Nhận Tư Vấn Miễn Phí</a>
+                <a href="tours.html" class="btn btn-outline">Xem Tất Cả Tour</a>
               </div>
             </div>
           </div>
         </div>
-
       </div>
 
-    </section></main>
+    </div>
+  </section>
+</main>
 
-  <footer id="footer" class="footer position-relative dark-background">
-    <div class="container footer-top">
-      <div class="row gy-4">
-        <div class="col-lg-4 col-md-6 footer-about">
-          <a href="index.html" class="d-flex align-items-center">
-            <span class="sitename">VietTrip</span>
+<footer id="footer" class="footer position-relative dark-background">
+  <div class="container footer-top">
+    <div class="row gy-4">
+      <div class="col-lg-4 col-md-6 footer-about">
+        <a href="index.html" class="d-flex align-items-center">
+          <span class="sitename">VietTrip</span>
+        </a>
+        <div class="footer-contact pt-3">
+          <p>Số 123 Đường Cầu Diễn</p>
+          <p>Phú Diễn, Bắc Từ Liêm</p>
+          <p class="mt-3"><strong>Hotline:</strong> <span>+84 123 456 789</span></p>
+          <p><strong>Email:</strong> <span>lienhe@viettrip.vn</span></p>
+        </div>
+      </div>
+
+      <div class="col-lg-2 col-md-3 footer-links">
+        <h4>Liên Kết Nhanh</h4>
+        <ul>
+          <li><i class="bi bi-chevron-right"></i> <a href="index.html">Trang chủ</a></li>
+          <li><i class="bi bi-chevron-right"></i> <a href="about.html">Về chúng tôi</a></li>
+          <li><i class="bi bi-chevron-right"></i> <a href="destinations.html">Điểm đến</a></li>
+          <li><i class="bi bi-chevron-right"></i> <a href="tours.html">Tours</a></li>
+          <li><i class="bi bi-chevron-right"></i> <a href="contact.html">Liên hệ</a></li>
+        </ul>
+      </div>
+
+      <div class="col-lg-2 col-md-3 footer-links">
+        <h4>Hỗ Trợ</h4>
+        <ul>
+          <li><i class="bi bi-chevron-right"></i> <a href="terms.html">Điều khoản dịch vụ</a></li>
+          <li><i class="bi bi-chevron-right"></i> <a href="privacy.html">Chính sách bảo mật</a></li>
+          <li><i class="bi bi-chevron-right"></i> <a href="contact.html">Câu hỏi thường gặp</a></li>
+        </ul>
+      </div>
+
+      <div class="col-lg-4 col-md-12">
+        <h4>Kết Nối Với Chúng Tôi</h4>
+        <p>Theo dõi VietTrip để cập nhật tour mới và ưu đãi sớm nhất.</p>
+        <div class="social-links d-flex">
+          <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+          <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+          <a href="#" aria-label="TikTok"><i class="bi bi-tiktok"></i></a>
+          <a href="#" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="container copyright text-center mt-4">
+    <p>© Bản quyền thuộc về <strong class="sitename">VietTrip</strong>. Bảo lưu mọi quyền.</p>
+  </div>
+</footer>
+
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+<div id="preloader"></div>
+
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="assets/vendor/php-email-form/validate.js"></script>
+<script src="assets/vendor/aos/aos.js"></script>
+<script src="assets/vendor/purecounter/purecounter_vanilla.js"></script>
+<script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
+<script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+<script src="assets/vendor/imagesloaded/imagesloaded.pkgd.min.js"></script>
+<script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
+
+<script src="assets/js/main.js"></script>
+<script src="assets/js/auth-ui.js"></script>
+
+<script>
+  /* ============================================================
+     ĐIỂM ĐẾN = "địa điểm" (Location) ở BE
+     GET /api/public/locations → ApiResponse<List<LocationResponse>>
+     (chỉ địa điểm đang hiển thị, sắp theo tên A → Z)
+     ============================================================ */
+  const API = '/api/public/locations';
+  let locations = [];
+
+  function $(id) { return document.getElementById(id); }
+
+  function escapeHtml(str) {
+    return String(str ?? '').replace(/[&<>"']/g, c =>
+            ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  /** "Hạ Long" → "ha long": tìm không dấu */
+  function removeAccents(text) {
+    return String(text || '').replace(/đ/g, 'd').replace(/Đ/g, 'D')
+            .normalize('NFD').replace(/\p{M}+/gu, '').toLowerCase();
+  }
+
+  const NO_IMAGE = '<div class="ds-noimg"><i class="bi bi-image"></i></div>';
+
+  async function loadLocations() {
+    try {
+      const res = await fetch(API);
+      const json = await res.json().catch(() => null);
+      if (!res.ok || !json || !json.success) throw new Error((json && json.message) || 'Không tải được danh sách điểm đến.');
+      locations = json.data || [];
+      render();
+    } catch (e) {
+      console.error(e);
+      $('dsCount').textContent = '';
+      $('dsGrid').innerHTML = `
+        <div class="col-12 ds-state">
+          <i class="bi bi-wifi-off"></i>
+          Không tải được danh sách điểm đến. Vui lòng thử lại sau.
+          <div class="mt-3"><button type="button" class="btn btn-outline-primary btn-sm" onclick="retry()">Thử lại</button></div>
+        </div>`;
+    }
+  }
+
+  function retry() {
+    $('dsGrid').innerHTML = '<div class="col-lg-4 col-md-6"><div class="ds-skeleton"></div></div>'.repeat(3);
+    $('dsCount').textContent = 'Đang tải điểm đến…';
+    loadLocations();
+  }
+
+  function render() {
+    const q = removeAccents($('dsKeyword').value.trim());
+    const list = locations.filter(l => !q || removeAccents(l.locationName).includes(q));
+
+    $('dsCount').innerHTML = q
+            ? `Tìm thấy <b>${list.length}</b> điểm đến`
+            : `<b>${locations.length}</b> điểm đến đang có tour`;
+    $('dsClear').style.display = q ? 'inline-flex' : 'none';
+
+    if (!list.length) {
+      $('dsGrid').innerHTML = `
+        <div class="col-12 ds-state">
+          <i class="bi bi-compass"></i>
+          ${locations.length ? 'Không tìm thấy điểm đến phù hợp.' : 'Chưa có điểm đến nào.'}
+        </div>`;
+      return;
+    }
+
+    $('dsGrid').innerHTML = list.map(l => {
+      // Bấm điểm đến → trang Tours lọc sẵn theo điểm đến này
+      const url = `tours.html?locationId=${l.locationId}`;
+      const desc = l.description && l.description.trim()
+              ? l.description
+              : `Khám phá các tour du lịch đến ${l.locationName}.`;
+      const img = l.imageUrl
+              ? `<img src="${escapeHtml(l.imageUrl)}" alt="${escapeHtml(l.locationName)}" class="img-fluid" loading="lazy"
+                      onerror="this.outerHTML='${NO_IMAGE.replace(/"/g, '&quot;')}'">`
+              : NO_IMAGE;
+
+      return `
+        <div class="col-lg-4 col-md-6">
+          <a href="${url}" class="destination-tile">
+            <div class="tile-image">
+              ${img}
+              <div class="overlay-content">
+                <div class="destination-info">
+                  <h4>${escapeHtml(l.locationName)}</h4>
+                  <p>${escapeHtml(desc)}</p>
+                  <div class="destination-stats">
+                    <span class="ds-explore">Xem tour <i class="bi bi-arrow-right"></i></span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </a>
-          <div class="footer-contact pt-3">
-            <p>Số 123 Đường Cầu Diễn</p>
-            <p>Phú Diễn, Bắc Từ Liêm</p>
-            <p class="mt-3"><strong>Hotline:</strong> <span>+84 123 456 789</span></p>
-            <p><strong>Email:</strong> <span>lienhe@example.com</span></p>
-          </div>
-        </div>
+        </div>`;
+    }).join('');
+  }
 
-        <div class="col-lg-2 col-md-3 footer-links">
-          <h4>Liên Kết Nhanh</h4>
-          <ul>
-            <li><i class="bi bi-chevron-right"></i> <a href="index.html">Trang chủ</a></li>
-            <li><i class="bi bi-chevron-right"></i> <a href="about.html">Về chúng tôi</a></li>
-            <li><i class="bi bi-chevron-right"></i> <a href="services.html">Dịch vụ</a></li>
-            <li><i class="bi bi-chevron-right"></i> <a href="terms.html">Điều khoản dịch vụ</a></li>
-            <li><i class="bi bi-chevron-right"></i> <a href="privacy.html">Chính sách bảo mật</a></li>
-          </ul>
-        </div>
+  let searchTimer = null;
+  $('dsKeyword').addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(render, 200); });
+  $('dsClear').addEventListener('click', () => { $('dsKeyword').value = ''; render(); $('dsKeyword').focus(); });
 
-        <div class="col-lg-2 col-md-3 footer-links">
-          <h4>Dịch Vụ Của Chúng Tôi</h4>
-          <ul>
-            <li><i class="bi bi-chevron-right"></i> <a href="#">Tour Trong Nước</a></li>
-            <li><i class="bi bi-chevron-right"></i> <a href="#">Tour Quốc Tế</a></li>
-            <li><i class="bi bi-chevron-right"></i> <a href="#">Đặt Vé Máy Bay</a></li>
-            <li><i class="bi bi-chevron-right"></i> <a href="#">Đặt Phòng Khách Sạn</a></li>
-            <li><i class="bi bi-chevron-right"></i> <a href="#">Tư Vấn Visa</a></li>
-          </ul>
-        </div>
-
-        <div class="col-lg-4 col-md-12">
-          <h4>Kết Nối Với Chúng Tôi</h4>
-          <p>Theo dõi chúng tôi trên mạng xã hội để cập nhật những hành trình thú vị và chia sẻ khoảnh khắc đáng nhớ.</p>
-          <div class="social-links d-flex">
-            <a href=""><i class="bi bi-twitter-x"></i></a>
-            <a href=""><i class="bi bi-facebook"></i></a>
-            <a href=""><i class="bi bi-instagram"></i></a>
-            <a href=""><i class="bi bi-linkedin"></i></a>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <div class="container copyright text-center mt-4">
-      <p>© Bản quyền thuộc về <strong class="sitename">VietTrip</strong>. Bảo lưu mọi quyền.</p>
-    </div>
-
-  </footer>
-
-  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
-
-  <div id="preloader"></div>
-
-  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="assets/vendor/php-email-form/validate.js"></script>
-  <script src="assets/vendor/aos/aos.js"></script>
-  <script src="assets/vendor/purecounter/purecounter_vanilla.js"></script>
-  <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
-  <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
-  <script src="assets/vendor/imagesloaded/imagesloaded.pkgd.min.js"></script>
-  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
-
-  <script src="assets/js/main.js"></script>
-
-  <script src="assets/js/auth-ui.js"></script>
+  loadLocations();
+</script>
 
 </body>
 

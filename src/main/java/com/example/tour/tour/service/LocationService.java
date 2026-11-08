@@ -25,4 +25,6 @@ public interface LocationService {
     List<LocationResponse> getAllLocations();
 
     LocationResponse getLocationById(int locationId);
+
+    void deleteLocation(int locationId);
 }

@@ -84,6 +84,13 @@ public class CategoryController {
         return ResponseEntity.ok(ApiResponse.success("Lấy chi tiết danh mục thành công", data));
     }
 
+    // Xoá cứng
+    @DeleteMapping("/admin/categories/{categoryId}")
+    public ResponseEntity<ApiResponse<Void>> deleteCategory(@PathVariable Integer categoryId) {
+        categoryService.deleteCategory(categoryId);
+        return ResponseEntity.ok(ApiResponse.success("Xóa danh mục thành công", null));
+    }
+
     // API public (danh mục có isActive = true)
     // Danh sách danh mục đang hiển thị (menu / bộ lọc phía khách)
     @GetMapping("/public/categories")

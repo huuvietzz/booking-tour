@@ -81,7 +81,22 @@
         anchor.replaceChildren(avatar, name);
     }
 
+    /**
+     * Tô sáng mục menu theo trang đang mở (khỏi gán class="active" bằng tay ở từng trang).
+     * data-pages="a.html,b.html": các trang con cũng tô sáng mục đó, vd tour-details.html → "Tours"
+     */
+    function highlightNav() {
+        const page = location.pathname.split('/').pop() || 'index.html';
+        document.querySelectorAll('#navmenu a').forEach(a => {
+            const pages = [a.getAttribute('href'), ...(a.dataset.pages || '').split(',')]
+                .map(s => s.trim()).filter(Boolean);
+            a.classList.toggle('active', pages.includes(page));
+        });
+    }
+
     function init() {
+        highlightNav();   // đặt TRƯỚC dòng return bên dưới: trang không có nút đăng nhập vẫn tô menu
+
         const anchor = document.querySelector('.btn-getstarted');
         if (!anchor) return;
 

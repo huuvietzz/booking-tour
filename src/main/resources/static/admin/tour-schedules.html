@@ -846,7 +846,7 @@
             let toggleBtn = '';
             if (!departed && !cancelled) {
                 toggleBtn = `<button class="btn btn-sm btn-outline-secondary" title="Huỷ lịch"
-                            onclick="cancelSchedule(${s.scheduleId}, this)" data-code="${escapeHtml(s.scheduleCode)}">
+                            onclick="cancelSchedule(${s.scheduleId}, this)" data-code="${escapeHtml(s.scheduleCode)}" data-booked="${booked}">
                             <i class="bi bi-x-circle"></i></button>`;
             } else if (!departed && cancelled) {
                 toggleBtn = `<button class="btn btn-sm btn-outline-success" title="Mở lại lịch"
@@ -881,9 +881,8 @@
                                 onclick="openEditModal(${s.scheduleId})">
                             <i class="bi bi-pencil-square"></i></button>
                         ${toggleBtn}
-                        <button class="btn btn-sm btn-outline-danger" ${booked > 0 ? 'disabled' : ''}
-                                title="${booked > 0 ? 'Đã có khách đặt, không xoá được' : 'Xoá'}"
-                                onclick="deleteSchedule(${s.scheduleId}, this)" data-code="${escapeHtml(s.scheduleCode)}">
+                        <button class="btn btn-sm btn-outline-danger" title="Xoá"
+                                onclick="deleteSchedule(${s.scheduleId}, this)" data-code="${escapeHtml(s.scheduleCode)}" data-booked="${booked}">
                             <i class="bi bi-trash"></i></button>
                     </div>
                 </td>
@@ -1145,7 +1144,18 @@
     /* ============================================================
        4. HUỶ / MỞ LẠI: PATCH /api/admin/schedules/{id}/cancel | /reopen
        ============================================================ */
+    /** Biết chắc thao tác sẽ bị BE từ chối → báo lý do luôn, không hỏi xác nhận */
+    function showBlocked(title, html) {
+        Swal.fire({ icon: 'info', title, html, confirmButtonText: 'Đã hiểu' });
+    }
+
     async function cancelSchedule(id, btn) {
+        const booked = Number(btn.dataset.booked) || 0;
+        if (booked > 0) {
+            return showBlocked('Chưa thể huỷ lịch',
+                `Lịch <b>${escapeHtml(btn.dataset.code)}</b> còn <b>${booked}</b> chỗ khách đang giữ.<br>
+                 Hãy huỷ và hoàn tiền các đơn đặt của lịch này trước, sau đó mới huỷ lịch.`);
+        }
         const confirm = await Swal.fire({
             icon: 'warning',
             title: 'Huỷ lịch khởi hành?',
@@ -1181,14 +1191,19 @@
        5. XOÁ: DELETE /api/admin/schedules/{id} (chỉ khi chưa có booking)
        ============================================================ */
     async function deleteSchedule(id, btn) {
+        const booked = Number(btn.dataset.booked) || 0;
+        if (booked > 0) {
+            return showBlocked('Không thể xoá lịch',
+                `Lịch <b>${escapeHtml(btn.dataset.code)}</b> đã có <b>${booked}</b> chỗ được đặt.<br>
+                 Lịch có đơn đặt được giữ lại để đối chiếu đơn hàng và thanh toán.
+                 Nếu không muốn bán tiếp, hãy dùng <b>Huỷ lịch</b> sau khi xử lý các đơn.`);
+        }
         const confirm = await Swal.fire({
             icon: 'warning',
-            title: 'Xoá vĩnh viễn lịch?',
-            html: `Lịch <b>${escapeHtml(btn.dataset.code)}</b> sẽ bị xoá vĩnh viễn.<br>
-                   <small class="text-muted">Lịch đã từng có đơn đặt (kể cả đơn đã huỷ) sẽ không xoá được, hãy dùng "Huỷ lịch".</small>`,
+            title: 'Xoá lịch khởi hành ?',
             showCancelButton: true,
-            confirmButtonText: 'Xoá vĩnh viễn',
-            cancelButtonText: 'Đóng',
+            confirmButtonText: 'Xoá',
+            cancelButtonText: 'Hủy',
             confirmButtonColor: '#dc3545'
         });
         if (!confirm.isConfirmed) return;

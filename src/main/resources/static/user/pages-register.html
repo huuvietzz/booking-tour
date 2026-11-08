@@ -5,22 +5,30 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>Đăng ký tài khoản - Booking Tour</title>
+  <title>Đăng ký tài khoản - VietTrip</title>
 
   <link href="assets/img/favicon.png" rel="icon">
   <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
 
-  <link href="https://fonts.gstatic.com" rel="preconnect">
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
 
   <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+  <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+  <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
 
-  <link href="assets/css/style.css" rel="stylesheet">
+  <link href="assets/css/main.css" rel="stylesheet">
+  <link href="assets/css/auth-ui.css" rel="stylesheet">
+  <link href="assets/css/header-white.css" rel="stylesheet">
 
   <style>
-    body {
+    /* Header fixed-top nên chừa khoảng trên cho form */
+    .register-main {
       background-color: #f6f7f9;
+      padding: 130px 0 70px;
     }
 
     .register-wrapper {
@@ -116,6 +124,10 @@
     }
 
     @media (max-width: 575.98px) {
+      .register-main {
+        padding-top: 100px;
+      }
+
       .register-card {
         padding: 1.75rem 1.25rem 1.5rem;
       }
@@ -132,17 +144,34 @@
   </style>
 </head>
 
-<body>
+<body class="register-page">
 
-<main class="py-5">
+<header id="header" class="header d-flex align-items-center fixed-top">
+  <div class="header-container container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+
+    <a href="index.html" class="logo d-flex align-items-center me-auto me-xl-0">
+      <img src="assets/img/logo.webp" alt="VietTrip">
+    </a>
+
+    <nav id="navmenu" class="navmenu">
+      <ul>
+        <!-- Mục đang mở được tô sáng tự động bởi auth-ui.js (highlightNav) -->
+        <li><a href="index.html">Trang chủ</a></li>
+        <li><a href="about.html">Về chúng tôi</a></li>
+        <li><a href="destinations.html">Điểm đến</a></li>
+        <li><a href="tours.html" data-pages="tour-details.html,booking.html">Tours</a></li>
+        <li><a href="contact.html">Liên hệ</a></li>
+      </ul>
+      <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+    </nav>
+
+    <a class="btn-getstarted" href="pages-login.html">Đăng nhập</a>
+
+  </div>
+</header>
+
+<main class="main register-main">
   <div class="container register-wrapper">
-
-    <div class="text-center mb-4">
-      <a href="index.html" class="logo d-inline-flex align-items-center text-decoration-none">
-        <img src="assets/img/logo.png" alt="" height="48">
-        <span class="ms-2 fs-3 fw-bold">Booking Tour</span>
-      </a>
-    </div>
 
     <div class="register-card">
 
@@ -243,8 +272,8 @@
           <div class="form-check d-inline-block text-start">
             <input class="form-check-input" type="checkbox" id="termsAccepted" required>
             <label class="form-check-label small" for="termsAccepted">
-              Tôi đồng ý với <a href="#">Chính sách bảo vệ dữ liệu cá nhân</a>
-              và <a href="#">Các điều khoản</a>
+              Tôi đồng ý với <a href="privacy.html" target="_blank">Chính sách bảo vệ dữ liệu cá nhân</a>
+              và <a href="terms.html" target="_blank">Các điều khoản</a>
             </label>
           </div>
         </div>
@@ -268,7 +297,71 @@
   </div>
 </main>
 
+<footer id="footer" class="footer position-relative dark-background">
+  <div class="container footer-top">
+    <div class="row gy-4">
+      <div class="col-lg-4 col-md-6 footer-about">
+        <a href="index.html" class="d-flex align-items-center">
+          <span class="sitename">VietTrip</span>
+        </a>
+        <div class="footer-contact pt-3">
+          <p>Số 123 Đường Cầu Diễn</p>
+          <p>Phú Diễn, Bắc Từ Liêm</p>
+          <p class="mt-3"><strong>Hotline:</strong> <span>+84 123 456 789</span></p>
+          <p><strong>Email:</strong> <span>lienhe@viettrip.vn</span></p>
+        </div>
+      </div>
+
+      <div class="col-lg-2 col-md-3 footer-links">
+        <h4>Liên Kết Nhanh</h4>
+        <ul>
+          <li><i class="bi bi-chevron-right"></i> <a href="index.html">Trang chủ</a></li>
+          <li><i class="bi bi-chevron-right"></i> <a href="about.html">Về chúng tôi</a></li>
+          <li><i class="bi bi-chevron-right"></i> <a href="destinations.html">Điểm đến</a></li>
+          <li><i class="bi bi-chevron-right"></i> <a href="tours.html">Tours</a></li>
+          <li><i class="bi bi-chevron-right"></i> <a href="contact.html">Liên hệ</a></li>
+        </ul>
+      </div>
+
+      <div class="col-lg-2 col-md-3 footer-links">
+        <h4>Hỗ Trợ</h4>
+        <ul>
+          <li><i class="bi bi-chevron-right"></i> <a href="terms.html">Điều khoản dịch vụ</a></li>
+          <li><i class="bi bi-chevron-right"></i> <a href="privacy.html">Chính sách bảo mật</a></li>
+          <li><i class="bi bi-chevron-right"></i> <a href="contact.html">Câu hỏi thường gặp</a></li>
+        </ul>
+      </div>
+
+      <div class="col-lg-4 col-md-12">
+        <h4>Kết Nối Với Chúng Tôi</h4>
+        <p>Theo dõi VietTrip để cập nhật tour mới và ưu đãi sớm nhất.</p>
+        <div class="social-links d-flex">
+          <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+          <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+          <a href="#" aria-label="TikTok"><i class="bi bi-tiktok"></i></a>
+          <a href="#" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="container copyright text-center mt-4">
+    <p>© Bản quyền thuộc về <strong class="sitename">VietTrip</strong>. Bảo lưu mọi quyền.</p>
+  </div>
+</footer>
+
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+<div id="preloader"></div>
+
 <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="assets/vendor/aos/aos.js"></script>
+<script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
+<script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
+
+<script src="assets/js/main.js"></script>
+<script src="assets/js/auth-ui.js"></script>
 
 <script>
   const form       = document.getElementById('registerForm');
@@ -391,8 +484,12 @@
     resultBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
+  let registered = false;
+
   function setLoading(loading) {
-    if (loading) {
+    if (registered) {
+      submitBtn.disabled = true;
+    } else if (loading) {
       submitBtn.disabled = true;
     } else {
       checkFormState();
@@ -430,14 +527,15 @@
       const json = await res.json();
 
       if (json.success) {
-        showMessage(json.message, true);              // <- thêm true
+        registered = true;
+        showMessage(json.message, true);
         Array.from(form.elements).forEach(el => el.disabled = true);
         return;
       }
 
       if (json.errors && json.errors.length) {
         showMessage('<strong>' + json.message + '</strong><br>'
-                + json.errors.join('<br>'), false); // <- thêm false
+                + json.errors.join('<br>'), false);
       } else {
         showMessage(json.message || 'Đăng ký thất bại.', false);
       }

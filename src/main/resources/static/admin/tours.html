@@ -725,16 +725,14 @@
      3. XOÁ CỨNG: DELETE /api/admin/tours/{id} (chỉ khi chưa có booking)
      ============================================================ */
   async function deleteTour(id, btn) {
-    const name = btn.dataset.name;
     const confirm = await Swal.fire({
       icon: 'warning',
-      title: 'Xoá vĩnh viễn tour?',
-      html: `Tour <b>${escapeHtml(name)}</b> cùng ảnh, lịch trình và lịch khởi hành sẽ bị xoá vĩnh viễn.<br>
-                   <small class="text-muted">Tour đã có đơn đặt sẽ không xoá được, hãy dùng công tắc để ẩn tour.</small>`,
+      title: 'Xoá tour ?',
       showCancelButton: true,
-      confirmButtonText: 'Xoá vĩnh viễn',
+      confirmButtonText: 'Xoá',
       cancelButtonText: 'Huỷ',
-      confirmButtonColor: '#dc3545'
+      confirmButtonColor: '#dc3545',
+      focusCancel: true
     });
     if (!confirm.isConfirmed) return;
 

@@ -33,4 +33,10 @@ public interface TourRepository extends JpaRepository<Tour, Integer>, JpaSpecifi
     @Modifying
     @Query("UPDATE Tour t SET t.viewCount = t.viewCount + 1 WHERE t.tourId = :id")
     void incrementViewCount(@Param("id") Integer id);
+
+    /** Số tour thuộc địa điểm (tính cả tour đang ẩn) — chặn xoá địa điểm */
+    long countByLocation_LocationId(Integer locationId);
+
+    /** Số tour thuộc danh mục (tính cả tour đang ẩn) — chặn xoá danh mục */
+    long countByCategory_CategoryId(Integer categoryId);
 }

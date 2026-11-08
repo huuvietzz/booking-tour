@@ -8,6 +8,7 @@ import com.example.tour.tour.dto.request.CategoryRequest;
 import com.example.tour.tour.dto.response.CategoryResponse;
 import com.example.tour.tour.entity.Category;
 import com.example.tour.tour.repository.CategoryRepository;
+import com.example.tour.tour.repository.TourRepository;
 import com.example.tour.tour.service.CategoryService;
 import com.example.tour.tour.specification.CategorySpecification;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
+    private final TourRepository tourRepository;
     private final FileStorageService fileStorageService;
     private static final String IMAGE_FOLDER = "categories";
 
@@ -162,6 +164,20 @@ public class CategoryServiceImpl implements CategoryService {
 
         category.setIsActive(active);
         return toCategoryResponse(categoryRepository.save(category));
+    }
+
+    @Override
+    @Transactional
+    public void deleteCategory(int categoryId) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
+
+        if (tourRepository.countByCategory_CategoryId(categoryId) > 0) {
+            throw new AppException(ErrorCode.CATEGORY_HAS_TOURS);
+        }
+
+        categoryRepository.delete(category);
+        fileStorageService.cleanupAfterTransaction(category.getImageUrl(), null);
     }
 
     // Entity -> Response

@@ -282,7 +282,7 @@
                                     </button>
                                 </th>
                                 <th class="text-center" style="width: 160px;">Trạng thái</th>
-                                <th class="text-center" style="width: 120px;">Hành động</th>
+                                <th class="text-center" style="width: 150px;">Hành động</th>
                             </tr>
                             </thead>
                             <tbody id="locationListBody">
@@ -569,9 +569,49 @@
                                 onclick="viewLocation(${l.locationId})"><i class="bi bi-eye"></i></button>
                         <button class="btn btn-sm btn-outline-warning" title="Sửa"
                                 onclick="openEditModal(${l.locationId})"><i class="bi bi-pencil-square"></i></button>
+                        <button class="btn btn-sm btn-outline-danger" title="Xoá"
+                                onclick="deleteLocation(${l.locationId}, this)"><i class="bi bi-trash"></i></button>
                     </div>
                 </td>
             </tr>`).join('');
+    }
+
+    /* ============================================================
+       XOÁ CỨNG: DELETE /api/admin/locations/{id} (chỉ khi địa điểm chưa có tour)
+       ============================================================ */
+    async function deleteLocation(id, btn) {
+        const confirm = await Swal.fire({
+            icon: 'warning',
+            title: 'Xoá địa điểm?',
+            showCancelButton: true,
+            confirmButtonText: 'Xoá',
+            cancelButtonText: 'Huỷ',
+            confirmButtonColor: '#dc3545',
+            focusCancel: true          // Enter mặc định là "Huỷ", tránh xoá nhầm
+        });
+        if (!confirm.isConfirmed) return;
+
+        btn.disabled = true;
+        try {
+            const res = await fetch(`${API}/${id}`, { method: 'DELETE', headers: AdminAuth.authHeaders() });
+            if (res.status === 401) return AdminAuth.logout();
+            const json = await readJson(res);
+
+            if (res.ok && json && json.success) {
+                showToast('Đã xoá địa điểm');
+                fetchLocations();      // xoá dòng cuối của trang → fetchLocations tự lùi 1 trang
+            } else {
+                Swal.fire({
+                    icon: 'error', title: 'Không xoá được địa điểm',
+                    text: errorMessage(json, 'Vui lòng thử lại.')   // vd: "Địa điểm đang có tour..."
+                });
+            }
+        } catch (e) {
+            console.error(e);
+            Swal.fire({ icon: 'error', title: 'Không xoá được địa điểm', text: 'Không kết nối được tới máy chủ.' });
+        } finally {
+            btn.disabled = false;
+        }
     }
 
     function showTableError(msg) {

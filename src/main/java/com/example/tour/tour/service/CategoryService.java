@@ -25,4 +25,6 @@ public interface CategoryService {
 
     // THÊM: ẩn / hiện danh mục
     CategoryResponse changeStatus(int categoryId, boolean active);
+
+    void deleteCategory(int categoryId);
 }

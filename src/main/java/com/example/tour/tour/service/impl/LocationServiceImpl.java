@@ -7,6 +7,7 @@ import com.example.tour.tour.dto.request.LocationRequest;
 import com.example.tour.tour.dto.response.LocationResponse;
 import com.example.tour.tour.entity.Location;
 import com.example.tour.tour.repository.LocationRepository;
+import com.example.tour.tour.repository.TourRepository;
 import com.example.tour.tour.service.LocationService;
 import com.example.tour.tour.specification.LocationSpecification;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ public class LocationServiceImpl implements LocationService {
 
     private final LocationRepository locationRepository;
     private final FileStorageService fileStorageService;
+    private final TourRepository tourRepository;
 
     private static final String IMAGE_FOLDER = "locations";
 
@@ -127,6 +129,22 @@ public class LocationServiceImpl implements LocationService {
         Location location = locationRepository.findByLocationIdAndIsActiveTrue(locationId)
                 .orElseThrow(() -> new AppException(ErrorCode.LOCATION_NOT_FOUND));
         return toLocationResponse(location);
+    }
+
+    @Override
+    @Transactional
+    public void deleteLocation(int locationId) {
+        Location location = locationRepository.findById(locationId)
+                .orElseThrow(() -> new AppException(ErrorCode.LOCATION_NOT_FOUND));
+
+        // Còn tour (kể cả tour đang ẩn) → không xoá được, khoá ngoại tours.location_id NOT NULL
+        if(tourRepository.countByLocation_LocationId(locationId) > 0) {
+            throw new AppException(ErrorCode.LOCATION_HAS_TOURS);
+        }
+        locationRepository.delete(location);
+
+        // Xoá file ảnh SAU KHI commit thành công; rollback thì giữ nguyên ảnh
+        fileStorageService.cleanupAfterTransaction(location.getImageUrl(), null);
     }
 
     // Entity -> Response

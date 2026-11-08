@@ -103,7 +103,7 @@ public class TourServiceImpl implements TourService {
         Category category = findCategory(request.getCategoryId());
         Location location = findLocation(request.getLocationId());
 
-        // Ảnh thư viện giữ lại: null → giữ hết; có danh sách → chỉ giữ các id đó, theo đúng thứ tự
+        // 1. Ảnh thư viện giữ lại: null → giữ hết; có danh sách → chỉ giữ các id đó, theo đúng thứ tự
         List<Image> kept = resolveKeptImages(tour, request.getKeepImageIds());
         List<MultipartFile> newFiles = nonEmpty(galleryImages);
         if (kept.size() + newFiles.size() > MAX_GALLERY_SIZE) {
@@ -115,6 +115,7 @@ public class TourServiceImpl implements TourService {
         List<String> newUrls = new ArrayList<>();
         fileStorageService.cleanupAfterTransaction(oldUrlsToDelete, newUrls);
 
+        boolean priceChanged = tour.getBasePrice().compareTo(request.getBasePrice()) != 0;
         applyFields(tour, request, category, location);
 
         // 3. Ảnh đại diện: ảnh mới > bỏ ảnh > giữ nguyên
@@ -154,6 +155,9 @@ public class TourServiceImpl implements TourService {
         }
 
         Tour saved = tourRepository.save(tour);
+        if (priceChanged) {
+            scheduleRepository.syncAdultPrice(tourId, request.getBasePrice(), LocalDate.now());
+        }
         return toTourResponse(saved);
     }
 

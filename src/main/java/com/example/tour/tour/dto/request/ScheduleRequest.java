@@ -21,25 +21,38 @@ public class ScheduleRequest {
     @NotNull(message = "Vui lòng chọn ngày khởi hành")
     private LocalDate departureDate;
 
-    /** Không gửi → tự tính theo thời gian tour (VD 3N2Đ: đi ngày 13 → về ngày 15) */
-    private LocalDate returnDate;
-
     @NotNull(message = "Vui lòng nhập tổng số chỗ")
     @Min(value = 1, message = "Tổng số chỗ phải từ 1 trở lên")
     @Max(value = 1000, message = "Tổng số chỗ tối đa 1000")
     private Integer totalSlots;
 
-    @NotNull(message = "Vui lòng nhập giá người lớn")
-    @DecimalMin(value = "0", message = "Giá người lớn không được âm")
-    @Digits(integer = 15, fraction = 0, message = "Giá người lớn không hợp lệ")
-    private BigDecimal adultPrice;
+    // adultPrice lấy từ basePrice trong bảng tour
+    // Cách làm của bạn đơn giản hơn, phù hợp nếu đồ án không cần giá theo mùa.
+    // Có một điểm phải xử lý cẩn thận: khi base_price thay đổi, không được cập nhật giá
+    // của các lịch đã có khách đặt.
 
+    // Đây cũng là lý do vẫn nên giữ cột adult_price trong bảng schedules. Cột này đóng
+    // vai trò “ảnh chụp” giá của lịch: lịch chưa có khách đặt thì giá chạy theo tour,
+    // lịch đã có khách đặt thì giá được giữ nguyên.
+    /*
+    * Kết quả:
+
+        Lịch	                               Khi tour đổi giá
+        Chưa khởi hành, chưa có booking	       Giá người lớn đổi theo
+        Đã có booking (kể cả đơn đã huỷ)	   Giữ nguyên giá cũ
+        Đã khởi hành	                       Giữ nguyên, vì là dữ liệu lịch sử
+    * */
     @NotNull(message = "Vui lòng nhập giá trẻ em")
     @DecimalMin(value = "0", message = "Giá trẻ em không được âm")
     @Digits(integer = 15, fraction = 0, message = "Giá trẻ em không hợp lệ")
     private BigDecimal childPrice;
 
-    /** Không gửi → 0 */
+    @NotNull(message = "Vui lòng nhập giá trẻ nhỏ")
+    @DecimalMin(value = "0", message = "Giá trẻ nhỏ không được âm")
+    @Digits(integer = 15, fraction = 0, message = "Giá trẻ nhỏ không hợp lệ")
+    private BigDecimal toddlerPrice;
+
+    @NotNull(message = "Vui lòng nhập phụ thu phòng đơn")
     @DecimalMin(value = "0", message = "Phụ thu phòng đơn không được âm")
     @Digits(integer = 15, fraction = 0, message = "Phụ thu phòng đơn không hợp lệ")
     private BigDecimal singleRoomSupplement;

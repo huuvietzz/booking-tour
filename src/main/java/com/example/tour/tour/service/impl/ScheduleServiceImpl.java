@@ -20,7 +20,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -53,7 +52,7 @@ public class ScheduleServiceImpl implements ScheduleService {
                 .orElseThrow(() -> new AppException(ErrorCode.TOUR_NOT_FOUND));
 
         LocalDate departure = request.getDepartureDate();
-        LocalDate returnDate = resolveReturnDate(tour, departure, request.getReturnDate());
+        LocalDate returnDate = resolveReturnDate(tour, departure);
         validateDates(departure, returnDate);
 
         if (scheduleRepository.existsByTour_TourIdAndDepartureDate(tour.getTourId(), departure)) {
@@ -66,15 +65,17 @@ public class ScheduleServiceImpl implements ScheduleService {
                 .departureDate(departure)
                 .returnDate(returnDate)
                 .totalSlots(request.getTotalSlots())
-                .availableSlots(request.getTotalSlots())        // lịch mới: chưa ai đặt
-                .adultPrice(request.getAdultPrice())
+                .availableSlots(request.getTotalSlots())
+                .adultPrice(tour.getBasePrice())
                 .childPrice(request.getChildPrice())
-                .singleRoomSupplement(orZero(request.getSingleRoomSupplement()))
+                .toddlerPrice(request.getToddlerPrice())
+                .singleRoomSupplement(request.getSingleRoomSupplement())
                 .transport(trimToNull(request.getTransport()))
                 .status(ScheduleStatus.AVAILABLE)
                 .build();
 
-        return toResponse(scheduleRepository.save(schedule));
+        Schedule savedSchedule = scheduleRepository.save(schedule);
+        return toResponse(savedSchedule);
     }
 
     // =====================================================================
@@ -92,20 +93,18 @@ public class ScheduleServiceImpl implements ScheduleService {
         boolean hasBookings = bookingRepository.existsBySchedule_ScheduleId((scheduleId));
 
         LocalDate departure = request.getDepartureDate();
-        LocalDate returnDate = resolveReturnDate(tour, departure, request.getReturnDate());
-        BigDecimal supplement = orZero(request.getSingleRoomSupplement());
+        LocalDate returnDate = resolveReturnDate(tour, departure);
 
         boolean datesChanged = !departure.equals(schedule.getDepartureDate())
                 || !returnDate.equals(schedule.getReturnDate());
-        boolean pricesChanged = request.getAdultPrice().compareTo(schedule.getAdultPrice()) != 0
-                || request.getChildPrice().compareTo(schedule.getChildPrice()) != 0
-                || supplement.compareTo(orZero(schedule.getSingleRoomSupplement())) != 0;
+        boolean pricesChanged = request.getChildPrice().compareTo(schedule.getChildPrice()) != 0
+                || request.getToddlerPrice().compareTo(schedule.getToddlerPrice()) != 0
+                || request.getSingleRoomSupplement().compareTo(schedule.getSingleRoomSupplement()) != 0;
 
         // Đã có khách đặt → ngày đi / ngày về / giá đã "chốt" với khách, không được đổi
         if (hasBookings && (datesChanged || pricesChanged)) {
             throw new AppException(ErrorCode.SCHEDULE_LOCKED_BY_BOOKINGS);
         }
-
         if (datesChanged) {
             validateDates(departure, returnDate);
             if (scheduleRepository.existsByTour_TourIdAndDepartureDateAndScheduleIdNot(
@@ -116,24 +115,22 @@ public class ScheduleServiceImpl implements ScheduleService {
             schedule.setReturnDate(returnDate);
             schedule.setScheduleCode(buildCode(tour, departure));   // chưa có booking nên đổi mã an toàn
         }
-
         // Tổng chỗ mới không được ít hơn số chỗ khách đã giữ
         if (request.getTotalSlots() < booked) {
             throw new AppException(ErrorCode.SCHEDULE_SLOTS_TOO_LOW);
         }
         schedule.setTotalSlots(request.getTotalSlots());
         schedule.setAvailableSlots(request.getTotalSlots() - booked);
-
-        schedule.setAdultPrice(request.getAdultPrice());
         schedule.setChildPrice(request.getChildPrice());
-        schedule.setSingleRoomSupplement(supplement);
+        schedule.setToddlerPrice(request.getToddlerPrice());
+        schedule.setSingleRoomSupplement(request.getSingleRoomSupplement());
         schedule.setTransport(trimToNull(request.getTransport()));
-
         if (schedule.getStatus() != ScheduleStatus.CANCELLED) {
             schedule.setStatus(slotStatus(schedule.getAvailableSlots()));
         }
 
-        return toResponse(scheduleRepository.save(schedule));
+        Schedule savedSchedule = scheduleRepository.save(schedule);
+        return toResponse(savedSchedule);
     }
 
     // =====================================================================
@@ -149,23 +146,26 @@ public class ScheduleServiceImpl implements ScheduleService {
         if (bookingRepository.countBySchedule_ScheduleIdAndBookingStatusIn(scheduleId, ACTIVE_BOOKING_STATUSES) > 0) {
             throw new AppException(ErrorCode.SCHEDULE_HAS_ACTIVE_BOOKINGS);
         }
-
         schedule.setStatus(ScheduleStatus.CANCELLED);
-        return toResponse(scheduleRepository.save(schedule));
+
+        Schedule savedSchedule = scheduleRepository.save(schedule);
+        return toResponse(savedSchedule);
     }
 
     @Override
     @Transactional
     public ScheduleResponse reopenSchedule(int scheduleId) {
         Schedule schedule = findWithTour(scheduleId);
-        if (schedule.getStatus() != ScheduleStatus.CANCELLED) return toResponse(schedule);
-
+        if (schedule.getStatus() != ScheduleStatus.CANCELLED) {
+            return toResponse(schedule);
+        }
         if (!schedule.getDepartureDate().isAfter(LocalDate.now())) {
             throw new AppException(ErrorCode.INVALID_SCHEDULE_DATE);   // lịch đã qua, không mở lại
         }
-
         schedule.setStatus(slotStatus(schedule.getAvailableSlots()));
-        return toResponse(scheduleRepository.save(schedule));
+
+        Schedule savedSchedule = scheduleRepository.save(schedule);
+        return toResponse(savedSchedule);
     }
 
     // =====================================================================
@@ -189,15 +189,16 @@ public class ScheduleServiceImpl implements ScheduleService {
     // =====================================================================
     @Override
     @Transactional(readOnly = true)
-    public Page<ScheduleResponse> getSchedulesForAdmin(ScheduleFilterRequest filter, Pageable pageable) {
+    public Page<ScheduleResponse> getAllSchedulesForAdmin(ScheduleFilterRequest filter, Pageable pageable) {
         return scheduleRepository.findAll(ScheduleSpecification.adminFilter(filter), pageable)
                 .map(this::toResponse);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public ScheduleResponse getScheduleForAdmin(int scheduleId) {
-        return toResponse(findWithTour(scheduleId));
+    public ScheduleResponse getScheduleByIdForAdmin(int scheduleId) {
+        Schedule schedule = findWithTour(scheduleId);
+        return toResponse(schedule);
     }
 
     @Override
@@ -229,9 +230,8 @@ public class ScheduleServiceImpl implements ScheduleService {
         }
     }
 
-    /** Có gửi ngày về → dùng; không gửi → ngày đi + (số ngày của tour - 1). "3N2Đ" → 3 ngày */
-    private static LocalDate resolveReturnDate(Tour tour, LocalDate departure, LocalDate requested) {
-        if (requested != null) return requested;
+    /** Ngày về = ngày đi + (số ngày của tour - 1). "3N2Đ" → 3 ngày */
+    private static LocalDate resolveReturnDate(Tour tour, LocalDate departure) {
         Matcher m = DURATION_DAYS.matcher(Objects.toString(tour.getDuration(), ""));
         int days = m.find() ? Math.max(Integer.parseInt(m.group(1)), 1) : 1;
         return departure.plusDays(days - 1L);
@@ -245,8 +245,6 @@ public class ScheduleServiceImpl implements ScheduleService {
     private static ScheduleStatus slotStatus(int availableSlots) {
         return availableSlots <= 0 ? ScheduleStatus.FULL : ScheduleStatus.AVAILABLE;
     }
-
-    private static BigDecimal orZero(BigDecimal v) { return v == null ? BigDecimal.ZERO : v; }
 
     private static String trimToNull(String s) {
         return s == null || s.isBlank() ? null : s.trim();
@@ -268,6 +266,7 @@ public class ScheduleServiceImpl implements ScheduleService {
                 .bookedSlots(s.getTotalSlots() - s.getAvailableSlots())
                 .adultPrice(s.getAdultPrice())
                 .childPrice(s.getChildPrice())
+                .toddlerPrice(s.getToddlerPrice())
                 .singleRoomSupplement(s.getSingleRoomSupplement())
                 .transport(s.getTransport())
                 .status(s.getStatus())

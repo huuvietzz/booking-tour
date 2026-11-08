@@ -1,165 +1,178 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>Lịch khởi hành - Admin</title>
+    <title>Quản lý lịch khởi hành - Admin</title>
+
     <link href="assets/img/favicon.png" rel="icon">
     <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
     <link href="https://fonts.gstatic.com" rel="preconnect">
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Nunito:300,400,600,700|Poppins:300,400,500,600,700" rel="stylesheet">
     <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
-    <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
     <link href="assets/css/style.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css" rel="stylesheet">
 
     <script src="assets/js/admin-auth.js"></script>
     <script>AdminAuth.requireLogin();</script>
 
     <style>
-        /* ===== CUSTOM PAGINATION ===== */
+        /* ===== PAGINATION ===== */
         .custom-pagination-wrapper {
             display: flex; align-items: center; justify-content: space-between;
-            padding: 16px 2px 4px 2px; flex-wrap: wrap; gap: 10px;
+            padding: 16px 2px 4px; flex-wrap: wrap; gap: 10px;
         }
-        .pagination-info { font-size: 0.82rem; color: #6c757d; white-space: nowrap; }
+        .pagination-info { font-size: .82rem; color: #6c757d; white-space: nowrap; }
         .pagination-info span { font-weight: 600; color: #333; }
-        .custom-pagination {
-            display: flex; align-items: center; gap: 4px;
-            list-style: none; margin: 0; padding: 0;
-        }
+        .custom-pagination { display: flex; align-items: center; gap: 4px; list-style: none; margin: 0; padding: 0; }
         .custom-pagination .page-item { display: flex; }
         .custom-pagination .page-btn {
             display: inline-flex; align-items: center; justify-content: center;
             min-width: 34px; height: 34px; padding: 0 10px;
-            font-size: 0.82rem; font-weight: 500; color: #4154f1;
-            background: #fff; border: 1.5px solid #c8cef7;
-            border-radius: 6px; cursor: pointer;
-            transition: background .15s, border-color .15s, color .15s, box-shadow .15s;
-            line-height: 1; user-select: none; text-decoration: none;
+            font-size: .82rem; font-weight: 500; color: #4154f1;
+            background: #fff; border: 1.5px solid #c8cef7; border-radius: 6px;
+            cursor: pointer; transition: background .15s, border-color .15s; line-height: 1; user-select: none;
         }
-        .custom-pagination .page-btn:hover:not(.active):not(.disabled):not(.ellipsis) {
-            background: #eef0fd; border-color: #4154f1; color: #4154f1;
-        }
+        .custom-pagination .page-btn:hover:not(.active):not(.disabled):not(.ellipsis) { background: #eef0fd; border-color: #4154f1; }
         .custom-pagination .page-btn.active {
-            background: #4154f1; border-color: #4154f1; color: #fff;
-            font-weight: 700; box-shadow: 0 2px 8px rgba(65,84,241,.25);
-            cursor: default; pointer-events: none;
+            background: #4154f1; border-color: #4154f1; color: #fff; font-weight: 700;
+            box-shadow: 0 2px 8px rgba(65, 84, 241, .25); pointer-events: none;
         }
-        .custom-pagination .page-btn.disabled {
-            color: #b8bfd8; border-color: #e6e9f5; background: #f7f8fc;
-            cursor: not-allowed; pointer-events: none;
-        }
-        .custom-pagination .page-btn.ellipsis {
-            border: none; background: transparent; color: #9aa0bc;
-            cursor: default; pointer-events: none; min-width: 24px; letter-spacing: 1px;
-        }
-        .custom-pagination .page-btn i { font-size: 0.88rem; }
-
-        /* ===== BULK ACTION BAR ===== */
-        #bulkActionBar {
-            display: none; position: sticky; top: 60px; z-index: 100;
-            background: #4154f1; color: #fff; border-radius: 8px;
-            padding: 10px 18px; margin-bottom: 12px;
-            align-items: center; gap: 12px;
-            box-shadow: 0 4px 16px rgba(65,84,241,0.25);
-            animation: slideDown 0.2s ease;
-        }
-        #bulkActionBar.show { display: flex; }
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-8px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-        #bulkActionBar .bulk-count {
-            font-weight: 700; font-size: 0.95rem;
-            background: rgba(255,255,255,0.2);
-            padding: 3px 12px; border-radius: 20px;
-        }
-        #bulkActionBar .btn-bulk {
-            background: rgba(255,255,255,0.18); color: #fff;
-            border: 1.5px solid rgba(255,255,255,0.4);
-            font-size: 0.82rem; padding: 4px 14px; border-radius: 6px;
-            cursor: pointer; transition: background .15s;
-        }
-        #bulkActionBar .btn-bulk:hover { background: rgba(255,255,255,0.32); }
-        #bulkActionBar .btn-bulk.danger { background: rgba(220,53,69,0.7); border-color: rgba(220,53,69,0.8); }
-        #bulkActionBar .btn-bulk.danger:hover { background: rgba(220,53,69,0.9); }
-        #bulkActionBar .ms-auto-bulk { margin-left: auto; }
-
-        /* ===== TABLE CHECKBOX ===== */
-        .form-check-input[type=checkbox] { cursor: pointer; }
-        #scheduleTable thead .form-check-input { transform: scale(1.1); }
-
-        /* ===== SCROLLBAR ===== */
-        .table-responsive { scrollbar-width: thin; scrollbar-color: #cbd0d5 #f8f9fa; }
-        .table-responsive::-webkit-scrollbar { height: 8px; }
-        .table-responsive::-webkit-scrollbar-track { background: #f8f9fa; border-radius: 4px; }
-        .table-responsive::-webkit-scrollbar-thumb { background: #cbd0d5; border-radius: 4px; }
-        .table-responsive::-webkit-scrollbar-thumb:hover { background: #aab2bd; }
+        .custom-pagination .page-btn.disabled { color: #b8bfd8; border-color: #e6e9f5; background: #f7f8fc; pointer-events: none; }
+        .custom-pagination .page-btn.ellipsis { border: none; background: transparent; color: #9aa0bc; pointer-events: none; min-width: 24px; }
 
         /* ===== LOADING OVERLAY ===== */
         .table-wrapper { position: relative; }
         #tableLoadingOverlay {
             display: none; position: absolute; inset: 0;
-            background: rgba(255,255,255,0.7); z-index: 10;
-            align-items: center; justify-content: center; border-radius: 4px;
+            background: rgba(255, 255, 255, .7); z-index: 10;
+            align-items: center; justify-content: center;
         }
         #tableLoadingOverlay.show { display: flex; }
 
-        /* ===== SORTING ===== */
-        th.sortable { cursor: pointer; user-select: none; transition: color 0.2s; }
-        th.sortable:hover { color: #4154f1; }
-        th.sortable .sort-icon { margin-left: 4px; color: #adb5bd; font-size: 0.8rem; opacity: 0; transition: all 0.2s; }
-        th.sortable:hover .sort-icon { opacity: 0.5; }
-        th.sortable.sort-active { color: #4154f1; }
-        th.sortable.sort-active .sort-icon { opacity: 1; font-weight: bold; font-size: 1.1rem; }
+        .code-text {
+            background: #f1f3f9; color: #5a6a85; padding: 2px 6px;
+            border-radius: 4px; font-size: .8rem; font-family: monospace; white-space: nowrap;
+        }
+        .price-text { font-weight: 600; color: #333; white-space: nowrap; }
 
-        /* ===== STATUS BADGES ===== */
-        .badge-available  { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
-        .badge-full       { background: #fff3e0; color: #e65100; border: 1px solid #ffcc80; }
-        .badge-cancelled  { background: #f5f5f5; color: #616161; border: 1px solid #bdbdbd; }
-
-        /* ===== PRICE ADJUSTMENT ===== */
-        .price-plus  { color: #2e7d32; font-weight: 600; }
-        .price-minus { color: #c62828; font-weight: 600; }
-        .price-zero  { color: #9e9e9e; }
-
-        /* ===== ROW CANCELLED ===== */
-        tr.row-cancelled td:not(:last-child) { opacity: 0.6; }
-
-        /* ===== SLOT PROGRESS ===== */
-        .slot-text { font-size: 0.82rem; }
-        .slot-full   { color: #c62828; font-weight: 600; }
-        .slot-normal { color: #555; }
-
-        code {
-            background: #f1f3f9; color: #5a6a85;
-            padding: 2px 6px; border-radius: 4px; font-size: 0.82rem;
+        /* Tên tour dài: tối đa 2 dòng */
+        .tour-name {
+            display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2;
+            overflow: hidden; overflow-wrap: anywhere;
+            max-width: 300px; line-height: 1.35; font-weight: 600; color: #212529;
         }
 
-        /* ===== SWEET ALERT ===== */
-        .swal-custom-title { font-family: 'Nunito', sans-serif !important; color: #444; font-weight: 700; font-size: 1.5rem; }
-        .swal-custom-html  { font-family: 'Open Sans', sans-serif !important; color: #666; font-size: 1rem; }
+        /* ===== NGÀY ĐI / VỀ ===== */
+        .date-main { font-weight: 600; color: #212529; white-space: nowrap; }
+        .date-sub  { font-size: .78rem; color: #6c757d; white-space: nowrap; }
 
-        /* ===== TOUR FILTER SELECT ===== */
-        #filterTour { max-width: 260px; }
+        /* ===== SỐ CHỖ ===== */
+        .slot-cell { min-width: 130px; }
+        .slot-text { font-size: .85rem; white-space: nowrap; }
+        .slot-bar  { height: 5px; margin: 4px 0 2px; background: #eceff5; }
+        .slot-bar .progress-bar { background: #4154f1; }
+        .slot-bar.is-high .progress-bar { background: #e8890c; }   /* đã bán ≥ 80% */
+        .slot-bar.is-full .progress-bar { background: #dc3545; }
 
-        /* ===== EXPORT BUTTON ===== */
-        .btn-export {
-            background: #e8f5e9; color: #2e7d32;
-            border: 1.5px solid #a5d6a7;
-            font-size: 0.82rem; font-weight: 600;
-            padding: 5px 14px; border-radius: 6px;
-            cursor: pointer; transition: all .15s;
-            display: inline-flex; align-items: center; gap: 5px;
+        /* ===== BADGE TRẠNG THÁI ===== */
+        .st-badge {
+            display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;
+            padding: 3px 10px; border-radius: 999px; font-size: .78rem; font-weight: 600;
         }
-        .btn-export:hover { background: #c8e6c9; border-color: #66bb6a; }
+        .st-badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+        .st-available { background: #e7f6ec; color: #1e7e43; }
+        .st-full      { background: #fff4e5; color: #b25e00; }
+        .st-cancelled { background: #fdecee; color: #c12a3a; }
+        .st-departed  { background: #eef0f3; color: #5f6b7a; }
+
+        /* ===== THẺ TOUR (khi mở từ trang tour: ?tourId=) ===== */
+        .tour-banner {
+            display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+            padding: 12px 16px; margin-bottom: 14px;
+            background: #f6f7fe; border: 1px solid #e0e4fb; border-radius: 8px;
+        }
+        .tour-banner .tb-name { font-weight: 700; color: #012970; }
+        .tour-banner .tb-meta { font-size: .85rem; color: #5a6a85; display: flex; gap: 14px; flex-wrap: wrap; }
+
+        /* ===== NÚT LỌC + CHIP BỘ LỌC ===== */
+        .btn-filter { position: relative; height: 31px; width: 38px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+        .btn-filter .filter-count {
+            position: absolute; top: -7px; right: -7px; font-size: .68rem; min-width: 18px;
+            padding: 2px 5px; border-radius: 10px;
+        }
+        .active-filter-bar {
+            display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+            padding: 10px 2px; border-top: 1px solid #ebeef4; font-size: .85rem; color: #555;
+        }
+        .filter-chip {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: #eef0fd; color: #4154f1; border: 1px solid #d5dafb;
+            border-radius: 6px; padding: 2px 4px 2px 10px; font-size: .8rem;
+        }
+        .filter-chip button { border: 0; background: none; color: inherit; padding: 0 4px; line-height: 1; }
+        .filter-chip button:hover { color: #dc3545; }
+        .btn-clear-all { border: 0; background: none; color: #6c757d; margin-left: auto; padding: 2px 6px; }
+        .btn-clear-all:hover { color: #dc3545; }
+
+        /* ===== Ô CHỌN CÓ TÌM KIẾM (Choices.js) — giống form-select của Bootstrap ===== */
+        .modal .choices { margin-bottom: 0; }
+        .modal .choices__inner {
+            min-height: 38px; padding: 4px 10px; background: #fff;
+            border: 1px solid #dee2e6; border-radius: .375rem; font-size: 1rem;
+        }
+        .modal .choices.is-disabled .choices__inner { background: #e9ecef; }
+        .modal .choices.is-focused .choices__inner,
+        .modal .choices.is-open .choices__inner { border-color: #86b7fe; box-shadow: 0 0 0 .25rem rgba(13, 110, 253, .15); }
+        .modal .choices__list--single { padding: 4px 16px 4px 2px; }
+        .modal .choices__placeholder { opacity: 1; color: #6c757d; }
+        .modal .choices__list--dropdown, .modal .choices__list[aria-expanded] {
+            border-radius: .375rem; box-shadow: 0 6px 20px rgba(0, 0, 0, .1); z-index: 20;
+        }
+        .modal .choices__list--dropdown .choices__item--selectable.is-highlighted { background: #eef0fd; }
+        .modal .choices__input--cloned { font-size: .95rem; }
+        .modal .choices[data-type*=select-one] .choices__button { opacity: .5; margin-right: 22px; }
+        .modal .choices[data-type*=select-one] .choices__button:hover { opacity: 1; }
+        .modal .is-invalid-choices .choices__inner { border-color: #dc3545; }
+
+        /* ===== SẮP XẾP THEO CỘT ===== */
+        .sort-btn {
+            border: 0; background: none; padding: 0; font: inherit; font-weight: inherit; color: inherit;
+            display: inline-flex; align-items: center; gap: 4px; cursor: pointer; white-space: nowrap;
+        }
+        .sort-btn:hover { color: #4154f1; }
+        .sort-btn:focus-visible { outline: 2px solid #4154f1; outline-offset: 2px; border-radius: 4px; }
+        .sort-btn .sort-icon { font-size: .8rem; color: #adb5bd; opacity: 0; transition: opacity .15s; }
+        .sort-btn:hover .sort-icon { opacity: .6; }
+        .sort-btn.sort-active { color: #4154f1; }
+        .sort-btn.sort-active .sort-icon { opacity: 1; color: #4154f1; font-size: 1rem; }
+
+        #scheduleTable th { white-space: nowrap; }
+
+        /* ===== FORM THÊM / SỬA ===== */
+        .form-label .req { color: #dc3545; }
+        .readonly-box {
+            min-height: 38px; padding: 6px 12px; border-radius: .375rem;
+            background: #f4f6fa; border: 1px dashed #d3d9e4; color: #333; font-weight: 600;
+            display: flex; align-items: center;
+        }
+        .field-hint { font-size: .78rem; color: #6c757d; margin-top: 4px; }
+        .section-label {
+            font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+            color: #8a94a6; margin: 6px 0 -4px;
+        }
+
+        /* ===== MODAL XEM CHI TIẾT ===== */
+        .detail-table th { width: 42%; color: #6c757d; font-weight: 500; }
+        .detail-table td { font-weight: 500; }
     </style>
 </head>
 
 <body>
 
+<!-- ======================= HEADER ======================= -->
 <header id="header" class="header fixed-top d-flex align-items-center">
     <div class="d-flex align-items-center justify-content-between">
         <a href="index.html" class="logo d-flex align-items-center">
@@ -167,12 +180,6 @@
             <span class="d-none d-lg-block">VietTrip Admin</span>
         </a>
         <i class="bi bi-list toggle-sidebar-btn"></i>
-    </div>
-    <div class="search-bar">
-        <form class="search-form d-flex align-items-center" method="POST" action="#">
-            <input type="text" name="query" placeholder="Tìm kiếm nhanh..." title="Nhập từ khóa tìm kiếm">
-            <button type="submit" title="Search"><i class="bi bi-search"></i></button>
-        </form>
     </div>
     <nav class="header-nav ms-auto">
         <ul class="d-flex align-items-center">
@@ -185,10 +192,10 @@
                     <li class="dropdown-header"><h6 data-admin-name></h6><span data-admin-role></span></li>
                     <li><hr class="dropdown-divider"></li>
                     <li><a class="dropdown-item d-flex align-items-center" href="profile.html">
-                        <i class="bi bi-person"></i><span>Hồ sơ của tôi</span>
+                        <i class="bi bi-person"></i><span>Hồ sơ</span>
                     </a></li>
                     <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item d-flex align-items-center" href="#" id="btnLogout" data-admin-logout>
+                    <li><a class="dropdown-item d-flex align-items-center" href="#" data-admin-logout>
                         <i class="bi bi-box-arrow-right"></i><span>Đăng xuất</span>
                     </a></li>
                 </ul>
@@ -196,1537 +203,1135 @@
         </ul>
     </nav>
 </header>
+<script>AdminAuth.renderUser();</script>
 
+<!-- ======================= SIDEBAR ======================= -->
 <aside id="sidebar" class="sidebar">
     <ul class="sidebar-nav" id="sidebar-nav">
-
         <li class="nav-item">
-            <a class="nav-link" href="index.html">
-                <i class="bi bi-grid"></i><span>Bảng điều khiển</span>
-            </a>
+            <a class="nav-link collapsed" href="index.html"><i class="bi bi-grid"></i><span>Bảng điều khiển</span></a>
         </li>
 
-        <!-- ================= KINH DOANH ================= -->
         <li class="nav-heading">Kinh doanh</li>
-
         <li class="nav-item">
-            <a class="nav-link collapsed" href="bookings.html">
-                <i class="bi bi-cart-check"></i><span>Quản lý đặt tour</span>
-            </a>
+            <a class="nav-link collapsed" href="bookings.html"><i class="bi bi-cart-check"></i><span>Quản lý đặt tour</span></a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="payments.html"><i class="bi bi-credit-card"></i><span>Quản lý thanh toán</span></a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="promotions.html"><i class="bi bi-tags"></i><span>Quản lý khuyến mãi</span></a>
         </li>
 
-        <li class="nav-item">
-            <a class="nav-link collapsed" href="payments.html">
-                <i class="bi bi-credit-card"></i><span>Quản lý thanh toán</span>
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a class="nav-link collapsed" href="promotions.html">
-                <i class="bi bi-tags"></i><span>Quản lý khuyến mãi</span>
-            </a>
-        </li>
-
-        <!-- ================= SẢN PHẨM ================= -->
         <li class="nav-heading">Sản phẩm</li>
-
         <li class="nav-item">
-            <a class="nav-link collapsed" href="tours.html">
-                <i class="bi bi-map"></i><span>Quản lý tour</span>
-            </a>
+            <a class="nav-link collapsed" href="tours.html" data-pages="tour-form.html"><i class="bi bi-map"></i><span>Quản lý tour</span></a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="tour-schedules.html"><i class="bi bi-calendar-event"></i><span>Quản lý lịch khởi hành</span></a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="locations.html"><i class="bi bi-geo-alt"></i><span>Quản lý địa điểm</span></a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="categories.html"><i class="bi bi-bookmarks"></i><span>Quản lý danh mục</span></a>
         </li>
 
-        <li class="nav-item">
-            <a class="nav-link collapsed" href="tour-schedules.html">
-                <i class="bi bi-calendar-event"></i><span>Quản lý lịch khởi hành</span>
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a class="nav-link collapsed" href="locations.html">
-                <i class="bi bi-geo-alt"></i><span>Quản lý địa điểm</span>
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a class="nav-link collapsed" href="categories.html">
-                <i class="bi bi-bookmarks"></i><span>Quản lý danh mục</span>
-            </a>
-        </li>
-
-        <!-- ================= QUẢN LÝ CHUNG ================= -->
         <li class="nav-heading">Quản lý chung</li>
-
         <li class="nav-item">
-            <a class="nav-link collapsed" href="customers.html">
-                <i class="bi bi-people"></i><span>Quản lý khách hàng</span>
-            </a>
+            <a class="nav-link collapsed" href="customers.html"><i class="bi bi-people"></i><span>Quản lý khách hàng</span></a>
         </li>
-
         <li class="nav-item">
-            <a class="nav-link collapsed" href="reviews.html">
-                <i class="bi bi-star"></i><span>Quản lý đánh giá</span>
-            </a>
+            <a class="nav-link collapsed" href="reviews.html"><i class="bi bi-star"></i><span>Quản lý đánh giá</span></a>
         </li>
-
-        <!-- Chỉ ADMIN thấy: admin-auth.js gỡ phần tử này nếu là STAFF -->
         <li class="nav-item" data-admin-only>
-            <a class="nav-link collapsed" href="staff.html">
-                <i class="bi bi-person-badge"></i><span>Quản lý nhân viên</span>
-            </a>
+            <a class="nav-link collapsed" href="staff.html"><i class="bi bi-person-badge"></i><span>Quản lý nhân viên</span></a>
         </li>
-
         <li class="nav-item">
-            <a class="nav-link collapsed" href="report-revenue.html">
-                <i class="bi bi-bar-chart"></i><span>Báo cáo thống kê</span>
-            </a>
+            <a class="nav-link collapsed" href="report-revenue.html"><i class="bi bi-bar-chart"></i><span>Báo cáo thống kê</span></a>
         </li>
-
     </ul>
 </aside>
 
+<!-- ======================= NỘI DUNG ======================= -->
 <main id="main" class="main">
     <div class="pagetitle">
-        <h1>Lịch khởi hành</h1>
+        <h1>Quản lý lịch khởi hành</h1>
         <nav>
-            <ol class="breadcrumb">
+            <ol class="breadcrumb" id="breadcrumb">
                 <li class="breadcrumb-item"><a href="index.html">Trang chủ</a></li>
-                <li class="breadcrumb-item">Tour</li>
+                <li class="breadcrumb-item">Sản phẩm</li>
                 <li class="breadcrumb-item active">Lịch khởi hành</li>
             </ol>
         </nav>
     </div>
 
     <section class="section">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="card">
-                    <div class="card-body">
+        <div class="card">
+            <div class="card-body">
 
-                        <!-- HEADER -->
-                        <div class="d-flex justify-content-between align-items-center mt-3 mb-4 flex-wrap gap-2">
-                            <h5 class="card-title p-0 m-0">Quản lý Lịch khởi hành Tour</h5>
-                            <div class="d-flex gap-2 flex-wrap">
-                                <button class="btn-export" onclick="exportToExcel()" title="Xuất danh sách ra file Excel">
-                                    <i class="bi bi-file-earmark-excel"></i> Xuất Excel
-                                </button>
-                                <button type="button" class="btn btn-primary" style="background-color:#4154f1;border:none;"
-                                        onclick="openAddModal()">
-                                    <i class="bi bi-calendar-plus me-1"></i> Thêm Lịch mới
-                                </button>
+                <!-- Tiêu đề + nút Thêm -->
+                <div class="d-flex justify-content-between align-items-center mt-3 mb-3 flex-wrap gap-2">
+                    <h5 class="card-title p-0 m-0">Danh sách lịch khởi hành</h5>
+                    <button type="button" class="btn btn-primary" onclick="openCreateModal()">
+                        <i class="bi bi-plus-lg me-1"></i>Thêm lịch
+                    </button>
+                </div>
+
+                <!-- Thẻ tour: chỉ hiện khi mở từ trang tour (tour-schedules.html?tourId=...) -->
+                <div class="tour-banner d-none" id="tourBanner">
+                    <i class="bi bi-map fs-4 text-primary"></i>
+                    <div class="flex-grow-1">
+                        <div class="tb-name" id="tbName">—</div>
+                        <div class="tb-meta">
+                            <span><i class="bi bi-upc me-1"></i><span id="tbCode">—</span></span>
+                            <span><i class="bi bi-clock me-1"></i><span id="tbDuration">—</span></span>
+                            <span><i class="bi bi-cash me-1"></i>Giá người lớn: <b id="tbPrice">—</b></span>
+                        </div>
+                    </div>
+                    <a href="tour-schedules.html" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-list-ul me-1"></i>Xem lịch của tất cả tour
+                    </a>
+                </div>
+
+                <!-- Thanh công cụ -->
+                <div class="d-flex flex-wrap align-items-end gap-3 mb-2">
+                    <div>
+                        <label class="form-label text-muted small mb-1" for="selectPerPage">Hiển thị</label>
+                        <select class="form-select form-select-sm" id="selectPerPage" onchange="onPerPageChange(this.value)" style="min-width: 95px;">
+                            <option value="5">5 mục</option>
+                            <option value="10" selected>10 mục</option>
+                            <option value="20">20 mục</option>
+                        </select>
+                    </div>
+                    <div class="ms-auto d-flex align-items-end gap-2">
+                        <div>
+                            <label class="form-label text-muted small mb-1" for="searchInput">Tìm kiếm</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                                <input type="text" class="form-control border-start-0" id="searchInput"
+                                       placeholder="Mã lịch, mã tour, tên tour..." oninput="onSearchInput(this.value)"
+                                       style="min-width: 260px;">
                             </div>
                         </div>
-
-                        <!-- BULK ACTION BAR -->
-                        <div id="bulkActionBar">
-                            <span class="bulk-count" id="bulkCount">0 lịch đã chọn</span>
-
-                            <!-- Hiển thị theo nhóm trạng thái -->
-                            <button class="btn-bulk danger" id="btnBulkCancel" onclick="bulkCancel()" style="display:none;">
-                                <i class="bi bi-x-circle me-1"></i>Hủy lịch
-                            </button>
-
-                            <button class="btn-bulk" id="btnBulkRestore" onclick="bulkRestore()" style="display:none;">
-                                <i class="bi bi-arrow-counterclockwise me-1"></i>Khôi phục
-                            </button>
-
-                            <button class="btn-bulk danger" id="btnBulkDelete" onclick="bulkDelete()" style="display:none;">
-                                <i class="bi bi-trash me-1"></i>Xóa vĩnh viễn
-                            </button>
-
-                            <!-- Cảnh báo hỗn hợp -->
-                            <span id="bulkMixedWarning" style="display:none; font-size:0.82rem; opacity:0.9;">
-                                <i class="bi bi-exclamation-triangle me-1"></i>Bỏ chọn lịch đã hủy để tiếp tục
-                            </span>
-
-                            <button class="btn-bulk ms-auto-bulk" onclick="clearSelection()">
-                                <i class="bi bi-x-lg"></i>
-                            </button>
-                        </div>
-
-                        <!-- FILTER BAR -->
-                        <div class="d-flex flex-wrap align-items-end gap-3 mb-3 pb-3 border-bottom">
-                            <div>
-                                <label class="form-label text-muted small mb-1">
-                                    <i class="bi bi-map me-1"></i>Tour
-                                </label>
-                                <select class="form-select form-select-sm" id="filterTour" onchange="onFilterChange()" style="min-width:200px;">
-                                    <option value="">Tất cả các Tour</option>
-                                    <!-- Được load động từ API -->
-                                </select>
-                            </div>
-                            <div>
-                                <label class="form-label text-muted small mb-1">
-                                    <i class="bi bi-activity me-1"></i>Trạng thái
-                                </label>
-                                <select class="form-select form-select-sm" id="filterStatus" onchange="onFilterChange()" style="min-width:160px;">
-                                    <option value="">Tất cả trạng thái</option>
-                                    <option value="AVAILABLE">Mở bán</option>
-                                    <option value="FULL">Hết chỗ</option>
-                                    <option value="CANCELLED">Đã hủy</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="form-label text-muted small mb-1">
-                                    <i class="bi bi-calendar-month me-1"></i>Tháng khởi hành
-                                </label>
-                                <input type="month" class="form-control form-control-sm" id="filterMonth"
-                                       onchange="onFilterChange()" style="min-width:160px;">
-                            </div>
-                            <div class="align-self-end" id="btnClearFilterWrapper" style="display:none;">
-                                <button class="btn btn-sm btn-outline-secondary" onclick="clearFilters()">
-                                    <i class="bi bi-x-circle me-1"></i>Xóa bộ lọc
-                                </button>
-                            </div>
-                            <div class="ms-auto">
-                                <label class="form-label text-muted small mb-1">Hiển thị</label>
-                                <select class="form-select form-select-sm" id="customPerPage" onchange="onPerPageChange(this.value)" style="min-width:100px;">
-                                    <option value="5">5 mục</option>
-                                    <option value="10" selected>10 mục</option>
-                                    <option value="20">20 mục</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="form-label text-muted small mb-1">Tìm kiếm</label>
-                                <div class="input-group input-group-sm">
-                  <span class="input-group-text bg-white border-end-0">
-                    <i class="bi bi-search text-muted"></i>
-                  </span>
-                                    <input type="text" class="form-control border-start-0" id="customSearch"
-                                           placeholder="Mã, tên tour..." oninput="onSearchInput(this.value)"
-                                           style="min-width:180px;">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- TABLE -->
-                        <div class="table-wrapper">
-                            <div id="tableLoadingOverlay">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Đang tải...</span>
-                                </div>
-                            </div>
-                            <div class="table-responsive">
-                                <table class="table table-hover align-middle" id="scheduleTable">
-                                    <thead>
-                                    <tr>
-                                        <th style="width:3%;">
-                                            <input class="form-check-input" type="checkbox" id="checkAll" onchange="toggleCheckAll(this)">
-                                        </th>
-                                        <th class="sortable text-nowrap" style="width:5%;" data-sort="scheduleId" onclick="sortBy('scheduleId')">
-                                            ID <i class="bi bi-arrow-down-up sort-icon"></i>
-                                        </th>
-                                        <th class="sortable" style="min-width:220px;" data-sort="tourName" onclick="sortBy('tourName')">
-                                            Tên Tour <i class="bi bi-arrow-down-up sort-icon"></i>
-                                        </th>
-                                        <th class="sortable text-nowrap" style="width:13%;" data-sort="departureDate" onclick="sortBy('departureDate')">
-                                            Ngày khởi hành <i class="bi bi-arrow-down-up sort-icon"></i>
-                                        </th>
-                                        <th class="sortable text-nowrap" style="width:12%;" data-sort="returnDate" onclick="sortBy('returnDate')">
-                                            Ngày trở về <i class="bi bi-arrow-down-up sort-icon"></i>
-                                        </th>
-                                        <th class="text-nowrap" style="width:10%;">Số chỗ</th>
-                                        <th class="sortable text-nowrap text-end" style="width:13%;" data-sort="priceAdjustment" onclick="sortBy('priceAdjustment')">
-                                            Giá điều chỉnh <i class="bi bi-arrow-down-up sort-icon"></i>
-                                        </th>
-                                        <th class="text-nowrap" style="width:11%;">Trạng thái</th>
-                                        <th class="text-center text-nowrap" style="width:9%;">Hành động</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody id="scheduleListBody">
-                                    <tr><td colspan="9" class="text-center py-4">Đang tải dữ liệu...</td></tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- PAGINATION -->
-                        <div class="custom-pagination-wrapper" id="paginationWrapper">
-                            <div class="pagination-info" id="paginationInfo">—</div>
-                            <ul class="custom-pagination" id="paginationControls"></ul>
-                        </div>
-
+                        <button type="button" class="btn btn-sm btn-outline-secondary btn-filter" title="Bộ lọc"
+                                aria-label="Mở bộ lọc" onclick="openFilterModal()">
+                            <i class="bi bi-funnel"></i>
+                            <span class="badge bg-primary filter-count d-none" id="filterCount">0</span>
+                        </button>
                     </div>
                 </div>
+
+                <!-- Bộ lọc đang áp dụng -->
+                <div class="active-filter-bar d-none" id="activeFilterBar">
+                    <span>Bộ lọc đang kích hoạt</span>
+                    <span class="d-flex flex-wrap gap-2" id="activeChips"></span>
+                    <button type="button" class="btn-clear-all" title="Xoá tất cả bộ lọc" onclick="clearFilters()">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+                <div class="border-bottom mb-3"></div>
+
+                <!-- Bảng -->
+                <div class="table-wrapper">
+                    <div id="tableLoadingOverlay">
+                        <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Đang tải...</span></div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle" id="scheduleTable" style="min-width: 1080px;">
+                            <thead>
+                            <tr>
+                                <th style="width: 170px;">Mã lịch</th>
+                                <th class="col-tour" style="min-width: 220px;">Tour</th>
+                                <th style="width: 150px;">
+                                    <button type="button" class="sort-btn" data-sort="departureDate" onclick="sortBy('departureDate')">
+                                        Ngày đi / về <i class="bi bi-arrow-down-up sort-icon"></i>
+                                    </button>
+                                </th>
+                                <th style="width: 150px;">
+                                    <button type="button" class="sort-btn" data-sort="availableSlots" onclick="sortBy('availableSlots')">
+                                        Số chỗ <i class="bi bi-arrow-down-up sort-icon"></i>
+                                    </button>
+                                </th>
+                                <th class="text-end" style="width: 140px;">
+                                    <button type="button" class="sort-btn" data-sort="adultPrice" onclick="sortBy('adultPrice')">
+                                        Giá người lớn <i class="bi bi-arrow-down-up sort-icon"></i>
+                                    </button>
+                                </th>
+                                <th class="text-center" style="width: 130px;">Trạng thái</th>
+                                <th class="text-center" style="width: 180px;">Hành động</th>
+                            </tr>
+                            </thead>
+                            <tbody id="scheduleListBody">
+                            <tr><td colspan="7" class="text-center py-4">Đang tải dữ liệu...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Phân trang -->
+                <div class="custom-pagination-wrapper">
+                    <div class="pagination-info" id="paginationInfo">—</div>
+                    <ul class="custom-pagination" id="paginationControls"></ul>
+                </div>
+
             </div>
         </div>
     </section>
 </main>
-<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 
-<!-- ============================================================
-     MODAL: THÊM LỊCH KHỞI HÀNH
-     ============================================================ -->
-<div class="modal fade" id="addTourScheduleModal" tabindex="-1" aria-labelledby="addTourScheduleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+<!-- ======================= MODAL BỘ LỌC ======================= -->
+<div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
-
-            <div class="modal-header" style="background:#4154f1;">
-                <h5 class="modal-title text-white fw-bold" id="addTourScheduleModalLabel">
-                    <i class="bi bi-calendar-plus me-2"></i>Thêm Lịch khởi hành
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="filterModalTitle">Bộ lọc</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
             </div>
-
             <div class="modal-body">
-                <div id="addFormError" class="alert alert-danger d-none small py-2"></div>
-
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Tour <span class="text-danger">*</span></label>
-                    <select class="form-select" id="addTourId">
-                        <option value="">-- Chọn tour --</option>
-                    </select>
-                    <div class="invalid-feedback">Vui lòng chọn tour.</div>
+                <div class="row g-3">
+                    <div class="col-md-12" id="filterTourWrap">
+                        <label class="form-label" for="filterTour">Tour</label>
+                        <select class="form-select" id="filterTour" onchange="onFilterChange()">
+                            <option value="">Tất cả</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="filterStatus">Trạng thái</label>
+                        <select class="form-select" id="filterStatus" onchange="onFilterChange()">
+                            <option value="">Tất cả</option>
+                            <option value="AVAILABLE">Còn chỗ</option>
+                            <option value="FULL">Hết chỗ</option>
+                            <option value="CANCELLED">Đã huỷ</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="filterUpcoming">Thời gian</label>
+                        <select class="form-select" id="filterUpcoming" onchange="onFilterChange()">
+                            <option value="">Tất cả</option>
+                            <option value="true">Sắp khởi hành</option>
+                        </select>
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label" for="filterFromDate">Ngày khởi hành</label>
+                        <div class="input-group">
+                            <input type="date" class="form-control" id="filterFromDate" aria-label="Từ ngày" onchange="onDateRangeChange()">
+                            <span class="input-group-text">–</span>
+                            <input type="date" class="form-control" id="filterToDate" aria-label="Đến ngày" onchange="onDateRangeChange()">
+                        </div>
+                        <div class="small text-danger mt-1 d-none" id="dateRangeError">
+                            <i class="bi bi-exclamation-circle me-1"></i>Từ ngày không được sau đến ngày.
+                        </div>
+                    </div>
                 </div>
+            </div>
+            <div class="modal-footer justify-content-start">
+                <button type="button" class="btn btn-danger" onclick="clearFilters()">Đặt lại bộ lọc</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-                <div class="row g-3 mb-3">
-                    <div class="col-6">
-                        <label class="form-label fw-semibold">Ngày khởi hành <span class="text-danger">*</span></label>
-                        <input type="date" class="form-control" id="addDepartureDate">
-                        <div class="invalid-feedback">Vui lòng chọn ngày khởi hành.</div>
-                    </div>
-                    <div class="col-6">
-                        <label class="form-label fw-semibold">Ngày trở về <span class="text-danger">*</span></label>
-                        <input type="date" class="form-control" id="addReturnDate">
-                        <div class="invalid-feedback">Ngày trở về phải sau ngày khởi hành.</div>
-                    </div>
+<!-- ======================= MODAL THÊM / SỬA ======================= -->
+<div class="modal fade" id="formModal" tabindex="-1" aria-labelledby="formModalTitle" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <form class="modal-content" id="scheduleForm" novalidate>
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="formModalTitle">Thêm lịch khởi hành</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Lịch đã có khách đặt: khoá ngày và giá -->
+                <div class="alert alert-warning py-2 small d-none" id="lockedAlert">
+                    <i class="bi bi-lock me-1"></i>
+                    Lịch đã có <b id="lockedBooked">0</b> chỗ được đặt: không đổi được ngày khởi hành và giá.
+                    Tổng số chỗ không được nhỏ hơn số chỗ đã đặt.
                 </div>
 
                 <div class="row g-3">
-                    <div class="col-6">
-                        <label class="form-label fw-semibold">Số chỗ <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control" id="addAvailableSlots" min="1" placeholder="VD: 30">
-                        <div class="invalid-feedback">Số chỗ phải lớn hơn 0.</div>
+                    <div class="section-label col-12">Tour &amp; thời gian</div>
+
+                    <div class="col-12">
+                        <label class="form-label" for="formTour">Tour <span class="req">*</span></label>
+                        <select class="form-select" id="formTour">
+                            <option value="">Chọn tour</option>
+                        </select>
+                        <div class="invalid-feedback d-block d-none" id="formTourError">Vui lòng chọn tour.</div>
+                        <div class="small mt-1 d-none" id="formTourHidden" style="color: #b26a00;">
+                            <i class="bi bi-eye-slash me-1"></i>Tour đang ẩn: khách chưa thấy lịch này cho tới khi bật tour.
+                        </div>
                     </div>
-                    <div class="col-6">
-                        <label class="form-label fw-semibold">
-                            Giá điều chỉnh
-                            <i class="bi bi-info-circle text-muted ms-1" title="Số dương: phụ thu. Số âm: giảm giá. Để 0 nếu không điều chỉnh."></i>
-                        </label>
-                        <div class="input-group">
-                            <input type="number" class="form-control" id="addPriceAdjustment" placeholder="0">
-                            <span class="input-group-text">đ</span>
+
+                    <div class="col-md-4">
+                        <label class="form-label" for="formDeparture">Ngày khởi hành <span class="req">*</span></label>
+                        <input type="date" class="form-control" id="formDeparture" required>
+                        <div class="invalid-feedback">Ngày khởi hành phải sau hôm nay.</div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Ngày về</label>
+                        <div class="readonly-box" id="formReturn">—</div>
+                        <div class="field-hint" id="formDurationHint">Tự tính theo thời lượng tour</div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="formSlots">Tổng số chỗ <span class="req">*</span></label>
+                        <input type="number" class="form-control" id="formSlots" min="1" max="1000" step="1" required>
+                        <div class="invalid-feedback" id="formSlotsError">Tổng số chỗ từ 1 đến 1000.</div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label class="form-label" for="formTransport">Phương tiện</label>
+                        <input type="text" class="form-control" id="formTransport" maxlength="100" list="transportList"
+                               placeholder="VD: Máy bay Vietnam Airlines">
+                        <datalist id="transportList">
+                            <option value="Máy bay"></option>
+                            <option value="Xe du lịch"></option>
+                            <option value="Tàu hoả"></option>
+                            <option value="Du thuyền"></option>
+                        </datalist>
+                    </div>
+
+                    <div class="section-label col-12 mt-3">Giá</div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Giá người lớn</label>
+                        <div class="readonly-box" id="formAdultPrice">—</div>
+                        <div class="field-hint">Lấy theo giá cơ bản của tour, đổi ở trang sửa tour.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="formChildPrice">Giá trẻ em (5–11 tuổi) <span class="req">*</span></label>
+                        <div class="input-group has-validation">
+                            <input type="text" class="form-control price-input" id="formChildPrice" inputmode="numeric" autocomplete="off" maxlength="19" required>
+                            <span class="input-group-text">₫</span>
+                            <div class="invalid-feedback">Vui lòng nhập giá trẻ em.</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="formToddlerPrice">Giá trẻ nhỏ (2–4 tuổi) <span class="req">*</span></label>
+                        <div class="input-group has-validation">
+                            <input type="text" class="form-control price-input" id="formToddlerPrice" inputmode="numeric" autocomplete="off" maxlength="19" required>
+                            <span class="input-group-text">₫</span>
+                            <div class="invalid-feedback">Vui lòng nhập giá trẻ nhỏ (nhập 0 nếu miễn phí).</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="formSupplement">Phụ thu phòng đơn <span class="req">*</span></label>
+                        <div class="input-group has-validation">
+                            <input type="text" class="form-control price-input" id="formSupplement" inputmode="numeric" autocomplete="off" maxlength="19" required>
+                            <span class="input-group-text">₫</span>
+                            <div class="invalid-feedback">Vui lòng nhập phụ thu (nhập 0 nếu không có).</div>
                         </div>
                     </div>
                 </div>
             </div>
-
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
-                <button type="button" class="btn btn-primary px-4" id="btnConfirmAdd"
-                        onclick="submitAddTourSchedule()" style="background:#4154f1;border:none;">
-                    <i class="bi bi-plus-circle me-1"></i>Thêm lịch
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Huỷ</button>
+                <button type="submit" class="btn btn-primary" id="btnSubmit">
+                    <span class="spinner-border spinner-border-sm me-1 d-none" id="submitSpinner"></span>
+                    <span id="submitText">Lưu</span>
                 </button>
             </div>
-
-        </div>
+        </form>
     </div>
 </div>
 
-
-<!-- ============================================================
-     MODAL: CHỈNH SỬA LỊCH KHỞI HÀNH
-     ============================================================ -->
-<div class="modal fade" id="editTourScheduleModal" tabindex="-1" aria-labelledby="editTourScheduleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+<!-- ======================= MODAL XEM CHI TIẾT ======================= -->
+<div class="modal fade" id="viewModal" tabindex="-1" aria-labelledby="viewModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
-
-            <div class="modal-header" style="background:#4154f1;">
-                <h5 class="modal-title text-white fw-bold" id="editTourScheduleModalLabel">
-                    <i class="bi bi-pencil-square me-2"></i>Chỉnh sửa Lịch <span id="editModalScheduleId"></span>
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="viewModalTitle">Chi tiết lịch khởi hành</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
             </div>
-
-            <div class="modal-body">
-                <div id="editFormError" class="alert alert-danger d-none small py-2"></div>
-                <div id="editFormLoading" class="text-center py-4">
-                    <div class="spinner-border text-primary" role="status"></div>
-                    <div class="mt-2 text-muted small">Đang tải dữ liệu...</div>
-                </div>
-
-                <div id="editFormBody" style="display:none;">
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Tour</label>
-                        <input type="text" class="form-control" id="editTourName" disabled>
-                        <input type="hidden" id="editScheduleId">
-                        <input type="hidden" id="editTourId">
-                    </div>
-
-                    <div class="row g-3 mb-3">
-                        <div class="col-6">
-                            <label class="form-label fw-semibold">Ngày khởi hành <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control" id="editDepartureDate">
-                            <div class="invalid-feedback">Vui lòng chọn ngày khởi hành.</div>
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label fw-semibold">Ngày trở về <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control" id="editReturnDate">
-                            <div class="invalid-feedback">Ngày trở về phải sau ngày khởi hành.</div>
-                        </div>
-                    </div>
-
-                    <div class="row g-3">
-                        <div class="col-6">
-                            <label class="form-label fw-semibold">Số chỗ <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="editAvailableSlots" min="1">
-                            <div class="invalid-feedback">Số chỗ phải lớn hơn 0.</div>
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label fw-semibold">Giá điều chỉnh</label>
-                            <div class="input-group">
-                                <input type="number" class="form-control" id="editPriceAdjustment">
-                                <span class="input-group-text">đ</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="modal-body" id="viewBody">
+                <div class="text-center py-4"><div class="spinner-border text-primary"></div></div>
             </div>
-
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
-                <button type="button" class="btn btn-primary px-4" id="btnConfirmEdit"
-                        onclick="submitEditTourSchedule()" style="background:#4154f1;border:none;">
-                    <i class="bi bi-save me-1"></i>Lưu thay đổi
-                </button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-warning" id="viewEditBtn"><i class="bi bi-pencil-square me-1"></i>Sửa</button>
             </div>
-
         </div>
     </div>
 </div>
 
-<!-- ============================================================
-     MODAL: XEM CHI TIẾT LỊCH KHỞI HÀNH
-     ============================================================ -->
-<div class="modal fade" id="viewTourScheduleModal" tabindex="-1" aria-labelledby="viewTourScheduleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-
-            <div class="modal-header" style="background:#4154f1;">
-                <h5 class="modal-title text-white fw-bold" id="viewTourScheduleModalLabel">
-                    <i class="bi bi-calendar-check me-2"></i>Chi tiết Lịch khởi hành <span id="viewModalScheduleId"></span>
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-
-            <div class="modal-body">
-                <div id="viewFormLoading" class="text-center py-4">
-                    <div class="spinner-border text-primary" role="status"></div>
-                    <div class="mt-2 text-muted small">Đang tải dữ liệu...</div>
-                </div>
-
-                <div id="viewFormBody" style="display:none;">
-
-                    <!-- Tour info -->
-                    <div class="row g-3 mb-3">
-                        <div class="col-8">
-                            <div class="text-muted small mb-1"><i class="bi bi-map me-1"></i>Tên tour</div>
-                            <div class="fw-semibold" id="viewTourName"></div>
-                        </div>
-                        <div class="col-4">
-                            <div class="text-muted small mb-1"><i class="bi bi-upc me-1"></i>Mã tour</div>
-                            <code id="viewTourCode"></code>
-                        </div>
-                    </div>
-
-                    <!-- Dates -->
-                    <div class="row g-3 mb-3">
-                        <div class="col-6">
-                            <div class="text-muted small mb-1"><i class="bi bi-calendar-event me-1"></i>Ngày khởi hành</div>
-                            <div class="fw-semibold" id="viewDepartureDate"></div>
-                        </div>
-                        <div class="col-6">
-                            <div class="text-muted small mb-1"><i class="bi bi-calendar-check me-1"></i>Ngày trở về</div>
-                            <div class="fw-semibold" id="viewReturnDate"></div>
-                        </div>
-                    </div>
-
-                    <!-- Slots + Price -->
-                    <div class="row g-3 mb-3">
-                        <div class="col-6">
-                            <div class="text-muted small mb-1"><i class="bi bi-people me-1"></i>Số chỗ</div>
-                            <div class="fw-semibold" id="viewSlots"></div>
-                        </div>
-                        <div class="col-6">
-                            <div class="text-muted small mb-1"><i class="bi bi-cash-stack me-1"></i>Giá điều chỉnh</div>
-                            <div class="fw-semibold" id="viewPriceAdjustment"></div>
-                        </div>
-                    </div>
-
-                    <!-- Status -->
-                    <div class="mb-3">
-                        <div class="text-muted small mb-1"><i class="bi bi-activity me-1"></i>Trạng thái</div>
-                        <div id="viewStatus"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-            </div>
-
-        </div>
-    </div>
-</div>
+<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/scripts/choices.min.js"></script>
 <script src="assets/js/main.js"></script>
 
 <script>
-    // ============================================================
-    //  STATE
-    // ============================================================
-    let currentPage   = 0;   // 0-based (Spring Boot)
+    /* ============================================================
+       STATE
+       ============================================================ */
+    const API      = '/api/admin/schedules';
+    const TOUR_API = '/api/admin/tours';
+
+    // Mở từ trang tour: tour-schedules.html?tourId=12 → chỉ xem / thêm lịch của tour đó
+    const lockedTourId = (() => {
+        const v = parseInt(new URLSearchParams(location.search).get('tourId'), 10);
+        return Number.isInteger(v) && v > 0 ? v : null;
+    })();
+
+    let currentPage   = 0;
     let perPage       = 10;
-    let sortCol       = '';
-    let sortAsc       = false;
     let searchKeyword = '';
     let searchTimer   = null;
-    let selectedIds   = new Set();
-    const rowStatusMap = new Map();
+    let sortCol    = 'departureDate';   // mặc định: lịch khởi hành sớm nhất lên đầu
+    let sortAsc    = true;
+    let userSorted = false;
 
-    let totalPages    = 0;
-    let totalElements = 0;
+    let editingId  = null;   // null = đang thêm, số = đang sửa
+    let formTour   = null;   // tour đang chọn trong form: { tourId, tourCode, tourName, duration, basePrice }
+    const tourCache = {};    // tourId → chi tiết tour (đỡ gọi API lại)
 
-    const swalWithBootstrapButtons = Swal.mixin({
-        customClass: {
-            confirmButton: 'btn btn-danger mx-2 px-4 py-2',
-            cancelButton:  'btn btn-secondary mx-2 px-4 py-2',
-            title:         'swal-custom-title',
-            htmlContainer: 'swal-custom-html'
-        },
-        buttonsStyling: false
-    });
+    function $(id) { return document.getElementById(id); }
 
-    // ============================================================
-    //  BOOT
-    // ============================================================
-    document.addEventListener('DOMContentLoaded', () => {
-        // Đọc tourId từ URL (khi được link từ tours.html)
-        const urlParams = new URLSearchParams(window.location.search);
-        const tourIdFromUrl = urlParams.get('tourId');
-        if (tourIdFromUrl) {
-            // Sau khi load xong danh sách tour vào select mới set value
-            loadTourOptions().then(() => {
-                document.getElementById('filterTour').value = tourIdFromUrl;
-                checkFilterState();
-                fetchPage();
-            });
-        } else {
-            loadTourOptions().then(() => fetchPage());
+    // Bộ lọc trong modal: id ô → nhãn chip → tham số gửi API (khớp ScheduleFilterRequest)
+    const FILTERS = [
+        { id: 'filterTour',     label: 'Tour',       param: 'tourId'       },
+        { id: 'filterStatus',   label: 'Trạng thái', param: 'status'       },
+        { id: 'filterUpcoming', label: 'Thời gian',  param: 'upcomingOnly' },
+        { id: 'filterFromDate', label: 'Từ ngày',    param: 'fromDate', format: 'date' },
+        { id: 'filterToDate',   label: 'Đến ngày',   param: 'toDate',   format: 'date' }
+    ];
+
+    const STATUS_META = {
+        AVAILABLE: { text: 'Còn chỗ',       cls: 'st-available' },
+        FULL:      { text: 'Hết chỗ',       cls: 'st-full' },
+        CANCELLED: { text: 'Đã huỷ',        cls: 'st-cancelled' },
+        DEPARTED:  { text: 'Đã khởi hành',  cls: 'st-departed' }
+    };
+
+    /* ============================================================
+       TIỆN ÍCH
+       ============================================================ */
+    function escapeHtml(str) {
+        return String(str ?? '').replace(/[&<>"']/g, c =>
+            ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    const moneyFmt = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 });
+    function fmtMoney(v) { return v == null ? '—' : moneyFmt.format(v); }
+
+    /** "3500000" → "3.500.000" */
+    function formatThousands(digits) { return String(digits).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+    function getDigits(id) { return $(id).value.replace(/\D/g, ''); }
+
+    /** Date → "2026-11-08" theo giờ máy (không dùng toISOString vì lệch múi giờ UTC) */
+    function toIsoDate(d) {
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+    function parseIsoDate(s) { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); }
+    const todayIso = () => toIsoDate(new Date());
+    const tomorrowIso = () => { const d = new Date(); d.setDate(d.getDate() + 1); return toIsoDate(d); };
+
+    /** "2026-11-13" → "13/11/2026" */
+    function fmtDate(s) { if (!s) return '—'; const [y, m, d] = s.split('-'); return `${d}/${m}/${y}`; }
+
+    const WEEKDAYS = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+    function weekday(s) { return s ? WEEKDAYS[parseIsoDate(s).getDay()] : ''; }
+
+    /** Giống resolveReturnDate ở BE: "3N2Đ" → ngày đi + 2 */
+    function calcReturnDate(departure, duration) {
+        if (!departure) return null;
+        const m = /^\s*(\d+)\s*N/i.exec(String(duration || ''));
+        const days = m ? Math.max(parseInt(m[1], 10), 1) : 1;
+        const d = parseIsoDate(departure);
+        d.setDate(d.getDate() + days - 1);
+        return toIsoDate(d);
+    }
+
+    /** Lịch đã khởi hành: ngày đi ≤ hôm nay (khớp điều kiện isAfter(now) ở BE) */
+    function isDeparted(s) { return s.departureDate <= todayIso(); }
+
+    function displayStatus(s) {
+        if (s.status === 'CANCELLED') return STATUS_META.CANCELLED;
+        if (isDeparted(s)) return STATUS_META.DEPARTED;
+        return STATUS_META[s.status] || { text: s.status, cls: 'st-departed' };
+    }
+
+    function removeAccents(text) {
+        return String(text || '').replace(/đ/g, 'd').replace(/Đ/g, 'D')
+            .normalize('NFD').replace(/\p{M}+/gu, '').toLowerCase();
+    }
+
+    async function readJson(res) { try { return await res.json(); } catch (_) { return null; } }
+
+    function errorMessage(json, fallback) {
+        if (json && json.errors && json.errors.length) return json.errors.join(' • ');
+        return (json && json.message) || fallback;
+    }
+
+    const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 2000, timerProgressBar: true });
+    function showToast(message, icon = 'success') { Toast.fire({ icon, title: message }); }
+    function showError(title, text) { Swal.fire({ icon: 'error', title, text }); }
+
+    function showLoading(show) { $('tableLoadingOverlay').classList.toggle('show', show); }
+
+    /** fetch kèm token; 401 → đăng xuất */
+    async function api(url, options = {}) {
+        const headers = { ...AdminAuth.authHeaders(), ...(options.body ? { 'Content-Type': 'application/json' } : {}) };
+        const res = await fetch(url, { ...options, headers });
+        if (res.status === 401) { AdminAuth.logout(); throw new Error('UNAUTHORIZED'); }
+        return { res, json: await readJson(res) };
+    }
+
+    /* ============================================================
+       Ô CHỌN TOUR CÓ TÌM KIẾM (Choices.js)
+       ============================================================ */
+    const choicesMap = {};
+
+    function makeSearchableSelect(id, extra = {}) {
+        choicesMap[id] = new Choices($(id), {
+            searchPlaceholderValue: 'Gõ mã hoặc tên tour...',
+            noResultsText: 'Không tìm thấy tour',
+            noChoicesText: 'Không có tour',
+            itemSelectText: '',
+            removeItemButton: true,
+            shouldSort: false,
+            searchResultLimit: 50,
+            searchFields: ['label', 'customProperties'],
+            fuseOptions: { threshold: 0.3 },
+            position: 'bottom',            // luôn xổ xuống (mặc định 'auto' tự lật lên khi thiếu chỗ phía dưới)
+            ...extra
+        });
+    }
+
+    function selectedLabel(id) {
+        if (choicesMap[id]) { const item = choicesMap[id].getValue(); return item ? item.label : ''; }
+        const sel = $(id);
+        return sel.options[sel.selectedIndex].text;
+    }
+
+    function setSelect(id, value) {
+        if (choicesMap[id]) {
+            choicesMap[id].removeActiveItems();
+            choicesMap[id].setChoiceByValue(String(value));
         }
-    });
+        $(id).value = String(value);
+    }
 
-    // ============================================================
-    //  LOAD TOUR OPTIONS cho filter dropdown
-    //  Gọi /api/admin/tours để lấy danh sách tên tour (lấy page lớn, ko cần phân trang)
-    // ============================================================
+    const tourActive = {};   // tourId → true/false: báo "tour đang ẩn" khi chọn trong form
+
+    /** Danh sách tour cho ô lọc + ô chọn trong form: lấy tất cả, tour đang kích hoạt lên trước */
     async function loadTourOptions() {
-        const token = localStorage.getItem('token');
         try {
-            const res = await fetch('/api/admin/tours?page=0&size=200&sortBy=tourName&sortDir=asc', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const result = await res.json();
-            if (res.ok && result.success) {
-                const select = document.getElementById('filterTour');
-                // Xóa sạch option cũ (trừ "Tất cả")
-                while (select.options.length > 1) select.remove(1);
+            const { res, json } = await api(`${TOUR_API}?page=0&size=100&sortBy=tourName&sortDir=asc`);
+            if (res.ok && json && json.success) {
+                const tours = json.data.content;
+                tours.forEach(t => tourActive[t.tourId] = t.isActive);
 
-                const tours = result.data.content || [];
-                tours.forEach(tour => {
-                    const opt = document.createElement('option');
-                    opt.value = tour.tourId;
-                    opt.textContent = `${tour.tourCode} — ${tour.tourName}`;
-                    select.appendChild(opt);
-                });
+                const option = t =>
+                    `<option value="${t.tourId}" data-custom-properties="${escapeHtml(removeAccents(t.tourCode + ' ' + t.tourName))}">`
+                    + `${escapeHtml(t.tourCode)} · ${escapeHtml(t.tourName)}</option>`;
+                const group = (label, list) => list.length ? `<optgroup label="${label}">${list.map(option).join('')}</optgroup>` : '';
+                const html = group('Đang kích hoạt', tours.filter(t => t.isActive))
+                    + group('Đang ẩn', tours.filter(t => !t.isActive));
+
+                $('filterTour').insertAdjacentHTML('beforeend', html);
+                $('formTour').insertAdjacentHTML('beforeend', html);
             }
-        } catch (err) {
-            console.error('Không thể tải danh sách tour cho filter:', err);
+        } catch (e) {
+            if (e.message !== 'UNAUTHORIZED') console.error('Không tải được danh sách tour', e);
+        } finally {
+            // Khởi tạo SAU khi có option: Choices đọc option lúc khởi tạo
+            makeSearchableSelect('filterTour');
+            makeSearchableSelect('formTour');
+            $('formTour').addEventListener('change', onFormTourChange);
         }
     }
 
-    // ============================================================
-    //  FETCH PAGE (server-side)
-    // ============================================================
-    async function fetchPage() {
-        showLoading(true);
-        const token = localStorage.getItem('token');
+    /** Chi tiết tour (cần duration + basePrice để tính ngày về, giá người lớn) */
+    async function getTour(tourId) {
+        if (tourCache[tourId]) return tourCache[tourId];
+        const { res, json } = await api(`${TOUR_API}/${tourId}`);
+        if (!res.ok || !json || !json.success) throw new Error(errorMessage(json, 'Không tải được thông tin tour.'));
+        const t = json.data;
+        return (tourCache[tourId] = {
+            tourId: t.tourId, tourCode: t.tourCode, tourName: t.tourName,
+            duration: t.duration, basePrice: t.basePrice
+        });
+    }
 
-        const params = new URLSearchParams();
-        params.set('page',    currentPage);
-        params.set('size',    perPage);
-        params.set('sortBy',  sortCol);
-        params.set('sortDir', sortAsc ? 'asc' : 'desc');
+    /* ============================================================
+       THẺ TOUR KHI MỞ TỪ TRANG TOUR (?tourId=)
+       ============================================================ */
+    async function initLockedTour() {
+        $('filterTourWrap').classList.add('d-none');                 // đã cố định tour → ẩn ô lọc tour
+        document.querySelectorAll('.col-tour').forEach(th => th.textContent = 'Tour');
 
-        // Filter tour
-        const tourVal = document.getElementById('filterTour').value;
-        if (tourVal) params.set('tourId', tourVal);
-
-        // Filter trạng thái
-        const statusVal = document.getElementById('filterStatus').value;
-        if (statusVal) params.set('status', statusVal);
-
-        // Filter tháng — BE nhận format 'YYYY-MM'
-        const monthVal = document.getElementById('filterMonth').value;
-        if (monthVal) params.set('month', monthVal);
-
-        // Từ khóa
-        if (searchKeyword) params.set('keyword', searchKeyword);
+        $('breadcrumb').innerHTML = `
+            <li class="breadcrumb-item"><a href="index.html">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a href="tours.html">Tour</a></li>
+            <li class="breadcrumb-item active" id="bcTour">Lịch khởi hành</li>`;
 
         try {
-            const response = await fetch(`/api/admin/tour-schedules?${params.toString()}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const result = await response.json();
+            const t = await getTour(lockedTourId);
+            $('tbName').textContent     = t.tourName;
+            $('tbCode').textContent     = t.tourCode;
+            $('tbDuration').textContent = t.duration || '—';
+            $('tbPrice').textContent    = fmtMoney(t.basePrice);
+            $('bcTour').textContent     = `${t.tourCode} · Lịch khởi hành`;
+            $('tourBanner').classList.remove('d-none');
+        } catch (e) {
+            if (e.message === 'UNAUTHORIZED') return;
+            Swal.fire({ icon: 'error', title: 'Không tìm thấy tour', text: e.message, confirmButtonText: 'Về danh sách tour' })
+                .then(() => location.href = 'tours.html');
+        }
+    }
 
-            if (response.ok && result.success) {
-                const data     = result.data;
-                const pageInfo = data.page;             // Spring Boot 3.x
-                totalPages    = pageInfo.totalPages;
-                totalElements = pageInfo.totalElements;
+    /* ============================================================
+       1. DANH SÁCH: GET /api/admin/schedules
+       ============================================================ */
+    function filterValue(f) { return $(f.id).value; }
+    function activeFilters() { return FILTERS.filter(f => filterValue(f) !== ''); }
+    function isFiltering() { return searchKeyword !== '' || activeFilters().length > 0; }
 
-                // Tự lùi trang nếu trang hiện tại trống
-                if (data.content.length === 0 && currentPage > 0) {
-                    currentPage--;
-                    fetchPage();
-                    return;
-                }
+    async function fetchSchedules() {
+        showLoading(true);
+        updateFilterUI();
 
-                renderRows(data.content);
-                renderPagination(pageInfo.totalElements, pageInfo.totalPages, pageInfo.number, pageInfo.size);
+        const params = new URLSearchParams({
+            page: currentPage, size: perPage,
+            sortBy: sortCol, sortDir: sortAsc ? 'asc' : 'desc'
+        });
+        if (searchKeyword) params.set('keyword', searchKeyword);
+        FILTERS.forEach(f => { const v = filterValue(f); if (v !== '') params.set(f.param, v); });
+        if (lockedTourId) params.set('tourId', lockedTourId);
+
+        try {
+            const { res, json } = await api(`${API}?${params}`);
+
+            if (res.ok && json && json.success) {
+                const { content, page } = json.data;
+                if (content.length === 0 && currentPage > 0) { currentPage--; return fetchSchedules(); }
+                renderRows(content);
+                updateSortUI();
+                renderPagination(page.totalElements, page.totalPages, page.number, page.size);
             } else {
-                showTableError('Không thể tải dữ liệu: ' + (result.message || ''));
+                showTableError(errorMessage(json, 'Không tải được danh sách lịch khởi hành.'));
             }
-        } catch (err) {
-            console.error(err);
-            showTableError('Lỗi kết nối đến máy chủ!');
+        } catch (e) {
+            if (e.message === 'UNAUTHORIZED') return;
+            console.error(e);
+            showTableError('Không kết nối được tới máy chủ.');
         } finally {
             showLoading(false);
         }
     }
 
-    // ============================================================
-    //  RENDER ROWS
-    // ============================================================
-    function renderRows(schedules) {
-        const tbody = document.getElementById('scheduleListBody');
-        tbody.innerHTML = '';
-        document.getElementById('checkAll').checked = false;
+    function renderRows(rows) {
+        const tbody = $('scheduleListBody');
 
-        if (!schedules || schedules.length === 0) {
-            const isFiltering = searchKeyword ||
-                document.getElementById('filterTour').value   !== '' ||
-                document.getElementById('filterStatus').value !== '' ||
-                document.getElementById('filterMonth').value  !== '';
-
-            const emptyMsg = isFiltering ? 'Không tìm thấy kết quả nào!' : 'Chưa có lịch khởi hành nào';
-            const subMsg   = isFiltering ? 'Vui lòng thử lại với bộ lọc khác.' : 'Bấm "Thêm Lịch mới" để tạo lịch đầu tiên.';
-
+        if (!rows.length) {
             tbody.innerHTML = `
-        <tr>
-          <td colspan="9" class="text-center py-5" style="background-color:#f8f9fa;">
-            <div class="py-4">
-              <i class="bi bi-calendar-x d-block mb-3" style="font-size:3rem;color:#ced4da;"></i>
-              <h6 class="fw-bold text-secondary mb-1">${emptyMsg}</h6>
-              <span class="text-muted small">${subMsg}</span>
-            </div>
-          </td>
-        </tr>`;
-            updateSortUI();
+                <tr><td colspan="7" class="text-center text-muted py-5">
+                    <i class="bi bi-calendar-x fs-3 d-block mb-2 opacity-50"></i>
+                    ${isFiltering() ? 'Không có lịch nào khớp bộ lọc.' : 'Chưa có lịch khởi hành. Bấm "Thêm lịch" để tạo.'}
+                </td></tr>`;
             return;
         }
 
-        schedules.forEach(s => {
-            const isCancelled = s.status === 'CANCELLED';
-            const isFull      = s.status === 'FULL';
-            const isAvailable = s.status === 'AVAILABLE';
+        tbody.innerHTML = rows.map(s => {
+            const st        = displayStatus(s);
+            const departed  = isDeparted(s);
+            const cancelled = s.status === 'CANCELLED';
+            const booked    = s.bookedSlots ?? (s.totalSlots - s.availableSlots);
+            const percent   = s.totalSlots ? Math.round(booked * 100 / s.totalSlots) : 0;
+            const barCls    = percent >= 100 ? 'is-full' : percent >= 80 ? 'is-high' : '';
 
-            // Số chỗ
-            const slotFull = s.bookedSlots >= s.availableSlots;
-            const slotHtml = `<span class="slot-text ${slotFull ? 'slot-full' : 'slot-normal'}">${s.bookedSlots} / ${s.availableSlots}</span>`;
-
-            // Giá điều chỉnh
-            const adj = s.priceAdjustment;
-            let priceHtml;
-            if (adj > 0)      priceHtml = `<span class="price-plus">+${fmt(adj)}</span>`;
-            else if (adj < 0) priceHtml = `<span class="price-minus">${fmt(adj)}</span>`;
-            else              priceHtml = `<span class="price-zero">0 đ</span>`;
-
-            // Trạng thái badge
-            const statusMap = {
-                AVAILABLE: `<span class="badge badge-available"><i class="bi bi-check-circle me-1"></i>Mở bán</span>`,
-                FULL:      `<span class="badge badge-full"><i class="bi bi-exclamation-octagon me-1"></i>Hết chỗ</span>`,
-                CANCELLED: `<span class="badge badge-cancelled"><i class="bi bi-x-circle me-1"></i>Đã hủy</span>`,
-            };
-            const statusBadge = statusMap[s.status] || s.status;
-
-            const escapedName = (s.tourName || '').replace(/'/g, "\\'");
-
-            // ─────────────────────────────────────────────────
-            //  ACTIONS theo trạng thái:
-            //    AVAILABLE → Xem | Chỉnh sửa | dropdown: Hủy lịch
-            //    FULL      → Xem | Chỉnh sửa | dropdown: Hủy lịch
-            //    CANCELLED → Xem | Khôi phục | dropdown: Xóa cứng
-            // ─────────────────────────────────────────────────
-            let actionsHtml = '';
-
-            if (isAvailable || isFull) {
-                // AVAILABLE / FULL: Xem | Chỉnh sửa | Hủy lịch
-                actionsHtml = `
-          <!-- Desktop: 3 button riêng -->
-          <div class="d-none d-md-flex gap-1 justify-content-center align-items-center">
-            <button class="btn btn-sm btn-outline-info" title="Xem chi tiết"
-                    onclick="viewSchedule(${s.tourScheduleId})">
-              <i class="bi bi-eye"></i>
-            </button>
-            <button class="btn btn-sm btn-outline-dark" title="Chỉnh sửa"
-                    onclick="openEditModal(${s.tourScheduleId})">
-              <i class="bi bi-pencil-square"></i>
-            </button>
-            <button class="btn btn-sm btn-outline-danger" title="Hủy lịch"
-                    onclick="cancelSchedule(${s.tourScheduleId}, '${escapedName}')">
-              <i class="bi bi-x-circle"></i>
-            </button>
-          </div>
-          <!-- Mobile: dropdown 3 chấm -->
-          <div class="d-flex d-md-none justify-content-center">
-            <div class="dropdown">
-              <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
-                <i class="bi bi-three-dots-vertical"></i>
-              </button>
-              <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                <li><a class="dropdown-item" href="#" onclick="viewSchedule(${s.tourScheduleId})"><i class="bi bi-eye me-2 text-info"></i>Xem chi tiết</a></li>
-                <li><a class="dropdown-item" href="#" onclick="openEditModal(${s.tourScheduleId})"><i class="bi bi-pencil-square me-2 text-dark"></i>Chỉnh sửa</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item text-danger" href="#" onclick="cancelSchedule(${s.tourScheduleId}, '${escapedName}')"><i class="bi bi-x-circle me-2"></i>Hủy lịch</a></li>
-              </ul>
-            </div>
-          </div>`;
-            } else {
-                // CANCELLED: Xem | Khôi phục | Xóa vĩnh viễn
-                actionsHtml = `
-          <!-- Desktop: 3 button riêng -->
-          <div class="d-none d-md-flex gap-1 justify-content-center align-items-center">
-            <button class="btn btn-sm btn-outline-info" title="Xem chi tiết"
-                    onclick="viewSchedule(${s.tourScheduleId})">
-              <i class="bi bi-eye"></i>
-            </button>
-            <button class="btn btn-sm btn-outline-success" title="Khôi phục lịch"
-                    onclick="restoreSchedule(${s.tourScheduleId}, '${escapedName}')">
-              <i class="bi bi-arrow-counterclockwise"></i>
-            </button>
-            <button class="btn btn-sm btn-outline-danger" title="Xóa vĩnh viễn"
-                    onclick="hardDeleteSchedule(${s.tourScheduleId}, '${escapedName}')">
-              <i class="bi bi-trash"></i>
-            </button>
-          </div>
-          <!-- Mobile: dropdown 3 chấm -->
-          <div class="d-flex d-md-none justify-content-center">
-            <div class="dropdown">
-              <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
-                <i class="bi bi-three-dots-vertical"></i>
-              </button>
-              <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                <li><a class="dropdown-item" href="#" onclick="viewSchedule(${s.tourScheduleId})"><i class="bi bi-eye me-2 text-info"></i>Xem chi tiết</a></li>
-                <li><a class="dropdown-item text-success" href="#" onclick="restoreSchedule(${s.tourScheduleId}, '${escapedName}')"><i class="bi bi-arrow-counterclockwise me-2"></i>Khôi phục lịch</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item text-danger" href="#" onclick="hardDeleteSchedule(${s.tourScheduleId}, '${escapedName}')"><i class="bi bi-trash me-2"></i>Xóa vĩnh viễn</a></li>
-              </ul>
-            </div>
-          </div>`;
+            // Nút huỷ / mở lại: lịch đã khởi hành thì không hiện
+            let toggleBtn = '';
+            if (!departed && !cancelled) {
+                toggleBtn = `<button class="btn btn-sm btn-outline-secondary" title="Huỷ lịch"
+                            onclick="cancelSchedule(${s.scheduleId}, this)" data-code="${escapeHtml(s.scheduleCode)}">
+                            <i class="bi bi-x-circle"></i></button>`;
+            } else if (!departed && cancelled) {
+                toggleBtn = `<button class="btn btn-sm btn-outline-success" title="Mở lại lịch"
+                            onclick="reopenSchedule(${s.scheduleId}, this)">
+                            <i class="bi bi-arrow-counterclockwise"></i></button>`;
             }
 
-            const tr = document.createElement('tr');
-            if (isCancelled) tr.className = 'row-cancelled';
-            tr.dataset.id = s.tourScheduleId;
-            tr.dataset.status = s.status;
-            rowStatusMap.set(s.tourScheduleId, s.status);
-            tr.innerHTML = `
-        <td><input class="form-check-input row-check" type="checkbox" value="${s.tourScheduleId}"
-            ${selectedIds.has(s.tourScheduleId) ? 'checked' : ''}
-            onchange="onRowCheck(this, ${s.tourScheduleId})"></td>
-        <td><span class="text-muted small">${s.tourScheduleId}</span></td>
-        <td>
-          <div class="fw-semibold text-dark mb-1">${s.tourName}</div>
-          <code class="text-secondary">${s.tourCode}</code>
-        </td>
-        <td><span class="text-nowrap">${fmtDate(s.departureDate)}</span></td>
-        <td><span class="text-nowrap text-muted">${fmtDate(s.returnDate)}</span></td>
-        <td>${slotHtml}</td>
-        <td class="text-end">${priceHtml}</td>
-        <td>${statusBadge}</td>
-        <td class="text-center">${actionsHtml}</td>`;
-            tbody.appendChild(tr);
-        });
-
-        updateSortUI();
+            return `
+            <tr>
+                <td><span class="code-text">${escapeHtml(s.scheduleCode)}</span></td>
+                <td>
+                    <div class="tour-name" title="${escapeHtml(s.tourName)}">${escapeHtml(s.tourName)}</div>
+                    <div class="date-sub mt-1">${escapeHtml(s.tourCode)} · ${escapeHtml(s.duration || '')}</div>
+                </td>
+                <td>
+                    <div class="date-main">${weekday(s.departureDate)}, ${fmtDate(s.departureDate)}</div>
+                    <div class="date-sub">Về: ${weekday(s.returnDate)}, ${fmtDate(s.returnDate)}</div>
+                </td>
+                <td class="slot-cell">
+                    <div class="slot-text"><b>${booked}</b>/${s.totalSlots} đã đặt</div>
+                    <div class="progress slot-bar ${barCls}"><div class="progress-bar" style="width: ${Math.min(percent, 100)}%"></div></div>
+                    <div class="date-sub">Còn trống ${s.availableSlots} chỗ</div>
+                </td>
+                <td class="text-end"><span class="price-text">${fmtMoney(s.adultPrice)}</span></td>
+                <td class="text-center"><span class="st-badge ${st.cls}">${st.text}</span></td>
+                <td class="text-center">
+                    <div class="d-flex justify-content-center gap-1">
+                        <button class="btn btn-sm btn-outline-info" title="Xem chi tiết" onclick="openViewModal(${s.scheduleId})">
+                            <i class="bi bi-eye"></i></button>
+                        <button class="btn btn-sm btn-outline-warning" ${departed ? 'disabled' : ''}
+                                title="${departed ? 'Lịch đã khởi hành, không sửa được' : 'Sửa'}"
+                                onclick="openEditModal(${s.scheduleId})">
+                            <i class="bi bi-pencil-square"></i></button>
+                        ${toggleBtn}
+                        <button class="btn btn-sm btn-outline-danger" ${booked > 0 ? 'disabled' : ''}
+                                title="${booked > 0 ? 'Đã có khách đặt, không xoá được' : 'Xoá'}"
+                                onclick="deleteSchedule(${s.scheduleId}, this)" data-code="${escapeHtml(s.scheduleCode)}">
+                            <i class="bi bi-trash"></i></button>
+                    </div>
+                </td>
+            </tr>`;
+        }).join('');
     }
 
-    // ============================================================
-    //  PAGINATION
-    // ============================================================
-    function renderPagination(total, totalPgs, pageIndex, size) {
+    function showTableError(msg) {
+        $('scheduleListBody').innerHTML =
+            `<tr><td colspan="7" class="text-center text-danger py-4">
+                <i class="bi bi-exclamation-triangle me-2"></i>${escapeHtml(msg)}
+             </td></tr>`;
+        $('paginationInfo').textContent = '—';
+        $('paginationControls').innerHTML = '';
+    }
+
+    /* ============================================================
+       2. THÊM / SỬA: POST /api/admin/schedules · PUT /api/admin/schedules/{id}
+       ============================================================ */
+    const PRICE_FIELDS = ['formChildPrice', 'formToddlerPrice', 'formSupplement'];
+
+    function resetForm() {
+        // KHÔNG dùng form.reset(): Choices.js nghe sự kiện reset của form và xoá sạch danh sách tour
+        ['formDeparture', 'formSlots', 'formTransport', ...PRICE_FIELDS].forEach(id => $(id).value = '');
+        $('formTourHidden').classList.add('d-none');
+        $('scheduleForm').querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        $('formTourError').classList.add('d-none');
+        $('formTour').closest('.col-12').querySelector('.choices')?.classList.remove('is-invalid-choices');
+        $('lockedAlert').classList.add('d-none');
+        ['formDeparture', 'formSlots', 'formTransport', ...PRICE_FIELDS].forEach(id => $(id).disabled = false);
+        $('formDeparture').min = tomorrowIso();
+        $('formSlots').min = 1;
+        $('formAdultPrice').textContent = '—';
+        $('formReturn').textContent = '—';
+        $('formDurationHint').textContent = 'Tự tính theo thời lượng tour';
+        formTour = null;
+    }
+
+    async function openCreateModal() {
+        editingId = null;
+        resetForm();
+        $('formModalTitle').textContent = 'Thêm lịch khởi hành';
+        $('submitText').textContent = 'Tạo lịch';
+        PRICE_FIELDS.forEach(id => $(id).value = '0');
+
+        const tourChoices = choicesMap.formTour;
+        if (lockedTourId) {
+            setSelect('formTour', lockedTourId);
+            tourChoices?.disable();
+            await applyFormTour(lockedTourId);
+        } else {
+            setSelect('formTour', '');
+            tourChoices?.enable();
+        }
+        bootstrap.Modal.getOrCreateInstance($('formModal')).show();
+    }
+
+    async function openEditModal(id) {
+        try {
+            const { res, json } = await api(`${API}/${id}`);   // lấy bản mới nhất, tránh dữ liệu cũ trong bảng
+            if (!res.ok || !json || !json.success) return showError('Không mở được lịch', errorMessage(json, 'Vui lòng thử lại.'));
+            const s = json.data;
+
+            editingId = id;
+            resetForm();
+            $('formModalTitle').textContent = `Sửa lịch ${s.scheduleCode}`;
+            $('submitText').textContent = 'Lưu thay đổi';
+
+            // Lịch không đổi tour được (BE bỏ qua tourId khi sửa)
+            setSelect('formTour', s.tourId);
+            choicesMap.formTour?.disable();
+            formTour = { tourId: s.tourId, tourCode: s.tourCode, tourName: s.tourName, duration: s.duration, basePrice: s.adultPrice };
+
+            $('formDeparture').value = s.departureDate;
+            $('formDeparture').min = s.departureDate < tomorrowIso() ? s.departureDate : tomorrowIso();
+            $('formSlots').value = s.totalSlots;
+            $('formTransport').value = s.transport || '';
+            $('formChildPrice').value   = formatThousands(Math.round(s.childPrice ?? 0));
+            $('formToddlerPrice').value = formatThousands(Math.round(s.toddlerPrice ?? 0));
+            $('formSupplement').value   = formatThousands(Math.round(s.singleRoomSupplement ?? 0));
+            $('formAdultPrice').textContent = fmtMoney(s.adultPrice);
+            updateReturnPreview();
+
+            // Đã có khách giữ chỗ → khoá ngày + giá (BE cũng chặn, đây là để admin biết trước)
+            const booked = s.bookedSlots ?? (s.totalSlots - s.availableSlots);
+            if (booked > 0) {
+                $('lockedBooked').textContent = booked;
+                $('lockedAlert').classList.remove('d-none');
+                ['formDeparture', ...PRICE_FIELDS].forEach(fid => $(fid).disabled = true);
+                $('formSlots').min = booked;
+            }
+
+            bootstrap.Modal.getOrCreateInstance($('viewModal')).hide();
+            bootstrap.Modal.getOrCreateInstance($('formModal')).show();
+        } catch (e) {
+            if (e.message !== 'UNAUTHORIZED') showError('Không mở được lịch', 'Không kết nối được tới máy chủ.');
+        }
+    }
+
+    async function onFormTourChange() {
+        if (editingId) return;
+        const id = $('formTour').value;
+        $('formTourError').classList.add('d-none');
+        $('formTour').closest('.col-12').querySelector('.choices')?.classList.remove('is-invalid-choices');
+        if (!id) {
+            formTour = null;
+            $('formTourHidden').classList.add('d-none');
+            $('formAdultPrice').textContent = '—';
+            updateReturnPreview();
+            return;
+        }
+        await applyFormTour(parseInt(id, 10));
+    }
+
+    async function applyFormTour(tourId) {
+        $('formTourHidden').classList.toggle('d-none', tourActive[tourId] !== false);
+        $('formAdultPrice').textContent = 'Đang tải...';
+        try {
+            formTour = await getTour(tourId);
+            $('formAdultPrice').textContent = fmtMoney(formTour.basePrice);
+        } catch (e) {
+            formTour = null;
+            $('formAdultPrice').textContent = '—';
+            if (e.message !== 'UNAUTHORIZED') showToast(e.message, 'error');
+        }
+        updateReturnPreview();
+    }
+
+    function updateReturnPreview() {
+        const dep = $('formDeparture').value;
+        if (formTour && formTour.duration) $('formDurationHint').textContent = `Tự tính theo thời lượng tour (${formTour.duration})`;
+        const ret = formTour ? calcReturnDate(dep, formTour.duration) : null;
+        $('formReturn').textContent = ret ? `${weekday(ret)}, ${fmtDate(ret)}` : '—';
+    }
+    $('formDeparture').addEventListener('change', () => { $('formDeparture').classList.remove('is-invalid'); updateReturnPreview(); });
+    $('formSlots').addEventListener('input', () => $('formSlots').classList.remove('is-invalid'));
+
+    // Ô giá: gõ tới đâu thêm dấu chấm tới đó
+    PRICE_FIELDS.forEach(id => $(id).addEventListener('input', e => {
+        const digits = e.target.value.replace(/\D/g, '').replace(/^0+(?=\d)/, '').slice(0, 15);
+        e.target.value = formatThousands(digits);
+        e.target.classList.remove('is-invalid');
+    }));
+
+    /** Kiểm tra phía FE (BE vẫn kiểm tra lại) — trả về true nếu hợp lệ */
+    function validateForm() {
+        let ok = true;
+        const mark = (id, bad) => { $(id).classList.toggle('is-invalid', bad); if (bad) ok = false; };
+
+        if (!formTour) {
+            $('formTourError').classList.remove('d-none');
+            $('formTour').closest('.col-12').querySelector('.choices')?.classList.add('is-invalid-choices');
+            ok = false;
+        }
+
+        const dep = $('formDeparture').value;
+        if (!$('formDeparture').disabled) mark('formDeparture', !dep || dep < $('formDeparture').min);
+
+        const slots = Number($('formSlots').value);
+        const minSlots = Number($('formSlots').min) || 1;
+        const badSlots = !Number.isInteger(slots) || slots < minSlots || slots > 1000;
+        $('formSlotsError').textContent = minSlots > 1
+            ? `Tổng số chỗ từ ${minSlots} (số chỗ đã đặt) đến 1000.`
+            : 'Tổng số chỗ từ 1 đến 1000.';
+        mark('formSlots', badSlots);
+
+        PRICE_FIELDS.forEach(id => { if (!$(id).disabled) mark(id, getDigits(id) === ''); });
+        return ok;
+    }
+
+    $('scheduleForm').addEventListener('submit', async e => {
+        e.preventDefault();
+        if (!validateForm()) return;
+
+        const payload = {
+            tourId: formTour.tourId,
+            departureDate: $('formDeparture').value,
+            totalSlots: Number($('formSlots').value),
+            childPrice: Number(getDigits('formChildPrice')),
+            toddlerPrice: Number(getDigits('formToddlerPrice')),
+            singleRoomSupplement: Number(getDigits('formSupplement')),
+            transport: $('formTransport').value.trim() || null
+        };
+
+        setSubmitting(true);
+        try {
+            const { res, json } = await api(editingId ? `${API}/${editingId}` : API, {
+                method: editingId ? 'PUT' : 'POST',
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok && json && json.success) {
+                bootstrap.Modal.getOrCreateInstance($('formModal')).hide();
+                showToast(editingId ? 'Đã cập nhật lịch khởi hành' : 'Đã tạo lịch khởi hành');
+                if (!editingId) currentPage = 0;
+                fetchSchedules();
+            } else {
+                showError(editingId ? 'Không cập nhật được lịch' : 'Không tạo được lịch', errorMessage(json, 'Vui lòng thử lại.'));
+            }
+        } catch (err) {
+            if (err.message !== 'UNAUTHORIZED') showError('Lỗi kết nối', 'Không kết nối được tới máy chủ.');
+        } finally {
+            setSubmitting(false);
+        }
+    });
+
+    function setSubmitting(on) {
+        $('btnSubmit').disabled = on;
+        $('submitSpinner').classList.toggle('d-none', !on);
+    }
+
+    /* ============================================================
+       3. XEM CHI TIẾT: GET /api/admin/schedules/{id}
+       ============================================================ */
+    async function openViewModal(id) {
+        $('viewBody').innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div></div>';
+        $('viewEditBtn').classList.add('d-none');
+        bootstrap.Modal.getOrCreateInstance($('viewModal')).show();
+
+        try {
+            const { res, json } = await api(`${API}/${id}`);
+            if (!res.ok || !json || !json.success) {
+                $('viewBody').innerHTML = `<div class="text-danger text-center py-3">${escapeHtml(errorMessage(json, 'Không tải được lịch.'))}</div>`;
+                return;
+            }
+            const s = json.data;
+            const st = displayStatus(s);
+            const booked = s.bookedSlots ?? (s.totalSlots - s.availableSlots);
+            const row = (label, value) => `<tr><th>${label}</th><td>${value}</td></tr>`;
+
+            $('viewBody').innerHTML = `
+                <div class="mb-3">
+                    <div class="fw-bold">${escapeHtml(s.tourName)}</div>
+                    <div class="small text-muted">${escapeHtml(s.tourCode)} · ${escapeHtml(s.duration || '')}</div>
+                </div>
+                <table class="table table-sm detail-table mb-0">
+                    ${row('Mã lịch', `<span class="code-text">${escapeHtml(s.scheduleCode)}</span>`)}
+                    ${row('Trạng thái', `<span class="st-badge ${st.cls}">${st.text}</span>`)}
+                    ${row('Ngày khởi hành', `${weekday(s.departureDate)}, ${fmtDate(s.departureDate)}`)}
+                    ${row('Ngày về', `${weekday(s.returnDate)}, ${fmtDate(s.returnDate)}`)}
+                    ${row('Phương tiện', escapeHtml(s.transport || '—'))}
+                    ${row('Tổng số chỗ', s.totalSlots)}
+                    ${row('Đã đặt / còn trống', `${booked} / ${s.availableSlots}`)}
+                    ${row('Giá người lớn', fmtMoney(s.adultPrice))}
+                    ${row('Giá trẻ em', fmtMoney(s.childPrice))}
+                    ${row('Giá trẻ nhỏ', fmtMoney(s.toddlerPrice))}
+                    ${row('Phụ thu phòng đơn', fmtMoney(s.singleRoomSupplement))}
+                </table>`;
+
+            if (!isDeparted(s)) {
+                $('viewEditBtn').classList.remove('d-none');
+                $('viewEditBtn').onclick = () => openEditModal(s.scheduleId);
+            }
+        } catch (e) {
+            if (e.message !== 'UNAUTHORIZED') $('viewBody').innerHTML = '<div class="text-danger text-center py-3">Không kết nối được tới máy chủ.</div>';
+        }
+    }
+
+    /* ============================================================
+       4. HUỶ / MỞ LẠI: PATCH /api/admin/schedules/{id}/cancel | /reopen
+       ============================================================ */
+    async function cancelSchedule(id, btn) {
+        const confirm = await Swal.fire({
+            icon: 'warning',
+            title: 'Huỷ lịch khởi hành?',
+            html: `Lịch <b>${escapeHtml(btn.dataset.code)}</b> sẽ không còn hiển thị cho khách đặt.<br>
+                   <small class="text-muted">Lịch còn đơn đang giữ chỗ sẽ không huỷ được — hãy xử lý các đơn đó trước.</small>`,
+            showCancelButton: true,
+            confirmButtonText: 'Huỷ lịch',
+            cancelButtonText: 'Đóng',
+            confirmButtonColor: '#dc3545'
+        });
+        if (!confirm.isConfirmed) return;
+        await patchStatus(id, 'cancel', btn, 'Đã huỷ lịch khởi hành', 'Không huỷ được lịch');
+    }
+
+    async function reopenSchedule(id, btn) {
+        await patchStatus(id, 'reopen', btn, 'Đã mở lại lịch khởi hành', 'Không mở lại được lịch');
+    }
+
+    async function patchStatus(id, action, btn, okMsg, errTitle) {
+        btn.disabled = true;
+        try {
+            const { res, json } = await api(`${API}/${id}/${action}`, { method: 'PATCH' });
+            if (res.ok && json && json.success) { showToast(okMsg); fetchSchedules(); }
+            else showError(errTitle, errorMessage(json, 'Vui lòng thử lại.'));
+        } catch (e) {
+            if (e.message !== 'UNAUTHORIZED') showError(errTitle, 'Không kết nối được tới máy chủ.');
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    /* ============================================================
+       5. XOÁ: DELETE /api/admin/schedules/{id} (chỉ khi chưa có booking)
+       ============================================================ */
+    async function deleteSchedule(id, btn) {
+        const confirm = await Swal.fire({
+            icon: 'warning',
+            title: 'Xoá vĩnh viễn lịch?',
+            html: `Lịch <b>${escapeHtml(btn.dataset.code)}</b> sẽ bị xoá vĩnh viễn.<br>
+                   <small class="text-muted">Lịch đã từng có đơn đặt (kể cả đơn đã huỷ) sẽ không xoá được, hãy dùng "Huỷ lịch".</small>`,
+            showCancelButton: true,
+            confirmButtonText: 'Xoá vĩnh viễn',
+            cancelButtonText: 'Đóng',
+            confirmButtonColor: '#dc3545'
+        });
+        if (!confirm.isConfirmed) return;
+
+        btn.disabled = true;
+        try {
+            const { res, json } = await api(`${API}/${id}`, { method: 'DELETE' });
+            if (res.ok && json && json.success) { showToast('Đã xoá lịch khởi hành'); fetchSchedules(); }
+            else showError('Không xoá được lịch', errorMessage(json, 'Vui lòng thử lại.'));
+        } catch (e) {
+            if (e.message !== 'UNAUTHORIZED') showError('Không xoá được lịch', 'Không kết nối được tới máy chủ.');
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    /* ============================================================
+       PHÂN TRANG
+       ============================================================ */
+    function renderPagination(total, totalPages, pageIndex, size) {
         const start = total === 0 ? 0 : pageIndex * size + 1;
         const end   = Math.min((pageIndex + 1) * size, total);
 
-        document.getElementById('paginationInfo').innerHTML = total === 0
+        $('paginationInfo').innerHTML = total === 0
             ? 'Không có mục nào'
-            : `Hiển thị <span>${start}–${end}</span> trong tổng số <span>${total}</span> mục`;
+            : `Hiển thị <span>${start}–${end}</span> trong tổng số <span>${total}</span> lịch`;
 
-        const ul = document.getElementById('paginationControls');
+        const ul = $('paginationControls');
         ul.innerHTML = '';
-        if (totalPgs <= 1) return;
+        if (totalPages <= 1) return;
 
-        const displayPage = pageIndex + 1;
-
-        const addBtn = (label, zeroBasedPage, extraClass = '') => {
-            const li  = document.createElement('li'); li.className = 'page-item';
+        const addBtn = (label, page, extra = '') => {
+            const li = document.createElement('li');
+            li.className = 'page-item';
             const btn = document.createElement('button');
-            btn.className = `page-btn ${extraClass}`.trim();
+            btn.className = `page-btn ${extra}`.trim();
             btn.innerHTML = label;
-            const canClick = !extraClass.includes('disabled')
-                && !extraClass.includes('active')
-                && !extraClass.includes('ellipsis')
-                && typeof zeroBasedPage === 'number'
-                && !isNaN(zeroBasedPage)
-                && zeroBasedPage >= 0;
-            if (canClick) btn.addEventListener('click', () => goToPage(zeroBasedPage));
-            li.appendChild(btn); ul.appendChild(li);
+            if (!extra) btn.addEventListener('click', () => { currentPage = page; fetchSchedules(); });
+            li.appendChild(btn);
+            ul.appendChild(li);
         };
 
         addBtn('<i class="bi bi-chevron-left"></i>', pageIndex - 1, pageIndex === 0 ? 'disabled' : '');
-        getPageNumbers(displayPage, totalPgs).forEach(p => {
+        getPageNumbers(pageIndex + 1, totalPages).forEach(p => {
             if (p === '...') addBtn('…', -1, 'ellipsis');
-            else addBtn(String(p), p - 1, p === displayPage ? 'active' : '');
+            else addBtn(String(p), p - 1, p === pageIndex + 1 ? 'active' : '');
         });
-        addBtn('<i class="bi bi-chevron-right"></i>', pageIndex + 1, pageIndex === totalPgs - 1 ? 'disabled' : '');
+        addBtn('<i class="bi bi-chevron-right"></i>', pageIndex + 1, pageIndex === totalPages - 1 ? 'disabled' : '');
     }
 
     function getPageNumbers(current, total) {
         if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
         const pages = [1];
         if (current > 4) pages.push('...');
-        const s = Math.max(2, current - 1), e = Math.min(total - 1, current + 1);
-        for (let i = s; i <= e; i++) pages.push(i);
+        for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) pages.push(i);
         if (current < total - 3) pages.push('...');
         pages.push(total);
         return pages;
     }
 
-    function goToPage(page) {
-        if (typeof page !== 'number' || isNaN(page) || page < 0) return;
-        currentPage = page;
-        fetchPage();
-    }
-
-    // ============================================================
-    //  FILTER / SORT / SEARCH HANDLERS
-    // ============================================================
-    function onFilterChange() {
-        checkFilterState();
-        currentPage = 0;
-        fetchPage();
-    }
-
-    function onPerPageChange(val) {
-        perPage = parseInt(val);
-        currentPage = 0;
-        fetchPage();
-    }
-
+    /* ============================================================
+       TÌM KIẾM / LỌC / SẮP XẾP
+       ============================================================ */
     function onSearchInput(val) {
         searchKeyword = val.trim();
         clearTimeout(searchTimer);
-        searchTimer = setTimeout(() => {
-            currentPage = 0;
-            fetchPage();
-        }, 400);
+        searchTimer = setTimeout(() => { currentPage = 0; fetchSchedules(); }, 400);
     }
 
-    function sortBy(col) {
-        if (sortCol === col) {
-            sortAsc = !sortAsc;
-        } else {
-            sortCol = col;
-            sortAsc = true;
+    function onFilterChange() { currentPage = 0; fetchSchedules(); }
+
+    function onPerPageChange(val) { perPage = parseInt(val, 10); currentPage = 0; fetchSchedules(); }
+
+    function openFilterModal() { bootstrap.Modal.getOrCreateInstance($('filterModal')).show(); }
+
+    function onDateRangeChange() {
+        const from = $('filterFromDate').value, to = $('filterToDate').value;
+        const invalid = from !== '' && to !== '' && from > to;
+        $('dateRangeError').classList.toggle('d-none', !invalid);
+        ['filterFromDate', 'filterToDate'].forEach(id => $(id).classList.toggle('is-invalid', invalid));
+        if (!invalid) onFilterChange();   // khoảng ngày sai → chưa lọc
+    }
+
+    function updateFilterUI() {
+        const active = activeFilters();
+        $('filterCount').textContent = active.length;
+        $('filterCount').classList.toggle('d-none', active.length === 0);
+        $('activeFilterBar').classList.toggle('d-none', active.length === 0);
+
+        $('activeChips').innerHTML = active.map(f => {
+            const text = f.format === 'date' ? fmtDate($(f.id).value) : selectedLabel(f.id);
+            return `<span class="filter-chip">${escapeHtml(f.label)}: ${escapeHtml(text)}
+                        <button type="button" title="Bỏ bộ lọc này" aria-label="Bỏ bộ lọc ${escapeHtml(f.label)}"
+                                onclick="removeFilter('${f.id}')"><i class="bi bi-x"></i></button>
+                    </span>`;
+        }).join('');
+    }
+
+    function removeFilter(id) {
+        setSelect(id, '');
+        if (id === 'filterFromDate' || id === 'filterToDate') {
+            $('dateRangeError').classList.add('d-none');
+            ['filterFromDate', 'filterToDate'].forEach(x => $(x).classList.remove('is-invalid'));
         }
-        currentPage = 0;
-        fetchPage();
-    }
-
-    function updateSortUI() {
-        document.querySelectorAll('th.sortable').forEach(th => {
-            th.classList.remove('sort-active');
-            const icon = th.querySelector('.sort-icon');
-            if (icon) icon.className = 'bi bi-arrow-down-up sort-icon';
-        });
-        if (sortCol) {
-            const th = document.querySelector(`th.sortable[data-sort="${sortCol}"]`);
-            if (th) {
-                th.classList.add('sort-active');
-                const icon = th.querySelector('.sort-icon');
-                if (icon) icon.className = sortAsc ? 'bi bi-arrow-up-short sort-icon' : 'bi bi-arrow-down-short sort-icon';
-            }
-        }
-    }
-
-    function checkFilterState() {
-        const isFiltering =
-            document.getElementById('filterTour').value   !== '' ||
-            document.getElementById('filterStatus').value !== '' ||
-            document.getElementById('filterMonth').value  !== '';
-        document.getElementById('btnClearFilterWrapper').style.display = isFiltering ? '' : 'none';
-    }
-
-    function clearFilters() {
-        document.getElementById('filterTour').value   = '';
-        document.getElementById('filterStatus').value = '';
-        document.getElementById('filterMonth').value  = '';
         onFilterChange();
     }
 
-    // ============================================================
-    //  CHECKBOX / BULK
-    // ============================================================
-    function toggleCheckAll(chk) {
-        document.querySelectorAll('.row-check').forEach(b => {
-            b.checked = chk.checked;
-            const id = parseInt(b.value);
-            if (chk.checked) selectedIds.add(id); else selectedIds.delete(id);
-        });
-        updateBulkBar();
+    function clearFilters() {
+        FILTERS.forEach(f => setSelect(f.id, ''));
+        $('dateRangeError').classList.add('d-none');
+        ['filterFromDate', 'filterToDate'].forEach(id => $(id).classList.remove('is-invalid'));
+        currentPage = 0;
+        fetchSchedules();
     }
 
-    function onRowCheck(chk, id) {
-        if (chk.checked) selectedIds.add(id); else selectedIds.delete(id);
-        const boxes = document.querySelectorAll('.row-check');
-        document.getElementById('checkAll').checked = [...boxes].every(b => b.checked);
-        updateBulkBar();
+    /** Bấm cùng cột → đổi chiều; bấm cột khác → tăng dần */
+    function sortBy(col) {
+        if (userSorted && sortCol === col) sortAsc = !sortAsc;
+        else { sortCol = col; sortAsc = true; }
+        userSorted = true;
+        currentPage = 0;
+        fetchSchedules();
     }
 
-    function updateBulkBar() {
-        const bar = document.getElementById('bulkActionBar');
-        document.getElementById('bulkCount').textContent = `${selectedIds.size} lịch đã chọn`;
-        bar.classList.toggle('show', selectedIds.size > 0);
-
-        if (selectedIds.size === 0) return;
-
-        // Phân loại các id đã chọn
-        const hasCancelled    = [...selectedIds].some(id => rowStatusMap.get(id) === 'CANCELLED');
-        const hasNotCancelled = [...selectedIds].some(id => rowStatusMap.get(id) !== 'CANCELLED');
-        const isMixed = hasCancelled && hasNotCancelled;
-
-        // Ẩn hết trước
-        document.getElementById('btnBulkCancel').style.display    = 'none';
-        document.getElementById('btnBulkRestore').style.display   = 'none';
-        document.getElementById('btnBulkDelete').style.display    = 'none';
-        document.getElementById('bulkMixedWarning').style.display = 'none';
-
-        if (isMixed) {
-            document.getElementById('bulkMixedWarning').style.display = '';
-        } else if (hasNotCancelled) {
-            // Toàn bộ AVAILABLE/FULL
-            document.getElementById('btnBulkCancel').style.display = '';
-        } else {
-            // Toàn bộ CANCELLED
-            document.getElementById('btnBulkRestore').style.display = '';
-            document.getElementById('btnBulkDelete').style.display  = '';
-        }
-    }
-
-    function clearSelection() {
-        selectedIds.clear();
-        document.querySelectorAll('.row-check').forEach(b => b.checked = false);
-        document.getElementById('checkAll').checked = false;
-        updateBulkBar();
-    }
-
-    // ============================================================
-    //  SINGLE ACTIONS
-    // ============================================================
-    function showSuccess(title) {
-        Swal.fire({
-            icon: 'success', title, showConfirmButton: false, timer: 1500,
-            customClass: { title: 'swal-custom-title' }
+    function updateSortUI() {
+        document.querySelectorAll('.sort-btn').forEach(btn => {
+            const active = userSorted && btn.dataset.sort === sortCol;
+            btn.classList.toggle('sort-active', active);
+            btn.querySelector('.sort-icon').className = active
+                ? `bi ${sortAsc ? 'bi-arrow-up-short' : 'bi-arrow-down-short'} sort-icon`
+                : 'bi bi-arrow-down-up sort-icon';
+            btn.closest('th').setAttribute('aria-sort', active ? (sortAsc ? 'ascending' : 'descending') : 'none');
         });
     }
 
-    async function viewSchedule(id) {
-        const modal = new bootstrap.Modal(document.getElementById('viewTourScheduleModal'));
-
-        // Reset state
-        document.getElementById('viewFormLoading').style.display = '';
-        document.getElementById('viewFormBody').style.display = 'none';
-        document.getElementById('viewModalScheduleId').textContent = `#${id}`;
-
-        modal.show();
-
-        try {
-            const response = await fetch(`/api/tour-schedules/${id}`, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-            });
-            const result = await response.json();
-
-            if (response.ok && result.success) {
-                const s = result.data;
-
-                document.getElementById('viewTourName').textContent  = s.tourName;
-                document.getElementById('viewTourCode').textContent  = s.tourCode;
-                document.getElementById('viewDepartureDate').textContent = fmtDate(s.departureDate);
-                document.getElementById('viewReturnDate').textContent    = fmtDate(s.returnDate);
-
-                // Slots
-                const slotFull = s.bookedSlots >= s.availableSlots;
-                document.getElementById('viewSlots').innerHTML =
-                    `<span class="${slotFull ? 'slot-full' : 'slot-normal'}">${s.bookedSlots} / ${s.availableSlots}</span>`;
-
-                // Price
-                const adj = s.priceAdjustment;
-                let priceHtml;
-                if (adj > 0)      priceHtml = `<span class="price-plus">+${fmt(adj)}</span>`;
-                else if (adj < 0) priceHtml = `<span class="price-minus">${fmt(adj)}</span>`;
-                else              priceHtml = `<span class="price-zero">0 đ</span>`;
-                document.getElementById('viewPriceAdjustment').innerHTML = priceHtml;
-
-                // Status badge
-                const statusMap = {
-                    AVAILABLE: `<span class="badge badge-available"><i class="bi bi-check-circle me-1"></i>Mở bán</span>`,
-                    FULL:      `<span class="badge badge-full"><i class="bi bi-exclamation-octagon me-1"></i>Hết chỗ</span>`,
-                    CANCELLED: `<span class="badge badge-cancelled"><i class="bi bi-x-circle me-1"></i>Đã hủy</span>`,
-                };
-                document.getElementById('viewStatus').innerHTML = statusMap[s.status] || s.status;
-                document.getElementById('viewFormLoading').style.display = 'none';
-                document.getElementById('viewFormBody').style.display = '';
-            } else {
-                throw new Error(result.message || 'Không tải được dữ liệu');
-            }
-        } catch (e) {
-            console.error(e);
-            document.getElementById('viewFormLoading').style.display = 'none';
-            document.getElementById('viewFormBody').innerHTML =
-                `<div class="text-center text-danger py-3">
-               <i class="bi bi-exclamation-triangle me-1"></i>Không thể tải dữ liệu. Vui lòng thử lại.
-             </div>`;
-            document.getElementById('viewFormBody').style.display = '';
-        }
-    }
-
-    async function cancelSchedule(id, name) {
-        const res = await swalWithBootstrapButtons.fire({
-            icon: 'warning',
-            title: 'Hủy lịch khởi hành?',
-            html: `Lịch của tour <b>${name}</b> sẽ bị đánh dấu <b>Đã hủy</b>.<br>Không thể nhận thêm đặt chỗ mới.`,
-            showCancelButton: true,
-            confirmButtonText: '<i class="bi bi-x-circle me-1"></i>Đồng ý hủy',
-            cancelButtonText: 'Bỏ qua'
-        });
-        if (!res.isConfirmed) return;
-
-        try {
-            const response = await fetch(`/api/admin/tour-schedules/${id}/cancel`, {
-                method: 'PATCH',
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-            });
-            const result = await response.json();
-            if (response.ok && result.success) {
-                showSuccess('Đã hủy lịch thành công!');
-                fetchPage();
-            } else {
-                Swal.fire({ icon: 'error', title: 'Lỗi', text: result.message || 'Không thể hủy lịch.' });
-            }
-        } catch (e) {
-            console.error(e);
-            Swal.fire({ icon: 'error', title: 'Lỗi hệ thống', text: 'Không thể kết nối đến máy chủ!' });
-        }
-    }
-
-    async function restoreSchedule(id, name) {
-        const res = await swalWithBootstrapButtons.fire({
-            icon: 'question',
-            title: 'Khôi phục lịch khởi hành?',
-            html: `Lịch của tour <b>${name}</b> sẽ được mở bán lại.<br><br>
-             <span class="text-danger fw-bold"><i class="bi bi-exclamation-triangle me-1"></i>Lưu ý:</span>
-             Trạng thái sẽ được tự động xác định dựa trên số chỗ hiện tại.`,
-            showCancelButton: true,
-            customClass: {
-                confirmButton: 'btn btn-success mx-2 px-4 py-2',
-                cancelButton:  'btn btn-secondary mx-2 px-4 py-2',
-                title: 'swal-custom-title', htmlContainer: 'swal-custom-html'
-            },
-            buttonsStyling: false,
-            confirmButtonText: '<i class="bi bi-arrow-counterclockwise me-1"></i>Đồng ý khôi phục',
-            cancelButtonText: 'Đóng'
-        });
-        if (!res.isConfirmed) return;
-
-        try {
-            const response = await fetch(`/api/admin/tour-schedules/${id}/restore`, {
-                method: 'PATCH',
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-            });
-            const result = await response.json();
-            if (response.ok && result.success) {
-                showSuccess('Đã khôi phục lịch thành công!');
-                fetchPage();
-            } else {
-                Swal.fire({ icon: 'error', title: 'Lỗi', text: result.message || 'Không thể khôi phục lịch.' });
-            }
-        } catch (e) {
-            console.error(e);
-            Swal.fire({ icon: 'error', title: 'Lỗi hệ thống', text: 'Không thể kết nối đến máy chủ!' });
-        }
-    }
-
-    async function hardDeleteSchedule(id, name) {
-        const res = await swalWithBootstrapButtons.fire({
-            icon: 'warning',
-            title: 'Xóa vĩnh viễn lịch này?',
-            html: `Bạn đang xóa vĩnh viễn lịch của tour <b>${name}</b>.<br>
-             <span class="text-danger">Hành động này <b>không thể hoàn tác</b>!</span><br>
-             <small class="text-muted">Chỉ có thể xóa lịch đã hủy và chưa có đặt chỗ.</small>`,
-            showCancelButton: true,
-            confirmButtonText: '<i class="bi bi-trash me-1"></i>Xóa vĩnh viễn',
-            cancelButtonText: 'Hủy bỏ'
-        });
-        if (!res.isConfirmed) return;
-
-        try {
-            const response = await fetch(`/api/admin/tour-schedules/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-            });
-            const result = await response.json();
-            if (response.ok && result.success) {
-                showSuccess('Đã xóa vĩnh viễn lịch!');
-                fetchPage();
-            } else {
-                Swal.fire({ icon: 'error', title: 'Lỗi', text: result.message || 'Không thể xóa lịch này.' });
-            }
-        } catch (e) {
-            console.error(e);
-            Swal.fire({ icon: 'error', title: 'Lỗi hệ thống', text: 'Không thể kết nối đến máy chủ!' });
-        }
-    }
-
-    // ============================================================
-    //  UTILS
-    // ============================================================
-    function fmt(num) {
-        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(num);
-    }
-
-    function fmtDate(dateStr) {
-        if (!dateStr) return '—';
-        // Hỗ trợ cả dạng array [y,m,d] (LocalDate của Jackson) lẫn string 'YYYY-MM-DD'
-        if (Array.isArray(dateStr)) {
-            const [y, m, d] = dateStr;
-            return `${String(d).padStart(2,'0')}/${String(m).padStart(2,'0')}/${y}`;
-        }
-        const [y, m, d] = String(dateStr).split('-');
-        return `${d}/${m}/${y}`;
-    }
-
-    function fmtDateTime(dateTimeStr) {
-        if (!dateTimeStr) return '—';
-        // Hỗ trợ array [y,m,d,h,min,s] của Jackson LocalDateTime
-        if (Array.isArray(dateTimeStr)) {
-            const [y, mo, d, h = 0, mi = 0] = dateTimeStr;
-            return `${String(d).padStart(2,'0')}/${String(mo).padStart(2,'0')}/${y} ${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')}`;
-        }
-        const dt = new Date(dateTimeStr);
-        return dt.toLocaleString('vi-VN', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
-    }
-
-    function showLoading(show) {
-        document.getElementById('tableLoadingOverlay').classList.toggle('show', show);
-    }
-
-    function showTableError(msg) {
-        document.getElementById('scheduleListBody').innerHTML =
-            `<tr><td colspan="9" class="text-center text-danger py-4">
-        <i class="bi bi-exclamation-triangle me-2"></i>${msg}
-       </td></tr>`;
-        document.getElementById('paginationInfo').innerHTML = '—';
-        document.getElementById('paginationControls').innerHTML = '';
-    }
-
-    // ============================================================
-    //  EXPORT EXCEL
-    // ============================================================
-    async function exportToExcel() {
-        Swal.fire({
-            title: 'Đang tạo file Excel...',
-            html: 'Vui lòng chờ trong giây lát.',
-            allowOutsideClick: false,
-            didOpen: () => { Swal.showLoading(); }
-        });
-
-        // Xây dựng params filter giống fetchPage — xuất đúng những gì đang lọc
-        const params = new URLSearchParams();
-
-        const tourVal = document.getElementById('filterTour').value;
-        if (tourVal) params.set('tourId', tourVal);
-
-        const statusVal = document.getElementById('filterStatus').value;
-        if (statusVal) params.set('status', statusVal);
-
-        const monthVal = document.getElementById('filterMonth').value;
-        if (monthVal) params.set('month', monthVal);
-
-        if (searchKeyword) params.set('keyword', searchKeyword);
-
-        const queryString = params.toString();
-        const url = `/api/admin/tour-schedules/export${queryString ? '?' + queryString : ''}`;
-
-        try {
-            const response = await fetch(url, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-            });
-            if (!response.ok) throw new Error('Lỗi từ server');
-
-            const blob = await response.blob();
-            let fileName = `Lich_khoi_hanh_${new Date().toISOString().slice(0, 10)}.xlsx`;
-            const disposition = response.headers.get('Content-Disposition');
-            if (disposition && disposition.indexOf('filename=') !== -1) {
-                const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
-                if (matches?.[1]) {
-                    fileName = matches[1].replace(/['"]/g, '');
-                    if (fileName.startsWith("utf-8''")) fileName = decodeURIComponent(fileName.substring(7));
-                }
-            }
-
-            const url2 = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url2; a.download = fileName;
-            document.body.appendChild(a); a.click(); a.remove();
-            window.URL.revokeObjectURL(url2);
-
-            Swal.close();
-            showSuccess('Xuất Excel thành công!');
-        } catch (err) {
-            console.error(err);
-            Swal.fire({ icon: 'error', title: 'Lỗi xuất file', text: 'Không thể tải file Excel lúc này!' });
-        }
-    }
-
-    // ============================================================
-    //  ADD MODAL
-    // ============================================================
-    function openAddModal() {
-        // Reset form
-        ['addTourId','addDepartureDate','addReturnDate','addAvailableSlots','addPriceAdjustment']
-            .forEach(id => document.getElementById(id).value = '');
-        document.querySelectorAll('#addTourScheduleModal .is-invalid')
-            .forEach(el => el.classList.remove('is-invalid'));
-        document.getElementById('addFormError').classList.add('d-none');
-
-        // Sync danh sách tour vào modal (đã load sẵn ở filterTour)
-        const filterSelect = document.getElementById('filterTour');
-        const addSelect    = document.getElementById('addTourId');
-        addSelect.innerHTML = '<option value="">-- Chọn tour --</option>';
-        Array.from(filterSelect.options).forEach(opt => {
-            if (opt.value) {
-                const o = document.createElement('option');
-                o.value = opt.value;
-                o.textContent = opt.textContent;
-                addSelect.appendChild(o);
-            }
-        });
-
-        new bootstrap.Modal(document.getElementById('addTourScheduleModal')).show();
-    }
-
-    function validateAddTourScheduleForm() {
-        let valid = true;
-
-        const tourId   = document.getElementById('addTourId');
-        const depDate  = document.getElementById('addDepartureDate');
-        const retDate  = document.getElementById('addReturnDate');
-        const slots    = document.getElementById('addAvailableSlots');
-
-        [tourId, depDate, retDate, slots].forEach(el => el.classList.remove('is-invalid'));
-
-        if (!tourId.value) { tourId.classList.add('is-invalid'); valid = false; }
-        if (!depDate.value) { depDate.classList.add('is-invalid'); valid = false; }
-        if (!retDate.value || retDate.value <= depDate.value) { retDate.classList.add('is-invalid'); valid = false; }
-        if (!slots.value || parseInt(slots.value) < 1) { slots.classList.add('is-invalid'); valid = false; }
-
-        return valid;
-    }
-
-    async function submitAddTourSchedule() {
-        if (!validateAddTourScheduleForm()) return;
-
-        const btn = document.getElementById('btnConfirmAdd');
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Đang lưu...';
-
-        const payload = {
-            tourId:          parseInt(document.getElementById('addTourId').value),
-            departureDate:   document.getElementById('addDepartureDate').value,
-            returnDate:      document.getElementById('addReturnDate').value,
-            availableSlots:  parseInt(document.getElementById('addAvailableSlots').value),
-            priceAdjustment: parseFloat(document.getElementById('addPriceAdjustment').value || '0')
-        };
-
-        try {
-            const response = await fetch('/api/admin/tour-schedules', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify(payload)
-            });
-            const result = await response.json();
-
-            if (response.ok && result.success) {
-                bootstrap.Modal.getInstance(document.getElementById('addTourScheduleModal')).hide();
-                showSuccess('Thêm lịch khởi hành thành công!');
-                fetchPage();
-            } else {
-                const errEl = document.getElementById('addFormError');
-                errEl.textContent = result.message || 'Không thể thêm lịch. Vui lòng thử lại.';
-                errEl.classList.remove('d-none');
-            }
-        } catch (e) {
-            console.error(e);
-            const errEl = document.getElementById('addFormError');
-            errEl.textContent = 'Lỗi kết nối đến máy chủ!';
-            errEl.classList.remove('d-none');
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-plus-circle me-1"></i>Thêm lịch';
-        }
-    }
-
-
-    // ============================================================
-    //  EDIT MODAL
-    // ============================================================
-    async function openEditModal(id) {
-        const modal = new bootstrap.Modal(document.getElementById('editTourScheduleModal'));
-
-        // Reset state
-        document.getElementById('editFormLoading').style.display = '';
-        document.getElementById('editFormBody').style.display = 'none';
-        document.getElementById('editFormError').classList.add('d-none');
-        document.getElementById('editModalScheduleId').textContent = `#${id}`;
-        document.querySelectorAll('#editTourScheduleModal .is-invalid')
-            .forEach(el => el.classList.remove('is-invalid'));
-
-        modal.show();
-
-        try {
-            const response = await fetch(`/api/tour-schedules/${id}`, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-            });
-            const result = await response.json();
-
-            if (response.ok && result.success) {
-                const s = result.data;
-                document.getElementById('editScheduleId').value      = s.tourScheduleId;
-                document.getElementById('editTourId').value          = s.tourId;
-                document.getElementById('editTourName').value        = `${s.tourCode} — ${s.tourName}`;
-                document.getElementById('editDepartureDate').value   = Array.isArray(s.departureDate)
-                    ? `${s.departureDate[0]}-${String(s.departureDate[1]).padStart(2,'0')}-${String(s.departureDate[2]).padStart(2,'0')}`
-                    : s.departureDate;
-                document.getElementById('editReturnDate').value      = Array.isArray(s.returnDate)
-                    ? `${s.returnDate[0]}-${String(s.returnDate[1]).padStart(2,'0')}-${String(s.returnDate[2]).padStart(2,'0')}`
-                    : s.returnDate;
-                document.getElementById('editAvailableSlots').value  = s.availableSlots;
-                document.getElementById('editPriceAdjustment').value = s.priceAdjustment;
-
-                document.getElementById('editFormLoading').style.display = 'none';
-                document.getElementById('editFormBody').style.display = '';
-            } else {
-                throw new Error(result.message || 'Không tải được dữ liệu');
-            }
-        } catch (e) {
-            console.error(e);
-            document.getElementById('editFormLoading').style.display = 'none';
-            const errEl = document.getElementById('editFormError');
-            errEl.textContent = 'Không thể tải dữ liệu lịch. Vui lòng thử lại.';
-            errEl.classList.remove('d-none');
-        }
-    }
-
-    function validateEditTourScheduleForm() {
-        let valid = true;
-
-        const depDate = document.getElementById('editDepartureDate');
-        const retDate = document.getElementById('editReturnDate');
-        const slots   = document.getElementById('editAvailableSlots');
-
-        [depDate, retDate, slots].forEach(el => el.classList.remove('is-invalid'));
-
-        if (!depDate.value) { depDate.classList.add('is-invalid'); valid = false; }
-        if (!retDate.value || retDate.value <= depDate.value) { retDate.classList.add('is-invalid'); valid = false; }
-        if (!slots.value || parseInt(slots.value) < 1) { slots.classList.add('is-invalid'); valid = false; }
-
-        return valid;
-    }
-
-    async function submitEditTourSchedule() {
-        if (!validateEditTourScheduleForm()) return;
-
-        const btn = document.getElementById('btnConfirmEdit');
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Đang lưu...';
-
-        const id = document.getElementById('editScheduleId').value;
-        const payload = {
-            tourId:          parseInt(document.getElementById('editTourId').value),
-            departureDate:   document.getElementById('editDepartureDate').value,
-            returnDate:      document.getElementById('editReturnDate').value,
-            availableSlots:  parseInt(document.getElementById('editAvailableSlots').value),
-            priceAdjustment: parseFloat(document.getElementById('editPriceAdjustment').value || '0')
-        };
-
-        try {
-            const response = await fetch(`/api/admin/tour-schedules/${id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify(payload)
-            });
-            const result = await response.json();
-
-            if (response.ok && result.success) {
-                bootstrap.Modal.getInstance(document.getElementById('editTourScheduleModal')).hide();
-                showSuccess('Cập nhật lịch thành công!');
-                fetchPage();
-            } else {
-                const errEl = document.getElementById('editFormError');
-                errEl.textContent = result.message || 'Không thể cập nhật. Vui lòng thử lại.';
-                errEl.classList.remove('d-none');
-            }
-        } catch (e) {
-            console.error(e);
-            const errEl = document.getElementById('editFormError');
-            errEl.textContent = 'Lỗi kết nối đến máy chủ!';
-            errEl.classList.remove('d-none');
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-save me-1"></i>Lưu thay đổi';
-        }
-    }
-
-    async function bulkCancel() {
-        if (!selectedIds.size) return;
-
-        const res = await swalWithBootstrapButtons.fire({
-            icon: 'warning',
-            title: `Hủy ${selectedIds.size} lịch đã chọn?`,
-            html: 'Các lịch sẽ bị đánh dấu <b>Đã hủy</b>. Không thể nhận thêm đặt chỗ mới.',
-            showCancelButton: true,
-            confirmButtonText: '<i class="bi bi-x-circle me-1"></i>Đồng ý hủy',
-            cancelButtonText: 'Bỏ qua'
-        });
-        if (!res.isConfirmed) return;
-
-        try {
-            const response = await fetch('/api/admin/tour-schedules/bulk-cancel', {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify([...selectedIds])
-            });
-            const data = await response.json();
-            if (response.ok && data.success) {
-                showSuccess(`Đã hủy ${selectedIds.size} lịch thành công!`);
-                clearSelection();
-                fetchPage();
-            } else {
-                Swal.fire({ icon: 'error', title: 'Lỗi', text: data.message || 'Không thể hủy lịch.' });
-            }
-        } catch (e) {
-            Swal.fire({ icon: 'error', title: 'Lỗi hệ thống', text: 'Không thể kết nối đến máy chủ!' });
-        }
-    }
-
-    async function bulkRestore() {
-        if (!selectedIds.size) return;
-
-        const res = await swalWithBootstrapButtons.fire({
-            icon: 'question',
-            title: `Khôi phục ${selectedIds.size} lịch đã chọn?`,
-            html: 'Trạng thái sẽ được tự động xác định dựa trên số chỗ hiện tại.',
-            showCancelButton: true,
-            customClass: {
-                confirmButton: 'btn btn-success mx-2 px-4 py-2',
-                cancelButton:  'btn btn-secondary mx-2 px-4 py-2',
-                title: 'swal-custom-title', htmlContainer: 'swal-custom-html'
-            },
-            buttonsStyling: false,
-            confirmButtonText: '<i class="bi bi-arrow-counterclockwise me-1"></i>Đồng ý khôi phục',
-            cancelButtonText: 'Đóng'
-        });
-        if (!res.isConfirmed) return;
-
-        try {
-            const response = await fetch('/api/admin/tour-schedules/bulk-restore', {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify([...selectedIds])
-            });
-            const data = await response.json();
-            if (response.ok && data.success) {
-                showSuccess(`Đã khôi phục ${selectedIds.size} lịch thành công!`);
-                clearSelection();
-                fetchPage();
-            } else {
-                Swal.fire({ icon: 'error', title: 'Lỗi', text: data.message || 'Không thể khôi phục.' });
-            }
-        } catch (e) {
-            Swal.fire({ icon: 'error', title: 'Lỗi hệ thống', text: 'Không thể kết nối đến máy chủ!' });
-        }
-    }
-
-    async function bulkDelete() {
-        if (!selectedIds.size) return;
-
-        const res = await swalWithBootstrapButtons.fire({
-            icon: 'warning',
-            title: `Xóa vĩnh viễn ${selectedIds.size} lịch?`,
-            html: `Hành động này <b>không thể hoàn tác</b>!<br>
-               <small class="text-muted">Lịch có đặt chỗ sẽ được bỏ qua tự động.</small>`,
-            showCancelButton: true,
-            confirmButtonText: '<i class="bi bi-trash me-1"></i>Xóa vĩnh viễn',
-            cancelButtonText: 'Hủy bỏ'
-        });
-        if (!res.isConfirmed) return;
-
-        try {
-            const response = await fetch('/api/admin/tour-schedules/bulk-delete', {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify([...selectedIds])
-            });
-            const data = await response.json();
-            if (response.ok && data.success) {
-                showSuccess('Đã xóa vĩnh viễn các lịch đủ điều kiện!');
-                clearSelection();
-                fetchPage();
-            } else {
-                Swal.fire({ icon: 'error', title: 'Lỗi', text: data.message || 'Không thể xóa.' });
-            }
-        } catch (e) {
-            Swal.fire({ icon: 'error', title: 'Lỗi hệ thống', text: 'Không thể kết nối đến máy chủ!' });
-        }
-    }
+    /* ============================================================
+       KHỞI ĐỘNG
+       ============================================================ */
+    (async () => {
+        if (lockedTourId) initLockedTour();
+        await loadTourOptions();
+        fetchSchedules();
+    })();
 </script>
 
 </body>

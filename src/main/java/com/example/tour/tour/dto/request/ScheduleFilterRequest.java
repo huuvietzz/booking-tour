@@ -23,5 +23,7 @@ public class ScheduleFilterRequest {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate toDate;        // ngày khởi hành đến
 
+    // upcomingOnly = true nghĩa là chỉ lấy các lịch chưa khởi hành (ngày đi sau hôm nay)
+    // Bộ lọc này có ích vì admin chủ yếu làm việc với các lịch sắp tới
     private Boolean upcomingOnly;    // true → chỉ lịch chưa khởi hành
 }

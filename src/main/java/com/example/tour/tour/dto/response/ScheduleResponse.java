@@ -30,6 +30,7 @@ public class ScheduleResponse {
 
     private BigDecimal adultPrice;
     private BigDecimal childPrice;
+    private BigDecimal toddlerPrice;
     private BigDecimal singleRoomSupplement;
     private String transport;
 

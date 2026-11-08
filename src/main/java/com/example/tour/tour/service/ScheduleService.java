@@ -23,9 +23,9 @@ public interface ScheduleService {
     /** Xoá cứng: chỉ khi chưa từng có booking */
     void deleteSchedule(int scheduleId);
 
-    Page<ScheduleResponse> getSchedulesForAdmin(ScheduleFilterRequest filter, Pageable pageable);
+    Page<ScheduleResponse> getAllSchedulesForAdmin(ScheduleFilterRequest filter, Pageable pageable);
 
-    ScheduleResponse getScheduleForAdmin(int scheduleId);
+    ScheduleResponse getScheduleByIdForAdmin(int scheduleId);
 
     /** Phía khách: lịch sắp tới, chưa huỷ, của một tour đang hiển thị */
     List<ScheduleResponse> getUpcomingSchedulesOfTour(int tourId);

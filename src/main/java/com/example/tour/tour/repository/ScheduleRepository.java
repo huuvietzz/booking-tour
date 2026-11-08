@@ -9,6 +9,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
@@ -56,4 +57,18 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Integer>, Jp
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT s FROM Schedule s WHERE s.scheduleId = :id")
     Optional<Schedule> findByIdForUpdate(@Param("id") Integer id);
+
+    /**
+     * Đồng bộ giá người lớn theo giá tour.
+     * Chỉ lịch CHƯA khởi hành và CHƯA có booking nào (kể cả đơn đã huỷ):
+     * lịch đã có booking giữ nguyên giá khách đã chốt.
+     */
+    @Modifying
+    @Query("UPDATE Schedule s SET s.adultPrice = :price " +
+            "WHERE s.tour.tourId = :tourId " +
+            "AND s.departureDate > :today " +
+            "AND NOT EXISTS (SELECT 1 FROM Booking b WHERE b.schedule = s)")
+    void syncAdultPrice(@Param("tourId") Integer tourId,
+                       @Param("price") BigDecimal price,
+                       @Param("today") LocalDate today);
 }

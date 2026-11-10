@@ -1,0 +1,112 @@
+/**
+ * assets/css/search-controls.css
+ *
+ * Combobox bo tròn + lịch chọn "Ngày đi" — DÙNG CHUNG cho tours.html và index.html.
+ * Đi kèm assets/js/search-controls.js. Biến màu --tl-* lấy từ assets/css/tour-card.css.
+ */
+.tl-link-btn { border: 0; background: none; padding: 0; color: var(--tl-muted); font-size: 14px; }
+.tl-link-btn:hover { color: var(--tl-price); }
+
+/* ---------- Combobox tự làm (thay <select>): bo tròn, xổ xuống mềm như Vietravel ---------- */
+.tl-dd { position: relative; }
+.tl-dd-toggle {
+    width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    border: 1px solid var(--tl-border); background: #fff; border-radius: 999px; padding: 10px 18px;
+    font-weight: 600; color: var(--tl-primary); text-align: left; transition: border-color .15s, box-shadow .15s;
+}
+.tl-dd-toggle:hover { border-color: color-mix(in srgb, var(--tl-primary) 45%, #fff); }
+.tl-dd-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tl-dd-label.is-placeholder { color: var(--tl-muted); font-weight: 400; }
+.tl-dd-toggle > i { flex: 0 0 auto; color: var(--tl-text); transition: transform .2s; }
+.tl-dd.open .tl-dd-toggle { border-color: var(--tl-primary); box-shadow: 0 0 0 3px var(--tl-primary-soft); }
+.tl-dd.open .tl-dd-toggle > i { transform: rotate(180deg); }
+
+/* Menu nổi (Sắp xếp theo) */
+.tl-dd-menu {
+    position: absolute; top: calc(100% + 8px); right: 0; min-width: 100%; z-index: 30;
+    list-style: none; margin: 0; padding: 8px; background: #fff;
+    border: 1px solid var(--tl-border); border-radius: 16px; box-shadow: 0 14px 34px rgba(16, 24, 40, .16);
+    opacity: 0; visibility: hidden; transform: translateY(-6px); transition: opacity .15s, transform .15s, visibility .15s;
+}
+.tl-dd.open .tl-dd-menu { opacity: 1; visibility: visible; transform: none; }
+.tl-dd-menu li {
+    padding: 10px 16px; border-radius: 10px; cursor: pointer; white-space: nowrap; color: var(--tl-text); font-size: 15px;
+}
+.tl-dd-menu li:hover, .tl-dd-menu li:focus-visible { background: var(--tl-primary-soft); outline: none; }
+.tl-dd-menu li.active { color: var(--tl-primary); font-weight: 600; }
+
+/* Khung chọn nhiều có ô tìm kiếm (Điểm đến) — nằm trong luồng của cột lọc để không bị cắt khi cột lọc cuộn */
+.tl-filter .tl-dd-toggle { background: var(--tl-bg); font-size: 14px; }
+.tl-dd-panel {
+    display: none; margin-top: 8px; padding: 12px; background: #fff;
+    border: 1px solid var(--tl-border); border-radius: 16px; box-shadow: 0 10px 26px rgba(16, 24, 40, .10);
+}
+.tl-dd.open .tl-dd-panel { display: block; animation: tlFadeIn .15s ease-out; }
+@keyframes tlFadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+.tl-dd-search {
+    display: flex; align-items: center; gap: 8px; padding: 8px 14px;
+    border: 1px solid var(--tl-border); border-radius: 999px; color: var(--tl-muted);
+}
+.tl-dd-search:focus-within { border-color: var(--tl-primary); }
+.tl-dd-search input { border: 0; outline: 0; flex: 1; min-width: 0; background: none; color: var(--tl-text); }
+.tl-dd-options { max-height: 240px; overflow-y: auto; margin-top: 8px; padding-right: 4px; }
+.tl-dd-empty { padding: 10px 2px; color: var(--tl-muted); font-size: 14px; }
+/* Menu là <div> chứa ô tìm kiếm + <ul> (thanh tìm kiếm ngang) */
+.tl-dd-menu ul { list-style: none; margin: 0; padding: 0; max-height: 300px; overflow-y: auto; }
+.tl-dd-menu .tl-dd-search { margin-bottom: 6px; }
+
+/* Combobox trên thanh tìm kiếm ngang: ô bấm không viền (giữ kiểu chữ xanh đậm), menu bo tròn xổ xuống */
+.tl-dd--bar .tl-dd-toggle {
+    border: 0; background: none; padding: 0; border-radius: 6px; font-size: 16px; box-shadow: none !important;
+}
+.tl-dd--bar .tl-dd-toggle > i { color: var(--tl-text); font-size: .9rem; }
+.tl-dd--bar .tl-dd-menu { left: -10px; right: auto; min-width: calc(100% + 20px); width: max-content; max-width: 340px; top: calc(100% + 16px); }
+
+/* Lựa chọn có ảnh tròn (Điểm đến trên thanh ngang) */
+.tl-dd--images .tl-dd-menu { min-width: 300px; }
+.tl-dd--images .tl-dd-menu ul { max-height: 360px; }
+.tl-dd--images .tl-dd-menu li { display: flex; align-items: center; gap: 12px; padding: 8px 12px; }
+.tl-dd-thumb {
+    flex: 0 0 44px; width: 44px; height: 44px; border-radius: 50%; object-fit: cover;
+    background: var(--tl-primary-soft); color: var(--tl-primary);
+    display: inline-flex; align-items: center; justify-content: center; font-size: 1.1rem;
+    box-shadow: 0 1px 4px rgba(16, 24, 40, .15);
+}
+.tl-dd-heading { font-weight: 700; color: var(--tl-text); padding: 6px 12px 4px; }
+
+/* ---------- Lịch chọn "Ngày đi" (giống Vietravel) ---------- */
+.tl-dd--date .tl-dd-menu.tl-dp { width: 380px; max-width: calc(100vw - 32px); padding: 18px 18px 10px; border-radius: 20px; }
+.tl-dp-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.tl-dp-title {
+    flex: 1; text-align: center; padding: 8px 12px; border-radius: 999px;
+    background: var(--tl-bg); font-weight: 600; color: var(--tl-text);
+}
+.tl-dp-nav {
+    flex: 0 0 32px; height: 32px; border: 0; border-radius: 50%; padding: 0;
+    background: #4b5563; color: #fff; display: flex; align-items: center; justify-content: center; font-size: .8rem;
+    transition: background .15s;
+}
+.tl-dp-nav:hover:not(:disabled) { background: var(--tl-primary); }
+.tl-dp-nav:disabled { background: var(--tl-bg); color: #c3c8d4; cursor: not-allowed; }
+.tl-dp-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px 0; text-align: center; }   /* không cách cột → gạch dưới hàng thứ liền mạch */
+.tl-dp-wd {
+    padding: 6px 0 10px; margin-bottom: 4px; border-bottom: 1px solid var(--tl-border);
+    color: var(--tl-muted); font-size: 13px;
+}
+.tl-dp-wd.sun { color: var(--tl-price); }
+.tl-dp-day {
+    position: relative; height: 44px; border: 0; border-radius: 10px; background: none; padding: 0;
+    color: var(--tl-text); font-weight: 500; font-size: 15px; transition: background .12s, color .12s;
+}
+.tl-dp-day.sun { color: var(--tl-price); }
+.tl-dp-day:hover:not(:disabled) { background: var(--tl-primary-soft); }
+.tl-dp-day:disabled { color: #c8cdd8; cursor: default; }
+.tl-dp-day.today::after {   /* chấm nhỏ dưới ngày hôm nay */
+    content: ""; position: absolute; left: 50%; bottom: 6px; width: 4px; height: 4px; margin-left: -2px;
+    border-radius: 50%; background: var(--tl-primary);
+}
+.tl-dp-day.selected, .tl-dp-day.selected:hover { background: var(--tl-primary); color: #fff; }
+.tl-dp-day.selected::after { background: #fff; }
+.tl-dp-foot { display: flex; justify-content: flex-end; border-top: 1px solid var(--tl-border); margin-top: 8px; padding-top: 8px; }
+
+.tl-dd-foot { display: flex; justify-content: flex-end; border-top: 1px solid var(--tl-border); margin-top: 8px; padding-top: 8px; }

@@ -1,7 +1,9 @@
 package com.example.tour.tour.service;
 
+import com.example.tour.tour.dto.request.PublicTourFilterRequest;
 import com.example.tour.tour.dto.request.TourFilterRequest;
 import com.example.tour.tour.dto.request.TourRequest;
+import com.example.tour.tour.dto.response.DepartureCalendarResponse;
 import com.example.tour.tour.dto.response.TourCardResponse;
 import com.example.tour.tour.dto.response.TourResponse;
 import com.example.tour.tour.dto.response.TourAdminRowResponse;
@@ -9,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.YearMonth;
 import java.util.List;
 
 public interface TourService {
@@ -27,8 +30,12 @@ public interface TourService {
 
     TourResponse getTourByIdForAdmin(int tourId);
 
-    Page<TourCardResponse> getAllTours(TourFilterRequest filter, Pageable pageable);
+    Page<TourCardResponse> getAllTours(PublicTourFilterRequest filter, Pageable pageable);
+
+    List<String> getDepartureLocations();
 
     /** Chi tiết phía khách: chỉ tour đang hiển thị, tăng lượt xem */
     TourResponse getTourById(int tourId);
+
+    DepartureCalendarResponse getDepartureCalendar(PublicTourFilterRequest filter, YearMonth month);
 }

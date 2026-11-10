@@ -24,19 +24,15 @@
   <link href="assets/css/main.css" rel="stylesheet">
   <link href="assets/css/auth-ui.css" rel="stylesheet">
   <link href="assets/css/header-white.css" rel="stylesheet">
+  <link href="assets/css/tour-card.css" rel="stylesheet">
+  <link href="assets/css/search-controls.css" rel="stylesheet">
 
   <style>
     /* =========================================================
        TRANG DANH SÁCH TOUR — mọi class bắt đầu bằng "tl-" để không đụng CSS template
        ========================================================= */
     .tours-list-page {
-      --tl-primary: var(--accent-color, #0a5bd3);
-      --tl-primary-soft: color-mix(in srgb, var(--tl-primary) 10%, #fff);
-      --tl-text: #1d2433;
-      --tl-muted: #6b7385;
-      --tl-border: #e6e9f0;
-      --tl-bg: #f5f7fb;
-      --tl-price: #d6262c;
+      /* Biến màu --tl-* nằm trong assets/css/tour-card.css (dùng chung với trang chủ) */
       background: var(--tl-bg);
       padding: 32px 0 60px;
     }
@@ -107,8 +103,6 @@
     }
     .tl-filter-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
     .tl-filter-head h5 { margin: 0; font-size: 17px; font-weight: 700; color: var(--tl-text); }
-    .tl-link-btn { border: 0; background: none; padding: 0; color: var(--tl-muted); font-size: 14px; }
-    .tl-link-btn:hover { color: var(--tl-price); }
     .tl-filter-section { padding: 16px 0; border-top: 1px solid var(--tl-border); }
     .tl-filter-section:first-of-type { border-top: 0; }
     .tl-filter-title { font-weight: 600; color: var(--tl-text); margin-bottom: 12px; font-size: 15px; }
@@ -125,11 +119,17 @@
     .tl-cal-wd { font-size: 12px; color: var(--tl-muted); padding: 4px 0; }
     .tl-cal-wd.sun { color: var(--tl-price); }
     .tl-cal-day {
+      position: relative;
       border: 1px solid transparent; background: none; border-radius: 8px;
-      padding: 4px 0 3px; line-height: 1.1; min-height: 42px; color: var(--tl-text);
+      padding: 4px 0 8px; line-height: 1.1; min-height: 46px; color: var(--tl-text);   /* chừa 8px dưới cho chấm "hôm nay" */
     }
     .tl-cal-day b { display: block; font-size: 14px; font-weight: 600; }
     .tl-cal-day small { display: block; font-size: 10px; color: var(--tl-primary); margin-top: 2px; white-space: nowrap; }
+    .tl-cal-day small.none { color: #c3c8d4; }   /* ngày không có tour: gạch "-" màu xám */
+    .tl-cal-day.today::after {   /* chấm xanh nhỏ dưới ngày hôm nay */
+      content: ""; position: absolute; left: 50%; bottom: 2px; transform: translateX(-50%);
+      width: 5px; height: 5px; border-radius: 50%; background: var(--tl-primary);
+    }
     .tl-cal-day:not(:disabled):hover { background: var(--tl-primary-soft); }
     .tl-cal-day:disabled { color: #c3c8d4; cursor: default; }
     .tl-cal-day.sun b { color: var(--tl-price); }
@@ -137,110 +137,6 @@
     .tl-cal-day.selected { border-color: var(--tl-primary); background: var(--tl-primary-soft); }
     .tl-hint { font-size: 12px; color: var(--tl-muted); margin-top: 10px; }
 
-    /* Ô chọn bo tròn trong bộ lọc */
-    /* ---------- Combobox tự làm (thay <select>): bo tròn, xổ xuống mềm như Vietravel ---------- */
-    .tl-dd { position: relative; }
-    .tl-dd-toggle {
-      width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px;
-      border: 1px solid var(--tl-border); background: #fff; border-radius: 999px; padding: 10px 18px;
-      font-weight: 600; color: var(--tl-primary); text-align: left; transition: border-color .15s, box-shadow .15s;
-    }
-    .tl-dd-toggle:hover { border-color: color-mix(in srgb, var(--tl-primary) 45%, #fff); }
-    .tl-dd-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .tl-dd-label.is-placeholder { color: var(--tl-muted); font-weight: 400; }
-    .tl-dd-toggle > i { flex: 0 0 auto; color: var(--tl-text); transition: transform .2s; }
-    .tl-dd.open .tl-dd-toggle { border-color: var(--tl-primary); box-shadow: 0 0 0 3px var(--tl-primary-soft); }
-    .tl-dd.open .tl-dd-toggle > i { transform: rotate(180deg); }
-
-    /* Menu nổi (Sắp xếp theo) */
-    .tl-dd-menu {
-      position: absolute; top: calc(100% + 8px); right: 0; min-width: 100%; z-index: 30;
-      list-style: none; margin: 0; padding: 8px; background: #fff;
-      border: 1px solid var(--tl-border); border-radius: 16px; box-shadow: 0 14px 34px rgba(16, 24, 40, .16);
-      opacity: 0; visibility: hidden; transform: translateY(-6px); transition: opacity .15s, transform .15s, visibility .15s;
-    }
-    .tl-dd.open .tl-dd-menu { opacity: 1; visibility: visible; transform: none; }
-    .tl-dd-menu li {
-      padding: 10px 16px; border-radius: 10px; cursor: pointer; white-space: nowrap; color: var(--tl-text); font-size: 15px;
-    }
-    .tl-dd-menu li:hover, .tl-dd-menu li:focus-visible { background: var(--tl-primary-soft); outline: none; }
-    .tl-dd-menu li.active { color: var(--tl-primary); font-weight: 600; }
-
-    /* Khung chọn nhiều có ô tìm kiếm (Điểm đến) — nằm trong luồng của cột lọc để không bị cắt khi cột lọc cuộn */
-    .tl-filter .tl-dd-toggle { background: var(--tl-bg); font-size: 14px; }
-    .tl-dd-panel {
-      display: none; margin-top: 8px; padding: 12px; background: #fff;
-      border: 1px solid var(--tl-border); border-radius: 16px; box-shadow: 0 10px 26px rgba(16, 24, 40, .10);
-    }
-    .tl-dd.open .tl-dd-panel { display: block; animation: tlFadeIn .15s ease-out; }
-    @keyframes tlFadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
-    .tl-dd-search {
-      display: flex; align-items: center; gap: 8px; padding: 8px 14px;
-      border: 1px solid var(--tl-border); border-radius: 999px; color: var(--tl-muted);
-    }
-    .tl-dd-search:focus-within { border-color: var(--tl-primary); }
-    .tl-dd-search input { border: 0; outline: 0; flex: 1; min-width: 0; background: none; color: var(--tl-text); }
-    .tl-dd-options { max-height: 240px; overflow-y: auto; margin-top: 8px; padding-right: 4px; }
-    .tl-dd-empty { padding: 10px 2px; color: var(--tl-muted); font-size: 14px; }
-    /* Menu là <div> chứa ô tìm kiếm + <ul> (thanh tìm kiếm ngang) */
-    .tl-dd-menu ul { list-style: none; margin: 0; padding: 0; max-height: 300px; overflow-y: auto; }
-    .tl-dd-menu .tl-dd-search { margin-bottom: 6px; }
-
-    /* Combobox trên thanh tìm kiếm ngang: ô bấm không viền (giữ kiểu chữ xanh đậm), menu bo tròn xổ xuống */
-    .tl-dd--bar .tl-dd-toggle {
-      border: 0; background: none; padding: 0; border-radius: 6px; font-size: 16px; box-shadow: none !important;
-    }
-    .tl-dd--bar .tl-dd-toggle > i { color: var(--tl-text); font-size: .9rem; }
-    .tl-dd--bar .tl-dd-menu { left: -10px; right: auto; min-width: calc(100% + 20px); width: max-content; max-width: 340px; top: calc(100% + 16px); }
-
-    /* Lựa chọn có ảnh tròn (Điểm đến trên thanh ngang) */
-    .tl-dd--images .tl-dd-menu { min-width: 300px; }
-    .tl-dd--images .tl-dd-menu ul { max-height: 360px; }
-    .tl-dd--images .tl-dd-menu li { display: flex; align-items: center; gap: 12px; padding: 8px 12px; }
-    .tl-dd-thumb {
-      flex: 0 0 44px; width: 44px; height: 44px; border-radius: 50%; object-fit: cover;
-      background: var(--tl-primary-soft); color: var(--tl-primary);
-      display: inline-flex; align-items: center; justify-content: center; font-size: 1.1rem;
-      box-shadow: 0 1px 4px rgba(16, 24, 40, .15);
-    }
-    .tl-dd-heading { font-weight: 700; color: var(--tl-text); padding: 6px 12px 4px; }
-
-    /* ---------- Lịch chọn "Ngày đi" (giống Vietravel) ---------- */
-    .tl-dd--date .tl-dd-menu.tl-dp { width: 380px; max-width: calc(100vw - 32px); padding: 18px 18px 10px; border-radius: 20px; }
-    .tl-dp-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-    .tl-dp-title {
-      flex: 1; text-align: center; padding: 8px 12px; border-radius: 999px;
-      background: var(--tl-bg); font-weight: 600; color: var(--tl-text);
-    }
-    .tl-dp-nav {
-      flex: 0 0 32px; height: 32px; border: 0; border-radius: 50%; padding: 0;
-      background: #4b5563; color: #fff; display: flex; align-items: center; justify-content: center; font-size: .8rem;
-      transition: background .15s;
-    }
-    .tl-dp-nav:hover:not(:disabled) { background: var(--tl-primary); }
-    .tl-dp-nav:disabled { background: var(--tl-bg); color: #c3c8d4; cursor: not-allowed; }
-    .tl-dp-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px 0; text-align: center; }   /* không cách cột → gạch dưới hàng thứ liền mạch */
-    .tl-dp-wd {
-      padding: 6px 0 10px; margin-bottom: 4px; border-bottom: 1px solid var(--tl-border);
-      color: var(--tl-muted); font-size: 13px;
-    }
-    .tl-dp-wd.sun { color: var(--tl-price); }
-    .tl-dp-day {
-      position: relative; height: 44px; border: 0; border-radius: 10px; background: none; padding: 0;
-      color: var(--tl-text); font-weight: 500; font-size: 15px; transition: background .12s, color .12s;
-    }
-    .tl-dp-day.sun { color: var(--tl-price); }
-    .tl-dp-day:hover:not(:disabled) { background: var(--tl-primary-soft); }
-    .tl-dp-day:disabled { color: #c8cdd8; cursor: default; }
-    .tl-dp-day.today::after {   /* chấm nhỏ dưới ngày hôm nay */
-      content: ""; position: absolute; left: 50%; bottom: 6px; width: 4px; height: 4px; margin-left: -2px;
-      border-radius: 50%; background: var(--tl-primary);
-    }
-    .tl-dp-day.selected, .tl-dp-day.selected:hover { background: var(--tl-primary); color: #fff; }
-    .tl-dp-day.selected::after { background: #fff; }
-    .tl-dp-foot { display: flex; justify-content: flex-end; border-top: 1px solid var(--tl-border); margin-top: 8px; padding-top: 8px; }
-
-    .tl-dd-foot { display: flex; justify-content: flex-end; border-top: 1px solid var(--tl-border); margin-top: 8px; padding-top: 8px; }
 
     /* Thanh kéo giá 2 đầu: 2 input range chồng lên nhau trên 1 thanh nền */
     .tl-range { position: relative; height: 28px; margin: 4px 10px 8px; }
@@ -300,131 +196,6 @@
     .tl-view-btn.active svg rect { fill: currentColor; }   /* đang chọn → tô đặc */
     .tl-view-btn:focus-visible { outline: 2px solid var(--tl-primary); outline-offset: 2px; }
 
-    /* ---------- Tooltip khi di chuột (điểm khởi hành, tên tour đầy đủ) ---------- */
-    .tl-tip { position: relative; }
-    .tl-tip::after {
-      content: attr(data-tip);
-      position: absolute; left: -6px; bottom: calc(100% + 10px); z-index: 6;
-      background: #e3eefc; color: var(--tl-primary); padding: 8px 14px; border-radius: 10px;
-      font-size: 13px; font-weight: 500; line-height: 1.45; white-space: nowrap;   /* tooltip tên tour */
-      box-shadow: 0 6px 18px rgba(16, 24, 40, .12);
-      opacity: 0; visibility: hidden; transform: translateY(4px); transition: opacity .15s, transform .15s, visibility .15s;
-      pointer-events: none;
-    }
-    .tl-tip::before {   /* mũi tên nhỏ chỉ xuống */
-      content: ""; position: absolute; left: 14px; bottom: calc(100% - 2px); z-index: 6;
-      border: 6px solid transparent; border-top-color: #e3eefc;
-      opacity: 0; visibility: hidden; transition: opacity .15s, visibility .15s; pointer-events: none;
-    }
-    .tl-tip:hover::after, .tl-tip:hover::before { opacity: 1; visibility: visible; transform: none; }
-    .tl-tip-wide::after { left: -8px; right: -8px; white-space: normal; }   /* tên tour dài → xuống dòng, rộng bằng thẻ */
-    .tl-card--list .tl-tip-wide::after { right: auto; width: max-content; max-width: min(460px, 100%); }   /* thẻ ngang rộng → bong bóng gọn như Vietravel */
-    .tl-tip-right::after { left: auto; right: -6px; }
-    .tl-tip-right::before { left: auto; right: 14px; }
-
-    /* ---------- Thẻ tour ---------- */
-    .tl-card {
-      height: 100%; display: flex; flex-direction: column;
-      background: #fff; border-radius: 16px;   /* KHÔNG overflow:hidden: để tooltip tên tour tràn ra ngoài thẻ, không bị cắt */
-      border: 1px solid var(--tl-border); transition: transform .2s, box-shadow .2s;
-      position: relative;
-    }
-    .tl-card:hover { transform: translateY(-4px); box-shadow: 0 14px 30px rgba(16, 24, 40, .12); z-index: 3; }   /* thẻ đang rê nổi lên trên thẻ bên cạnh */
-    .tl-card-img {
-      position: relative; display: block; aspect-ratio: 4 / 3; overflow: hidden; background: #e9edf4;
-      border-radius: 15px 15px 0 0;   /* tự bo góc trên vì thẻ không còn cắt nội dung */
-    }
-    .tl-card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s; }
-    .tl-card:hover .tl-card-img img { transform: scale(1.05); }
-    .tl-badge {
-      position: absolute; top: 14px; left: 14px; padding: 4px 14px; border-radius: 999px;
-      font-size: 12px; font-weight: 600; background: #fff;
-    }
-    .tl-badge.BUDGET     { color: #8a2be2; background: #f4ecfd; }
-    .tl-badge.STANDARD   { color: #0a5bd3; background: #e8f1ff; }
-    .tl-badge.PREMIUM    { color: #a86b00; background: #fff4dc; }
-    .tl-badge.GOOD_PRICE { color: #0f8a4b; background: #e6f7ee; }
-
-    .tl-card-body { flex: 1; display: flex; flex-direction: column; padding: 18px 20px 20px; }
-    .tl-card-title {
-      display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden;
-      font-size: 17px; font-weight: 700; line-height: 1.4; min-height: 2.8em; margin: 0 0 12px;   /* tên tour */
-    }
-    .tl-card-title a { color: var(--tl-text); }
-    .tl-card-title a:hover { color: var(--tl-primary); }
-    .tl-meta { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; color: var(--tl-muted); margin-bottom: 12px; }
-    .tl-meta > span { display: inline-flex; align-items: center; gap: 5px; min-width: 0; cursor: default; }
-    .tl-meta .tl-ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-    .tl-dates-label { font-size: 13px; color: var(--tl-muted); margin-bottom: 6px; }
-    .tl-dates { position: relative; min-height: 30px; }
-    .tl-dates-track { display: flex; gap: 6px; overflow-x: auto; scroll-behavior: smooth; scrollbar-width: none; }
-    .tl-dates-track::-webkit-scrollbar { display: none; }
-    .tl-date {
-      flex: 0 0 auto; padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 500;   /* chip ngày */
-      border: 1px solid #f2b8ba; color: var(--tl-price); background: #fff; white-space: nowrap;
-    }
-    .tl-date { transition: background .15s, color .15s, border-color .15s; }
-    .tl-date:hover { background: #ed1d24; border-color: #ed1d24; color: #fff; }
-    .tl-date.active { background: var(--tl-price); border-color: var(--tl-price); color: #fff; }
-    /* Nút ‹ › nằm đè lên 2 mép dãy ngày; hết ngày phía nào thì ẩn nút phía đó */
-    .tl-dates-nav {
-      position: absolute; top: 50%; z-index: 2; transform: translateY(-50%);
-      width: 30px; height: 30px; border-radius: 50%; padding: 0;
-      border: 1px solid #d3d8e2; background: #fff; color: var(--tl-text);
-      box-shadow: 0 2px 8px rgba(16, 24, 40, .25);   /* bóng đậm để nổi rõ trên các chip ngày */
-      display: flex; align-items: center; justify-content: center; font-size: .8rem;
-      transition: opacity .15s, background .15s, color .15s, border-color .15s;
-    }
-    .tl-dates-nav.prev { left: -4px; }
-    .tl-dates-nav.next { right: -4px; }
-    .tl-dates-nav:hover { background: var(--tl-price); border-color: var(--tl-price); color: #fff; }
-    .tl-dates-nav.is-hidden { opacity: 0; pointer-events: none; }
-
-    /* ---------- Kiểu danh sách: ảnh bên trái, nội dung bên phải ---------- */
-    @media (min-width: 768px) {
-      .tl-card--list { flex-direction: row; }
-      .tl-card--list .tl-card-img { flex: 0 0 38%; aspect-ratio: auto; min-height: 260px; border-radius: 15px 0 0 15px; }
-      .tl-card--list .tl-card-body { padding: 22px 26px; min-width: 0; }   /* min-width:0 → thân thẻ không bị dãy ngày đẩy rộng ra (nguyên nhân tràn + mất nút ›) */
-      .tl-card--list .tl-card-title { min-height: 0; font-size: 18px; }
-    }
-
-    /* Thông tin ghi rõ nhãn (dạng danh sách, giống Vietravel) */
-    .tl-info {
-      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 24px;
-      font-size: 14px; color: var(--tl-muted); margin-bottom: 12px;
-    }
-    .tl-info > div, .tl-info-dates .lbl { display: flex; align-items: center; gap: 7px; min-width: 0; }
-    .tl-info > div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .tl-info b { font-weight: 500; color: var(--tl-text); overflow: hidden; text-overflow: ellipsis; }
-    .tl-info i, .tl-info-dates i { color: var(--tl-text); }
-    .tl-info-dates { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--tl-muted); }
-    .tl-info-dates .lbl { flex: 0 0 auto; white-space: nowrap; }
-    .tl-info-dates .tl-dates { flex: 1; min-width: 0; }
-    @media (max-width: 575.98px) {
-      .tl-info { grid-template-columns: 1fr; }
-      .tl-info-dates { flex-direction: column; align-items: stretch; }
-    }
-    .tl-no-date { font-size: 13px; color: var(--tl-muted); font-style: italic; }
-
-    .tl-card-foot {
-      margin-top: auto; padding-top: 16px; display: flex; align-items: flex-end; justify-content: space-between; gap: 10px;
-    }
-    .tl-price small { display: block; font-size: 13px; color: var(--tl-muted); }
-    .tl-price strong { font-size: 20px; color: var(--tl-price); font-weight: 700; white-space: nowrap; }
-
-    /* Nút xem chi tiết: bo vuông, nền màu chủ đạo, rê chuột thì đậm hơn */
-    .tl-detail-btn {
-      display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
-      padding: 10px 22px; border-radius: 10px;
-      background: var(--tl-primary); color: #fff; font-weight: 600; font-size: 14px;
-      transition: background .2s, box-shadow .2s;
-    }
-    .tl-detail-btn:hover {
-      background: color-mix(in srgb, var(--tl-primary) 78%, #000);   /* cùng màu, tối hơn ~22% */
-      color: #fff; box-shadow: 0 4px 12px color-mix(in srgb, var(--tl-primary) 35%, transparent);
-    }
-
     /* ---------- Xem thêm / trống ---------- */
     .tl-more-btn {
       border: 1.5px solid var(--tl-primary); color: var(--tl-primary); background: #fff;
@@ -433,6 +204,8 @@
     .tl-more-btn:hover { background: var(--tl-primary); color: #fff; }
     .tl-empty { text-align: center; padding: 60px 20px; background: #fff; border-radius: 16px; color: var(--tl-muted); }
     .tl-empty i { font-size: 2.6rem; display: block; margin-bottom: 10px; opacity: .5; }
+
+    .tl-cal-grid.is-loading { opacity: .45; pointer-events: none; transition: opacity .15s; }
 
     /* Nút mở bộ lọc trên điện thoại */
     .tl-filter-toggle {
@@ -616,7 +389,7 @@
 
           <div class="tl-result-bar">
             <div>
-              <h2>Kết quả: <span id="resultCount">0</span> chương trình tour</h2>
+              <h2>Kết quả: <span id="resultCount">…</span> chương trình tour</h2>
               <p id="resultSub">—</p>
             </div>
             <div class="tl-sort">
@@ -626,9 +399,9 @@
                   <span class="tl-dd-label" id="sortLabel">Ngày khởi hành gần nhất</span><i class="bi bi-chevron-down"></i>
                 </button>
                 <ul class="tl-dd-menu" role="listbox" aria-labelledby="sortTitle">
-                  <li role="option" tabindex="0" data-value="priceDesc">Giá từ cao đến thấp</li>
-                  <li role="option" tabindex="0" data-value="priceAsc">Giá từ thấp đến cao</li>
-                  <li role="option" tabindex="0" data-value="nearest" class="active" aria-selected="true">Ngày khởi hành gần nhất</li>
+                  <li role="option" tabindex="0" data-value="price_desc">Giá từ cao đến thấp</li>
+                  <li role="option" tabindex="0" data-value="price_asc">Giá từ thấp đến cao</li>
+                  <li role="option" tabindex="0" data-value="departure" class="active" aria-selected="true">Ngày khởi hành gần nhất</li>
                 </ul>
               </div>
               <div class="tl-view d-none d-md-flex" role="group" aria-label="Kiểu hiển thị">
@@ -720,16 +493,14 @@
 <div id="preloader"></div>
 
 <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-<script src="assets/vendor/php-email-form/validate.js"></script>
 <script src="assets/vendor/aos/aos.js"></script>
-<script src="assets/vendor/purecounter/purecounter_vanilla.js"></script>
 <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
-<script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
-<script src="assets/vendor/imagesloaded/imagesloaded.pkgd.min.js"></script>
 <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
 
 <script src="assets/js/main.js"></script>
 <script src="assets/js/auth-ui.js"></script>
+<script src="assets/js/tour-card.js"></script>
+<script src="assets/js/search-controls.js"></script>
 
 <script>
   /* ============================================================
@@ -745,16 +516,6 @@
 
   const TODAY = new Date(); TODAY.setHours(0, 0, 0, 0);
   const TODAY_ISO = toIso(TODAY);
-  function addDays(n) { const d = new Date(TODAY); d.setDate(d.getDate() + n); return toIso(d); }
-
-  /** "4N3Đ" → "4 ngày 3 đêm" (không đúng dạng thì giữ nguyên) */
-  function durationText(d) {
-    const m = /^\s*(\d+)\s*N\s*(\d+)\s*Đ/i.exec(d || '');
-    return m ? `${m[1]} ngày ${m[2]} đêm` : (d || '');
-  }
-
-  /** "2026-11-26" → "26/11" */
-  function shortDate(s) { const [, m, d] = s.split('-'); return `${d}/${m}`; }
 
   const moneyFmt = new Intl.NumberFormat('vi-VN');
   function fmtMoney(v) { return moneyFmt.format(v) + ' ₫'; }
@@ -770,228 +531,333 @@
   }
 
   /* ============================================================
-     DỮ LIỆU MẪU — cùng dạng TourCardResponse của BE.
-     Khi nối BE: thay MOCK_TOURS bằng dữ liệu từ GET /api/public/tours
-     (ngày khởi hành tính theo hôm nay để lúc nào mở trang cũng có lịch sắp tới)
+     API — mọi API trả ApiResponse { success, message, data }
+       GET /api/public/tours                       → Page<TourCardResponse>
+       GET /api/public/tours/departure-calendar    → DepartureCalendarResponse
+       GET /api/public/tours/departure-locations   → List<String>
+       GET /api/public/locations                   → List<LocationResponse>
      ============================================================ */
+  async function getData(url) {
+    const res = await fetch(url);
+    const json = await res.json().catch(() => null);
+    if (!res.ok || !json || !json.success) throw new Error((json && json.message) || 'Lỗi tải dữ liệu');
+    return json.data;
+  }
+
+  /** Spring Page có 2 dạng JSON: mặc định { content, totalElements, last }
+   *  hoặc bật VIA_DTO { content, page: { number, totalPages, totalElements } } → đọc được cả hai */
+  function readPage(data) {
+    const meta = data.page;
+    return {
+      content: data.content || [],
+      total:   meta ? meta.totalElements : data.totalElements,
+      last:    meta ? meta.number + 1 >= meta.totalPages : data.last
+    };
+  }
+
   const CLASS_LABELS = { BUDGET: 'Tiết kiệm', STANDARD: 'Tiêu chuẩn', GOOD_PRICE: 'Giá tốt', PREMIUM: 'Cao cấp' };
 
   /* Thanh kéo mức giá: 1 triệu → 100 triệu, mỗi nấc 500.000 ₫ */
   const PRICE_MIN = 1000000, PRICE_MAX = 100000000, PRICE_STEP = 500000;
 
-  const tour = (id, name, img, cls, from, to, duration, price, offsets) => ({
-    tourId: id, tourCode: 'TOUR' + String(id).padStart(5, '0'), tourName: name,
-    thumbnailUrl: `assets/img/travel/${img}.webp`, tourClass: cls,
-    departureLocation: from, locationName: to, duration, basePrice: price,
-    departureDates: offsets.map(addDays)
-  });
-
-  const MOCK_TOURS = [
-    tour(1,  'Hà Nội – Hạ Long – Ninh Bình – Bái Đính – Tràng An – Chuyến tàu 5 cửa ô', 'tour-26', 'STANDARD',   'Hà Nội',          'Hạ Long',   '4N3Đ', 8990000,  [3, 7, 10, 14, 17, 21, 24, 28, 31, 35, 38, 42, 45, 49, 52, 56]),
-    tour(2,  'Sapa – Fansipan – Bản Cát Cát – Thung lũng Mường Hoa',                       'tour-3',  'BUDGET',     'Hà Nội',          'Sa Pa',     '3N2Đ', 3590000,  [2, 5, 9, 12, 16, 19, 23, 26, 30, 33, 37, 40, 44, 47, 51, 54, 58]),
-    tour(3,  'Phú Quốc – Thị trấn Hoàng Hôn – Kiss Bridge – Tặng vé cáp treo Hòn Thơm',    'tour-15', 'STANDARD',   'Hà Nội',          'Phú Quốc',  '4N3Đ', 7990000,  [4, 11, 18, 25, 39]),
-    tour(4,  'Đà Nẵng – Hội An – Bà Nà Hills – Cầu Vàng – Huế',                            'tour-8',  'GOOD_PRICE', 'TP. Hồ Chí Minh', 'Đà Nẵng',   '5N4Đ', 6490000,  [6, 13, 20, 27]),
-    tour(5,  'Hà Giang – Lũng Cú – Cao nguyên đá Đồng Văn – Đèo Mã Pì Lèng – Sông Nho Quế', 'tour-14', 'BUDGET',     'Hà Nội',          'Hà Giang',  '4N3Đ', 4590000,  [3, 10, 17, 24]),
-    tour(6,  'Nha Trang – Du thuyền biển đảo – Nghỉ dưỡng cao cấp Vinpearl',                'tour-22', 'PREMIUM',    'Hà Nội',          'Nha Trang', '4N3Đ', 15990000, [8, 22, 36, 50]),
-    tour(7,  'Đà Lạt – Thành phố ngàn hoa – Đồi chè Cầu Đất – Thác Datanla',                'tour-7',  'GOOD_PRICE', 'TP. Hồ Chí Minh', 'Đà Lạt',    '3N2Đ', 2590000,  [1, 4, 8, 11, 15, 18, 22, 25, 29, 32, 36, 39, 43, 46, 50, 53, 57, 60]),
-    tour(8,  'Côn Đảo linh thiêng – Nghĩa trang Hàng Dương – Bãi Đầm Trầu',                 'tour-19', 'STANDARD',   'TP. Hồ Chí Minh', 'Côn Đảo',   '3N2Đ', 9590000,  [12, 26, 40]),
-    tour(9,  'Ninh Bình – Tràng An – Hang Múa – Tam Cốc – Chùa Bái Đính',                   'tour-2',  'BUDGET',     'Hà Nội',          'Ninh Bình', '2N1Đ', 2190000,  [2, 3, 6, 9, 10, 13, 16, 17, 20, 23, 24, 27, 30, 31, 34, 37, 38, 41, 44, 45]),
-    tour(10, 'Huế – Đại Nội – Lăng Khải Định – Sông Hương – Phá Tam Giang',                 'tour-5',  'STANDARD',   'Đà Nẵng',         'Huế',       '3N2Đ', 4990000,  [5, 19, 33]),
-    tour(11, 'Phú Quốc – Nghỉ dưỡng 5 sao – Grand World – VinWonders – Safari',             'tour-11', 'PREMIUM',    'TP. Hồ Chí Minh', 'Phú Quốc',  '5N4Đ', 21990000, [9, 23, 37]),
-    tour(12, 'Quy Nhơn – Kỳ Co – Eo Gió – Ghềnh Ráng Tiên Sa – Tuy Hòa',                    'tour-18', 'GOOD_PRICE', 'Hà Nội',          'Quy Nhơn',  '4N3Đ', 6990000,  [7, 14, 21, 35]),
-    tour(13, 'Mộc Châu mùa hoa cải – Đồi chè trái tim – Thác Dải Yếm',                      'tour-13', 'BUDGET',     'Hà Nội',          'Mộc Châu',  '2N1Đ', 1990000,  [3, 10, 24]),
-    tour(14, 'Hạ Long – Du thuyền 5 sao Lan Hạ – Đảo Cát Bà – Chèo kayak',                   'tour-25', 'PREMIUM',    'Hà Nội',          'Hạ Long',   '3N2Đ', 12490000, [6, 13, 27, 41])
-  ];
-
   /* ============================================================
-     TRẠNG THÁI BỘ LỌC
+     TRẠNG THÁI BỘ LỌC — tên field khớp PublicTourFilterRequest khi gửi lên
      ============================================================ */
-  const PAGE_SIZE = 9;
+  const PAGE_SIZE = 9;   // 3 hàng x 3 thẻ
   const state = {
-    departure: '', destinations: new Set(), date: '',   // điểm đến chọn được nhiều
-    classes: new Set(), minPrice: PRICE_MIN, maxPrice: PRICE_MAX,
-    sort: 'nearest', limit: PAGE_SIZE,
-    view: 'grid'   // 'grid' = lưới 3 cột, 'list' = danh sách ngang
+    departure: '',            // departureLocation: chuỗi, khớp chính xác Tour.departureLocation
+    destinations: new Set(),  // locationIds: id dạng chuỗi, chọn nhiều
+    date: '',                 // departureDate: "yyyy-mm-dd"
+    classes: new Set(),       // tourClasses: chọn nhiều
+    minPrice: PRICE_MIN, maxPrice: PRICE_MAX,
+    sort: 'departure',        // departure | price_asc | price_desc
+    view: 'grid'              // 'grid' = lưới 3 cột, 'list' = danh sách ngang
   };
   let calMonth = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1);   // tháng đang xem trên lịch
+  let locations = [];                                                  // [{ locationId, locationName, imageUrl }]
 
-  /** Các ngày khởi hành SAU hôm nay, tăng dần */
-  function upcoming(t) { return t.departureDates.filter(d => d > TODAY_ISO).sort(); }
+  /** Tour đã tải, cộng dồn qua các lần "Xem thêm" */
+  const list = { tours: [], page: 0, total: 0, last: true, loading: false, failed: false };
 
-  /**
-   * Tour có khớp bộ lọc không. skip = tên bộ lọc được bỏ qua
-   * (dùng để đếm số tour cho chính bộ lọc đó, vd số tour mỗi ngày trên lịch)
-   */
-  function matches(t, skip) {
-    if (state.departure && t.departureLocation !== state.departure) return false;
-    if (skip !== 'destination' && state.destinations.size && !state.destinations.has(t.locationName)) return false;
-    if (skip !== 'date' && state.date && !upcoming(t).includes(state.date)) return false;
-    if (skip !== 'class' && state.classes.size && !state.classes.has(t.tourClass)) return false;
-    // Nút kéo nằm ở đầu mút = không giới hạn phía đó (tour dưới 1 triệu / trên 100 triệu vẫn hiện)
-    if (state.minPrice > PRICE_MIN && t.basePrice < state.minPrice) return false;
-    if (state.maxPrice < PRICE_MAX && t.basePrice > state.maxPrice) return false;
-    return true;
-  }
+  /* Bấm lọc liên tục (kéo giá, tick nhiều ô) → nhiều request chạy song song, có thể về sai thứ tự.
+     Mỗi lần gọi tăng số thứ tự; kết quả về mà không phải lần mới nhất thì bỏ. */
+  let toursSeq = 0, calSeq = 0;
 
-  function sortTours(list) {
-    const nearest = t => upcoming(t)[0] || '9999-12-31';   // tour hết lịch xuống cuối
-    const sorted = [...list];
-    if (state.sort === 'priceAsc')  sorted.sort((a, b) => a.basePrice - b.basePrice);
-    if (state.sort === 'priceDesc') sorted.sort((a, b) => b.basePrice - a.basePrice);
-    if (state.sort === 'nearest')   sorted.sort((a, b) => nearest(a).localeCompare(nearest(b)) || a.basePrice - b.basePrice);
-    return sorted;
+  const locationName = id => locations.find(l => String(l.locationId) === String(id))?.locationName || '';
+
+  /** Tham số lọc dùng chung cho danh sách tour và lịch */
+  function filterParams() {
+    const p = new URLSearchParams();
+    if (state.departure)         p.set('departureLocation', state.departure);
+    if (state.destinations.size) p.set('locationIds', [...state.destinations].join(','));
+    if (state.date)              p.set('departureDate', state.date);
+    if (state.classes.size)      p.set('tourClasses', [...state.classes].join(','));
+    // Nút kéo nằm ở đầu mút = không giới hạn phía đó → không gửi (tour dưới 1 triệu / trên 100 triệu vẫn hiện)
+    if (state.minPrice > PRICE_MIN) p.set('minPrice', state.minPrice);
+    if (state.maxPrice < PRICE_MAX) p.set('maxPrice', state.maxPrice);
+    return p;
   }
 
   /* ============================================================
-     VẼ GIAO DIỆN
+     DANH SÁCH TOUR
      ============================================================ */
-  function render() {
-    const results = sortTours(MOCK_TOURS.filter(t => matches(t)));
-    const scheduleCount = results.reduce((n, t) => n + upcoming(t).length, 0);
+  /** reset = true: đổi bộ lọc / sắp xếp → tải lại từ trang 0. false: "Xem thêm" → tải trang kế, nối vào cuối */
+  async function loadTours(reset) {
+    const seq = ++toursSeq;
+    if (reset) {
+      list.page = 0;
+      showSkeleton();
+    }
+    list.loading = true;
+    list.failed = false;
+    updateMoreBtn();
 
-    $('resultCount').textContent = results.length;
-    $('resultSub').textContent = state.date
-            ? `Khởi hành ngày ${parseIso(state.date).toLocaleDateString('vi-VN')}`
-            : `${scheduleCount} lịch khởi hành sắp tới`;
+    const p = filterParams();
+    p.set('sort', state.sort);
+    p.set('page', list.page);
+    p.set('size', PAGE_SIZE);
 
-    renderCards(results);
-    renderCalendar();
-    renderClassCounts();
-    renderDestinations();
+    try {
+      const page = readPage(await getData('/api/public/tours?' + p));
+      if (seq !== toursSeq) return;
+
+      if (reset) list.tours = [];
+      // Giữa 2 lần "Xem thêm" mà admin thêm / ẩn tour, trang sau có thể lặp lại tour đã hiện → bỏ trùng
+      const shown = new Set(list.tours.map(t => t.tourId));
+      const fresh = page.content.filter(t => !shown.has(t.tourId));
+      list.tours.push(...fresh);
+      list.total = page.total;
+      list.last  = page.last;
+      list.page++;
+
+      $('resultCount').textContent = list.total;
+      reset ? renderCards() : appendCards(fresh);
+    } catch (e) {
+      if (seq !== toursSeq) return;
+      console.error(e);
+      if (reset) {
+        list.tours = [];
+        list.last = true;
+        $('resultCount').textContent = 0;
+        showError();
+      } else {
+        list.failed = true;   // "Xem thêm" lỗi → giữ các thẻ đã có, nút đổi thành "Thử lại"
+      }
+    } finally {
+      if (seq === toursSeq) {
+        list.loading = false;
+        updateMoreBtn();
+      }
+    }
   }
 
-  function renderCards(results) {
-    const grid = $('tourGrid');
+  function updateMoreBtn() {
+    const btn = $('btnMore');
+    $('moreWrap').classList.toggle('d-none', !list.tours.length || (list.last && !list.loading));
+    btn.disabled = list.loading;
+    btn.textContent = list.loading ? 'Đang tải...' : (list.failed ? 'Tải lỗi, bấm để thử lại' : 'Xem thêm');
+  }
 
-    if (!results.length) {
+  function showSkeleton() {
+    $('resultCount').textContent = '…';
+    const col = state.view === 'list' ? 'col-12' : 'col-xl-4 col-md-6';
+    const skel = state.view === 'list' ? 'tl-skel tl-skel--list' : 'tl-skel';
+    $('tourGrid').innerHTML = `<div class="${col}"><div class="${skel}"></div></div>`.repeat(state.view === 'list' ? 3 : 6);
+  }
+
+  function showError() {
+    $('tourGrid').innerHTML = `
+      <div class="col-12">
+        <div class="tl-empty">
+          <i class="bi bi-wifi-off"></i>
+          Không tải được danh sách tour. Vui lòng thử lại.
+          <div class="mt-3"><button type="button" class="tl-more-btn" onclick="apply()">Thử lại</button></div>
+        </div>
+      </div>`;
+  }
+
+  /** Vẽ lại toàn bộ (đổi bộ lọc, đổi kiểu xem) */
+  function renderCards() {
+    const grid = $('tourGrid');
+    if (!list.tours.length) {
       grid.innerHTML = `
         <div class="col-12">
           <div class="tl-empty">
             <i class="bi bi-compass"></i>
-            Không tìm thấy tour phù hợp. Hãy thử bỏ bớt bộ lọc.
+            Không tìm thấy tour phù hợp.
             <div class="mt-3"><button type="button" class="tl-more-btn" onclick="resetFilters()">Đặt lại bộ lọc</button></div>
           </div>
         </div>`;
-      $('moreWrap').classList.add('d-none');
       return;
     }
-
-    grid.innerHTML = results.slice(0, state.limit).map(t => {
-      const url = `tour-details.html?id=${t.tourId}`;
-      const dates = upcoming(t);
-      const datesHtml = dates.length
-              ? `<div class="tl-dates">
-                   <button type="button" class="tl-dates-nav prev is-hidden" aria-label="Ngày trước" onclick="scrollDates(this, -1)">
-                     <i class="bi bi-chevron-left"></i></button>
-                   <div class="tl-dates-track" onscroll="updateDateNav(this.parentElement)">
-                     ${dates.map(d => `<a href="${url}&date=${d}" class="tl-date ${d === state.date ? 'active' : ''}"
-                                         title="Khởi hành ${parseIso(d).toLocaleDateString('vi-VN')}">${shortDate(d)}</a>`).join('')}
-                   </div>
-                   <button type="button" class="tl-dates-nav next" aria-label="Ngày sau" onclick="scrollDates(this, 1)">
-                     <i class="bi bi-chevron-right"></i></button>
-                 </div>`
-              : '<div class="tl-no-date">Liên hệ để nhận lịch khởi hành</div>';
-
-      const list = state.view === 'list';
-      return `
-        <div class="${list ? 'col-12' : 'col-xl-4 col-md-6'}">
-          <article class="tl-card ${list ? 'tl-card--list' : ''}">
-            <a href="${url}" class="tl-card-img">
-              <img src="${escapeHtml(t.thumbnailUrl)}" alt="${escapeHtml(t.tourName)}" loading="lazy">
-              <span class="tl-badge ${t.tourClass}">${CLASS_LABELS[t.tourClass] || ''}</span>
-            </a>
-            <div class="tl-card-body">
-              <div class="tl-tip tl-tip-wide" data-tip="${escapeHtml(t.tourName)}">
-                <h3 class="tl-card-title"><a href="${url}">${escapeHtml(t.tourName)}</a></h3>
-              </div>
-              ${list ? `
-              <div class="tl-info">
-                <div><i class="bi bi-upc-scan"></i>Mã tour: <b>${escapeHtml(t.tourCode)}</b></div>
-                <div><i class="bi bi-geo-alt"></i>Điểm khởi hành: <b>${escapeHtml(t.departureLocation)}</b></div>
-                <div><i class="bi bi-clock"></i>Thời gian: <b>${escapeHtml(durationText(t.duration))}</b></div>
-              </div>
-              <div class="tl-info-dates">
-                <span class="lbl"><i class="bi bi-calendar3"></i>Ngày khởi hành:</span>
-                ${datesHtml}
-              </div>` : `
-              <div class="tl-meta">
-                <span><i class="bi bi-geo-alt"></i><span class="tl-ellipsis">${escapeHtml(t.departureLocation)}</span></span>
-                <span><i class="bi bi-clock"></i>${escapeHtml(t.duration)}</span>
-              </div>
-              <div class="tl-dates-label">Ngày khởi hành</div>
-              ${datesHtml}`}
-              <div class="tl-card-foot">
-                <div class="tl-price">
-                  <small>Giá từ</small>
-                  <strong>${fmtMoney(t.basePrice)}</strong>
-                </div>
-                <a href="${url}" class="tl-detail-btn">Chi tiết</a>
-              </div>
-            </div>
-          </article>
-        </div>`;
-    }).join('');
-
-    $('moreWrap').classList.toggle('d-none', results.length <= state.limit);
-    document.querySelectorAll('.tl-dates').forEach(updateDateNav);
+    grid.innerHTML = list.tours.map(cardHtml).join('');
+    TourCard.initDateNavs(grid);
+    fillTransports(grid);
   }
 
-  /** Bấm ‹ / › → trượt dãy ngày khoảng 2/3 bề rộng đang thấy */
-  function scrollDates(btn, dir) {
-    const track = btn.parentElement.querySelector('.tl-dates-track');
-    track.scrollBy({ left: dir * track.clientWidth * 0.66 });
+  /** "Xem thêm": chỉ nối thẻ mới, không vẽ lại thẻ cũ (giữ vị trí cuộn của dãy ngày) */
+  function appendCards(tours) {
+    if (!tours.length) return;
+    const tmp = document.createElement('div');
+    tmp.innerHTML = tours.map(cardHtml).join('');
+    const added = [...tmp.children];
+    $('tourGrid').append(...added);
+    added.forEach(el => {
+      TourCard.initDateNavs(el);
+      fillTransports(el);
+    });
   }
 
-  /** Còn ngày bị khuất bên trái → hiện ‹ ; còn bên phải → hiện › ; kịch mép nào thì ẩn nút mép đó */
-  function updateDateNav(wrap) {
-    const track = wrap.querySelector('.tl-dates-track');
-    const atStart = track.scrollLeft <= 1;
-    const atEnd   = track.scrollLeft + track.clientWidth >= track.scrollWidth - 1;
-    wrap.querySelector('.prev').classList.toggle('is-hidden', atStart);
-    wrap.querySelector('.next').classList.toggle('is-hidden', atEnd);
-  }
-  window.addEventListener('resize', () => document.querySelectorAll('.tl-dates').forEach(updateDateNav));
+  /* ============================================================
+     PHƯƠNG TIỆN (chỉ thẻ ngang)
+     Phương tiện nằm ở từng lịch khởi hành (schedules.transport), TourCardResponse không có
+     → mượn API sẵn có của trang chi tiết: GET /api/public/tours/{tourId}/schedules
+     Mỗi tour gọi 1 lần rồi nhớ lại (đổi kiểu xem, lọc lại không gọi nữa).
+     Đánh đổi: thẻ ngang tốn thêm tối đa 9 request / trang (chạy song song).
+     ============================================================ */
+  const transportCache = new Map();   // tourId → Promise<string[]>
 
-  /* ----- Lịch: đếm số tour khởi hành mỗi ngày (theo các bộ lọc khác) ----- */
-  function renderCalendar() {
+  function getTransports(tourId) {
+    if (!transportCache.has(tourId)) {
+      const p = getData(`/api/public/tours/${tourId}/schedules`)
+              .then(schedules => {
+                // Các lịch có thể khác phương tiện (đợt bay, đợt đi xe) → gom, bỏ trùng, giữ thứ tự ngày
+                const seen = new Map();
+                schedules.forEach(sc => {
+                  const v = (sc.transport || '').trim();
+                  if (v && !seen.has(v.toLowerCase())) seen.set(v.toLowerCase(), v);
+                });
+                return [...seen.values()];
+              })
+              .catch(e => {
+                transportCache.delete(tourId);   // lỗi mạng: lần vẽ sau thử lại
+                throw e;
+              });
+      transportCache.set(tourId, p);
+    }
+    return transportCache.get(tourId);
+  }
+
+  /** Icon theo chữ admin nhập (ô phương tiện là chữ tự do) */
+  function transportIcon(text) {
+    const v = removeAccents(text);
+    if (v.includes('bay'))                       return 'bi-airplane';
+    if (v.includes('tau hoa') || v.includes('tau lua')) return 'bi-train-front';
+    if (v.includes('thuyen') || v.includes('tau')) return 'bi-water';
+    return 'bi-bus-front';
+  }
+
+  function fillTransports(root) {
+    if (state.view !== 'list') return;
+    root.querySelectorAll('.js-transport').forEach(row => {
+      const val = row.querySelector('b');
+      getTransports(Number(row.dataset.tourId))
+              .then(list => {
+                if (!row.isConnected) return;   // thẻ đã bị vẽ lại trong lúc chờ
+                val.classList.toggle('tl-muted-val', !list.length);
+                val.textContent = list.length ? list.join(', ') : 'Đang cập nhật';
+                row.querySelector('i').className = `bi ${list.length ? transportIcon(list[0]) : 'bi-signpost-2'}`;
+                row.title = list.length ? `Phương tiện: ${list.join(', ')}` : '';
+              })
+              .catch(() => { if (row.isConnected) val.textContent = '—'; });
+    });
+  }
+
+  /** 1 thẻ tour (HTML thẻ, nút tim, dãy ngày: assets/js/tour-card.js — dùng chung với trang chủ) */
+  function cardHtml(t) {
+    const col = state.view === 'list' ? 'col-12' : 'col-xl-4 col-md-6';
+    return `<div class="${col}">${TourCard.html(t, { view: state.view, selectedDate: state.date })}</div>`;
+  }
+
+  /* ============================================================
+     LỊCH "NGÀY KHỞI HÀNH" (bộ lọc bên trái)
+     days  : số tour mỗi ngày — BE bỏ qua ngày đang chọn, nên các ngày khác vẫn có số để đổi sang
+     total : tổng lịch sắp tới của các tour ĐANG HIỆN (có tính ngày đang chọn) → dòng "N lịch khởi hành sắp tới"
+     ============================================================ */
+  async function loadCalendar() {
+    const seq = ++calSeq;
+    const p = filterParams();
+    p.set('year', calMonth.getFullYear());
+    p.set('month', calMonth.getMonth() + 1);
+    $('calGrid').classList.add('is-loading');
+
+    try {
+      const data = await getData('/api/public/tours/departure-calendar?' + p);
+      if (seq !== calSeq) return;
+      const counts = {};
+      (data.days || []).forEach(d => { counts[d.date] = d.tourCount; });
+      renderCalendar(counts);
+      $('resultSub').textContent = `${data.totalUpcomingSchedules} lịch khởi hành sắp tới`;
+    } catch (e) {
+      if (seq !== calSeq) return;
+      console.error(e);
+      renderCalendar({});
+      $('resultSub').textContent = '';
+    } finally {
+      if (seq === calSeq) $('calGrid').classList.remove('is-loading');
+    }
+  }
+
+  function renderCalendar(counts) {
     const y = calMonth.getFullYear(), m = calMonth.getMonth();
     $('calTitle').textContent = `Tháng ${m + 1} / ${y}`;
     $('calPrev').disabled = y === TODAY.getFullYear() && m === TODAY.getMonth();
 
-    const counts = {};
-    MOCK_TOURS.filter(t => matches(t, 'date')).forEach(t =>
-            upcoming(t).forEach(d => { counts[d] = (counts[d] || 0) + 1; }));
-
     const weekdays = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
     let html = weekdays.map((w, i) => `<div class="tl-cal-wd ${i === 6 ? 'sun' : ''}">${w}</div>`).join('');
+    html += '<div></div>'.repeat((new Date(y, m, 1).getDay() + 6) % 7);   // T2 là cột đầu
 
-    const lead = (new Date(y, m, 1).getDay() + 6) % 7;   // T2 là cột đầu
-    html += '<div></div>'.repeat(lead);
-
-    const days = new Date(y, m + 1, 0).getDate();
-    for (let d = 1; d <= days; d++) {
+    for (let d = 1, n = new Date(y, m + 1, 0).getDate(); d <= n; d++) {
       const iso = toIso(new Date(y, m, d));
       const count = counts[iso] || 0;
+      const selected = iso === state.date;
       const sun = new Date(y, m, d).getDay() === 0;
-      html += `<button type="button" class="tl-cal-day ${sun ? 'sun' : ''} ${iso === state.date ? 'selected' : ''}"
-                       ${count ? '' : 'disabled'} onclick="pickDate('${iso}')"
-                       aria-label="Ngày ${d}${count ? `, ${count} tour` : ''}">
-                 <b>${d}</b>${count ? `<small>${count} tour</small>` : ''}
+      const today = iso === TODAY_ISO;
+      // Ngày đang chọn luôn bấm được (để bỏ chọn), kể cả khi đổi bộ lọc khác làm ngày đó về 0 tour
+      html += `<button type="button" class="tl-cal-day ${sun ? 'sun' : ''} ${selected ? 'selected' : ''} ${today ? 'today' : ''}"
+                       ${count || selected ? '' : 'disabled'} onclick="pickDate('${iso}')"
+                       aria-label="Ngày ${d}${today ? ' (hôm nay)' : ''}, ${count ? `${count} tour` : 'không có tour'}">
+                 <b>${d}</b>${count ? `<small>${count} tour</small>` : '<small class="none">-</small>'}
                </button>`;
     }
     $('calGrid').innerHTML = html;
   }
 
-  function renderClassCounts() {
-    const base = MOCK_TOURS.filter(t => matches(t, 'class'));
+  function changeCalMonth(step) {
+    calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() + step, 1);
+    $('calTitle').textContent = `Tháng ${calMonth.getMonth() + 1} / ${calMonth.getFullYear()}`;
+    loadCalendar();   // chỉ đổi tháng xem → không tải lại danh sách tour
+  }
+
+  /* ============================================================
+     DÒNG TOUR / ĐIỂM ĐẾN / GIÁ (bộ lọc bên trái)
+     ============================================================ */
+  function renderClasses() {
     $('fClasses').innerHTML = Object.entries(CLASS_LABELS).map(([key, label]) => `
       <label class="tl-check">
         <input type="checkbox" value="${key}" ${state.classes.has(key) ? 'checked' : ''} onchange="toggleClass(this)">
-        Tour ${label.toLowerCase()} <span class="count">(${base.filter(t => t.tourClass === key).length})</span>
+        Tour ${label.toLowerCase()}
       </label>`).join('');
   }
 
-  /* ----- Thanh kéo giá ----- */
+  function renderDestinations() {
+    const q = removeAccents($('destSearch').value.trim());
+    const items = locations.filter(l => !q || removeAccents(l.locationName).includes(q));
+
+    $('destOptions').innerHTML = items.length
+            ? items.map(l => `
+                <label class="tl-check">
+                  <input type="checkbox" value="${l.locationId}" ${state.destinations.has(String(l.locationId)) ? 'checked' : ''}>
+                  ${escapeHtml(l.locationName)}
+                </label>`).join('')
+            : '<div class="tl-dd-empty">Không tìm thấy điểm đến</div>';
+
+    const chosen = [...state.destinations].map(locationName).filter(Boolean);
+    $('destLabel').textContent = chosen.length ? chosen.join(', ') : 'Chọn điểm đến';
+    $('destLabel').classList.toggle('is-placeholder', !chosen.length);
+    $('destClear').parentElement.classList.toggle('d-none', !chosen.length);
+  }
+
   function renderPriceSlider() {
     const pct = v => (v - PRICE_MIN) / (PRICE_MAX - PRICE_MIN) * 100;
     $('priceMin').value = state.minPrice;
@@ -1012,17 +878,22 @@
     else                            state.maxPrice = Math.max(max, min + PRICE_STEP);
     renderPriceSlider();
     clearTimeout(priceTimer);
-    priceTimer = setTimeout(apply, 150);   // đang kéo thì chưa lọc, dừng tay 0,15 giây mới lọc
+    priceTimer = setTimeout(apply, 400);   // đang kéo thì chưa gọi API, dừng tay 0,4 giây mới lọc
   }
 
   /* ============================================================
      SỰ KIỆN
      ============================================================ */
-  function apply() { state.limit = PAGE_SIZE; render(); }
+  /** Bộ lọc đổi → tải lại danh sách từ trang đầu + lịch (số tour mỗi ngày, tổng lịch) */
+  function apply() {
+    renderDestinations();
+    loadTours(true);
+    loadCalendar();
+  }
 
   /** Đồng bộ thanh tìm kiếm với trạng thái (bộ lọc bên trái cũng đổi được ngày / điểm đến) */
   function syncSearchBar() {
-    $('sbDeparture').value   = state.departure;
+    $('sbDeparture').value = state.departure;
     // Thanh tìm kiếm chỉ chọn 1 điểm đến; bên trái chọn nhiều thì hiện "N điểm đến"
     const sb = $('sbDestination');
     sb.querySelector('option[value="__multi"]')?.remove();
@@ -1032,7 +903,7 @@
     } else {
       sb.value = state.destinations.size ? [...state.destinations][0] : '';
     }
-    $('sbDate').value        = state.date;
+    $('sbDate').value = state.date;
     refreshBarSelects();
   }
 
@@ -1049,173 +920,30 @@
 
   function resetFilters() {
     state.destinations.clear();
-    $('destSearch').value = '';
-    Object.assign(state, { departure: '', date: '', minPrice: PRICE_MIN, maxPrice: PRICE_MAX, limit: PAGE_SIZE });
     state.classes.clear();
-    renderPriceSlider();
+    $('destSearch').value = '';
+    Object.assign(state, { departure: '', date: '', minPrice: PRICE_MIN, maxPrice: PRICE_MAX });
     calMonth = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1);
+    renderPriceSlider();
+    renderClasses();
     syncSearchBar();
-    render();
+    apply();
   }
 
   $('searchForm').addEventListener('submit', e => {
     e.preventDefault();
-    state.departure   = $('sbDeparture').value;
+    state.departure = $('sbDeparture').value;
     const dest = $('sbDestination').value;
     if (dest !== '__multi') state.destinations = new Set(dest ? [dest] : []);   // "N điểm đến" → giữ nguyên lựa chọn bên trái
-    state.date        = $('sbDate').value;
+    state.date = $('sbDate').value;
     if (state.date) { const d = parseIso(state.date); calMonth = new Date(d.getFullYear(), d.getMonth(), 1); }
     syncSearchBar();
     apply();
     document.querySelector('.tl-result-bar').scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 
-  /* ============================================================
-     COMBOBOX TỰ LÀM
-     ============================================================ */
-  function openDropdown(dd, open = !dd.classList.contains('open')) {
-    document.querySelectorAll('.tl-dd.open').forEach(o => { if (o !== dd) openDropdown(o, false); });
-    dd.classList.toggle('open', open);
-    dd.querySelector('.tl-dd-toggle').setAttribute('aria-expanded', open);
-    if (open) {
-      dd._render?.();                                   // combobox thanh ngang: vẽ lại danh sách mỗi lần mở
-      (dd.querySelector('.tl-dd-search input') || dd.querySelector('li.active'))?.focus();
-    }
-  }
-  document.addEventListener('click', e => {
-    const btn = e.target.closest('.tl-dd-toggle');
-    if (btn) openDropdown(btn.closest('.tl-dd'));
-  });
-
-  /**
-   * Biến 1 <select> thành combobox bo tròn. <select> gốc vẫn giữ (ẩn) để code cũ đọc / ghi .value như bình thường;
-   * ghi .value bằng code xong thì gọi refreshBarSelects() để cập nhật chữ hiển thị.
-   */
-  const enhancedSelects = [];
-  /** Ảnh tròn bên trái mỗi lựa chọn (option có data-img); không có ảnh / ảnh lỗi → biểu tượng ghim bản đồ */
-  function optionThumb(o) {
-    if (o.value === '' || o.value === '__multi') return '<span class="tl-dd-thumb"><i class="bi bi-globe-asia-australia"></i></span>';
-    const fallback = `this.outerHTML='<span class=&quot;tl-dd-thumb&quot;><i class=&quot;bi bi-geo-alt&quot;></i></span>'`;
-    return o.dataset.img
-            ? `<img class="tl-dd-thumb" src="${escapeHtml(o.dataset.img)}" alt="" loading="lazy" onerror="${fallback}">`
-            : '<span class="tl-dd-thumb"><i class="bi bi-geo-alt"></i></span>';
-  }
-
-  function enhanceSelect(sel, { search = false, images = false, heading = '' } = {}) {
-    sel.classList.add('d-none');
-    const dd = document.createElement('div');
-    dd.className = 'tl-dd tl-dd--bar' + (images ? ' tl-dd--images' : '');
-    dd.innerHTML = `
-      <button type="button" class="tl-dd-toggle" id="${sel.id}Btn" aria-haspopup="listbox" aria-expanded="false">
-        <span class="tl-dd-label"></span><i class="bi bi-chevron-down"></i>
-      </button>
-      <div class="tl-dd-menu">
-        ${search ? '<label class="tl-dd-search"><i class="bi bi-search"></i><input type="text" placeholder="Tìm kiếm" autocomplete="off"></label>' : ''}
-        ${heading ? `<div class="tl-dd-heading">${escapeHtml(heading)}</div>` : ''}
-        <ul role="listbox"></ul>
-      </div>`;
-    sel.after(dd);
-    document.querySelector(`label[for="${sel.id}"]`)?.setAttribute('for', `${sel.id}Btn`);
-
-    const ul = dd.querySelector('ul'), input = dd.querySelector('.tl-dd-search input');
-    const label = dd.querySelector('.tl-dd-label');
-
-    dd._render = () => {
-      const q = removeAccents(input?.value.trim() || '');
-      const opts = [...sel.options].filter(o => !q || removeAccents(o.text).includes(q));
-      ul.innerHTML = opts.length
-              ? opts.map(o => `<li role="option" tabindex="0" data-value="${escapeHtml(o.value)}"
-                                 class="${o.value === sel.value ? 'active' : ''}" aria-selected="${o.value === sel.value}">${images ? optionThumb(o) : ''}<span>${escapeHtml(o.text)}</span></li>`).join('')
-              : '<div class="tl-dd-empty">Không tìm thấy</div>';
-    };
-    const refresh = () => { label.textContent = sel.options[sel.selectedIndex]?.text || ''; };
-    const pick = li => {
-      sel.value = li.dataset.value;
-      sel.dispatchEvent(new Event('change', { bubbles: true }));
-      refresh();
-      openDropdown(dd, false);
-      dd.querySelector('.tl-dd-toggle').focus();
-    };
-
-    ul.addEventListener('click', e => { const li = e.target.closest('li'); if (li) pick(li); });
-    ul.addEventListener('keydown', e => {
-      const li = e.target.closest('li'); if (!li) return;
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(li); }
-      if (e.key === 'ArrowDown') { e.preventDefault(); li.nextElementSibling?.focus(); }
-      if (e.key === 'ArrowUp')   { e.preventDefault(); (li.previousElementSibling || input)?.focus(); }
-    });
-    input?.addEventListener('input', dd._render);
-    input?.addEventListener('keydown', e => { if (e.key === 'ArrowDown') { e.preventDefault(); ul.querySelector('li')?.focus(); } });
-
-    refresh();
-    enhancedSelects.push(refresh);
-  }
-  function refreshBarSelects() { enhancedSelects.forEach(fn => fn()); }
-
-  /* ----- Lịch chọn "Ngày đi" trên thanh tìm kiếm ----- */
-  let dpMonth = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1);
-
-  function refreshDateLabel() {
-    const v = $('sbDate').value;
-    $('sbDateLabel').textContent = v ? parseIso(v).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'dd/mm/yyyy';
-    $('sbDateLabel').classList.toggle('is-placeholder', !v);
-  }
-  enhancedSelects.push(refreshDateLabel);   // syncSearchBar() → refreshBarSelects() cập nhật luôn ô ngày
-
-  function renderDatePicker() {
-    const y = dpMonth.getFullYear(), m = dpMonth.getMonth();
-    const minIso = addDays(1);              // chỉ chọn từ ngày mai (BE yêu cầu ngày đi sau hôm nay)
-    const selected = $('sbDate').value;
-
-    $('dpTitle').textContent = `Tháng ${m + 1} - ${y}`;
-    $('dpPrev').disabled = y === TODAY.getFullYear() && m === TODAY.getMonth();
-
-    let html = ['Th 2', 'Th 3', 'Th 4', 'Th 5', 'Th 6', 'Th 7', 'CN']
-            .map((w, i) => `<div class="tl-dp-wd ${i === 6 ? 'sun' : ''}">${w}</div>`).join('');
-    html += '<div></div>'.repeat((new Date(y, m, 1).getDay() + 6) % 7);   // ô trống trước ngày 1 (T2 là cột đầu)
-
-    for (let d = 1, n = new Date(y, m + 1, 0).getDate(); d <= n; d++) {
-      const iso = toIso(new Date(y, m, d));
-      const cls = [
-        new Date(y, m, d).getDay() === 0 && 'sun',
-        iso === TODAY_ISO && 'today',
-        iso === selected && 'selected'
-      ].filter(Boolean).join(' ');
-      html += `<button type="button" class="tl-dp-day ${cls}" data-date="${iso}" ${iso < minIso ? 'disabled' : ''}
-                       aria-label="${d}/${m + 1}/${y}" ${iso === selected ? 'aria-pressed="true"' : ''}>${d}</button>`;
-    }
-    $('dpGrid').innerHTML = html;
-  }
-
-  // Mở lịch → nhảy tới tháng của ngày đang chọn (chưa chọn thì tháng hiện tại)
-  $('dateDD')._render = () => {
-    const v = $('sbDate').value;
-    const base = v ? parseIso(v) : TODAY;
-    dpMonth = new Date(base.getFullYear(), base.getMonth(), 1);
-    renderDatePicker();
-  };
-  $('dpPrev').addEventListener('click', () => { dpMonth.setMonth(dpMonth.getMonth() - 1); renderDatePicker(); });
-  $('dpNext').addEventListener('click', () => { dpMonth.setMonth(dpMonth.getMonth() + 1); renderDatePicker(); });
-  $('dpGrid').addEventListener('click', e => {
-    const day = e.target.closest('.tl-dp-day:not(:disabled)');
-    if (!day) return;
-    $('sbDate').value = day.dataset.date;
-    refreshDateLabel();
-    openDropdown($('dateDD'), false);
-  });
-  $('dpClear').addEventListener('click', () => {
-    $('sbDate').value = '';
-    refreshDateLabel();
-    openDropdown($('dateDD'), false);
-  });
-  // Bấm ra ngoài / Esc → đóng
-  document.addEventListener('click', e => {
-    const inside = e.composedPath().some(el => el.classList?.contains('tl-dd'));
-    if (!inside) document.querySelectorAll('.tl-dd.open').forEach(dd => openDropdown(dd, false));
-  });
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') document.querySelectorAll('.tl-dd.open').forEach(dd => openDropdown(dd, false));
-  });
+  /* Combobox + lịch "Ngày đi": assets/js/search-controls.js (dùng chung với trang chủ) */
+  initDatePicker($('dateDD'), $('sbDate'), $('sbDateLabel'));
 
   /* ----- Sắp xếp theo ----- */
   function pickSort(li) {
@@ -1226,7 +954,7 @@
       x.setAttribute('aria-selected', x === li);
     });
     openDropdown($('sortDD'), false);
-    apply();
+    loadTours(true);   // sắp xếp không đổi số tour / lịch → không cần tải lại lịch
   }
   document.querySelectorAll('#sortDD li').forEach(li => {
     li.addEventListener('click', () => pickSort(li));
@@ -1238,28 +966,6 @@
   });
 
   /* ----- Điểm đến (chọn nhiều + tìm kiếm không dấu) ----- */
-  const ALL_DESTINATIONS = [...new Set(MOCK_TOURS.map(t => t.locationName))].sort((a, b) => a.localeCompare(b, 'vi'));
-
-  function renderDestinations() {
-    // Số tour mỗi điểm đến, tính theo các bộ lọc còn lại
-    const base = MOCK_TOURS.filter(t => matches(t, 'destination'));
-    const q = removeAccents($('destSearch').value.trim());
-    const items = ALL_DESTINATIONS.filter(n => !q || removeAccents(n).includes(q));
-
-    $('destOptions').innerHTML = items.length
-            ? items.map(n => `
-                <label class="tl-check">
-                  <input type="checkbox" value="${escapeHtml(n)}" ${state.destinations.has(n) ? 'checked' : ''}>
-                  ${escapeHtml(n)} <span class="count">(${base.filter(t => t.locationName === n).length})</span>
-                </label>`).join('')
-            : '<div class="tl-dd-empty">Không tìm thấy điểm đến</div>';
-
-    const chosen = [...state.destinations];
-    $('destLabel').textContent = chosen.length ? chosen.join(', ') : 'Chọn điểm đến';
-    $('destLabel').classList.toggle('is-placeholder', !chosen.length);
-    $('destClear').parentElement.classList.toggle('d-none', !chosen.length);
-  }
-
   $('destOptions').addEventListener('change', e => {
     e.target.checked ? state.destinations.add(e.target.value) : state.destinations.delete(e.target.value);
     syncSearchBar();
@@ -1268,20 +974,39 @@
   $('destSearch').addEventListener('input', renderDestinations);
   $('destClear').addEventListener('click', () => { state.destinations.clear(); syncSearchBar(); apply(); });
 
-  // Đổi kiểu hiển thị lưới / danh sách (giữ nguyên số tour đang hiện)
-  document.querySelectorAll('.tl-view-btn').forEach(btn => btn.addEventListener('click', () => {
-    state.view = btn.dataset.view;
+  /* ----- Kiểu hiển thị lưới / danh sách: nhớ lựa chọn trong trình duyệt, reload vẫn giữ ----- */
+  const VIEW_KEY = 'viettrip.tourView';
+
+  /** Đọc kiểu đã lưu. Trình duyệt chặn lưu trữ (ẩn danh, tắt cookie) thì localStorage ném lỗi → dùng lưới */
+  function savedView() {
+    try {
+      const v = localStorage.getItem(VIEW_KEY);
+      return v === 'list' || v === 'grid' ? v : 'grid';
+    } catch (e) {
+      return 'grid';
+    }
+  }
+
+  /** Đặt kiểu hiển thị + tô nút tương ứng (KHÔNG vẽ lại thẻ) */
+  function setView(view) {
+    state.view = view;
     document.querySelectorAll('.tl-view-btn').forEach(b => {
-      b.classList.toggle('active', b === btn);
-      b.setAttribute('aria-pressed', b === btn);
+      b.classList.toggle('active', b.dataset.view === view);
+      b.setAttribute('aria-pressed', b.dataset.view === view);
     });
-    render();
+  }
+
+  // Bấm đổi kiểu: vẽ lại từ dữ liệu đã có, không gọi API
+  document.querySelectorAll('.tl-view-btn').forEach(btn => btn.addEventListener('click', () => {
+    setView(btn.dataset.view);
+    try { localStorage.setItem(VIEW_KEY, btn.dataset.view); } catch (e) { /* không lưu được thì thôi, vẫn đổi kiểu */ }
+    if (!list.loading || list.tours.length) renderCards();
   }));
   $('btnReset').addEventListener('click', resetFilters);
-  $('btnMore').addEventListener('click', () => { state.limit += PAGE_SIZE; render(); });
+  $('btnMore').addEventListener('click', () => { if (!list.loading) loadTours(false); });
 
-  $('calPrev').addEventListener('click', () => { calMonth.setMonth(calMonth.getMonth() - 1); renderCalendar(); });
-  $('calNext').addEventListener('click', () => { calMonth.setMonth(calMonth.getMonth() + 1); renderCalendar(); });
+  $('calPrev').addEventListener('click', () => changeCalMonth(-1));
+  $('calNext').addEventListener('click', () => changeCalMonth(1));
 
   /* ============================================================
      GHIM THANH TÌM KIẾM KHI CUỘN (chỉ màn ≥ 768px; điện thoại thanh cao 4 hàng, ghim sẽ che hết nội dung)
@@ -1309,16 +1034,42 @@
   /* ============================================================
      KHỞI ĐỘNG
      ============================================================ */
-  (function init() {
-    const uniq = key => [...new Set(MOCK_TOURS.map(t => t[key]))].sort((a, b) => a.localeCompare(b, 'vi'));
-    const opts = list => list.map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
 
-    $('sbDeparture').insertAdjacentHTML('beforeend', opts(uniq('departureLocation')));
-    // Điểm đến kèm ảnh. Nối BE: lấy imageUrl từ GET /api/public/locations; dữ liệu mẫu tạm lấy ảnh tour đầu tiên của điểm đến
-    $('sbDestination').insertAdjacentHTML('beforeend', uniq('locationName').map(v => {
-      const img = MOCK_TOURS.find(t => t.locationName === v)?.thumbnailUrl || '';
-      return `<option value="${escapeHtml(v)}" data-img="${escapeHtml(img)}">${escapeHtml(v)}</option>`;
-    }).join(''));
+  /** Từ trang chủ / trang điểm đến: tours.html?departure=Hà Nội&locationId=3&date=2026-11-20 */
+  function readUrlParams() {
+    const q = new URLSearchParams(location.search);
+    state.departure = q.get('departure') || '';
+    const locId = q.get('locationId');
+    if (locId && /^\d+$/.test(locId)) state.destinations.add(locId);
+    const date = q.get('date');
+    if (date && /^\d{4}-\d{2}-\d{2}$/.test(date) && date > TODAY_ISO) {   // chỉ nhận ngày sau hôm nay
+      state.date = date;
+      const d = parseIso(date);
+      calMonth = new Date(d.getFullYear(), d.getMonth(), 1);
+    }
+  }
+
+  /** Dropdown điểm khởi hành + điểm đến (thanh tìm kiếm) và danh sách điểm đến (bộ lọc trái) */
+  async function loadOptions() {
+    const [departures, locs] = await Promise.all([
+      getData('/api/public/tours/departure-locations').catch(e => { console.error(e); return []; }),
+      getData('/api/public/locations').catch(e => { console.error(e); return []; })
+    ]);
+    locations = locs.slice().sort((a, b) => a.locationName.localeCompare(b.locationName, 'vi'));
+
+    // Tham số trên URL có thể là giá trị cũ (điểm đã bị ẩn) → vẫn thêm vào dropdown để hiện đúng điều kiện đang lọc
+    const depList = state.departure && !departures.includes(state.departure)
+            ? [...departures, state.departure] : departures;
+    $('sbDeparture').insertAdjacentHTML('beforeend', depList.map(v =>
+            `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join(''));
+    $('sbDestination').insertAdjacentHTML('beforeend', locations.map(l =>
+            `<option value="${l.locationId}" data-img="${escapeHtml(l.imageUrl || '')}">${escapeHtml(l.locationName)}</option>`).join(''));
+
+    syncSearchBar();
+    renderDestinations();
+  }
+
+  (function init() {
     enhanceSelect($('sbDeparture'));
     enhanceSelect($('sbDestination'), { search: true, images: true, heading: 'Điểm đến' });
 
@@ -1327,8 +1078,13 @@
       $(id).addEventListener('input', onPriceInput);
     });
     renderPriceSlider();
+    renderClasses();
 
-    render();
+    setView(savedView());   // trước apply(): khung chờ tải cũng đúng kiểu lưới / danh sách
+    readUrlParams();
+    renderCalendar({});
+    apply();         // danh sách tour + lịch: không cần chờ dropdown
+    loadOptions();   // tải song song
   })();
 </script>
 

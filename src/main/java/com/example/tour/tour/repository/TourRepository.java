@@ -7,6 +7,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface TourRepository extends JpaRepository<Tour, Integer>, JpaSpecificationExecutor<Tour> {
@@ -39,4 +40,7 @@ public interface TourRepository extends JpaRepository<Tour, Integer>, JpaSpecifi
 
     /** Số tour thuộc danh mục (tính cả tour đang ẩn) — chặn xoá danh mục */
     long countByCategory_CategoryId(Integer categoryId);
+
+    @Query("SELECT DISTINCT t.departureLocation FROM Tour t WHERE t.isActive = true ORDER BY t.departureLocation")
+    List<String> findPublicDepartureLocations();
 }

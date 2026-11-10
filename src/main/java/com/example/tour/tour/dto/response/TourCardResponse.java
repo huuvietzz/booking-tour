@@ -1,4 +1,5 @@
 package com.example.tour.tour.dto.response;
+
 import com.example.tour.tour.constant.TourClass;
 import lombok.*;
 
@@ -12,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class TourCardResponse {
     private Integer tourId;
+    private String tourCode;
     private String thumbnailUrl;
     private TourClass tourClass;
     private String tourName;

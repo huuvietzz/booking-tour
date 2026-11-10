@@ -24,17 +24,13 @@
   <link href="assets/css/main.css" rel="stylesheet">
   <link href="assets/css/auth-ui.css" rel="stylesheet">
   <link href="assets/css/header-white.css" rel="stylesheet">
+  <link href="assets/css/tour-card.css" rel="stylesheet">
+  <link href="assets/css/search-controls.css" rel="stylesheet">
 
   <!-- Template: Tour – BootstrapMade.com (https://bootstrapmade.com/license/) -->
 
   <style>
     /* Bổ sung nhỏ cho dữ liệu thật (class "hp-" chỉ dùng ở trang chủ) */
-    .featured-tours .tour-card h4 a { color: inherit; }
-    .featured-tours .tour-card h4 a:hover { color: var(--accent-color); }
-    .featured-tours .tour-card h4 {
-      display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden;
-    }
-    .hp-dates-label { font-size: 13px; color: #6b7385; margin-bottom: 6px; }
     .hp-noimg {
       width: 100%; height: 100%; min-height: 220px; display: flex; align-items: center; justify-content: center;
       background: linear-gradient(135deg, #dfe8f7, #eef2f9); color: #9aa3b5; font-size: 3rem;
@@ -42,6 +38,160 @@
     .hp-state { text-align: center; padding: 40px 20px; color: #6b7385; }
     .featured-destination .description, .compact-destination .brief {
       display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden;
+    }
+
+    /* =========================================================
+       HERO ẢNH TĨNH + KHUNG TÌM TOUR (giống Vietravel)
+       Đổi ảnh nền: sửa --hp-hero-img
+       ========================================================= */
+    .hp-wrap { max-width: 1640px; margin: 0 auto; padding: 0 24px; }
+    .hp-hero {
+      --hp-hero-img: url("assets/img/travel/showcase-8.webp");
+      position: relative; min-height: 600px; display: flex; align-items: flex-end;
+      padding-bottom: 120px;   /* chừa chỗ cho khung tìm kiếm đè lên mép dưới ảnh */
+      /* lớp tối dần về phía dưới-trái để chữ trắng luôn đọc được, ảnh sáng cỡ nào cũng vậy */
+      background: linear-gradient(to top, rgba(0, 0, 0, .55), rgba(0, 0, 0, .05) 60%),
+      var(--hp-hero-img) center / cover no-repeat, #26425e;
+    }
+    .hp-hero > .hp-wrap { width: 100%; }   /* hero là flex → thiếu dòng này khung chữ co lại và bị căn giữa, lệch khung tìm kiếm */
+    .hp-hero-title {
+      color: #fff; font-size: clamp(34px, 5vw, 64px); font-weight: 700; line-height: 1.15; margin: 0 0 12px;
+      text-shadow: 0 2px 16px rgba(0, 0, 0, .35); max-width: 900px;
+    }
+    .hp-hero-sub { color: #fff; font-size: clamp(16px, 1.6vw, 20px); margin: 0; max-width: 720px; opacity: .95; text-shadow: 0 1px 8px rgba(0, 0, 0, .4); }
+
+    .hp-search-wrap { position: relative; z-index: 5; margin-top: -60px; margin-bottom: 20px; }   /* z-index: menu xổ xuống đè lên khu bên dưới */
+    .hp-search {
+      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto; gap: 16px; align-items: center;
+      background: #fff; border-radius: 24px; padding: 22px;
+      box-shadow: 0 16px 40px rgba(16, 24, 40, .12);
+    }
+    .hp-field {
+      display: flex; align-items: center; gap: 14px; min-width: 0; margin: 0; cursor: pointer;
+      background: var(--tl-bg); border: 1px solid transparent; border-radius: 999px; padding: 10px 22px 10px 12px;
+      transition: border-color .15s, background .15s;
+    }
+    .hp-field:hover { border-color: color-mix(in srgb, var(--tl-primary) 40%, #fff); }
+    .hp-field:focus-within { border-color: var(--tl-primary); background: #fff; }
+    .hp-field-icon {
+      flex: 0 0 auto; width: 46px; height: 46px; border-radius: 50%; background: #fff;
+      display: flex; align-items: center; justify-content: center; color: var(--tl-text); font-size: 20px;
+    }
+    .hp-field-body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .hp-field-label { font-size: 14px; color: var(--tl-muted); line-height: 1.2; }
+    /* Combobox / lịch (search-controls.css) trong ô: chữ to đậm màu chủ đạo, menu thả ngay dưới ô */
+    .hp-field .tl-dd--bar .tl-dd-toggle { font-size: 19px; }
+    .hp-field .tl-dd--bar .tl-dd-toggle > i { font-size: 1rem; color: var(--tl-muted); }
+    .hp-field .tl-dd--bar .tl-dd-menu { left: -72px; top: calc(100% + 22px); min-width: calc(100% + 94px); }   /* mép trái thẳng mép ô */
+    .hp-field .tl-dd--date .tl-dd-menu.tl-dp { left: -72px; }
+    .hp-search-btn {
+      border: 0; border-radius: 999px; background: var(--tl-primary); color: #fff; height: 66px; padding: 0 44px;
+      font-size: 18px; font-weight: 600; white-space: nowrap; display: inline-flex; align-items: center; gap: 10px;
+      transition: filter .15s, box-shadow .15s;
+    }
+    .hp-search-btn:hover { filter: brightness(.92); box-shadow: 0 6px 16px color-mix(in srgb, var(--tl-primary) 35%, transparent); }
+
+    @media (max-width: 1199.98px) {
+      .hp-search { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .hp-search-btn { grid-column: 1 / -1; justify-content: center; height: 56px; }
+    }
+    @media (max-width: 767.98px) {
+      .hp-hero { min-height: 460px; padding-bottom: 110px; }
+      .hp-search { grid-template-columns: 1fr; padding: 16px; gap: 12px; }
+      .hp-search-wrap { padding: 0 12px; margin-top: -60px; }
+      .hp-field .tl-dd--bar .tl-dd-toggle { font-size: 17px; }
+      .hp-wrap { padding: 0 12px; }
+    }
+
+    /* =========================================================
+       TOUR TRỌN GÓI (giống Vietravel): tab danh mục + băng chuyền thẻ tour
+       Thẻ tour: assets/css/tour-card.css + assets/js/tour-card.js (y hệt tours.html)
+       ========================================================= */
+    .hp-pkg { padding: 60px 0; }
+    .hp-pkg-wrap { max-width: 1640px; margin: 0 auto; padding: 0 24px; }
+    .hp-pkg-box { background: #eef5fd; border-radius: 28px; padding: 40px 36px 30px; }
+    .hp-pkg-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 26px; }
+    .hp-pkg-head h2 { font-size: 36px; font-weight: 700; color: var(--tl-text); margin: 0 0 8px; }
+    .hp-pkg-head p { margin: 0; color: var(--tl-muted); font-size: 17px; }
+
+    /* Nút "Xem thêm →" viền bo tròn, mũi tên trong vòng tròn đặc */
+    .hp-more-btn {
+      flex: 0 0 auto; display: inline-flex; align-items: center; gap: 14px;
+      padding: 6px 6px 6px 22px; border: 1.5px solid var(--tl-primary); border-radius: 999px;
+      color: var(--tl-primary); font-weight: 600; font-size: 16px; background: #fff; transition: background .15s, color .15s;
+      text-decoration: none;
+    }
+    .hp-more-btn span {
+      width: 38px; height: 38px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+      background: var(--tl-primary); color: #fff; font-size: 18px;
+    }
+    .hp-more-btn:hover { background: var(--tl-primary); color: #fff; }
+    .hp-more-btn:hover span { background: #fff; color: var(--tl-primary); }
+
+    /* Tab danh mục: viên thuốc, đang chọn → nền đậm chữ trắng; hẹp thì cuộn ngang thay vì xuống dòng */
+    .hp-pkg-tabs { display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; padding: 2px 2px 6px; margin-bottom: 22px; }
+    .hp-pkg-tabs::-webkit-scrollbar { display: none; }
+    .hp-pkg-tab {
+      flex: 0 0 auto; border: 1px solid #d9dee8; background: #fff; color: var(--tl-text);
+      border-radius: 999px; padding: 10px 24px; font-size: 16px; white-space: nowrap; transition: background .15s, color .15s, border-color .15s;
+    }
+    .hp-pkg-tab:hover { border-color: var(--tl-primary); color: var(--tl-primary); }
+    .hp-pkg-tab.active { background: var(--tl-text); border-color: var(--tl-text); color: #fff; }
+    .hp-pkg-tab:focus-visible { outline: 2px solid var(--tl-primary); outline-offset: 2px; }
+
+    /* Băng chuyền: cuộn ngang, mỗi lần dừng đúng mép 1 thẻ */
+    .hp-pkg-carousel { position: relative; }
+    .hp-pkg-track {
+      display: flex; gap: 24px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth;
+      scrollbar-width: none; padding: 10px 2px 18px;   /* chừa chỗ cho thẻ nổi lên + bóng khi rê chuột */
+      scroll-padding-inline: 2px;   /* thẻ dừng sát mép padding; thiếu dòng này lúc đầu scrollLeft = 2 → nút ‹ hiện sai */
+    }
+    .hp-pkg-track::-webkit-scrollbar { display: none; }
+    .hp-pkg-item { flex: 0 0 calc((100% - 3 * 24px) / 4); scroll-snap-align: start; min-width: 0; }   /* 4 thẻ / màn */
+    @media (max-width: 1199.98px) { .hp-pkg-item { flex-basis: calc((100% - 2 * 24px) / 3); } }
+    @media (max-width: 991.98px)  { .hp-pkg-item { flex-basis: calc((100% - 24px) / 2); } }
+    @media (max-width: 575.98px)  {
+      .hp-pkg-item { flex-basis: 86%; }   /* thấy mép thẻ sau → biết còn vuốt được */
+      .hp-pkg-box { padding: 28px 16px 20px; border-radius: 20px; }
+      .hp-pkg-wrap { padding: 0 12px; }
+      .hp-pkg-head { flex-direction: column; }
+      .hp-pkg-head h2 { font-size: 26px; }
+    }
+    .hp-pkg-item .tl-skel { height: 470px; }
+
+    /* Nút ‹ › 2 bên băng chuyền, ngang giữa phần ảnh; hết thẻ phía nào thì ẩn nút phía đó */
+    .hp-car-nav {
+      position: absolute; top: 150px; z-index: 5; width: 46px; height: 46px; border-radius: 50%;
+      border: 0; background: #fff; color: var(--tl-text); font-size: 18px;
+      display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(16, 24, 40, .18);
+      transition: opacity .15s, background .15s, color .15s;
+    }
+    .hp-car-nav.prev { left: -18px; }
+    .hp-car-nav.next { right: -18px; }
+    .hp-car-nav:hover { background: var(--tl-primary); color: #fff; }
+    .hp-car-nav.is-hidden { opacity: 0; pointer-events: none; }
+    @media (max-width: 575.98px) { .hp-car-nav { display: none; } }   /* điện thoại: vuốt */
+
+    .hp-pkg-empty {
+      flex: 1; text-align: center; padding: 60px 20px; background: #fff; border-radius: 16px; color: var(--tl-muted);
+    }
+    .hp-pkg-empty i { display: block; font-size: 2.4rem; opacity: .5; margin-bottom: 8px; }
+
+    /* Tìm kiếm nổi bật: viên thuốc xanh nhạt, chữ in hoa; rê chuột → nền đậm chữ trắng */
+    .hp-hot { display: flex; align-items: center; gap: 12px 16px; flex-wrap: wrap; margin-top: 8px; }
+    .hp-hot-label { font-size: 16px; color: var(--tl-text); text-transform: uppercase; white-space: nowrap; }
+    .hp-hot-list { display: flex; flex-wrap: wrap; gap: 12px; }
+    .hp-hot-list a {
+      padding: 10px 20px; border-radius: 999px; background: color-mix(in srgb, var(--tl-primary) 14%, #fff);
+      color: var(--tl-primary); font-size: 15px; font-weight: 500; text-transform: uppercase; letter-spacing: .3px;
+      text-decoration: none; white-space: nowrap; transition: background .15s, color .15s;
+    }
+    .hp-hot-list a:hover, .hp-hot-list a:focus-visible { background: var(--tl-primary); color: #fff; }
+    @media (max-width: 575.98px) {
+      /* điện thoại: 1 hàng vuốt ngang thay vì nhiều hàng chiếm chỗ */
+      .hp-hot-list { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; width: 100%; padding-bottom: 2px; }
+      .hp-hot-list::-webkit-scrollbar { display: none; }
+      .hp-hot-list a { padding: 8px 16px; font-size: 14px; }
     }
   </style>
 </head>
@@ -74,66 +224,60 @@
 
 <main class="main">
 
-  <!-- ===================== HERO + TÌM TOUR ===================== -->
-  <section id="travel-hero" class="travel-hero section dark-background">
-
-    <div class="hero-background">
-      <video autoplay muted loop playsinline>
-        <source src="assets/img/travel/video-2.mp4" type="video/mp4">
-      </video>
-      <div class="hero-overlay"></div>
+  <!-- ===================== HERO (ảnh tĩnh) + KHUNG TÌM TOUR (giống Vietravel) ===================== -->
+  <section class="hp-hero" aria-label="Giới thiệu">
+    <div class="hp-wrap">
+      <h1 class="hp-hero-title">Khám phá Việt Nam cùng VietTrip</h1>
+      <p class="hp-hero-sub">Tour trong nước từ Bắc vào Nam – giá rõ ràng, lịch khởi hành cụ thể, đặt chỗ chỉ trong vài phút.</p>
     </div>
+  </section>
 
-    <div class="container position-relative">
-      <div class="row align-items-center">
-        <div class="col-lg-7">
-          <div class="hero-text" data-aos="fade-up" data-aos-delay="100">
-            <h1 class="hero-title">Khám phá Việt Nam cùng VietTrip</h1>
-            <p class="hero-subtitle">Hàng trăm tour trong nước từ Bắc vào Nam – giá rõ ràng, lịch khởi hành cụ thể, đặt chỗ chỉ trong vài phút.</p>
-            <div class="hero-buttons">
-              <a href="tours.html" class="btn btn-primary me-3">Xem danh sách tour</a>
-              <a href="destinations.html" class="btn btn-outline">Khám phá điểm đến</a>
-            </div>
-          </div>
+  <!-- Gửi sang tours.html: ?departure=...&locationId=...&date=yyyy-mm-dd (ô để trống thì không gửi) -->
+  <div class="hp-wrap hp-search-wrap">
+    <!-- Ô chọn xổ xuống giống tours.html: assets/js/search-controls.js biến <select> thành combobox bo tròn -->
+    <form id="heroSearch" class="hp-search" action="tours.html" method="get" autocomplete="off">
+
+      <div class="hp-field">
+        <span class="hp-field-icon"><i class="bi bi-geo-alt"></i></span>
+        <div class="hp-field-body">
+          <label class="hp-field-label" for="hsDeparture">Điểm khởi hành</label>
+          <select name="departure" id="hsDeparture"><option value="">Tất cả</option></select>
         </div>
+      </div>
 
-        <div class="col-lg-5">
-          <div class="booking-form-wrapper" data-aos="fade-left" data-aos-delay="200">
-            <div class="booking-form">
-              <h3 class="form-title">Tìm tour phù hợp</h3>
-              <!-- Gửi sang tours.html: ?departure=...&locationId=...&date=yyyy-mm-dd -->
-              <form id="heroSearch" action="tours.html" method="get">
-                <div class="form-group mb-3">
-                  <label for="hsDeparture">Điểm khởi hành</label>
-                  <select name="departure" id="hsDeparture" class="form-select">
-                    <option value="">Tất cả</option>
-                    <option value="Hà Nội">Hà Nội</option>
-                    <option value="Đà Nẵng">Đà Nẵng</option>
-                    <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
-                  </select>
-                </div>
+      <div class="hp-field">
+        <span class="hp-field-icon"><i class="bi bi-pin-map"></i></span>
+        <div class="hp-field-body">
+          <label class="hp-field-label" for="hsDestination">Điểm đến</label>
+          <select name="locationId" id="hsDestination"><option value="">Tất cả</option></select>
+        </div>
+      </div>
 
-                <div class="form-group mb-3">
-                  <label for="hsDestination">Điểm đến</label>
-                  <select name="locationId" id="hsDestination" class="form-select">
-                    <option value="">Tất cả điểm đến</option>
-                  </select>
-                </div>
-
-                <div class="form-group mb-3">
-                  <label for="hsDate">Ngày khởi hành</label>
-                  <input type="date" name="date" id="hsDate" class="form-control">
-                </div>
-
-                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search me-2"></i>Tìm tour</button>
-              </form>
+      <div class="hp-field">
+        <span class="hp-field-icon"><i class="bi bi-calendar3"></i></span>
+        <div class="hp-field-body">
+          <label class="hp-field-label" for="hsDateBtn">Ngày đi</label>
+          <input type="hidden" name="date" id="hsDate">   <!-- "yyyy-mm-dd" -->
+          <div class="tl-dd tl-dd--bar tl-dd--date" id="hsDateDD">
+            <button type="button" class="tl-dd-toggle" id="hsDateBtn" aria-haspopup="dialog" aria-expanded="false">
+              <span class="tl-dd-label is-placeholder" id="hsDateLabel">dd/mm/yyyy</span>
+            </button>
+            <div class="tl-dd-menu tl-dp" role="dialog" aria-label="Chọn ngày đi">
+              <div class="tl-dp-head">
+                <button type="button" class="tl-dp-nav" aria-label="Tháng trước"><i class="bi bi-chevron-left"></i></button>
+                <div class="tl-dp-title">—</div>
+                <button type="button" class="tl-dp-nav" aria-label="Tháng sau"><i class="bi bi-chevron-right"></i></button>
+              </div>
+              <div class="tl-dp-grid"></div>
+              <div class="tl-dp-foot"><button type="button" class="tl-link-btn">Xoá ngày đã chọn</button></div>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-  </section>
+      <button type="submit" class="hp-search-btn"><i class="bi bi-search"></i> Tìm kiếm</button>
+    </form>
+  </div>
 
   <!-- ===================== VÌ SAO CHỌN VIETTRIP ===================== -->
   <section id="why-us" class="why-us section">
@@ -222,23 +366,38 @@
 
   </section>
 
-  <!-- ===================== TOUR NỔI BẬT (GET /api/public/tours) ===================== -->
-  <section id="featured-tours" class="featured-tours section">
+  <!-- ===================== TOUR TRỌN GÓI THEO DANH MỤC =====================
+       Tab: GET /api/public/categories   |   Thẻ: GET /api/public/tours?categoryId=...  -->
+  <section id="package-tours" class="hp-pkg">
+    <div class="hp-pkg-wrap">
+      <div class="hp-pkg-box" data-aos="fade-up">
 
-    <div class="container section-title" data-aos="fade-up">
-      <h2>Tour Nổi Bật</h2>
-      <div><span>Khám Phá</span> <span class="description-title">Các Tour Được Yêu Thích</span></div>
-    </div>
+        <div class="hp-pkg-head">
+          <div>
+            <h2>Tour trọn gói VietTrip</h2>
+            <p>Trải nghiệm du lịch trọn vẹn, đa dạng tour trong nước từ Bắc vào Nam</p>
+          </div>
+          <a href="tours.html" class="hp-more-btn">Xem thêm <span><i class="bi bi-arrow-right"></i></span></a>
+        </div>
 
-    <div class="container" data-aos="fade-up" data-aos-delay="100">
-      <div class="row gy-4" id="hpTours">
-        <div class="col-12 hp-state"><span class="spinner-border spinner-border-sm me-2"></span>Đang tải tour…</div>
+        <div class="hp-pkg-tabs" id="pkgTabs" role="tablist" aria-label="Danh mục tour">
+          <button type="button" class="hp-pkg-tab active" role="tab" aria-selected="true" data-id="">Tất cả</button>
+        </div>
+
+        <div class="hp-pkg-carousel">
+          <button type="button" class="hp-car-nav prev is-hidden" id="pkgPrev" aria-label="Tour trước"><i class="bi bi-chevron-left"></i></button>
+          <div class="hp-pkg-track" id="pkgTrack" aria-live="polite"></div>
+          <button type="button" class="hp-car-nav next is-hidden" id="pkgNext" aria-label="Tour sau"><i class="bi bi-chevron-right"></i></button>
+        </div>
+
+        <!-- Tìm kiếm nổi bật: các điểm đến (GET /api/public/locations) → tours.html?locationId=... -->
+        <nav class="hp-hot d-none" id="hotSearch" aria-label="Tìm kiếm nổi bật">
+          <span class="hp-hot-label">Tìm kiếm nổi bật:</span>
+          <div class="hp-hot-list" id="hotSearchList"></div>
+        </nav>
+
       </div>
-      <div class="text-center mt-5" data-aos="fade-up" data-aos-delay="500">
-        <a href="tours.html" class="btn-view-all">Xem Tất Cả Các Tour</a>
-      </div>
     </div>
-
   </section>
 
   <!-- ===================== KÊU GỌI HÀNH ĐỘNG ===================== -->
@@ -337,6 +496,8 @@
 
 <script src="assets/js/main.js"></script>
 <script src="assets/js/auth-ui.js"></script>
+<script src="assets/js/tour-card.js"></script>
+<script src="assets/js/search-controls.js"></script>
 
 <script>
   function $(id) { return document.getElementById(id); }
@@ -346,15 +507,11 @@
             ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
 
-  const money = v => v == null ? '' : new Intl.NumberFormat('vi-VN').format(v) + ' ₫';
-  const shortDate = s => { const [, m, d] = String(s).split('-'); return `${d}/${m}`; };
   const NO_IMG = '<div class="hp-noimg"><i class="bi bi-image"></i></div>';
   const imgTag = (src, alt) => src
           ? `<img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}" class="img-fluid" loading="lazy"
                   onerror="this.outerHTML='${NO_IMG.replace(/"/g, '&quot;')}'">`
           : NO_IMG;
-
-  const CLASS_LABELS = { BUDGET: 'Tiết kiệm', STANDARD: 'Tiêu chuẩn', GOOD_PRICE: 'Giá tốt', PREMIUM: 'Cao cấp' };
 
   /** fetch + kiểm tra ApiResponse { success, data } */
   async function getData(url) {
@@ -376,9 +533,11 @@
       console.error(e);
     }
 
+    renderHotSearch(locations);
+
     // Dropdown "Điểm đến" ở form tìm kiếm
     $('hsDestination').insertAdjacentHTML('beforeend', locations.map(l =>
-            `<option value="${l.locationId}">${escapeHtml(l.locationName)}</option>`).join(''));
+            `<option value="${l.locationId}" data-img="${escapeHtml(l.imageUrl || '')}">${escapeHtml(l.locationName)}</option>`).join(''));
 
     if (!locations.length) {
       $('featured-destinations').classList.add('d-none');   // không có dữ liệu → ẩn cả khu
@@ -423,52 +582,110 @@
       </div>`;
   }
 
+  /** Spring Page có 2 dạng JSON: mặc định { content, ... } hoặc VIA_DTO { content, page: {...} } — đều có content */
+  const pageContent = data => (data && data.content) || [];
+
   /* ============================================================
-     TOUR NỔI BẬT: GET /api/public/tours?isFeatured=true (Page<TourCardResponse>)
+     TÌM KIẾM NỔI BẬT (dưới băng chuyền tour trọn gói)
+     Dùng chung danh sách điểm đến với khu "Điểm đến nổi bật" → không gọi thêm API.
+     Bấm → tours.html?locationId=3: trang tour tự đọc tham số, tick sẵn điểm đến đó.
      ============================================================ */
-  async function loadFeaturedTours() {
-    let tours = [];
-    try {
-      const page = await getData('/api/public/tours?isFeatured=true&page=0&size=6&sortBy=createdAt&sortDir=desc');
-      tours = page.content || [];
-    } catch (e) {
-      console.error(e);
-    }
+  const HOT_MAX = 10;   // nhiều điểm đến quá thì dòng này dài lê thê
 
-    if (!tours.length) {
-      $('featured-tours').classList.add('d-none');
-      return;
-    }
-
-    $('hpTours').innerHTML = tours.map(t => {
-      const url = `tour-details.html?id=${t.tourId}`;
-      const dates = (t.departureDates || []).slice(0, 4);
-      return `
-        <div class="col-lg-4 col-md-6" data-aos="fade-up">
-          <div class="tour-card">
-            <div class="tour-image">
-              <a href="${url}">${imgTag(t.thumbnailUrl, t.tourName)}</a>
-              ${CLASS_LABELS[t.tourClass] ? `<div class="tour-badge">${CLASS_LABELS[t.tourClass]}</div>` : ''}
-              <div class="tour-price">${money(t.basePrice)}</div>
-            </div>
-            <div class="tour-content">
-              <h4><a href="${url}" title="${escapeHtml(t.tourName)}">${escapeHtml(t.tourName)}</a></h4>
-              <div class="tour-meta">
-                <span class="duration"><i class="bi bi-clock"></i> ${escapeHtml(t.duration || '')}</span>
-                ${t.departureLocation ? `<span class="group-size"><i class="bi bi-geo-alt"></i> ${escapeHtml(t.departureLocation)}</span>` : ''}
-              </div>
-              ${dates.length ? `
-                <div class="hp-dates-label">Ngày khởi hành</div>
-                <div class="tour-highlights">${dates.map(d => `<span>${shortDate(d)}</span>`).join('')}</div>` : ''}
-              <div class="tour-action">
-                <a href="${url}" class="btn-book">Xem chi tiết</a>
-                ${t.locationName ? `<div class="tour-rating"><i class="bi bi-pin-map"></i><span>${escapeHtml(t.locationName)}</span></div>` : ''}
-              </div>
-            </div>
-          </div>
-        </div>`;
-    }).join('');
+  function renderHotSearch(locations) {
+    if (!locations.length) return;   // không có điểm đến → giữ ẩn cả dòng
+    $('hotSearchList').innerHTML = locations.slice(0, HOT_MAX).map(l =>
+            `<a href="tours.html?locationId=${l.locationId}">${escapeHtml(l.locationName)}</a>`).join('');
+    $('hotSearch').classList.remove('d-none');
   }
+
+  /* ============================================================
+     TOUR TRỌN GÓI: tab danh mục + băng chuyền thẻ tour (thẻ y hệt tours.html)
+       GET /api/public/categories                          → List<CategoryResponse>
+       GET /api/public/tours?categoryId=&sort=&page=&size= → Page<TourCardResponse>
+     ============================================================ */
+  const PKG_SIZE = 8;              // tối đa 8 thẻ mỗi danh mục, muốn xem nữa → "Xem thêm"
+  const pkgCache = new Map();      // categoryId ('' = Tất cả) → Promise<tour[]>: quay lại tab cũ không gọi API nữa
+  let pkgCurrent = '';             // tab đang chọn; kết quả về muộn của tab khác thì bỏ
+
+  function getPkgTours(categoryId) {
+    if (!pkgCache.has(categoryId)) {
+      const q = new URLSearchParams({ sort: 'departure', page: 0, size: PKG_SIZE });
+      if (categoryId) q.set('categoryId', categoryId);
+      const p = getData('/api/public/tours?' + q).then(pageContent)
+              .catch(e => { pkgCache.delete(categoryId); throw e; });   // lỗi mạng: bấm lại tab thì thử lại
+      pkgCache.set(categoryId, p);
+    }
+    return pkgCache.get(categoryId);
+  }
+
+  async function loadCategories() {
+    let cats = [];
+    try {
+      cats = await getData('/api/public/categories');
+    } catch (e) {
+      console.error(e);   // không lấy được danh mục → vẫn còn tab "Tất cả"
+    }
+    cats = cats.slice().sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0));
+    $('pkgTabs').insertAdjacentHTML('beforeend', cats.map(c => `
+      <button type="button" class="hp-pkg-tab" role="tab" aria-selected="false" data-id="${c.categoryId}">
+        ${escapeHtml(c.categoryName)}</button>`).join(''));
+  }
+
+  async function selectCategory(categoryId) {
+    pkgCurrent = categoryId;
+    document.querySelectorAll('.hp-pkg-tab').forEach(b => {
+      const on = b.dataset.id === categoryId;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-selected', on);
+    });
+
+    const track = $('pkgTrack');
+    if (!pkgCache.has(categoryId)) {   // chưa có sẵn → khung chờ
+      track.innerHTML = '<div class="hp-pkg-item"><div class="tl-skel"></div></div>'.repeat(4);
+      updateCarNav();
+    }
+
+    try {
+      const tours = await getPkgTours(categoryId);
+      if (pkgCurrent !== categoryId) return;
+
+      if (!tours.length && !categoryId) {   // "Tất cả" cũng trống → chưa có tour nào, ẩn cả khu
+        $('package-tours').classList.add('d-none');
+        return;
+      }
+      track.innerHTML = tours.length
+              ? tours.map(t => `<div class="hp-pkg-item">${TourCard.html(t)}</div>`).join('')
+              : '<div class="hp-pkg-empty"><i class="bi bi-compass"></i>Danh mục này chưa có tour khởi hành.</div>';
+      TourCard.initDateNavs(track);
+    } catch (e) {
+      if (pkgCurrent !== categoryId) return;
+      console.error(e);
+      track.innerHTML = `<div class="hp-pkg-empty"><i class="bi bi-wifi-off"></i>Không tải được danh sách tour.
+              <div class="mt-3"><button type="button" class="hp-more-btn" style="padding: 8px 22px;"
+                      onclick="selectCategory(pkgCurrent)">Thử lại</button></div></div>`;
+    }
+    track.scrollLeft = 0;
+    updateCarNav();
+  }
+
+  // Bấm tab (tab danh mục được thêm sau khi tải xong → bắt sự kiện ở khung cha)
+  $('pkgTabs').addEventListener('click', e => {
+    const tab = e.target.closest('.hp-pkg-tab');
+    if (tab && tab.dataset.id !== pkgCurrent) selectCategory(tab.dataset.id);
+  });
+
+  /* ----- Nút ‹ › của băng chuyền ----- */
+  function updateCarNav() {
+    const t = $('pkgTrack');
+    $('pkgPrev').classList.toggle('is-hidden', t.scrollLeft <= 1);
+    $('pkgNext').classList.toggle('is-hidden', t.scrollLeft + t.clientWidth >= t.scrollWidth - 1);
+  }
+  // Mỗi lần bấm trượt đúng 1 "màn" thẻ (scroll-snap giữ mép thẻ thẳng hàng)
+  $('pkgPrev').addEventListener('click', () => $('pkgTrack').scrollBy({ left: -$('pkgTrack').clientWidth }));
+  $('pkgNext').addEventListener('click', () => $('pkgTrack').scrollBy({ left: $('pkgTrack').clientWidth }));
+  $('pkgTrack').addEventListener('scroll', updateCarNav, { passive: true });
+  window.addEventListener('resize', updateCarNav);
 
   // Form tìm kiếm: bỏ các ô để trống khỏi URL cho gọn (tours.html?locationId=3 thay vì ?departure=&locationId=3&date=)
   $('heroSearch').addEventListener('submit', e => {
@@ -478,14 +695,34 @@
     location.href = 'tours.html' + (params.toString() ? '?' + params : '');
   });
 
-  // Ngày khởi hành: chỉ chọn từ ngày mai
-  (() => {
-    const d = new Date(); d.setDate(d.getDate() + 1);
-    $('hsDate').min = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  })();
+  /* ----- Ô chọn giống tours.html (assets/js/search-controls.js) ----- */
+  enhanceSelect($('hsDeparture'));
+  enhanceSelect($('hsDestination'), { search: true, images: true, heading: 'Điểm đến' });
+  initDatePicker($('hsDateDD'), $('hsDate'), $('hsDateLabel'));   // chỉ chọn từ ngày mai
 
+  // Bấm chỗ nào trong ô (icon, nhãn) cũng mở ô chọn, không chỉ đúng dòng chữ
+  document.querySelectorAll('.hp-field').forEach(field => field.addEventListener('click', e => {
+    if (e.target.closest('.tl-dd')) return;   // bấm trong combobox: để combobox tự xử lý
+    e.preventDefault();                       // nhãn <label> không tự bấm thêm lần nữa
+    e.stopPropagation();                      // không cho "bấm ra ngoài thì đóng" đóng ngay ô vừa mở
+    openDropdown(field.querySelector('.tl-dd'), true);
+  }));
+
+  /** Điểm khởi hành lấy từ chính dữ liệu tour đang bán (giống tours.html), không viết cứng */
+  async function loadDepartures() {
+    try {
+      const list = await getData('/api/public/tours/departure-locations');
+      $('hsDeparture').insertAdjacentHTML('beforeend', list.map(v =>
+              `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join(''));
+    } catch (e) {
+      console.error(e);   // lỗi → vẫn còn "Tất cả"
+    }
+  }
+
+  loadDepartures();
   loadDestinations();
-  loadFeaturedTours();
+  selectCategory('');   // "Tất cả": tải song song với danh sách danh mục
+  loadCategories();
 </script>
 
 </body>

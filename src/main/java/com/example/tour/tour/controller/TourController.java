@@ -1,13 +1,19 @@
 package com.example.tour.tour.controller;
 
 import com.example.tour.common.dto.ApiResponse;
+import com.example.tour.common.exception.AppException;
+import com.example.tour.common.exception.ErrorCode;
+import com.example.tour.tour.dto.request.PublicTourFilterRequest;
 import com.example.tour.tour.dto.request.TourFilterRequest;
 import com.example.tour.tour.dto.request.TourRequest;
+import com.example.tour.tour.dto.response.DepartureCalendarResponse;
 import com.example.tour.tour.dto.response.TourCardResponse;
 import com.example.tour.tour.dto.response.TourResponse;
 import com.example.tour.tour.dto.response.TourAdminRowResponse;
 import com.example.tour.tour.service.TourService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +25,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Set;
 
@@ -104,25 +111,54 @@ public class TourController {
     }
 
     // ======================= API PUBLIC =======================
+    // Thay 2 method public cũ bằng đoạn này. Import thêm:
+    //   com.example.tour.tour.dto.request.PublicTourFilterRequest
 
-    // ?keyword=&categoryId=&locationId=&tourClass=&isFeatured=&minPrice=&maxPrice=&page=&size=&sortBy=&sortDir=
+    // ?departureLocation=&locationIds=&departureDate=&tourClasses=&minPrice=&maxPrice=&isFeatured=&sort=&page=&size=
     @GetMapping("/public/tours")
     public ResponseEntity<ApiResponse<Page<TourCardResponse>>> getAllTours(
-            @ModelAttribute TourFilterRequest filter,
-            @RequestParam(defaultValue = "0")         int page,
-            @RequestParam(defaultValue = "12")        int size,
-            @RequestParam(defaultValue = "createdAt") String sortBy,
-            @RequestParam(defaultValue = "desc")      String sortDir) {
-        filter.setIsActive(null);   // phía khách không được chọn xem tour đang ẩn
-        Pageable pageable = buildPageable(page, size, sortBy, sortDir, PUBLIC_SORTS);
+            @ModelAttribute PublicTourFilterRequest filter,
+            @RequestParam(defaultValue = "0")  int page,
+            @RequestParam(defaultValue = "12") int size) {
+        page = Math.max(page, 0);
+        size = Math.min(Math.max(size, 1), 100);
+
+        // Sắp theo giá: Sort thường. Sắp theo ngày khởi hành: Specification tự orderBy → Pageable KHÔNG kèm Sort
+        Pageable pageable = switch (filter.getSort() == null ? "" : filter.getSort()) {
+            case PublicTourFilterRequest.SORT_PRICE_ASC  ->
+                    PageRequest.of(page, size, Sort.by("basePrice").ascending().and(Sort.by("tourId").descending()));
+            case PublicTourFilterRequest.SORT_PRICE_DESC ->
+                    PageRequest.of(page, size, Sort.by("basePrice").descending().and(Sort.by("tourId").descending()));
+            default -> {
+                filter.setSort(PublicTourFilterRequest.SORT_DEPARTURE);   // giá trị lạ → về mặc định
+                yield PageRequest.of(page, size);
+            }
+        };
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách tour thành công",
                 tourService.getAllTours(filter, pageable)));
+    }
+
+    // Dropdown "Điểm khởi hành": lấy từ chính dữ liệu tour đang bán
+    @GetMapping("/public/tours/departure-locations")
+    public ResponseEntity<ApiResponse<List<String>>> getDepartureLocations() {
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách điểm khởi hành thành công",
+                tourService.getDepartureLocations()));
     }
 
     @GetMapping("/public/tours/{tourId}")
     public ResponseEntity<ApiResponse<TourResponse>> getTourById(@PathVariable Integer tourId) {
         return ResponseEntity.ok(ApiResponse.success("Lấy chi tiết tour thành công",
                 tourService.getTourById(tourId)));
+    }
+
+    // ?year=2026&month=11 + cùng bộ lọc với /public/tours (departureDate gửi lên cũng bị bỏ qua)
+    @GetMapping("/public/tours/departure-calendar")
+    public ResponseEntity<ApiResponse<DepartureCalendarResponse>> getDepartureCalendar(
+            @ModelAttribute PublicTourFilterRequest filter,
+            @RequestParam @Min(2000) @Max(2100) int year,
+            @RequestParam @Min(1)    @Max(12)   int month) {
+        return ResponseEntity.ok(ApiResponse.success("Lấy lịch khởi hành thành công",
+                tourService.getDepartureCalendar(filter, YearMonth.of(year, month))));
     }
 
     // ----- Hỗ trợ -----

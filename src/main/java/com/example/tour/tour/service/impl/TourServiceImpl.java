@@ -4,7 +4,9 @@ import com.example.tour.booking.repository.BookingRepository;
 import com.example.tour.common.exception.AppException;
 import com.example.tour.common.exception.ErrorCode;
 import com.example.tour.common.service.FileStorageService;
+import com.example.tour.tour.constant.ScheduleStatus;
 import com.example.tour.tour.dto.request.ItineraryRequest;
+import com.example.tour.tour.dto.request.PublicTourFilterRequest;
 import com.example.tour.tour.dto.request.TourFilterRequest;
 import com.example.tour.tour.dto.request.TourRequest;
 import com.example.tour.tour.dto.response.*;
@@ -15,6 +17,9 @@ import com.example.tour.tour.repository.ScheduleRepository;
 import com.example.tour.tour.repository.TourRepository;
 import com.example.tour.tour.service.TourService;
 import com.example.tour.tour.specification.TourSpecification;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Tuple;
+import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
@@ -25,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -45,6 +51,7 @@ public class TourServiceImpl implements TourService {
     private final ScheduleRepository scheduleRepository;
     private final BookingRepository bookingRepository;
     private final FileStorageService fileStorageService;
+    private final EntityManager entityManager;
 
     // =====================================================================
     // THÊM
@@ -217,8 +224,8 @@ public class TourServiceImpl implements TourService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<TourCardResponse> getAllTours(TourFilterRequest filter, Pageable pageable) {
-        Page<Tour> page = tourRepository.findAll(TourSpecification.publicFilter(filter), pageable);
+    public Page<TourCardResponse> getAllTours(PublicTourFilterRequest filter, Pageable pageable) {
+        Page<Tour> page = tourRepository.findAll(TourSpecification.publicFilter(filter, LocalDate.now()), pageable);
 
         // 1 câu truy vấn cho ngày khởi hành của CẢ TRANG, rồi chia theo tourId
         List<Integer> tourIds = page.getContent().stream().map(Tour::getTourId).toList();
@@ -238,6 +245,12 @@ public class TourServiceImpl implements TourService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<String> getDepartureLocations() {
+        return tourRepository.findPublicDepartureLocations();
+    }
+
+    @Override
     @Transactional   // KHÔNG readOnly: có câu UPDATE tăng lượt xem
     public TourResponse getTourById(int tourId) {
         Tour tour = tourRepository.findPublicById(tourId)
@@ -247,6 +260,62 @@ public class TourServiceImpl implements TourService {
         TourResponse response = toTourResponse(tour);
         response.setViewCount(tour.getViewCount() + 1);   // entity đã nạp trước khi UPDATE
         return response;
+    }
+
+    /**
+     * Số tour khởi hành mỗi ngày trong 1 tháng, theo đúng bộ lọc đang chọn (trừ ngày).
+     * Mỗi tour chỉ có 1 lịch / ngày (UNIQUE tour_id + departure_date) → đếm lịch = đếm tour.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public DepartureCalendarResponse getDepartureCalendar(PublicTourFilterRequest filter, YearMonth month) {
+        LocalDate today = LocalDate.now();
+        LocalDate from  = month.atDay(1).isAfter(today) ? month.atDay(1) : today.plusDays(1);   // chỉ ngày tương lai
+        LocalDate to    = month.atEndOfMonth();
+
+        List<DepartureCalendarResponse.Day> days = from.isAfter(to)
+                ? List.of()                                   // tháng đã qua hết
+                : countToursPerDay(filter, from, to);
+
+        return new DepartureCalendarResponse(days, countUpcomingSchedules(filter, today));
+    }
+
+    // SELECT s.departureDate, COUNT(s) FROM Schedule s JOIN s.tour t ... GROUP BY s.departureDate
+    private List<DepartureCalendarResponse.Day> countToursPerDay(PublicTourFilterRequest filter,
+                                                                 LocalDate from, LocalDate to) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Tuple> q = cb.createTupleQuery();
+        Root<Schedule> s = q.from(Schedule.class);
+        Join<Schedule, Tour> tour = s.join("tour");
+        Path<LocalDate> date = s.get("departureDate");
+
+        List<Predicate> ps = TourSpecification.publicPredicates(filter, tour, q, cb, false);
+        ps.add(cb.notEqual(s.get("status"), ScheduleStatus.CANCELLED));
+        ps.add(cb.between(date, from, to));
+
+        q.multiselect(date, cb.count(s))
+                .where(ps.toArray(new Predicate[0]))
+                .groupBy(date)
+                .orderBy(cb.asc(date));
+
+        return entityManager.createQuery(q).getResultList().stream()
+                .map(t -> new DepartureCalendarResponse.Day(t.get(0, LocalDate.class), t.get(1, Long.class)))
+                .toList();
+    }
+
+    // Tổng số lịch sắp tới khớp bộ lọc (không giới hạn tháng)
+    private long countUpcomingSchedules(PublicTourFilterRequest filter, LocalDate today) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Long> q = cb.createQuery(Long.class);
+        Root<Schedule> s = q.from(Schedule.class);
+        Join<Schedule, Tour> tour = s.join("tour");
+
+        List<Predicate> ps = TourSpecification.publicPredicates(filter, tour, q, cb, true);
+        ps.add(cb.notEqual(s.get("status"), ScheduleStatus.CANCELLED));
+        ps.add(cb.greaterThan(s.get("departureDate"), today));
+
+        q.select(cb.count(s)).where(ps.toArray(new Predicate[0]));
+        return entityManager.createQuery(q).getSingleResult();
     }
 
     // =====================================================================
@@ -357,6 +426,7 @@ public class TourServiceImpl implements TourService {
     private TourCardResponse toTourCardResponse(Tour t, List<DepartureDateResponse> dates) {
         return TourCardResponse.builder()
                 .tourId(t.getTourId())
+                .tourCode(t.getTourCode())
                 .thumbnailUrl(t.getThumbnailUrl())
                 .tourClass(t.getTourClass())
                 .tourName(t.getTourName())

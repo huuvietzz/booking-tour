@@ -4,8 +4,8 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>Chi Tiết Tour - Tour Du Lịch</title>
-  <meta name="description" content="">
+  <title>Chi Tiết Tour - VietTrip</title>
+  <meta name="description" content="Chi tiết tour, lịch khởi hành, giá và lịch trình từng ngày.">
   <meta name="keywords" content="">
 
   <link href="assets/img/favicon.png" rel="icon">
@@ -22,512 +22,1003 @@
   <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
 
   <link href="assets/css/main.css" rel="stylesheet">
+  <link href="assets/css/auth-ui.css" rel="stylesheet">
+  <link href="assets/css/header-white.css" rel="stylesheet">
+  <link href="assets/css/tour-card.css" rel="stylesheet">
+
+  <style>
+    /* =========================================================
+       CHI TIẾT TOUR — class "td-" chỉ dùng ở trang này
+       Thẻ tour (Các chương trình khác) + nút tim: assets/css/tour-card.css
+       ========================================================= */
+    .td-page { background: var(--tl-bg); padding: 24px 0 70px; }
+    .td-page a { text-decoration: none; }
+    .td-wrap { max-width: 1640px; margin: 0 auto; padding: 0 24px; }
+    @media (max-width: 575.98px) { .td-wrap { padding: 0 12px; } }
+    .td-box { background: #fff; border-radius: 24px; padding: 28px 32px; }
+    @media (max-width: 575.98px) { .td-box { padding: 20px 16px; border-radius: 18px; } }
+
+    /* Đường dẫn */
+    .td-crumbs { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 6px; font-size: 15px; color: var(--tl-text); margin: 6px 0 22px; }
+    .td-crumbs a { color: var(--tl-text); }
+    .td-crumbs a:hover { color: var(--tl-primary); }
+    .td-crumbs .sep { color: var(--tl-muted); }
+    .td-crumbs .current { color: var(--tl-primary); font-weight: 600; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Tiêu đề */
+    .td-title { font-size: clamp(22px, 2.4vw, 32px); font-weight: 700; color: var(--tl-text); line-height: 1.35; margin: 0; }
+
+    /* Ảnh: 1 ảnh lớn + dải ảnh nhỏ */
+    .td-gallery { position: relative; }
+    .td-main-img {
+      position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; border: 0; padding: 0;
+      border-radius: 20px; overflow: hidden; background: #e9edf4; cursor: zoom-in;
+    }
+    .td-main-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s; }
+    .td-main-img:hover img { transform: scale(1.03); }
+    .td-main-img .td-noimg { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 4rem; color: #b6bfd0; }
+    .td-zoom {
+      position: absolute; right: 16px; bottom: 16px; width: 48px; height: 48px; border-radius: 14px;
+      background: rgba(255, 255, 255, .92); color: var(--tl-text); display: flex; align-items: center; justify-content: center; font-size: 20px;
+    }
+    .td-gallery .tl-fav { top: 16px; right: 16px; width: 46px; height: 46px; font-size: 21px; }
+    .td-gallery .tl-fav-pop { top: 72px; right: 16px; }
+
+    /* Khung giá bên phải: đứng yên khi cuộn */
+    .td-side { position: sticky; top: calc(var(--td-bar, 66px) + 24px); }   /* dính ngay dưới thanh mục lục */
+    .td-price-card { background: #fff; border-radius: 24px; padding: 24px; }
+    .td-kv { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 7px 0; font-size: 16px; }
+    .td-kv > span:first-child { display: inline-flex; align-items: center; gap: 10px; color: var(--tl-text); font-weight: 500; white-space: nowrap; }
+    .td-kv > span:first-child i { font-size: 19px; color: var(--tl-muted); }
+    .td-kv b { color: var(--tl-primary); font-weight: 500; text-align: right; min-width: 0; overflow-wrap: anywhere; }
+    /* Giá + nút luôn trên 1 hàng: không xuống dòng, chữ / đệm co theo bề rộng khung */
+    .td-price-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 14px; padding-top: 16px; border-top: 1px solid var(--tl-border); }
+    .td-price { min-width: 0; white-space: nowrap; }
+    .td-price small { color: var(--tl-muted); font-size: 14px; margin-right: 4px; }
+    .td-price strong { font-size: clamp(20px, 1.5vw, 26px); font-weight: 700; color: var(--tl-price); line-height: 1.2; }
+    .td-btn-pick {
+      flex: 0 0 auto; border: 0; border-radius: 999px; background: var(--tl-price); color: #fff; font-weight: 600; font-size: 15px;
+      padding: 10px 20px; white-space: nowrap; transition: filter .15s, box-shadow .15s;
+    }
+    .td-btn-pick:hover { filter: brightness(.92); box-shadow: 0 6px 16px rgba(214, 38, 44, .3); color: #fff; }
+
+    /* Đã chọn ngày: dòng đầu = Giá + nút ngày (bấm để bỏ chọn), nút "Đặt ngay" rộng hết khung */
+    .td-picked-head { display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      padding-bottom: 16px; margin-bottom: 8px; border-bottom: 1px solid var(--tl-border); }
+    .td-picked-date {
+      flex: 0 0 auto; display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: 999px; padding: 9px 14px;
+      background: var(--tl-primary-soft); color: var(--tl-primary); font-size: 14px; font-weight: 500; white-space: nowrap; transition: background .15s;
+    }
+    .td-picked-date:hover { background: color-mix(in srgb, var(--tl-primary) 18%, #fff); }
+    .td-btn-book { width: 100%; margin-top: 16px; padding: 14px; font-size: 17px; }
+
+    /* Thanh mục lục dính dưới header */
+    /* Header của web cuộn theo trang (không cố định) ở trang này */
+    body.tour-details-page #header { position: absolute; }
+
+    .td-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 997; background: #fff;
+      border-radius: 0 0 24px 24px; box-shadow: 0 6px 20px rgba(16, 24, 40, .08);
+      transform: translateY(-110%); transition: transform .25s ease;
+    }
+    .td-bar.show { transform: none; }
+    .td-bar a { text-decoration: none; }
+    .td-tabs { display: flex; gap: 6px 40px; overflow-x: auto; scrollbar-width: none; }
+    .td-tabs::-webkit-scrollbar { display: none; }
+    .td-tabs a {
+      flex: 0 0 auto; padding: 20px 0 17px; color: var(--tl-text); font-size: 18px; border-bottom: 3px solid transparent;
+      transition: color .15s, border-color .15s;
+    }
+    .td-tabs a:hover { color: var(--tl-primary); }
+    .td-tabs a.active { color: var(--tl-primary); border-bottom-color: var(--tl-primary); }
+
+    /* main.css của template tô MỌI thẻ <section> nền trắng + padding 60px → trả về nền trong suốt,
+       chỉ khối nội dung bên trong mới trắng (tiêu đề nằm trên nền xám của trang) */
+    .td-page section.td-section {
+      background: transparent; padding: 40px 0 0; overflow: visible;
+      scroll-margin-top: calc(var(--td-bar, 66px) + 4px);
+    }
+    .td-section > h2 { font-size: 24px; font-weight: 700; color: var(--tl-text); margin: 0 0 18px; }
+
+    /* Lịch khởi hành */
+    .td-months { display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; margin-bottom: 18px; padding-bottom: 2px; }
+    .td-months::-webkit-scrollbar { display: none; }
+    .td-month {
+      flex: 0 0 auto; min-width: 128px; border: 1px solid var(--tl-border); background: #fff; color: var(--tl-muted);
+      border-radius: 16px; padding: 12px 18px; line-height: 1.35; font-size: 16px; transition: all .15s;
+    }
+    .td-month:hover { border-color: var(--tl-primary); color: var(--tl-primary); }
+    .td-month.active { background: var(--tl-primary); border-color: var(--tl-primary); color: #fff; }
+    /* Dòng lịch: chưa chọn = ngày | mã | giá | Chọn; đã chọn = viền xanh + mở chi tiết bên dưới */
+    .td-sched { background: #fff; border-radius: 22px; border: 1px solid transparent; margin-bottom: 12px; transition: border-color .15s, box-shadow .15s; }
+    .td-sched.is-selected { border-color: var(--tl-primary); }
+    .td-sched-row { display: flex; align-items: center; gap: 14px 24px; flex-wrap: wrap; padding: 16px 20px; border-radius: 22px; cursor: pointer; }
+    /* Rê chuột vào dòng còn chỗ → cả khối hiện viền (nút "Chọn" giữ nguyên màu) */
+    .td-sched:not(.is-selected):not(.is-full):hover { border-color: var(--tl-text); }
+    .td-sched-row:focus-visible { outline: 2px solid var(--tl-primary); outline-offset: 2px; }
+    .td-sched.is-selected .td-sched-row, .td-sched.is-full .td-sched-row { cursor: default; }
+    .td-sched-date { background: var(--tl-primary-soft); color: var(--tl-primary); font-weight: 600; border-radius: 999px; padding: 10px 20px; white-space: nowrap; }
+    .td-sched-code { flex: 1; min-width: 180px; display: inline-flex; align-items: center; gap: 8px; color: var(--tl-text); font-size: 15px; }
+    .td-sched-code i { color: var(--tl-muted); }
+    .td-sched-price { font-size: 22px; font-weight: 700; color: var(--tl-text); white-space: nowrap; }
+    .td-sched.is-selected .td-sched-price { display: none; }   /* đã chọn: giá xem trong bảng bên dưới + khung phải */
+    /* "Chọn" chỉ là nhãn trong dòng (cả dòng mới là thứ bấm được) */
+    .td-choose {
+      min-width: 136px; border-radius: 999px; background: var(--tl-bg); color: var(--tl-text); font-weight: 600; text-align: center;
+      padding: 13px 26px; transition: background .15s, color .15s; white-space: nowrap;
+    }
+    .td-sched.is-selected .td-choose { background: var(--tl-primary); color: #fff; }
+    .td-sched.is-full .td-choose { background: #f1f2f5; color: #a3a9b6; }
+
+    .td-sched-detail { display: none; margin: 0 20px; padding: 6px 0 20px; border-top: 1px solid var(--tl-border); }
+    .td-sched.is-selected .td-sched-detail { display: block; animation: tdFade .2s ease-out; }
+    @keyframes tdFade { from { opacity: 0; transform: translateY(-4px); } }
+    .td-detail-title { text-align: center; font-weight: 600; color: var(--tl-text); margin: 16px 0 14px; font-size: 17px; }
+    .td-detail-grid { display: grid; grid-template-columns: 1fr 1fr; }
+    .td-detail-grid > div { padding: 0 24px; min-width: 0; }
+    .td-detail-grid > div:first-child { padding-left: 0; border-right: 1px solid var(--tl-border); }
+    .td-detail-grid > div:last-child { padding-right: 0; }
+    .td-detail-sep { border-top: 1px solid var(--tl-border); margin-top: 18px; }
+
+    /* Chiều đi / chiều về */
+    .td-leg-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 16px; color: var(--tl-muted); }
+    .td-leg-top b { color: var(--tl-text); font-weight: 600; }
+    .td-leg-transport { color: #f26b1d; display: inline-flex; align-items: center; gap: 6px; font-weight: 500; }
+    .td-leg-line { position: relative; height: 1px; margin: 22px 6px 14px; border-top: 1px dashed #cdd3df; }
+    .td-leg-line::before, .td-leg-line::after {
+      content: ""; position: absolute; top: -4px; width: 7px; height: 7px; border-radius: 50%; background: #cdd3df;
+    }
+    .td-leg-line::before { left: -4px; }
+    .td-leg-line::after { right: -4px; }
+    .td-leg-places { display: flex; justify-content: space-between; gap: 10px; color: var(--tl-muted); font-size: 16px; }
+    .td-leg-places span:last-child { text-align: right; }
+
+    /* Bảng giá theo độ tuổi */
+    .td-fare-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 8px 0; }
+    .td-fare-row b { display: block; color: var(--tl-text); font-weight: 600; font-size: 17px; }
+    .td-fare-row small { color: var(--tl-muted); font-size: 14px; }
+    .td-fare-row strong { color: var(--tl-price); font-size: 18px; font-weight: 700; white-space: nowrap; }
+
+    @media (max-width: 767.98px) {
+      .td-detail-grid { grid-template-columns: 1fr; }
+      .td-detail-grid > div { padding: 0 !important; border-right: 0 !important; }
+      .td-detail-grid > div + div { margin-top: 14px; padding-top: 14px !important; border-top: 1px solid var(--tl-border); }
+    }
+    .td-empty { background: #fff; border-radius: 22px; padding: 36px 20px; text-align: center; color: var(--tl-muted); }
+    .td-empty i { display: block; font-size: 2.2rem; opacity: .5; margin-bottom: 6px; }
+
+    /* Thông tin thêm: thẻ nhỏ có icon */
+    .td-facts { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
+    .td-fact { background: #fff; border-radius: 20px; padding: 20px 22px; }
+    .td-fact h3 { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 600; color: var(--tl-text); margin: 0 0 8px; }
+    .td-fact h3 i { font-size: 24px; color: var(--tl-primary); }
+    .td-fact p { margin: 0; color: var(--tl-muted); font-size: 15px; }
+
+    /* Giới thiệu (HTML do admin soạn) */
+    .td-desc { position: relative; color: var(--tl-text); font-size: 16px; line-height: 1.75; }
+    .td-desc.is-collapsed { max-height: 260px; overflow: hidden; }
+    .td-desc.is-collapsed::after {
+      content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 90px;
+      background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #fff);
+    }
+    .td-desc h2, .td-desc h3 { font-size: 19px; font-weight: 700; margin: 18px 0 8px; color: var(--tl-text); }
+    .td-desc img { max-width: 100%; height: auto; border-radius: 12px; }
+    .td-toggle { border: 0; background: none; color: var(--tl-primary); padding: 10px 0 0; font-weight: 500; }
+
+    /* Lịch trình: mỗi ngày 1 dòng, bấm mở nội dung */
+    .td-days { background: #fff; border-radius: 24px; padding: 8px 28px; }
+    .td-day + .td-day { border-top: 1px solid var(--tl-border); }
+    .td-day-head {
+      width: 100%; border: 0; background: none; padding: 20px 0; text-align: left;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    }
+    .td-day-head b { font-size: 18px; color: var(--tl-text); font-weight: 600; }
+    .td-day-head b span { color: var(--tl-text); }   /* "Ngày 1:" cùng màu đen với tiêu đề ngày */
+    .td-day-head i { flex: 0 0 auto; color: var(--tl-muted); transition: transform .2s; }
+    .td-day.open .td-day-head i { transform: rotate(90deg); }
+    .td-day-body { display: none; padding: 0 0 20px; color: var(--tl-text); line-height: 1.75; }
+    .td-day.open .td-day-body { display: block; }
+    .td-day-body img { max-width: 100%; height: auto; border-radius: 12px; }
+    @media (max-width: 575.98px) { .td-days { padding: 4px 16px; } }
+
+    /* Lưu ý */
+    /* Lưu ý: cùng kiểu khối với Lịch trình, mũi tên xuống, mở thì xoay lên */
+    .td-acc .td-day.open .td-day-head i { transform: rotate(180deg); }
+    .td-acc .td-day.open .td-day-head b { color: var(--tl-primary); }   /* mục đang mở: tiêu đề màu xanh như Vietravel */
+    .td-acc .td-day-body { color: #4b5263; }
+    .td-acc .td-day-body li + li { margin-top: 4px; }
+    .td-day-body ul { padding-left: 20px; margin-bottom: 10px; }
+
+    /* Các chương trình khác: lưới thẻ tour giống tours.html */
+    .td-others { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; }
+    @media (max-width: 1199.98px) { .td-others { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    @media (max-width: 991.98px)  { .td-others { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 575.98px)  { .td-others { grid-template-columns: 1fr; } }
+
+    /* Đang tải / lỗi */
+    .td-skel { border-radius: 20px; background: linear-gradient(90deg, #eceff5 25%, #f7f9fc 50%, #eceff5 75%); background-size: 200% 100%; animation: tl-shimmer 1.2s infinite linear; }
+    .td-error { background: #fff; border-radius: 24px; padding: 70px 20px; text-align: center; color: var(--tl-muted); }
+    .td-error i { font-size: 3rem; display: block; opacity: .5; margin-bottom: 10px; }
+    .td-error a { display: inline-block; margin-top: 16px; border-radius: 999px; background: var(--tl-primary); color: #fff; padding: 11px 26px; font-weight: 600; }
+  </style>
 </head>
 
 <body class="tour-details-page">
 
-  <header id="header" class="header d-flex align-items-center fixed-top">
-    <div class="header-container container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+<header id="header" class="header d-flex align-items-center fixed-top">
+  <div class="header-container container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
 
-      <a href="index.html" class="logo d-flex align-items-center me-auto me-xl-0">
-        <h1 class="sitename">Tour</h1>
-      </a>
+    <a href="index.html" class="logo d-flex align-items-center me-auto me-xl-0">
+      <img src="assets/img/logo.webp" alt="Booking Tour">
+    </a>
 
-      <nav id="navmenu" class="navmenu">
+    <nav id="navmenu" class="navmenu">
+      <ul>
+        <li><a href="index.html">Trang chủ</a></li>
+        <li><a href="about.html">Về chúng tôi</a></li>
+        <li><a href="destinations.html">Điểm đến</a></li>
+        <li><a href="tours.html" class="active" data-pages="tour-details.html,booking.html">Tours</a></li>
+        <li><a href="contact.html">Liên hệ</a></li>
+      </ul>
+      <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+    </nav>
+
+    <a class="btn-getstarted" href="pages-login.html">Đăng nhập</a>
+
+  </div>
+</header>
+
+<!-- Mục lục: chỉ hiện khi header của web đã cuộn khuất (giống Vietravel); bấm → cuộn tới mục; cuộn → tô mục đang xem -->
+<div class="td-bar" id="tdBar" aria-hidden="true">
+  <div class="td-wrap">
+    <nav class="td-tabs" id="tdTabs" aria-label="Mục lục">
+      <a href="#sec-schedules">Lịch khởi hành</a>
+      <a href="#sec-facts">Thông tin chuyến đi</a>
+      <a href="#sec-intro" id="tabIntro">Giới thiệu</a>
+      <a href="#sec-itinerary" id="tabItinerary">Lịch trình</a>
+      <a href="#sec-notes">Lưu ý</a>
+    </nav>
+  </div>
+</div>
+
+<main class="main td-page" id="tdMain">
+  <div class="td-wrap">
+
+    <nav class="td-crumbs" id="tdCrumbs" aria-label="Đường dẫn">
+      <a href="index.html">Trang chủ</a><span class="sep">/</span><a href="tours.html">Tours</a>
+    </nav>
+
+    <!-- Đang tải -->
+    <div id="tdLoading">
+      <div class="td-skel mb-4" style="height: 110px;"></div>
+      <div class="row g-4">
+        <div class="col-lg-8"><div class="td-skel" style="aspect-ratio: 16 / 9;"></div></div>
+        <div class="col-lg-4"><div class="td-skel" style="height: 300px;"></div></div>
+      </div>
+    </div>
+
+    <!-- Không tìm thấy / lỗi -->
+    <div class="td-error d-none" id="tdError">
+      <i class="bi bi-compass"></i>
+      <div id="tdErrorText">Không tìm thấy tour hoặc tour đã ngừng hiển thị.</div>
+      <a href="tours.html">Xem các tour khác</a>
+    </div>
+
+    <div class="d-none" id="tdContent">
+
+      <!-- Tiêu đề -->
+      <div class="td-box mb-4">
+        <h1 class="td-title" id="tdTitle"></h1>
+      </div>
+
+      <!-- KHÔNG align-items-start: cột phải phải cao bằng cột trái thì khung giá mới "dính" được khi cuộn -->
+      <div class="row g-4">
+        <!-- ===================== CỘT TRÁI ===================== -->
+        <div class="col-lg-8">
+
+          <div class="td-box">
+            <div class="td-gallery" id="tdGallery"></div>
+          </div>
+
+
+          <!-- Lịch khởi hành -->
+          <section class="td-section" id="sec-schedules">
+            <h2>Lịch khởi hành</h2>
+            <div class="td-months" id="tdMonths" role="tablist" aria-label="Tháng khởi hành"></div>
+            <div id="tdSchedules"></div>
+          </section>
+
+          <!-- Thông tin thêm về chuyến đi -->
+          <section class="td-section" id="sec-facts">
+            <h2>Thông tin thêm về chuyến đi</h2>
+            <div class="td-facts" id="tdFacts"></div>
+          </section>
+
+          <!-- Giới thiệu (mô tả HTML của admin) -->
+          <section class="td-section" id="sec-intro">
+            <h2>Giới thiệu chương trình</h2>
+            <div class="td-box">
+              <div class="td-desc" id="tdDesc"></div>
+              <button type="button" class="td-toggle d-none" id="tdDescToggle">Xem thêm <i class="bi bi-chevron-down"></i></button>
+            </div>
+          </section>
+
+          <!-- Lịch trình từng ngày -->
+          <section class="td-section" id="sec-itinerary">
+            <h2>Lịch trình</h2>
+            <div class="td-days" id="tdDays"></div>
+          </section>
+
+          <!-- Lưu ý -->
+          <section class="td-section" id="sec-notes">
+            <h2>Những thông tin cần lưu ý</h2>
+            <!-- Lưu ý CHUNG, viết cứng cho mọi tour (chưa có cột lưu ý riêng từng tour ở BE) -->
+            <div class="td-days td-acc" id="tdNotes">
+              <div class="td-day">
+                <button type="button" class="td-day-head" aria-expanded="false"><b>Giá tour bao gồm</b><i class="bi bi-chevron-down"></i></button>
+                <div class="td-day-body">
+                  <ul>
+                    <li>Xe tham quan theo chương trình.</li>
+                    <li>Vé máy bay / tàu / xe khứ hồi theo chương trình (nếu có).</li>
+                    <li>Hành lý ký gửi và xách tay theo quy định của hãng vận chuyển.</li>
+                    <li>Khách sạn theo tiêu chuẩn 2 – 3 khách/phòng.</li>
+                    <li>Ăn theo chương trình, thực đơn món Việt.</li>
+                    <li>Vé tham quan theo chương trình.</li>
+                    <li>Hướng dẫn viên tiếng Việt suốt tuyến.</li>
+                    <li>Bảo hiểm du lịch tối đa 120.000.000 VND/vụ.</li>
+                    <li>Nón VietTrip, nước suối, khăn lạnh, VAT.</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="td-day">
+                <button type="button" class="td-day-head" aria-expanded="false"><b>Giá tour không bao gồm</b><i class="bi bi-chevron-down"></i></button>
+                <div class="td-day-body">
+                  <ul>
+                    <li>Chi phí cá nhân, giặt ủi, đổi vé, nâng hạng, hành lý quá cước, phụ thu phòng đơn…</li>
+                    <li>Tham quan ngoài chương trình.</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="td-day">
+                <button type="button" class="td-day-head" aria-expanded="false"><b>Lưu ý giá trẻ em</b><i class="bi bi-chevron-down"></i></button>
+                <div class="td-day-body">
+                  <ul>
+                    <li>Dưới 2 tuổi: miễn phí dịch vụ (bố mẹ tự lo chi phí phát sinh).</li>
+                    <li>Từ 2 đến 4 tuổi: tính giá trẻ nhỏ theo từng ngày khởi hành, không có giường riêng. 02 người lớn kèm 01 trẻ nhỏ; trẻ thứ 2 tính như trẻ em và phụ thu 01 suất giường đơn.</li>
+                    <li>Từ 5 đến 11 tuổi: tính giá trẻ em theo từng ngày khởi hành, không có giường riêng. 02 người lớn kèm 01 trẻ em; trẻ thứ 2 tính phụ thu 01 suất giường đơn.</li>
+                    <li>Từ 12 tuổi trở lên: tính như người lớn.</li>
+                    <li>Vé máy bay, tàu hỏa, phương tiện vận chuyển công cộng mua vé theo quy định của các đơn vị vận chuyển.</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="td-day">
+                <button type="button" class="td-day-head" aria-expanded="false"><b>Điều kiện thanh toán</b><i class="bi bi-chevron-down"></i></button>
+                <div class="td-day-body">
+                  <ul>
+                    <li>Khi đăng ký đặt cọc 50% số tiền tour.</li>
+                    <li>Số tiền còn lại thanh toán hết trước ngày khởi hành 7 – 10 ngày (áp dụng tour ngày thường), trước ngày khởi hành 20 – 25 ngày (áp dụng tour Lễ Tết).</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="td-day">
+                <button type="button" class="td-day-head" aria-expanded="false"><b>Điều kiện đăng ký</b><i class="bi bi-chevron-down"></i></button>
+                <div class="td-day-body">
+                  <ul>
+                    <li>Khi đăng ký vui lòng cung cấp giấy tờ tùy thân tất cả người đi: Căn cước công dân / Hộ chiếu (Passport) / Giấy khai sinh (trẻ em dưới 14 tuổi). Khi đăng ký trực tuyến trên website VietTrip, vui lòng nhập tên chính xác theo thứ tự: Họ / tên lót / tên để xuất vé. Quý khách cung cấp tên theo giấy tờ tùy thân nào thì khi đi tour mang theo giấy tờ tùy thân đó.</li>
+                    <li><b>Khách quốc tịch Việt Nam:</b> trẻ em dưới 14 tuổi mang theo Giấy khai sinh bản chính / Hộ chiếu bản chính còn giá trị sử dụng. Trẻ em từ 14 tuổi trở lên và người lớn mang theo Căn cước công dân / Hộ chiếu bản chính còn giá trị sử dụng. Trẻ em trên 14 tuổi bắt buộc có Căn cước công dân / Hộ chiếu để làm thủ tục lên máy bay, hoặc Giấy xác nhận nhân thân theo mẫu quy định (chỉ có giá trị trong 30 ngày kể từ ngày xác nhận).</li>
+                    <li><b>Khách quốc tịch nước ngoài hoặc Việt kiều:</b> mang theo hộ chiếu bản chính (Passport) hoặc thẻ xanh kèm thị thực nhập cảnh (visa dán vào hộ chiếu, tờ rời hoặc cuốn miễn thị thực); các giấy tờ này phải có dấu nhập cảnh Việt Nam và còn giá trị sử dụng khi đi tour.</li>
+                    <li><b>Thông tin tập trung:</b> tại sân bay / điểm hẹn trước giờ khởi hành 2 tiếng (ngày thường), trước 3 tiếng (Lễ, Tết).</li>
+                    <li><b>Hành lý:</b> xách tay dưới 7kg/khách, kích thước không quá 56cm x 36cm x 23cm, chất lỏng không quá 100ml. Ký gửi 20kg/khách, kích thước không quá 119cm x 119cm x 81cm. Các vật phẩm không được chấp nhận theo quy định hàng không không được mang theo.</li>
+                    <li>Trường hợp Quý khách cung cấp tên sai hoặc đến trễ giờ bay, vui lòng thanh toán phí đổi vé hoặc mua vé mới theo quy định của hãng hàng không (nếu chuyến bay còn chỗ).</li>
+                    <li>Vé máy bay khuyến mãi (Vietnam Airlines, Jetstar, Vietjet…) không hoàn, không đổi; hủy hoặc sai tên mất 100%. Không bay chặng đi thì chặng về tự động bị hủy.</li>
+                    <li>Giá vé, chuyến bay, giờ bay phụ thuộc hãng hàng không nên có thể thay đổi mà không báo trước. Tùy tình hình thực tế, chương trình có thể linh động đổi thứ tự điểm tham quan cho phù hợp giờ bay và thời tiết. VietTrip không chịu trách nhiệm bảo đảm các điểm tham quan khi xảy ra: thiên tai (bão lụt, hạn hán, động đất…); sự cố an ninh (khủng bố, biểu tình); sự cố hàng không (trục trặc kỹ thuật, an ninh, dời, hủy, hoãn chuyến bay). Khi đó VietTrip sẽ xem xét hoàn trả chi phí không tham quan trong điều kiện có thể (sau khi trừ các dịch vụ đã thực hiện) và không bồi thường thêm chi phí nào khác.</li>
+                    <li>Sau khi làm thủ tục và nhận thẻ lên máy bay, Quý khách vui lòng giữ cẩn thận và lên máy bay đúng giờ. VietTrip không chịu trách nhiệm khi khách làm mất thẻ lên máy bay hoặc không lên máy bay đúng giờ quy định.</li>
+                    <li>Giờ nhận phòng và trả phòng theo quy định khách sạn: nhận sau 14:00 và trả trước 12:00.</li>
+                    <li>Phòng khách sạn / resort có thể không gần nhau, không cùng tầng, loại phòng một giường đôi hoặc hai giường đơn không theo yêu cầu, tùy tình hình thực tế.</li>
+                    <li>Nhóm 03 khách: VietTrip bố trí 01 phòng gồm 01 giường lớn 1m6 và 01 giường phụ di động 0,8 – 1,2m (extrabed). Nếu muốn ở riêng, vui lòng đóng thêm phụ thu phòng đơn.</li>
+                    <li>Muốn nâng hạng phòng, vui lòng liên hệ nhân viên phụ trách tuyến và thanh toán chi phí phát sinh theo hạng phòng (nếu có).</li>
+                    <li>Với chương trình biển đảo, Quý khách không khỏe, có tiền sử bệnh hoặc có chất kích thích (rượu, bia…) không nên tắm và lặn biển để đảm bảo an toàn.</li>
+                    <li><b>Sức khỏe:</b> khách nữ từ 55 tuổi và khách nam từ 60 tuổi nên có người thân dưới 55 tuổi (đủ sức khỏe) đi cùng; khách từ 70 tuổi bắt buộc có người thân dưới 55 tuổi đi cùng; hạn chế nhận khách từ 80 tuổi (không có chế độ bảo hiểm). Khách mang thai vui lòng báo khi đăng ký, có ý kiến bác sĩ trước khi đi, mang theo sổ khám thai và giấy tờ theo quy định hãng hàng không; từ tuần thai thứ 28 mang theo giấy khám thai trong vòng 7 ngày. Quý khách cam kết đủ sức khỏe tham gia chương trình và tự chịu chi phí phát sinh liên quan đến rủi ro sức khỏe (lưu trú, vận chuyển, khám chữa bệnh…), trừ các chi phí thuộc hạng mục bảo hiểm.</li>
+                    <li>Cần xuất hóa đơn, vui lòng cung cấp thông tin ngay khi đăng ký hoặc trước khi thanh toán hết; không nhận xuất hóa đơn sau khi tour đã khởi hành.</li>
+                    <li>Quý khách vui lòng đọc kỹ chương trình, giá tour, các khoản bao gồm và không bao gồm, điều kiện hủy tour. Tùy thời điểm đăng ký, giá tour có thể thay đổi. Trường hợp người khác đăng ký hộ, Quý khách vui lòng tìm hiểu kỹ chương trình từ người đăng ký.</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="td-day">
+                <button type="button" class="td-day-head" aria-expanded="false"><b>Lưu ý về chuyển hoặc hủy tour</b><i class="bi bi-chevron-down"></i></button>
+                <div class="td-day-body">
+                  <ul>
+                    <li>Sau khi đóng tiền, nếu Quý khách muốn chuyển / hủy tour vui lòng mang Vé du lịch, Biên nhận và giấy tờ tùy thân (của khách thanh toán) đến văn phòng VietTrip để làm thủ tục theo quy định, hoặc liên hệ nhân viên tư vấn VietTrip để được hướng dẫn.</li>
+                    <li>Thời gian hủy chuyến du lịch được tính theo ngày làm việc từ thứ 2 đến thứ 6, không tính thứ 7, Chủ nhật và các ngày nghỉ Lễ, Tết.</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="td-day">
+                <button type="button" class="td-day-head" aria-expanded="false"><b>Các điều kiện hủy tour đối với ngày thường</b><i class="bi bi-chevron-down"></i></button>
+                <div class="td-day-body">
+                  <ul>
+                    <li>Được chuyển sang các tuyến du lịch khác trước ngày khởi hành 20 ngày: không mất chi phí.</li>
+                    <li>Hủy hoặc chuyển sang chuyến du lịch khác từ 15 – 19 ngày trước ngày khởi hành: chi phí hủy tour 50% tiền cọc tour.</li>
+                    <li>Hủy hoặc chuyển sang chuyến du lịch khác từ 12 – 14 ngày trước ngày khởi hành: chi phí hủy tour 100% tiền cọc tour.</li>
+                    <li>Hủy chuyến du lịch trong vòng 08 – 11 ngày trước ngày khởi hành: chi phí hủy tour 50% trên giá tour du lịch.</li>
+                    <li>Hủy chuyến du lịch trong vòng 05 – 07 ngày trước ngày khởi hành: chi phí hủy tour 70% trên giá tour du lịch.</li>
+                    <li>Hủy chuyến du lịch trong vòng 02 – 04 ngày trước ngày khởi hành: chi phí hủy tour 90% trên giá tour du lịch.</li>
+                    <li>Hủy chuyến du lịch trong vòng 1 ngày trước ngày khởi hành: chi phí hủy tour 100% trên giá tour du lịch.</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="td-day">
+                <button type="button" class="td-day-head" aria-expanded="false"><b>Các điều kiện hủy tour đối với ngày lễ, Tết</b><i class="bi bi-chevron-down"></i></button>
+                <div class="td-day-body">
+                  <ul>
+                    <li>Được chuyển sang các tuyến du lịch khác trước ngày khởi hành 30 ngày: không mất chi phí.</li>
+                    <li>Hủy hoặc chuyển sang chuyến du lịch khác từ 25 – 29 ngày trước ngày khởi hành: chi phí hủy tour 50% tiền cọc tour.</li>
+                    <li>Hủy hoặc chuyển sang chuyến du lịch khác từ 20 – 24 ngày trước ngày khởi hành: chi phí hủy tour 100% tiền cọc tour.</li>
+                    <li>Hủy chuyến du lịch trong vòng 17 – 19 ngày trước ngày khởi hành: chi phí hủy tour 50% trên giá tour du lịch.</li>
+                    <li>Hủy chuyến du lịch trong vòng 08 – 16 ngày trước ngày khởi hành: chi phí hủy tour 70% trên giá tour du lịch.</li>
+                    <li>Hủy chuyến du lịch trong vòng 02 – 07 ngày trước ngày khởi hành: chi phí hủy tour 90% trên giá tour du lịch.</li>
+                    <li>Hủy chuyến du lịch trong vòng 1 ngày trước ngày khởi hành: chi phí hủy tour 100% trên giá tour du lịch.</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="td-day">
+                <button type="button" class="td-day-head" aria-expanded="false"><b>Trường hợp bất khả kháng</b><i class="bi bi-chevron-down"></i></button>
+                <div class="td-day-body">
+                  <p class="mb-0">Nếu chương trình du lịch bị hủy bỏ hoặc thay đổi bởi một trong hai bên vì lý do bất khả kháng (hỏa hoạn, thời tiết, tai nạn,
+                    thiên tai, chiến tranh, dịch bệnh, hoãn, dời, hủy chuyến hoặc thay đổi khác của các phương tiện vận chuyển công cộng hoặc các sự kiện
+                    bất khả kháng khác theo quy định pháp luật…), VietTrip không chịu nghĩa vụ bồi hoàn các tổn thất đã xảy ra và không chịu trách nhiệm
+                    pháp lý nào. Tuy nhiên mỗi bên có trách nhiệm cố gắng tối đa giúp đỡ bên bị thiệt hại nhằm giảm thiểu tổn thất. Thời gian hoàn tiền
+                    dịch vụ do hủy tour vì lý do bất khả kháng hoàn tất trong vòng 60 – 90 ngày, tùy điều kiện của các đối tác cung ứng dịch vụ.</p>
+                </div>
+              </div>
+              <div class="td-day">
+                <button type="button" class="td-day-head" aria-expanded="false"><b>Liên hệ</b><i class="bi bi-chevron-down"></i></button>
+                <div class="td-day-body">
+                  <p class="mb-1">Mọi thắc mắc về chương trình tour, vui lòng liên hệ VietTrip:</p>
+                  <ul>
+                    <li><b>Hotline:</b> <a href="tel:+84123456789">+84 123 456 789</a></li>
+                    <li><b>Email:</b> <a href="mailto:lienhe@viettrip.vn">lienhe@viettrip.vn</a></li>
+                    <li><b>Văn phòng:</b> Số 123 Đường Cầu Diễn, Phú Diễn, Bắc Từ Liêm, Hà Nội</li>
+                  </ul>
+                  <p class="mb-0">Xem thêm <a href="terms.html" target="_blank" rel="noopener">Điều khoản dịch vụ</a>.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- ===================== CỘT PHẢI: GIÁ ===================== -->
+        <aside class="col-lg-4">
+          <div class="td-side">
+            <!-- Chưa chọn ngày -->
+            <div class="td-price-card" id="tdCardDefault">
+              <div class="td-kv"><span><i class="bi bi-upc-scan"></i>Mã tour:</span><b id="tdCode"></b></div>
+              <div class="td-kv"><span><i class="bi bi-clock"></i>Thời gian:</span><b id="tdDuration"></b></div>
+              <div class="td-price-row">
+                <div class="td-price"><small>Giá từ:</small><strong id="tdPrice"></strong></div>
+                <button type="button" class="td-btn-pick" id="tdPick">Chọn ngày</button>
+              </div>
+            </div>
+
+            <!-- Đã chọn 1 ngày khởi hành -->
+            <div class="td-price-card d-none" id="tdCardPicked">
+              <div class="td-picked-head">
+                <div class="td-price"><small>Giá:</small><strong id="tdPickedPrice"></strong></div>
+                <button type="button" class="td-picked-date" id="tdUnpick" title="Bỏ chọn ngày này">
+                  <span id="tdPickedDate"></span><i class="bi bi-pencil"></i>
+                </button>
+              </div>
+              <div class="td-kv"><span><i class="bi bi-upc-scan"></i>Mã khởi hành:</span><b id="tdPickedCode"></b></div>
+              <div class="td-kv"><span><i class="bi bi-geo-alt"></i>Khởi hành:</span><b id="tdPickedFrom"></b></div>
+              <div class="td-kv"><span><i class="bi bi-clock"></i>Thời gian:</span><b id="tdPickedDuration"></b></div>
+              <div class="td-kv"><span><i class="bi bi-people"></i>Số chỗ còn:</span><b id="tdPickedSlots"></b></div>
+              <button type="button" class="td-btn-pick td-btn-book" id="tdBook">Đặt ngay</button>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Các chương trình khác -->
+      <section class="td-section d-none" id="sec-others">
+        <h2>Các chương trình khác</h2>
+        <div class="td-others" id="tdOthers"></div>
+      </section>
+    </div>
+
+  </div>
+</main>
+
+<footer id="footer" class="footer position-relative dark-background">
+  <div class="container footer-top">
+    <div class="row gy-4">
+      <div class="col-lg-4 col-md-6 footer-about">
+        <a href="index.html" class="d-flex align-items-center">
+          <span class="sitename">VietTrip</span>
+        </a>
+        <div class="footer-contact pt-3">
+          <p>Số 123 Đường Cầu Diễn</p>
+          <p>Phú Diễn, Bắc Từ Liêm</p>
+          <p class="mt-3"><strong>Hotline:</strong> <span>+84 123 456 789</span></p>
+          <p><strong>Email:</strong> <span>lienhe@viettrip.vn</span></p>
+        </div>
+      </div>
+
+      <div class="col-lg-2 col-md-3 footer-links">
+        <h4>Liên Kết Nhanh</h4>
         <ul>
-          <li><a href="index.html">Trang chủ</a></li>
-          <li><a href="about.html">Về chúng tôi</a></li>
-          <li><a href="destinations.html">Điểm đến</a></li>
-          <li><a href="tours.html">Tours</a></li>
-          <li><a href="gallery.html">Thư viện ảnh</a></li>
-          <li><a href="blog.html">Blog</a></li>
-          <li class="dropdown"><a href="#"><span>Trang khác</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-            <ul>
-              <li><a href="destination-details.html">Chi tiết điểm đến</a></li>
-              <li><a href="tour-details.html" class="active">Chi tiết tour</a></li>
-              <li><a href="booking.html">Đặt tour</a></li>
-              <li><a href="testimonials">Ý kiến khách hàng</a></li>
-              <li><a href="faq.html">Câu hỏi thường gặp</a></li>
-              <li><a href="blog-details.html">Chi tiết bài viết</a></li>
-              <li><a href="terms.html">Điều khoản</a></li>
-              <li><a href="privacy.html">Chính sách bảo mật</a></li>
-              <li><a href="404.html">404</a></li>
-            </ul>
-          </li>
-          <li><a href="contact.html">Liên hệ</a></li>
+          <li><i class="bi bi-chevron-right"></i> <a href="index.html">Trang chủ</a></li>
+          <li><i class="bi bi-chevron-right"></i> <a href="about.html">Về chúng tôi</a></li>
+          <li><i class="bi bi-chevron-right"></i> <a href="destinations.html">Điểm đến</a></li>
+          <li><i class="bi bi-chevron-right"></i> <a href="tours.html">Tours</a></li>
+          <li><i class="bi bi-chevron-right"></i> <a href="contact.html">Liên hệ</a></li>
         </ul>
-        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
-      </nav>
+      </div>
 
-      <a class="btn-getstarted" href="destiantios.html">Bắt đầu</a>
+      <div class="col-lg-2 col-md-3 footer-links">
+        <h4>Hỗ Trợ</h4>
+        <ul>
+          <li><i class="bi bi-chevron-right"></i> <a href="terms.html">Điều khoản dịch vụ</a></li>
+          <li><i class="bi bi-chevron-right"></i> <a href="privacy.html">Chính sách bảo mật</a></li>
+          <li><i class="bi bi-chevron-right"></i> <a href="contact.html">Câu hỏi thường gặp</a></li>
+        </ul>
+      </div>
+
+      <div class="col-lg-4 col-md-12">
+        <h4>Kết Nối Với Chúng Tôi</h4>
+        <p>Theo dõi VietTrip để cập nhật tour mới và ưu đãi sớm nhất.</p>
+        <div class="social-links d-flex">
+          <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+          <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+          <a href="#" aria-label="TikTok"><i class="bi bi-tiktok"></i></a>
+          <a href="#" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+        </div>
+      </div>
 
     </div>
-  </header>
+  </div>
 
-  <main class="main">
+  <div class="container copyright text-center mt-4">
+    <p>© Bản quyền thuộc về <strong class="sitename">VietTrip</strong>. Bảo lưu mọi quyền.</p>
+  </div>
+</footer>
 
-    <div class="page-title dark-background" data-aos="fade" style="background-image: url(assets/img/travel/showcase-8.webp);">
-      <div class="container position-relative">
-        <h1>Chi Tiết Tour</h1>
-        <p>Khám phá lịch trình chi tiết, những trải nghiệm độc đáo và tất cả thông tin bạn cần cho chuyến đi.</p>
-        <nav class="breadcrumbs">
-          <ol>
-            <li><a href="index.html">Trang chủ</a></li>
-            <li class="current">Chi tiết tour</li>
-          </ol>
-        </nav>
-      </div>
-    </div><section id="travel-tour-details" class="travel-tour-details section">
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 
-      <div class="container" data-aos="fade-up" data-aos-delay="100">
+<div id="preloader"></div>
 
-        <div class="tour-hero">
-          <div class="hero-image-wrapper">
-            <img src="assets/img/travel/showcase-9.webp" alt="Khám Phá Địa Trung Hải" class="img-fluid w-100">
-            <div class="hero-overlay">
-              <div class="hero-content">
-                <h1>Khám Phá Địa Trung Hải</h1>
-                <div class="hero-meta">
-                  <span class="duration"><i class="bi bi-calendar"></i> 12 Ngày</span>
-                  <span class="destination"><i class="bi bi-geo-alt"></i> Ý, Hy Lạp & Thổ Nhĩ Kỳ</span>
-                  <span class="rating"><i class="bi bi-star-fill"></i> 4.8 (124 đánh giá)</span>
-                </div>
-                <p class="hero-tagline">Trải nghiệm những kỳ quan cổ đại, bãi biển hoang sơ và nền văn hóa sôi động qua ba quốc gia tuyệt đẹp</p>
-                <a href="#booking" class="btn-book">Kiểm Tra Chỗ Trống</a>
-              </div>
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="assets/vendor/aos/aos.js"></script>
+<script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
+<script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
+
+<script src="assets/js/main.js"></script>
+<script src="assets/js/auth-ui.js"></script>
+<script src="assets/js/tour-card.js"></script>
+
+<script>
+  /* ============================================================
+     CHI TIẾT TOUR — tour-details.html?id=5[&date=2026-11-20]
+       GET /api/public/tours/{id}            → TourResponse (tăng lượt xem)
+       GET /api/public/tours/{id}/schedules  → List<ScheduleResponse>: lịch sắp tới, chưa huỷ, tăng dần
+       GET /api/public/tours?categoryId=...  → "Các chương trình khác"
+     ============================================================ */
+  function $(id) { return document.getElementById(id); }
+
+  function escapeHtml(str) {
+    return String(str ?? '').replace(/[&<>"']/g, c =>
+            ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+  const moneyFmt = new Intl.NumberFormat('vi-VN');
+  const fmtMoney = v => v == null ? '—' : moneyFmt.format(v) + ' ₫';
+  function parseIso(s) { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); }
+  const WEEKDAYS = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+  /** "2026-11-11" → "T4, 11/11/2026" */
+  function longDate(iso) {
+    const d = parseIso(iso);
+    return `${WEEKDAYS[d.getDay()]}, ${d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}`;
+  }
+
+  async function getData(url) {
+    const res = await fetch(url);
+    const json = await res.json().catch(() => null);
+    if (!res.ok || !json || !json.success) {
+      const err = new Error((json && json.message) || 'Lỗi tải dữ liệu');
+      err.status = res.status;
+      throw err;
+    }
+    return json.data;
+  }
+
+  const params  = new URLSearchParams(location.search);
+  const tourId  = Number(params.get('id'));
+  const wantDate = /^\d{4}-\d{2}-\d{2}$/.test(params.get('date') || '') ? params.get('date') : '';   // bấm ô ngày trên thẻ tour
+
+  let tour = null, schedules = [];
+
+  /* ============================================================
+     TẢI DỮ LIỆU
+     ============================================================ */
+  async function load() {
+    if (!Number.isInteger(tourId) || tourId <= 0) return showError('Đường dẫn tour không hợp lệ.');
+
+    let schedErr = null;
+    try {
+      // 2 API chạy song song; lịch lỗi thì vẫn hiện được thông tin tour
+      [tour, schedules] = await Promise.all([
+        getData(`/api/public/tours/${tourId}`),
+        getData(`/api/public/tours/${tourId}/schedules`).catch(e => { schedErr = e; return []; })
+      ]);
+    } catch (e) {
+      console.error(e);
+      return showError(e.status === 404 || e.status === 400
+              ? 'Không tìm thấy tour hoặc tour đã ngừng hiển thị.'
+              : 'Không tải được thông tin tour. Vui lòng thử lại sau.');
+    }
+
+    document.title = `${tour.tourName} - VietTrip`;
+    renderHeader();
+    renderGallery();
+    renderSchedules(schedErr);
+    renderFacts();
+    renderDescription();
+    renderItinerary();
+    renderPriceCard();
+
+    $('tdLoading').classList.add('d-none');
+    $('tdContent').classList.remove('d-none');
+    TourCard.initDateNavs(document);
+    updateActiveTab();
+
+    if (wantDate) focusSchedule(wantDate);
+    loadOthers();
+  }
+
+  function showError(text) {
+    $('tdLoading').classList.add('d-none');
+    $('tdErrorText').textContent = text;
+    $('tdError').classList.remove('d-none');
+  }
+
+  /* ============================================================
+     TIÊU ĐỀ + ĐƯỜNG DẪN
+     ============================================================ */
+  function renderHeader() {
+    $('tdCrumbs').insertAdjacentHTML('beforeend', `
+      ${tour.categoryName ? `<span class="sep">/</span><span>${escapeHtml(tour.categoryName)}</span>` : ''}
+      ${tour.locationName ? `<span class="sep">/</span><a href="tours.html?locationId=${tour.locationId}">${escapeHtml(tour.locationName)}</a>` : ''}
+      <span class="sep">/</span><span class="current">${escapeHtml(tour.tourName)}</span>`);
+
+    $('tdTitle').textContent = tour.tourName;
+  }
+
+  /* ============================================================
+     ẢNH: hiện ảnh đầu tiên; bấm → xem toàn màn hình cả ảnh đại diện + thư viện
+     ============================================================ */
+  let galleryUrls = [];
+
+  function renderGallery() {
+    const urls = [tour.thumbnailUrl, ...(tour.images || []).map(i => i.imageUrl)].filter(Boolean);
+    galleryUrls = [...new Set(urls)];
+
+    const fav = `<button type="button" class="tl-fav" data-tour-id="${tour.tourId}" aria-pressed="false"
+                         aria-label="Thêm vào tour yêu thích" title="Yêu thích"><i class="bi bi-heart"></i></button>`;
+    if (!galleryUrls.length) {
+      $('tdGallery').innerHTML = `<div class="td-main-img" style="cursor: default;"><span class="td-noimg"><i class="bi bi-image"></i></span></div>${fav}`;
+      return;
+    }
+    $('tdGallery').innerHTML = `
+      <button type="button" class="td-main-img" id="tdMainImg" aria-label="Xem ảnh lớn">
+        <img src="${escapeHtml(galleryUrls[0])}" alt="${escapeHtml(tour.tourName)}">
+        <span class="td-zoom"><i class="bi bi-arrows-angle-expand"></i></span>
+      </button>
+      ${fav}
+`;
+
+    $('tdMainImg').addEventListener('click', () => {
+      if (typeof GLightbox === 'function') {
+        GLightbox({ elements: galleryUrls.map(href => ({ href, type: 'image' })) }).openAt(0);   // xem hết ảnh, bấm ‹ › để chuyển
+      } else {
+        window.open(galleryUrls[0], '_blank', 'noopener');
+      }
+    });
+  }
+
+  /* ============================================================
+     LỊCH KHỞI HÀNH: tab theo tháng, mỗi lịch 1 dòng, bấm "Chi tiết giá" xem giá trẻ em / em bé / phòng đơn
+     ============================================================ */
+  let activeMonth = '';
+  const monthKey = iso => iso.slice(0, 7);   // "2026-11"
+
+  function renderSchedules(err) {
+    if (err) {
+      $('tdSchedules').innerHTML = '<div class="td-empty"><i class="bi bi-wifi-off"></i>Không tải được lịch khởi hành. Vui lòng tải lại trang.</div>';
+      return;
+    }
+    if (!schedules.length) {
+      $('tdSchedules').innerHTML = `<div class="td-empty"><i class="bi bi-calendar-x"></i>Tour hiện chưa có lịch khởi hành.
+              Gọi <a href="tel:+84123456789">+84 123 456 789</a> để được báo khi có lịch mới.</div>`;
+      return;
+    }
+    const months = [...new Set(schedules.map(s => monthKey(s.departureDate)))];
+    activeMonth = wantDate && months.includes(monthKey(wantDate)) ? monthKey(wantDate) : months[0];
+
+    $('tdMonths').innerHTML = months.map(m => {
+      const [y, mm] = m.split('-');
+      return `<button type="button" class="td-month" role="tab" data-month="${m}">Tháng ${Number(mm)}<br>${y}</button>`;
+    }).join('');
+    $('tdMonths').addEventListener('click', e => {
+      const b = e.target.closest('.td-month');
+      if (b) { activeMonth = b.dataset.month; drawMonth(); }
+    });
+    drawMonth();
+  }
+
+  function drawMonth() {
+    document.querySelectorAll('.td-month').forEach(b => {
+      const on = b.dataset.month === activeMonth;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-selected', on);
+    });
+    $('tdSchedules').innerHTML = schedules.filter(s => monthKey(s.departureDate) === activeMonth).map(schedRowHtml).join('');
+  }
+
+  /** 1 dòng lịch. Chưa chọn: ngày | mã | giá người lớn | Chọn. Đã chọn: mở thêm chiều đi / về + giá theo độ tuổi */
+  function schedRowHtml(s) {
+    const full = s.status === 'FULL' || s.availableSlots <= 0;
+    const on = selected?.scheduleId === s.scheduleId;
+    const from = tour.departureLocation || '', to = tour.locationName || '';
+    const transport = s.transport
+            ? `<span class="td-leg-transport"><i class="bi ${transportIcon(s.transport)}"></i>${escapeHtml(s.transport)}</span>` : '';
+    const leg = (label, iso, a, b) => `
+      <div>
+        <div class="td-leg-top"><span>${label}: <b>${iso ? shortVnDate(iso) : '—'}</b></span>${transport}</div>
+        <div class="td-leg-line"></div>
+        <div class="td-leg-places"><span>${escapeHtml(a)}</span><span>${escapeHtml(b)}</span></div>
+      </div>`;
+    const fare = (name, note, price) => `
+      <div class="td-fare-row"><div><b>${name}</b>${note ? `<small>(${note})</small>` : ''}</div><strong>${fmtMoney(price)}</strong></div>`;
+
+    return `
+      <div class="td-sched ${on ? 'is-selected' : ''} ${full ? 'is-full' : ''}" data-date="${s.departureDate}" data-id="${s.scheduleId}">
+        <div class="td-sched-row" ${full || on ? '' : 'role="button" tabindex="0"'}
+             aria-label="${full ? 'Hết chỗ' : (on ? 'Đang chọn' : 'Chọn')} ngày ${longDate(s.departureDate)}">
+          <span class="td-sched-date">${longDate(s.departureDate)}</span>
+          <span class="td-sched-code"><i class="bi bi-upc-scan"></i>${escapeHtml(s.scheduleCode)}</span>
+          <span class="td-sched-price">${fmtMoney(s.adultPrice)}</span>
+          <span class="td-choose">${full ? 'Hết chỗ' : (on ? 'Đang chọn' : 'Chọn')}</span>
+        </div>
+        <div class="td-sched-detail">
+          <div class="td-detail-title">Phương tiện di chuyển</div>
+          <div class="td-detail-grid">
+            ${leg('Ngày đi', s.departureDate, from, to)}
+            ${leg('Ngày về', s.returnDate, to, from)}
+          </div>
+          <div class="td-detail-sep"></div>
+          <div class="td-detail-title">Giá chuyến đi</div>
+          <div class="td-detail-grid">
+            <div>
+              ${fare('Người lớn', 'Từ 12 tuổi trở lên', s.adultPrice)}
+              ${fare('Trẻ em', 'Từ 5 đến 11 tuổi', s.childPrice)}
+            </div>
+            <div>
+              ${fare('Trẻ nhỏ', 'Từ 2 đến 4 tuổi', s.toddlerPrice)}
+              ${fare('Phụ thu phòng đơn', '', s.singleRoomSupplement)}
             </div>
           </div>
         </div>
+      </div>`;
+  }
 
-        <div class="tour-overview" data-aos="fade-up" data-aos-delay="200">
-          <div class="row">
-            <div class="col-lg-8">
-              <h2>Tổng Quan Về Tour</h2>
-              <p>Bắt đầu một hành trình khó quên qua trái tim của Địa Trung Hải, nơi các nền văn minh cổ đại để lại dấu ấn trên những cảnh quan tuyệt đẹp. Chuyến đi toàn diện này đưa bạn từ những con kênh lãng mạn của Venice đến những hòn đảo ngập nắng của Santorini, và kết thúc tại thành phố huyền diệu Istanbul, nơi Đông gặp Tây.</p>
-              <p>Chúng tôi cam kết mang đến cho bạn trải nghiệm du lịch chất lượng cao, kết hợp giữa khám phá văn hóa, thưởng thức ẩm thực và thư giãn tại những điểm đến đẹp nhất.</p>
-            </div>
-            <div class="col-lg-4">
-              <div class="tour-highlights">
-                <h3>Điểm Nổi Bật Của Tour</h3>
-                <ul>
-                  <li><i class="bi bi-check-circle"></i> Khách sạn Boutique 4 sao</li>
-                  <li><i class="bi bi-check-circle"></i> Hướng dẫn viên địa phương chuyên nghiệp</li>
-                  <li><i class="bi bi-check-circle"></i> Bao gồm bữa sáng hàng ngày</li>
-                  <li><i class="bi bi-check-circle"></i> Nhóm nhỏ (Tối đa 16 người)</li>
-                  <li><i class="bi bi-check-circle"></i> Di sản thế giới UNESCO</li>
-                  <li><i class="bi bi-check-circle"></i> Trải nghiệm văn hóa đặc sắc</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
+  /** "2026-11-11" → "11/11/2026" */
+  function shortVnDate(iso) {
+    return parseIso(iso).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
 
-        <div class="tour-itinerary" data-aos="fade-up" data-aos-delay="300">
-          <h2>Lịch Trình Chi Tiết</h2>
-          <div class="itinerary-timeline">
+  /** Icon theo chữ phương tiện admin nhập (ô tự do) */
+  function transportIcon(text) {
+    const v = String(text).toLowerCase().normalize('NFD').replace(/\p{M}+/gu, '').replace(/đ/g, 'd');
+    if (v.includes('bay')) return 'bi-airplane';
+    if (v.includes('tau hoa') || v.includes('tau lua')) return 'bi-train-front';
+    if (v.includes('thuyen') || v.includes('tau')) return 'bi-water';
+    return 'bi-bus-front';
+  }
 
-            <div class="itinerary-item">
-              <div class="day-number">Ngày 1</div>
-              <div class="day-content">
-                <h4>Đến Venice</h4>
-                <p>Chào mừng đến với thành phố của những con kênh đầy mê hoặc. Sau khi đến nơi, nhận phòng khách sạn bên bờ sông và thưởng thức bữa tối chào mừng với hải sản tươi sống và đặc sản Venice.</p>
-                <div class="day-details">
-                  <span class="accommodation"><i class="bi bi-building"></i> Khách sạn Palazzo Vitturi</span>
-                  <span class="meals"><i class="bi bi-cup-hot"></i> Bữa tối chào mừng</span>
-                </div>
-              </div>
-            </div>
+  // Bấm vào CẢ DÒNG (ngày, mã, giá, Chọn) → chọn ngày đó.
+  // Hết chỗ / đang chọn rồi thì bỏ qua; bỏ chọn bằng nút ngày ở khung bên phải
+  function pickRow(row) {
+    const sched = row?.closest('.td-sched');
+    if (!sched || sched.classList.contains('is-full') || sched.classList.contains('is-selected')) return;
+    selectSchedule(Number(sched.dataset.id));
+  }
+  $('tdSchedules').addEventListener('click', e => pickRow(e.target.closest('.td-sched-row')));
+  $('tdSchedules').addEventListener('keydown', e => {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('td-sched-row')) {
+      e.preventDefault();
+      pickRow(e.target);
+    }
+  });
 
-            <div class="itinerary-item">
-              <div class="day-number">Ngày 2</div>
-              <div class="day-content">
-                <h4>Tham Quan Thành Phố Venice</h4>
-                <p>Khám phá Quảng trường St. Mark, thăm Vương cung thánh đường tráng lệ và đi thuyền Gondola qua những con kênh lãng mạn. Buổi chiều thăm đảo Murano để xem trình diễn thổi thủy tinh truyền thống.</p>
-                <div class="day-details">
-                  <span class="accommodation"><i class="bi bi-building"></i> Khách sạn Palazzo Vitturi</span>
-                  <span class="meals"><i class="bi bi-cup-hot"></i> Bữa sáng</span>
-                </div>
-              </div>
-            </div>
+  /** Đến từ ô ngày trên thẻ tour (?date=...) → mở đúng tháng, tô + mở lịch đó, cuộn tới */
+  function focusSchedule(iso) {
+    const row = document.querySelector(`.td-sched[data-date="${iso}"]`);
+    if (!row) return;
+    if (!row.classList.contains('is-full')) selectSchedule(Number(row.dataset.id), false);   // còn chỗ → chọn sẵn
+    setTimeout(() => document.querySelector(`.td-sched[data-date="${iso}"]`)
+            ?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
+  }
 
-            <div class="itinerary-item">
-              <div class="day-number">Ngày 3</div>
-              <div class="day-content">
-                <h4>Khám Phá Florence</h4>
-                <p>Di chuyển đến Florence, cái nôi của thời kỳ Phục hưng. Tham quan Phòng trưng bày Uffizi, chiêm ngưỡng tượng David của Michelangelo và leo lên đỉnh Duomo để ngắm toàn cảnh thành phố.</p>
-                <div class="day-details">
-                  <span class="accommodation"><i class="bi bi-building"></i> Khách sạn Davanzati</span>
-                  <span class="meals"><i class="bi bi-cup-hot"></i> Bữa sáng</span>
-                </div>
-              </div>
-            </div>
+  /* ============================================================
+     KHUNG GIÁ BÊN PHẢI
+       Chưa chọn ngày: Mã tour, Thời gian, "Giá từ", nút "Chọn ngày" (cuộn xuống lịch khởi hành)
+       Đã chọn ngày  : thêm ngày đi / về / phương tiện / số chỗ, giá người lớn của ngày đó, nút "Đặt tour"
+     ============================================================ */
+  let minPrice = null, selected = null;   // selected = ScheduleResponse đang chọn
 
-            <div class="itinerary-item">
-              <div class="day-number">Ngày 4-5</div>
-              <div class="day-content">
-                <h4>Khám Phá Rome</h4>
-                <p>Hai ngày trọn vẹn tại Thành phố Vĩnh hằng. Tham quan Đấu trường La Mã, Quảng trường La Mã, Thành Vatican với Nhà nguyện Sistine và tham gia lớp học nấu ăn đích thực với một gia đình người La Mã.</p>
-                <div class="day-details">
-                  <span class="accommodation"><i class="bi bi-building"></i> Khách sạn Artemide</span>
-                  <span class="meals"><i class="bi bi-cup-hot"></i> Bữa sáng, Lớp học nấu ăn</span>
-                </div>
-              </div>
-            </div>
+  function renderPriceCard() {
+    const open = schedules.filter(s => s.status !== 'FULL' && s.availableSlots > 0);
+    // "Giá từ" = giá người lớn thấp nhất còn đặt được; chưa có lịch → giá gốc của tour
+    minPrice = open.length ? Math.min(...open.map(s => Number(s.adultPrice))) : tour.basePrice;
+    $('tdCode').textContent = tour.tourCode;
+    $('tdDuration').textContent = TourCard.durationText(tour.duration);
+    $('tdPrice').textContent = fmtMoney(minPrice);
+    drawPriceCard();
 
-            <div class="itinerary-item">
-              <div class="day-number">Ngày 6-8</div>
-              <div class="day-content">
-                <h4>Thiên Đường Santorini</h4>
-                <p>Bay đến Hy Lạp và đến Santorini. Ba ngày để khám phá những nhà thờ mái vòm xanh mang tính biểu tượng, ngắm hoàng hôn tuyệt đẹp ở Oia, thử rượu vang và thư giãn trên những bãi biển núi lửa độc đáo.</p>
-                <div class="day-details">
-                  <span class="accommodation"><i class="bi bi-building"></i> Khách sạn Canaves Oia</span>
-                  <span class="meals"><i class="bi bi-cup-hot"></i> Bữa sáng hàng ngày</span>
-                </div>
-              </div>
-            </div>
+    $('tdPick').addEventListener('click', () => $('sec-schedules').scrollIntoView({ behavior: 'smooth' }));
+    // Nút ngày cạnh giá = bỏ chọn, quay về danh sách lịch để chọn ngày khác
+    $('tdUnpick').addEventListener('click', () => {
+      selectSchedule(null);
+      $('sec-schedules').scrollIntoView({ behavior: 'smooth' });
+    });
+    $('tdBook').addEventListener('click', () => {
+      if (selected) location.href = `booking.html?scheduleId=${selected.scheduleId}`;   // trang đặt tour tự kiểm tra đăng nhập
+    });
+  }
 
-            <div class="itinerary-item">
-              <div class="day-number">Ngày 9-11</div>
-              <div class="day-content">
-                <h4>Phiêu Lưu Tại Istanbul</h4>
-                <p>Bay đến Istanbul cho ba ngày tuyệt vời khám phá nơi châu Âu gặp châu Á. Tham quan Hagia Sophia, Nhà thờ Hồi giáo Xanh, Grand Bazaar và tận hưởng du thuyền Bosphorus lúc hoàng hôn.</p>
-                <div class="day-details">
-                  <span class="accommodation"><i class="bi bi-building"></i> Four Seasons Sultanahmet</span>
-                  <span class="meals"><i class="bi bi-cup-hot"></i> Bữa sáng, Bữa tối chia tay</span>
-                </div>
-              </div>
-            </div>
+  function drawPriceCard() {
+    const s = selected;
+    $('tdCardDefault').classList.toggle('d-none', !!s);
+    $('tdCardPicked').classList.toggle('d-none', !s);
+    if (!s) return;
+    $('tdPickedPrice').textContent = fmtMoney(s.adultPrice);
+    $('tdPickedDate').textContent = longDate(s.departureDate);
+    $('tdPickedCode').textContent = s.scheduleCode;
+    $('tdPickedFrom').textContent = tour.departureLocation;
+    $('tdPickedDuration').textContent = TourCard.durationText(tour.duration);
+    $('tdPickedSlots').textContent = `Còn ${s.availableSlots} chỗ`;
+  }
 
-            <div class="itinerary-item">
-              <div class="day-number">Ngày 12</div>
-              <div class="day-content">
-                <h4>Khởi Hành</h4>
-                <p>Di chuyển đến Sân bay Istanbul cho chuyến bay trở về của bạn. Mang về nhà những kỷ niệm của một chuyến phiêu lưu Địa Trung Hải đáng kinh ngạc sẽ tồn tại suốt đời.</p>
-                <div class="day-details">
-                  <span class="meals"><i class="bi bi-cup-hot"></i> Bữa sáng</span>
-                </div>
-              </div>
-            </div>
+  /** Chọn 1 lịch (id) hoặc bỏ chọn (null). Vẽ lại tháng đang xem để dòng đó mở chi tiết. */
+  function selectSchedule(id, scroll = true) {
+    selected = id == null ? null : schedules.find(s => s.scheduleId === id) || null;
+    if (selected) activeMonth = monthKey(selected.departureDate);
+    drawMonth();
+    drawPriceCard();
+    // Điện thoại: khung giá nằm dưới cùng → đưa khách tới nút "Đặt ngay"
+    if (scroll && selected && window.innerWidth < 992) $('tdBook').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
 
-          </div>
-        </div>
+  /* ============================================================
+     THÔNG TIN THÊM
+     ============================================================ */
+  function renderFacts() {
+    // Phương tiện nằm ở từng lịch → gom, bỏ trùng
+    const transports = [...new Map(schedules.filter(s => s.transport)
+            .map(s => [s.transport.trim().toLowerCase(), s.transport.trim()])).values()];
+    const facts = [
+      ['bi-pin-map', 'Điểm đến', tour.locationName],
+      ['bi-geo-alt', 'Điểm khởi hành', tour.departureLocation],
+      ['bi-signpost-2', 'Phương tiện', transports.join(', ') || 'Đang cập nhật'],
+      ['bi-gem', 'Dòng tour', TourCard.CLASS_LABELS[tour.tourClass]],
+      ['bi-bookmark-star', 'Loại tour', tour.categoryName]
+    ].filter(f => f[2]);
+    $('tdFacts').innerHTML = facts.map(([icon, title, text]) => `
+      <div class="td-fact"><h3><i class="bi ${icon}"></i>${title}</h3><p>${escapeHtml(text)}</p></div>`).join('');
+  }
 
-        <div class="tour-inclusions" data-aos="fade-up" data-aos-delay="400">
-          <div class="row">
-            <div class="col-lg-6">
-              <div class="included-section">
-                <h3><i class="bi bi-check-circle-fill"></i> Bao Gồm</h3>
-                <ul class="inclusion-list included">
-                  <li><i class="bi bi-check"></i> Vé máy bay khứ hồi giữa các điểm đến</li>
-                  <li><i class="bi bi-check"></i> 11 đêm lưu trú (khách sạn 4 sao)</li>
-                  <li><i class="bi bi-check"></i> Bữa sáng hàng ngày tại tất cả các khách sạn</li>
-                  <li><i class="bi bi-check"></i> Hướng dẫn viên chuyên nghiệp nói tiếng Anh/Việt</li>
-                  <li><i class="bi bi-check"></i> Vé vào cửa tất cả các điểm tham quan</li>
-                  <li><i class="bi bi-check"></i> Phương tiện di chuyển riêng</li>
-                  <li><i class="bi bi-check"></i> Bữa tối chào mừng và chia tay</li>
-                  <li><i class="bi bi-check"></i> Đi thuyền Gondola ở Venice</li>
-                  <li><i class="bi bi-check"></i> Thử rượu vang ở Santorini</li>
-                  <li><i class="bi bi-check"></i> Du thuyền Bosphorus ở Istanbul</li>
-                </ul>
-              </div>
-            </div>
-            <div class="col-lg-6">
-              <div class="excluded-section">
-                <h3><i class="bi bi-x-circle-fill"></i> Không Bao Gồm</h3>
-                <ul class="inclusion-list excluded">
-                  <li><i class="bi bi-x"></i> Vé máy bay quốc tế đến/đi từ thành phố khởi hành</li>
-                  <li><i class="bi bi-x"></i> Bữa trưa và bữa tối (trừ khi được chỉ định)</li>
-                  <li><i class="bi bi-x"></i> Chi phí cá nhân và mua sắm</li>
-                  <li><i class="bi bi-x"></i> Bảo hiểm du lịch (khuyến nghị)</li>
-                  <li><i class="bi bi-x"></i> Tiền boa cho hướng dẫn viên và tài xế</li>
-                  <li><i class="bi bi-x"></i> Các hoạt động và chuyến tham quan tùy chọn</li>
-                  <li><i class="bi bi-x"></i> Đồ uống có cồn (trừ buổi thử rượu)</li>
-                  <li><i class="bi bi-x"></i> Phí visa nếu có yêu cầu</li>
-                  <li><i class="bi bi-x"></i> Phụ phí phòng đơn cho khách đi một mình</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
+  /* ============================================================
+     GIỚI THIỆU: HTML đã được BE lọc (Jsoup safelist) → chèn thẳng
+     ============================================================ */
+  function renderDescription() {
+    const html = (tour.description || '').trim();
+    if (!html) {
+      $('sec-intro').classList.add('d-none');
+      $('tabIntro').classList.add('d-none');
+      return;
+    }
+    const box = $('tdDesc');
+    box.innerHTML = html;
+    // Dài quá thì thu gọn, có nút "Xem thêm"
+    requestAnimationFrame(() => {
+      if (box.scrollHeight > 340) {
+        box.classList.add('is-collapsed');
+        $('tdDescToggle').classList.remove('d-none');
+      }
+    });
+    $('tdDescToggle').addEventListener('click', () => {
+      const collapsed = box.classList.toggle('is-collapsed');
+      $('tdDescToggle').innerHTML = collapsed ? 'Xem thêm <i class="bi bi-chevron-down"></i>' : 'Thu gọn <i class="bi bi-chevron-up"></i>';
+      if (collapsed) $('sec-intro').scrollIntoView({ behavior: 'smooth' });
+    });
+  }
 
-        <div class="tour-pricing" data-aos="fade-up" data-aos-delay="500">
-          <h2>Giá Cả & Ngày Khởi Hành</h2>
-          <div class="pricing-table">
-            <div class="pricing-header">
-              <div class="price-item">
-                <h3>Giá Khởi Điểm</h3>
-                <div class="price-amount">$3,299</div>
-                <p>mỗi người (phòng đôi)</p>
-              </div>
-            </div>
-            <div class="pricing-details">
-              <div class="row">
-                <div class="col-lg-4">
-                  <div class="price-type">
-                    <h4>Phòng Đôi</h4>
-                    <div class="price">$3,299</div>
-                    <p>mỗi người</p>
-                  </div>
-                </div>
-                <div class="col-lg-4">
-                  <div class="price-type">
-                    <h4>Phụ Thu Phòng Đơn</h4>
-                    <div class="price">+$899</div>
-                    <p>chi phí thêm</p>
-                  </div>
-                </div>
-                <div class="col-lg-4">
-                  <div class="price-type">
-                    <h4>Giảm Giá Nhóm</h4>
-                    <div class="price">-$200</div>
-                    <p>cho nhóm 6+ người</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="available-dates">
-              <h3>Ngày Khởi Hành 2024</h3>
-              <div class="dates-grid">
-                <div class="date-option">
-                  <div class="date">15-26 Tháng 5</div>
-                  <div class="availability">Còn 6 chỗ</div>
-                </div>
-                <div class="date-option">
-                  <div class="date">12-23 Tháng 6</div>
-                  <div class="availability">Có sẵn</div>
-                </div>
-                <div class="date-option">
-                  <div class="date">10-21 Tháng 7</div>
-                  <div class="availability">Sắp hết chỗ</div>
-                </div>
-                <div class="date-option">
-                  <div class="date">14-25 Tháng 8</div>
-                  <div class="availability">Có sẵn</div>
-                </div>
-                <div class="date-option">
-                  <div class="date">18-29 Tháng 9</div>
-                  <div class="availability">Có sẵn</div>
-                </div>
-                <div class="date-option">
-                  <div class="date">9-20 Tháng 10</div>
-                  <div class="availability">Còn 11 chỗ</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+  /* ============================================================
+     LỊCH TRÌNH: mỗi ngày 1 dòng, bấm mở nội dung
+     ============================================================ */
+  function renderItinerary() {
+    const days = (tour.itineraries || []).slice().sort((a, b) => a.dayNumber - b.dayNumber);
+    if (!days.length) {
+      $('sec-itinerary').classList.add('d-none');
+      $('tabItinerary').classList.add('d-none');
+      return;
+    }
+    $('tdDays').innerHTML = days.map((d, i) => `
+      <div class="td-day">
+        <button type="button" class="td-day-head" aria-expanded="false">
+          <b><span>Ngày ${d.dayNumber}:</span> ${escapeHtml(d.title)}</b><i class="bi bi-chevron-right"></i>
+        </button>
+        <div class="td-day-body">${d.description || '<em class="text-muted">Đang cập nhật nội dung.</em>'}</div>
+      </div>`).join('');
 
-        <div class="booking-section" id="booking" data-aos="fade-up" data-aos-delay="600">
-          <div class="booking-card">
-            <h2>Đặt Tour Này</h2>
-            <form action="forms/tour-booking.php" method="post" class="php-email-form">
-              <div class="row">
-                <div class="col-lg-6">
-                  <div class="form-group">
-                    <label for="travel-date">Ngày Khởi Hành Mong Muốn</label>
-                    <select name="date" id="travel-date" class="form-control" required="">
-                      <option value="">Chọn ngày</option>
-                      <option value="May 15-26">15-26 Tháng 5, 2024</option>
-                      <option value="June 12-23">12-23 Tháng 6, 2024</option>
-                      <option value="July 10-21">10-21 Tháng 7, 2024</option>
-                      <option value="August 14-25">14-25 Tháng 8, 2024</option>
-                      <option value="September 18-29">18-29 Tháng 9, 2024</option>
-                      <option value="October 9-20">9-20 Tháng 10, 2024</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="col-lg-6">
-                  <div class="form-group">
-                    <label for="travelers">Số Lượng Khách</label>
-                    <select name="travelers" id="travelers" class="form-control" required="">
-                      <option value="">Chọn số lượng</option>
-                      <option value="1">1 Khách</option>
-                      <option value="2">2 Khách</option>
-                      <option value="3">3 Khách</option>
-                      <option value="4">4 Khách</option>
-                      <option value="5">5 Khách</option>
-                      <option value="6+">6+ Khách</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-lg-6">
-                  <div class="form-group">
-                    <label for="name">Họ và Tên</label>
-                    <input type="text" name="name" id="name" class="form-control" required="">
-                  </div>
-                </div>
-                <div class="col-lg-6">
-                  <div class="form-group">
-                    <label for="email">Địa Chỉ Email</label>
-                    <input type="email" name="email" id="email" class="form-control" required="">
-                  </div>
-                </div>
-              </div>
-              <div class="form-group">
-                <label for="phone">Số Điện Thoại</label>
-                <input type="tel" name="phone" id="phone" class="form-control">
-              </div>
-              <div class="form-group">
-                <label for="message">Yêu Cầu Đặc Biệt Hoặc Câu Hỏi</label>
-                <textarea name="message" id="message" rows="4" class="form-control" placeholder="Yêu cầu ăn kiêng, hỗ trợ đi lại, hoặc dịp đặc biệt..."></textarea>
-              </div>
-              <div class="loading">Đang xử lý...</div>
-              <div class="error-message"></div>
-              <div class="sent-message">Yêu cầu đặt chỗ của bạn đã được gửi. Chúng tôi sẽ liên hệ lại trong vòng 24 giờ!</div>
-              <button type="submit" class="btn-submit">Gửi Yêu Cầu Đặt Tour</button>
-            </form>
-          </div>
-        </div>
+  }
 
-        <div class="tour-gallery" data-aos="fade-up" data-aos-delay="700">
-          <h2>Thư Viện Ảnh</h2>
-          <div class="gallery-grid">
-            <div class="gallery-item">
-              <a href="assets/img/travel/destination-1.webp" class="glightbox">
-                <img src="assets/img/travel/destination-1.webp" alt="Kênh Đào Venice" class="img-fluid" loading="lazy">
-              </a>
-            </div>
-            <div class="gallery-item">
-              <a href="assets/img/travel/destination-2.webp" class="glightbox">
-                <img src="assets/img/travel/destination-2.webp" alt="Nhà Thờ Florence" class="img-fluid" loading="lazy">
-              </a>
-            </div>
-            <div class="gallery-item">
-              <a href="assets/img/travel/destination-3.webp" class="glightbox">
-                <img src="assets/img/travel/destination-3.webp" alt="Đấu Trường La Mã" class="img-fluid" loading="lazy">
-              </a>
-            </div>
-            <div class="gallery-item">
-              <a href="assets/img/travel/destination-4.webp" class="glightbox">
-                <img src="assets/img/travel/destination-4.webp" alt="Hoàng Hôn Santorini" class="img-fluid" loading="lazy">
-              </a>
-            </div>
-            <div class="gallery-item">
-              <a href="assets/img/travel/destination-5.webp" class="glightbox">
-                <img src="assets/img/travel/destination-5.webp" alt="Hagia Sophia" class="img-fluid" loading="lazy">
-              </a>
-            </div>
-            <div class="gallery-item">
-              <a href="assets/img/travel/destination-6.webp" class="glightbox">
-                <img src="assets/img/travel/destination-6.webp" alt="Ẩm Thực Địa Trung Hải" class="img-fluid" loading="lazy">
-              </a>
-            </div>
-          </div>
-        </div>
+  // Bấm 1 dòng (Lịch trình, Lưu ý) → mở / đóng nội dung dòng đó
+  document.addEventListener('click', e => {
+    const head = e.target.closest('.td-day-head');
+    if (head) head.setAttribute('aria-expanded', head.parentElement.classList.toggle('open'));
+  });
 
-        <div class="final-cta" data-aos="fade-up" data-aos-delay="1000">
-          <div class="cta-content">
-            <h2>Sẵn Sàng Cho Chuyến Phiêu Lưu Địa Trung Hải?</h2>
-            <p>Số lượng chỗ có hạn cho các chuyến khởi hành năm 2024. Đặt ngay để giữ chỗ cho hành trình đáng nhớ này.</p>
-            <div class="cta-actions">
-              <a href="booking.html" class="btn-primary">Đặt Ngay</a>
-              <a href="tel:+84123456789" class="btn-secondary">Gọi Cho Chúng Tôi: +84 123 456 789</a>
-            </div>
-            <div class="urgency-banner">
-              <i class="bi bi-clock"></i>
-              <span>Chuyến khởi hành tiếp theo trong 45 ngày tới - Chỉ còn 6 chỗ!</span>
-            </div>
-          </div>
-        </div>
+  /* ============================================================
+     CÁC CHƯƠNG TRÌNH KHÁC: cùng loại tour, thẻ y hệt tours.html
+     ============================================================ */
+  async function loadOthers() {
+    try {
+      const q = new URLSearchParams({ sort: 'departure', page: 0, size: 5 });
+      if (tour.categoryId) q.set('categoryId', tour.categoryId);
+      const page = await getData('/api/public/tours?' + q);
+      const others = (page.content || []).filter(t => t.tourId !== tour.tourId).slice(0, 4);
+      if (!others.length) return;
+      $('tdOthers').innerHTML = others.map(t => TourCard.html(t)).join('');
+      $('sec-others').classList.remove('d-none');
+      TourCard.initDateNavs($('tdOthers'));
+    } catch (e) {
+      console.error(e);   // phần phụ: lỗi thì thôi không hiện
+    }
+  }
 
-      </div>
+  /* ============================================================
+     MỤC LỤC DÍNH + CHIỀU CAO HEADER
+     ============================================================ */
+  /** Header của web cuộn theo trang → chỉ cần chừa chỗ cho nó lúc tải / đổi cỡ màn hình */
+  function syncTopPadding() {
+    $('tdMain').style.paddingTop = ((document.getElementById('header')?.offsetHeight || 90) + 20) + 'px';
+    document.documentElement.style.setProperty('--td-bar', $('tdBar').offsetHeight + 'px');
+  }
 
-    </section></main>
+  /** Header cuộn khuất → hiện thanh mục lục; cuộn lên thấy header → ẩn */
+  function toggleBar() {
+    const headerBottom = document.getElementById('header')?.offsetHeight || 90;
+    const show = window.scrollY > headerBottom;
+    $('tdBar').classList.toggle('show', show);
+    $('tdBar').setAttribute('aria-hidden', !show);
+  }
 
-  <footer id="footer" class="footer position-relative dark-background">
+  function updateActiveTab() {
+    const offset = $('tdBar').offsetHeight + 40;
+    let current = null;
+    document.querySelectorAll('#tdTabs a:not(.d-none)').forEach(a => {
+      const sec = document.querySelector(a.getAttribute('href'));
+      if (sec && sec.getBoundingClientRect().top <= offset) current = a;
+    });
+    document.querySelectorAll('#tdTabs a').forEach(a => a.classList.toggle('active', a === current));
+  }
 
-    <div class="footer-newsletter">
-      <div class="container">
-        <div class="row justify-content-center text-center">
-          <div class="col-lg-6">
-            <h4>Đăng Ký Nhận Bản Tin</h4>
-            <p>Đăng ký ngay để nhận thông tin mới nhất về các tour du lịch hấp dẫn và những ưu đãi độc quyền!</p>
-            <form action="forms/newsletter.php" method="post" class="php-email-form">
-              <div class="newsletter-form"><input type="email" name="email" placeholder="Nhập email của bạn"><input type="submit" value="Đăng Ký"></div>
-              <div class="loading">Đang xử lý...</div>
-              <div class="error-message"></div>
-              <div class="sent-message">Yêu cầu đăng ký của bạn đã được gửi. Xin cảm ơn!</div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
+  window.addEventListener('scroll', () => { toggleBar(); updateActiveTab(); }, { passive: true });
+  window.addEventListener('resize', syncTopPadding);
+  syncTopPadding();
+  toggleBar();
 
-    <div class="container footer-top">
-      <div class="row gy-4">
-        <div class="col-lg-4 col-md-6 footer-about">
-          <a href="index.html" class="d-flex align-items-center">
-            <span class="sitename">Tour</span>
-          </a>
-          <div class="footer-contact pt-3">
-            <p>Số 123 Đường Cầu Diễn</p>
-            <p>Phú Diễn, Bắc Từ Liêm</p>
-            <p class="mt-3"><strong>Hotline:</strong> <span>+84 123 456 789</span></p>
-            <p><strong>Email:</strong> <span>lienhe@example.com</span></p>
-          </div>
-        </div>
-
-        <div class="col-lg-2 col-md-3 footer-links">
-          <h4>Liên Kết Nhanh</h4>
-          <ul>
-            <li><i class="bi bi-chevron-right"></i> <a href="index.html">Trang chủ</a></li>
-            <li><i class="bi bi-chevron-right"></i> <a href="about.html">Về chúng tôi</a></li>
-            <li><i class="bi bi-chevron-right"></i> <a href="services.html">Dịch vụ</a></li>
-            <li><i class="bi bi-chevron-right"></i> <a href="terms.html">Điều khoản dịch vụ</a></li>
-            <li><i class="bi bi-chevron-right"></i> <a href="privacy.html">Chính sách bảo mật</a></li>
-          </ul>
-        </div>
-
-        <div class="col-lg-2 col-md-3 footer-links">
-          <h4>Dịch Vụ Của Chúng Tôi</h4>
-          <ul>
-            <li><i class="bi bi-chevron-right"></i> <a href="#">Tour Trong Nước</a></li>
-            <li><i class="bi bi-chevron-right"></i> <a href="#">Tour Quốc Tế</a></li>
-            <li><i class="bi bi-chevron-right"></i> <a href="#">Đặt Vé Máy Bay</a></li>
-            <li><i class="bi bi-chevron-right"></i> <a href="#">Đặt Phòng Khách Sạn</a></li>
-            <li><i class="bi bi-chevron-right"></i> <a href="#">Tư Vấn Visa</a></li>
-          </ul>
-        </div>
-
-        <div class="col-lg-4 col-md-12">
-          <h4>Kết Nối Với Chúng Tôi</h4>
-          <p>Theo dõi chúng tôi trên mạng xã hội để cập nhật những hành trình thú vị và chia sẻ khoảnh khắc đáng nhớ.</p>
-          <div class="social-links d-flex">
-            <a href=""><i class="bi bi-twitter-x"></i></a>
-            <a href=""><i class="bi bi-facebook"></i></a>
-            <a href=""><i class="bi bi-instagram"></i></a>
-            <a href=""><i class="bi bi-linkedin"></i></a>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <div class="container copyright text-center mt-4">
-      <p>© Bản quyền thuộc về <strong class="px-1 sitename">Tour</strong>. Bảo lưu mọi quyền.</p>
-      <div class="credits">
-        Thiết kế bởi <a href="https://bootstrapmade.com/">BootstrapMade</a>
-      </div>
-    </div>
-
-  </footer>
-
-  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
-
-  <div id="preloader"></div>
-
-  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="assets/vendor/php-email-form/validate.js"></script>
-  <script src="assets/vendor/aos/aos.js"></script>
-  <script src="assets/vendor/purecounter/purecounter_vanilla.js"></script>
-  <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
-  <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
-  <script src="assets/vendor/imagesloaded/imagesloaded.pkgd.min.js"></script>
-  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
-
-  <script src="assets/js/main.js"></script>
+  load();
+</script>
 
 </body>
 

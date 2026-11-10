@@ -73,6 +73,22 @@ public enum ErrorCode {
     DUPLICATE_ACTIVE_BOOKING(400, "Bạn đang có đơn đặt cho chuyến đi này. Vui lòng hoàn thành hoặc hủy đơn cũ trước khi đặt tiếp", HttpStatus.BAD_REQUEST),
     SINGLE_ROOM_ADULT_ONLY(400, "Phòng đơn chỉ áp dụng cho khách từ 12 tuổi trở lên", HttpStatus.BAD_REQUEST),
 
+    // ========== PROMOTION ==========
+    PROMOTION_NOT_FOUND(404, "Không tìm thấy mã khuyến mãi", HttpStatus.NOT_FOUND),
+    PROMOTION_CODE_EXISTS(409, "Mã khuyến mãi đã tồn tại", HttpStatus.CONFLICT),
+    PROMOTION_CODE_LOCKED(409, "Mã đã có khách sử dụng, không thể đổi mã", HttpStatus.CONFLICT),
+    PROMOTION_IN_USE(409, "Mã đã có khách sử dụng, không thể xoá. Hãy tắt mã thay vì xoá", HttpStatus.CONFLICT),
+    PROMOTION_QUANTITY_TOO_LOW(400, "Số lượng không được nhỏ hơn số lượt đã sử dụng", HttpStatus.BAD_REQUEST),
+    INVALID_PROMOTION_DATE(400, "Ngày kết thúc phải sau ngày bắt đầu", HttpStatus.BAD_REQUEST),
+    INVALID_DISCOUNT_PERCENT(400, "Giảm theo phần trăm chỉ từ 1 đến 100", HttpStatus.BAD_REQUEST),
+    PROMOTION_INVALID(400, "Mã giảm giá không hợp lệ", HttpStatus.BAD_REQUEST),
+    PROMOTION_NOT_STARTED(400, "Mã giảm giá chưa đến thời gian sử dụng", HttpStatus.BAD_REQUEST),
+    PROMOTION_EXPIRED(400, "Mã giảm giá đã hết hạn", HttpStatus.BAD_REQUEST),
+    PROMOTION_OUT_OF_STOCK(400, "Mã giảm giá đã hết lượt sử dụng", HttpStatus.BAD_REQUEST),
+    PROMOTION_NOT_APPLICABLE_TOUR(400, "Mã giảm giá không áp dụng cho tour này", HttpStatus.BAD_REQUEST),
+    PROMOTION_MIN_ORDER_NOT_MET(400, "Đơn hàng chưa đạt giá trị tối thiểu để dùng mã này", HttpStatus.BAD_REQUEST),
+    PROMOTION_USER_LIMIT_REACHED(400, "Bạn đã dùng hết số lần cho phép của mã này", HttpStatus.BAD_REQUEST),
+
     // ========== SYSTEM ==========
     INTERNAL_SERVE_ERROR(500, "Lỗi hệ thống", HttpStatus.INTERNAL_SERVER_ERROR)
     ;

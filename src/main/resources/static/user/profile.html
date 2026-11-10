@@ -276,6 +276,49 @@
             font-weight: 500;
         }
 
+        /* ===== MÃ KHUYẾN MÃI: phiếu giảm giá ===== */
+        .promo-list { display: flex; flex-direction: column; gap: 16px; }
+        .voucher {
+            display: flex; min-height: 150px; background: #fff;
+            border-radius: 12px; box-shadow: 0 1px 8px rgba(0, 0, 0, .07); overflow: hidden;
+        }
+        /* Khối màu bên trái, mép phải răng cưa (khoét bán nguyệt bằng mask) */
+        .voucher-left {
+            flex: 0 0 150px; padding: 16px 18px 16px 12px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+            background: var(--accent-color); color: #fff;
+            -webkit-mask: radial-gradient(5px at right, #0000 97%, #000) right / 100% 14px repeat-y;
+            mask: radial-gradient(5px at right, #0000 97%, #000) right / 100% 14px repeat-y;
+        }
+        .voucher-value { font-size: 34px; font-weight: 800; line-height: 1.1; letter-spacing: -.5px; }
+        .voucher-unit { font-size: 13px; font-weight: 700; letter-spacing: .04em; margin-top: 4px; opacity: .9; }
+
+        .voucher-body { flex: 1; min-width: 0; padding: 16px 22px; display: flex; flex-direction: column; justify-content: center; gap: 8px; }
+        .voucher-name { font-weight: 700; font-size: 17px; line-height: 1.35; color: #212529; }
+        .voucher-code-row { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #6c757d; }
+        .voucher-code {
+            font-family: monospace; font-weight: 700; font-size: 15px; letter-spacing: .04em;
+            padding: 3px 10px; border: 1px dashed #c7ced8; border-radius: 6px; color: var(--accent-color);
+        }
+        .voucher-copy {
+            border: 0; background: none; padding: 2px 4px; color: #6c757d; font-size: 16px; line-height: 1;
+            border-radius: 4px; transition: color .15s;
+        }
+        .voucher-copy:hover { color: var(--accent-color); }
+        .voucher-copy.copied { color: #198754; }
+        .voucher-desc { font-size: 14px; color: #495057; }
+        .voucher-meta { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: #6c757d; }
+        .voucher-meta i { color: var(--accent-color); font-size: 15px; }
+        .voucher-meta b { color: #495057; font-weight: 500; }
+        .voucher-meta.soon b { color: #dc3545; }
+        .promo-empty { text-align: center; color: #6c757d; padding: 36px 12px; }
+        .promo-empty i { font-size: 40px; opacity: .4; display: block; margin-bottom: 8px; }
+        @media (max-width: 575.98px) {
+            .voucher-left { flex-basis: 110px; }
+            .voucher-value { font-size: 26px; }
+            .voucher-body { padding: 14px 14px; }
+        }
+
         @media (max-width: 991.98px) {
             .profile-sidebar {
                 position: static;
@@ -370,6 +413,10 @@
                         <a class="nav-link" href="favorites.html">
                             <i class="bi bi-heart"></i> Tour yêu thích
                         </a>
+                        <button class="nav-link" data-bs-toggle="tab"
+                                data-bs-target="#tab-promo" type="button" role="tab" id="promoTabBtn">
+                            <i class="bi bi-ticket-perforated"></i> Mã khuyến mãi
+                        </button>
                         <button class="nav-link text-danger" type="button" id="logoutBtn">
                             <i class="bi bi-box-arrow-right"></i> Đăng xuất
                         </button>
@@ -517,6 +564,18 @@
                         </div>
                     </div>
 
+                    <!-- ---------- Tab: Mã khuyến mãi ---------- -->
+                    <div class="tab-pane fade" id="tab-promo" role="tabpanel">
+                        <div class="profile-card">
+
+                            <h5 class="profile-card-title mb-4">Mã khuyến mãi</h5>
+
+                            <div id="promoList">
+                                <div class="text-center py-4"><div class="spinner-border text-primary"></div></div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
@@ -552,42 +611,41 @@
                     <p>Số 123 Đường Cầu Diễn</p>
                     <p>Phú Diễn, Bắc Từ Liêm</p>
                     <p class="mt-3"><strong>Hotline:</strong> <span>+84 123 456 789</span></p>
-                    <p><strong>Email:</strong> <span>lienhe@example.com</span></p>
+                    <p><strong>Email:</strong> <span>lienhe@viettrip.vn</span></p>
                 </div>
             </div>
 
             <div class="col-lg-2 col-md-3 footer-links">
                 <h4>Liên Kết Nhanh</h4>
                 <ul>
-                    <li><i class="bi bi-chevron-right"></i> <a href="#">Trang chủ</a></li>
-                    <li><i class="bi bi-chevron-right"></i> <a href="#">Về chúng tôi</a></li>
-                    <li><i class="bi bi-chevron-right"></i> <a href="#">Dịch vụ</a></li>
-                    <li><i class="bi bi-chevron-right"></i> <a href="#">Điều khoản dịch vụ</a></li>
-                    <li><i class="bi bi-chevron-right"></i> <a href="#">Chính sách bảo mật</a></li>
+                    <li><i class="bi bi-chevron-right"></i> <a href="index.html">Trang chủ</a></li>
+                    <li><i class="bi bi-chevron-right"></i> <a href="about.html">Về chúng tôi</a></li>
+                    <li><i class="bi bi-chevron-right"></i> <a href="destinations.html">Điểm đến</a></li>
+                    <li><i class="bi bi-chevron-right"></i> <a href="tours.html">Tours</a></li>
+                    <li><i class="bi bi-chevron-right"></i> <a href="contact.html">Liên hệ</a></li>
                 </ul>
             </div>
 
             <div class="col-lg-2 col-md-3 footer-links">
-                <h4>Dịch Vụ Của Chúng Tôi</h4>
+                <h4>Hỗ Trợ</h4>
                 <ul>
-                    <li><i class="bi bi-chevron-right"></i> <a href="#">Tour Trong Nước</a></li>
-                    <li><i class="bi bi-chevron-right"></i> <a href="#">Tour Quốc Tế</a></li>
-                    <li><i class="bi bi-chevron-right"></i> <a href="#">Đặt Vé Máy Bay</a></li>
-                    <li><i class="bi bi-chevron-right"></i> <a href="#">Đặt Phòng Khách Sạn</a></li>
-                    <li><i class="bi bi-chevron-right"></i> <a href="#">Tư Vấn Visa</a></li>
+                    <li><i class="bi bi-chevron-right"></i> <a href="terms.html">Điều khoản dịch vụ</a></li>
+                    <li><i class="bi bi-chevron-right"></i> <a href="privacy.html">Chính sách bảo mật</a></li>
+                    <li><i class="bi bi-chevron-right"></i> <a href="contact.html">Câu hỏi thường gặp</a></li>
                 </ul>
             </div>
 
             <div class="col-lg-4 col-md-12">
                 <h4>Kết Nối Với Chúng Tôi</h4>
-                <p>Theo dõi chúng tôi trên mạng xã hội để cập nhật những hành trình thú vị và chia sẻ khoảnh khắc đáng nhớ.</p>
+                <p>Theo dõi VietTrip để cập nhật tour mới và ưu đãi sớm nhất.</p>
                 <div class="social-links d-flex">
-                    <a href=""><i class="bi bi-twitter-x"></i></a>
-                    <a href=""><i class="bi bi-facebook"></i></a>
-                    <a href=""><i class="bi bi-instagram"></i></a>
-                    <a href=""><i class="bi bi-linkedin"></i></a>
+                    <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+                    <a href="#" aria-label="TikTok"><i class="bi bi-tiktok"></i></a>
+                    <a href="#" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
                 </div>
             </div>
+
         </div>
     </div>
 
@@ -1013,6 +1071,111 @@
             $('pwText').textContent = 'Đổi mật khẩu';
         }
     });
+
+    // =====================================================================
+    // MÃ KHUYẾN MÃI: GET /api/public/promotions (mã đang dùng được)
+    // =====================================================================
+
+    const moneyFmt = new Intl.NumberFormat('vi-VN');
+    const fmtMoney = v => moneyFmt.format(Number(v) || 0) + ' ₫';
+
+    function escapeHtml(str) {
+        return String(str ?? '').replace(/[&<>"']/g, c =>
+            ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    /** Ô giá trị bên trái: 200000 → "200K", 1500000 → "1,5TR" */
+    function shortMoney(v) {
+        v = Number(v) || 0;
+        if (v >= 1e6) return (v / 1e6).toLocaleString('vi-VN', { maximumFractionDigits: 1 }) + 'TR';
+        if (v >= 1e3) return (v / 1e3).toLocaleString('vi-VN', { maximumFractionDigits: 0 }) + 'K';
+        return moneyFmt.format(v);
+    }
+
+    /** Đơn tối thiểu: 5000000 → "5.000k", 500000 → "500k" (dưới 1.000đ giữ nguyên) */
+    function kMoney(v) {
+        v = Number(v) || 0;
+        return v >= 1000 ? moneyFmt.format(Math.round(v / 1000)) + 'k' : moneyFmt.format(v) + ' ₫';
+    }
+
+    /** "2026-12-30T23:59:59" → "30/12/2026" */
+    function fmtDate(s) { if (!s) return '—'; const [y, m, d] = s.slice(0, 10).split('-'); return `${d}/${m}/${y}`; }
+
+    /** Thứ tự: tên KM → Mã → Mô tả → Đơn tối thiểu → Ngày hết hạn */
+    function voucherHtml(p) {
+        const percent = p.discountType === 'PERCENT';
+        const soon = p.endDate && new Date(p.endDate) - new Date() <= 3 * 24 * 3600 * 1000;   // còn ≤ 3 ngày → chữ đỏ
+        return `
+        <div class="voucher">
+            <div class="voucher-left">
+                <div class="voucher-value">${percent ? `${Number(p.discountValue)}%` : shortMoney(p.discountValue)}</div>
+                <div class="voucher-unit">GIẢM GIÁ</div>
+            </div>
+            <div class="voucher-body">
+                <div class="voucher-name">${escapeHtml(p.promotionName)}</div>
+                <div class="voucher-code-row">
+                    Mã: <span class="voucher-code">${escapeHtml(p.promotionCode)}</span>
+                    <button type="button" class="voucher-copy" data-code="${escapeHtml(p.promotionCode)}"
+                            title="Sao chép mã" aria-label="Sao chép mã ${escapeHtml(p.promotionCode)}">
+                        <i class="bi bi-copy"></i>
+                    </button>
+                </div>
+                ${p.description ? `<div class="voucher-desc">${escapeHtml(p.description)}</div>` : ''}
+                <div class="voucher-meta" title="Đơn tối thiểu"><i class="bi bi-basket2"></i>
+                    <b>${Number(p.minOrderAmount) > 0 ? '≥ ' + kMoney(p.minOrderAmount) : 'Mọi đơn hàng'}</b></div>
+                <div class="voucher-meta ${soon ? 'soon' : ''}" title="Ngày hết hạn"><i class="bi bi-clock"></i>
+                    <b>${fmtDate(p.endDate)}</b></div>
+            </div>
+        </div>`;
+    }
+
+    let promoLoaded = false;
+
+    async function loadPromotions() {
+        try {
+            const res = await fetch('/api/public/promotions');
+            const json = await readJson(res);
+            if (!res.ok || !json || !json.success) throw new Error(errorMessage(json, 'Không tải được mã khuyến mãi.'));
+
+            promoLoaded = true;
+            $('promoList').innerHTML = json.data.length
+                ? `<div class="promo-list">${json.data.map(voucherHtml).join('')}</div>`
+                : '<div class="promo-empty"><i class="bi bi-ticket-perforated"></i>Hiện chưa có mã khuyến mãi nào.</div>';
+        } catch (err) {
+            $('promoList').innerHTML = `<div class="promo-empty text-danger">
+                ${escapeHtml(err.message === 'Failed to fetch' ? 'Không kết nối được tới máy chủ.' : err.message)}
+                <div class="mt-2"><button type="button" class="btn btn-sm btn-light" id="promoRetry">Thử lại</button></div></div>`;
+            $('promoRetry').addEventListener('click', loadPromotions);
+        }
+    }
+
+    // Chỉ tải khi mở tab lần đầu (không làm chậm lúc vào trang hồ sơ)
+    $('promoTabBtn').addEventListener('shown.bs.tab', () => { if (!promoLoaded) loadPromotions(); });
+
+    // Sao chép mã
+    $('promoList').addEventListener('click', async (e) => {
+        const btn = e.target.closest('.voucher-copy');
+        if (!btn) return;
+        try {
+            await navigator.clipboard.writeText(btn.dataset.code);
+        } catch (_) {
+            // Trình duyệt chặn clipboard (http không phải localhost...) → cách cũ
+            const t = document.createElement('textarea');
+            t.value = btn.dataset.code; document.body.appendChild(t); t.select();
+            document.execCommand('copy'); t.remove();
+        }
+        btn.classList.add('copied');
+        btn.title = 'Đã sao chép';
+        btn.innerHTML = '<i class="bi bi-check2"></i>';
+        setTimeout(() => {
+            btn.classList.remove('copied');
+            btn.title = 'Sao chép mã';
+            btn.innerHTML = '<i class="bi bi-copy"></i>';
+        }, 1500);
+    });
+
+    // Mở thẳng tab từ link khác: profile.html#promo
+    if (location.hash === '#promo') bootstrap.Tab.getOrCreateInstance($('promoTabBtn')).show();
 
     // ---------- Đăng xuất ----------
     const logoutModal = new bootstrap.Modal($('logoutModal'));

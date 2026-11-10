@@ -5,6 +5,7 @@ import com.example.tour.promotion.constant.DiscountType;
 import com.example.tour.tour.entity.Tour;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -31,7 +32,7 @@ public class Promotion extends BaseEntity {
     @Column(name = "promotion_name", nullable = false)
     private String promotionName;
 
-    @Column(name = "description", nullable = false)
+    @Column(name = "description")
     private String description;
 
     @Enumerated(EnumType.STRING)
@@ -70,9 +71,14 @@ public class Promotion extends BaseEntity {
     @Column(name = "is_active")
     private Boolean isActive = true;
 
-    // Promotion là owning side của bảng trung gian promotion_tours
+    /**
+     * Promotion là owning side của bảng trung gian promotion_tours. Rỗng = áp dụng mọi tour.
+     * @BatchSize: danh sách admin 10 mã, mỗi mã đọc tours → không có thì 10 câu SELECT riêng (N+1);
+     * có thì Hibernate gom thành 1 câu "... where promotion_id in (?, ?, ...)".
+     */
     @Builder.Default
     @ManyToMany
+    @BatchSize(size = 50)
     @JoinTable(name = "promotion_tours",
             joinColumns = @JoinColumn(name = "promotion_id"),
             inverseJoinColumns = @JoinColumn(name = "tour_id"))

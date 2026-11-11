@@ -97,6 +97,11 @@ public enum ErrorCode {
     PROMOTION_MIN_ORDER_NOT_MET(400, "Đơn hàng chưa đạt giá trị tối thiểu để dùng mã này", HttpStatus.BAD_REQUEST),
     PROMOTION_USER_LIMIT_REACHED(400, "Bạn đã dùng hết số lần cho phép của mã này", HttpStatus.BAD_REQUEST),
 
+    // ========== CHATBOT ==========
+    CHATBOT_RATE_LIMIT(429, "Bạn gửi hơi nhanh, đợi một chút rồi hỏi tiếp nhé", HttpStatus.TOO_MANY_REQUESTS),
+    CHATBOT_BUSY(503, "Trợ lý đang bận, bạn thử lại sau ít phút nhé", HttpStatus.SERVICE_UNAVAILABLE),
+    CHATBOT_UNAVAILABLE(503, "Trợ lý tạm thời chưa sẵn sàng, vui lòng gọi hotline +84 123 456 789", HttpStatus.SERVICE_UNAVAILABLE),
+
     // ========== SYSTEM ==========
     INTERNAL_SERVE_ERROR(500, "Lỗi hệ thống", HttpStatus.INTERNAL_SERVER_ERROR)
     ;

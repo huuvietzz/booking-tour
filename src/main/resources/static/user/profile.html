@@ -19,6 +19,7 @@
     <link href="assets/css/main.css" rel="stylesheet">
     <link href="assets/css/auth-ui.css" rel="stylesheet">
     <link href="assets/css/header-white.css" rel="stylesheet">
+    <link href="assets/css/tour-card.css" rel="stylesheet">
 
     <style>
         .profile-page {
@@ -319,6 +320,83 @@
             .voucher-body { padding: 14px 14px; }
         }
 
+        /* ===== ĐƠN ĐẶT TOUR ===== */
+        .bk-filter { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+        .bk-filter button {
+            border: 1px solid #dee2e6; background: #fff; color: #495057; border-radius: 999px;
+            padding: 6px 16px; font-size: 14px; transition: all .15s;
+        }
+        .bk-filter button:hover { border-color: var(--accent-color); color: var(--accent-color); }
+        .bk-filter button.active { background: var(--accent-color); border-color: var(--accent-color); color: #fff; }
+
+        .bk-list { display: flex; flex-direction: column; gap: 16px; }
+        .bk-item { border: 1px solid #e6e9f0; border-radius: 12px; overflow: hidden; transition: box-shadow .2s; }
+        .bk-item:hover { box-shadow: 0 4px 16px rgba(16, 24, 40, .07); }
+        .bk-item-head {
+            display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+            padding: 11px 18px; background: #f8f9fb; border-bottom: 1px solid #eef0f4; font-size: 13.5px; color: #6c757d;
+        }
+        .bk-item-head b { color: #212529; font-weight: 600; letter-spacing: .02em; }
+        .bk-item-body { display: flex; gap: 16px; padding: 16px 18px; }
+        .bk-thumb { flex: 0 0 132px; height: 92px; border-radius: 8px; overflow: hidden; background: #e9edf3; }
+        .bk-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .bk-info { flex: 1; min-width: 0; }
+        .bk-tour { font-weight: 600; font-size: 16px; line-height: 1.4; margin-bottom: 8px; }
+        .bk-tour a { color: #212529; }
+        .bk-tour a:hover { color: var(--accent-color); }
+        .bk-meta { display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 14px; color: #495057; }
+        .bk-meta i { color: var(--accent-color); margin-right: 6px; }
+        .bk-item-foot {
+            display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+            padding: 12px 18px; border-top: 1px dashed #e6e9f0;
+        }
+        .bk-total { font-size: 14px; color: #6c757d; }
+        .bk-total b { font-size: 18px; color: #d6262c; margin-left: 6px; }
+        .bk-actions { display: flex; gap: 8px; }
+        .bk-actions .btn { border-radius: 8px; font-size: 14px; padding: 6px 14px; }
+
+        .bk-status { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+        .bk-status.PENDING   { background: #fff4d6; color: #a86b00; }
+        .bk-status.CONFIRMED { background: #e7f0ff; color: #0d6efd; }
+        .bk-status.PAID      { background: #e6f7f3; color: #0f8a6a; }
+        .bk-status.COMPLETED { background: #e0f8e9; color: #198754; }
+        .bk-status.CANCELLED { background: #fdecee; color: #dc3545; }
+
+        /* Modal chi tiết đơn */
+        .bk-detail .modal-content { border: 0; border-radius: 14px; }
+        .bk-sec + .bk-sec { margin-top: 18px; padding-top: 18px; border-top: 1px solid #eef0f4; }
+        .bk-sec-title { font-weight: 600; font-size: 15px; margin-bottom: 10px; }
+        .bk-kv { display: grid; grid-template-columns: 150px 1fr; gap: 6px 12px; font-size: 14px; }
+        .bk-kv dt { font-weight: 400; color: #6c757d; }
+        .bk-kv dd { margin: 0; color: #212529; }
+        .bk-pax { font-size: 14px; margin: 0; }
+        .bk-pax th { color: #6c757d; font-weight: 500; white-space: nowrap; }
+        .bk-price { font-size: 14px; }
+        .bk-price .row-line { display: flex; justify-content: space-between; padding: 4px 0; }
+        .bk-price .discount { color: #198754; }
+        .bk-price .grand { border-top: 1px solid #eef0f4; margin-top: 6px; padding-top: 10px; font-weight: 600; font-size: 16px; }
+        .bk-price .grand span:last-child { color: #d6262c; font-size: 19px; }
+        @media (max-width: 575.98px) {
+            .bk-item-body { flex-direction: column; }
+            .bk-thumb { flex-basis: auto; height: 150px; }
+            .bk-kv { grid-template-columns: 1fr; gap: 2px; }
+            .bk-kv dd { margin-bottom: 6px; }
+        }
+
+        /* ===== TOUR YÊU THÍCH ===== */
+        .fav-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
+        .fav-count { font-size: 14px; color: #6c757d; }
+        .fav-grid > div { transition: opacity .25s, transform .25s; }
+        .fav-grid > div.is-removing { opacity: 0; transform: scale(.96); }
+        .fav-empty { text-align: center; color: #6c757d; padding: 40px 12px; }
+        .fav-empty i { font-size: 44px; color: #e0252b; opacity: .35; display: block; margin-bottom: 10px; }
+        .fav-empty .btn { margin-top: 14px; }
+        .fav-more {
+            border: 1.5px solid var(--accent-color); color: var(--accent-color); background: #fff;
+            border-radius: 999px; padding: 8px 30px; font-weight: 600;
+        }
+        .fav-more:hover:not(:disabled) { background: var(--accent-color); color: #fff; }
+
         @media (max-width: 991.98px) {
             .profile-sidebar {
                 position: static;
@@ -407,12 +485,14 @@
                                 data-bs-target="#tab-password" type="button" role="tab">
                             <i class="bi bi-shield-lock"></i> Đổi mật khẩu
                         </button>
-                        <a class="nav-link" href="my-bookings.html">
+                        <button class="nav-link" data-bs-toggle="tab"
+                                data-bs-target="#tab-bookings" type="button" role="tab" id="bookingTabBtn">
                             <i class="bi bi-journal-text"></i> Đơn đặt tour
-                        </a>
-                        <a class="nav-link" href="favorites.html">
+                        </button>
+                        <button class="nav-link" data-bs-toggle="tab"
+                                data-bs-target="#tab-fav" type="button" role="tab" id="favTabBtn">
                             <i class="bi bi-heart"></i> Tour yêu thích
-                        </a>
+                        </button>
                         <button class="nav-link" data-bs-toggle="tab"
                                 data-bs-target="#tab-promo" type="button" role="tab" id="promoTabBtn">
                             <i class="bi bi-ticket-perforated"></i> Mã khuyến mãi
@@ -564,6 +644,51 @@
                         </div>
                     </div>
 
+                    <!-- ---------- Tab: Đơn đặt tour ---------- -->
+                    <div class="tab-pane fade" id="tab-bookings" role="tabpanel">
+                        <div class="profile-card">
+                            <div class="fav-head">
+                                <h5 class="profile-card-title mb-0">Đơn đặt tour</h5>
+                                <span class="fav-count" id="bkCount"></span>
+                            </div>
+
+                            <div class="bk-filter" id="bkFilter" role="group" aria-label="Lọc theo trạng thái">
+                                <button type="button" class="active" data-status="">Tất cả</button>
+                                <button type="button" data-status="PENDING">Chờ xác nhận</button>
+                                <button type="button" data-status="CONFIRMED">Đã xác nhận</button>
+                                <button type="button" data-status="PAID">Đã thanh toán</button>
+                                <button type="button" data-status="COMPLETED">Hoàn thành</button>
+                                <button type="button" data-status="CANCELLED">Đã huỷ</button>
+                            </div>
+
+                            <div id="bkList">
+                                <div class="text-center py-4"><div class="spinner-border text-primary"></div></div>
+                            </div>
+
+                            <div class="text-center mt-4 d-none" id="bkMoreWrap">
+                                <button type="button" class="fav-more" id="bkMoreBtn">Xem thêm</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ---------- Tab: Tour yêu thích ---------- -->
+                    <div class="tab-pane fade" id="tab-fav" role="tabpanel">
+                        <div class="profile-card">
+                            <div class="fav-head">
+                                <h5 class="profile-card-title mb-0">Tour yêu thích</h5>
+                                <span class="fav-count" id="favCount"></span>
+                            </div>
+
+                            <div class="row g-4 fav-grid" id="favGrid">
+                                <div class="col-12 text-center py-4"><div class="spinner-border text-primary"></div></div>
+                            </div>
+
+                            <div class="text-center mt-4 d-none" id="favMoreWrap">
+                                <button type="button" class="fav-more" id="favMoreBtn">Xem thêm</button>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- ---------- Tab: Mã khuyến mãi ---------- -->
                     <div class="tab-pane fade" id="tab-promo" role="tabpanel">
                         <div class="profile-card">
@@ -579,6 +704,38 @@
                 </div>
             </div>
 
+        </div>
+    </div>
+
+    <!-- Modal chi tiết đơn đặt tour -->
+    <div class="modal fade bk-detail" id="bkDetailModal" tabindex="-1" aria-labelledby="bkDetailTitle" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-semibold" id="bkDetailTitle">Chi tiết đơn</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body" id="bkDetailBody"></div>
+                <div class="modal-footer" id="bkDetailFoot"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal xác nhận huỷ đơn -->
+    <div class="modal fade confirm-modal" id="bkCancelModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content border-0" style="border-radius: 14px;">
+                <div class="modal-body text-center px-4 py-4">
+                    <div class="confirm-icon"><i class="bi bi-x-circle"></i></div>
+                    <h6 class="fw-semibold mb-2">Huỷ đơn <span id="bkCancelCode"></span>?</h6>
+                    <p class="text-secondary small mb-4">Đơn đã huỷ không khôi phục được.</p>
+                    <div class="text-danger small mb-3 d-none" id="bkCancelError"></div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-light flex-fill" data-bs-dismiss="modal">Không</button>
+                        <button type="button" class="btn btn-danger flex-fill" id="bkCancelConfirm">Huỷ đơn</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -661,6 +818,8 @@
 <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="assets/js/main.js"></script>
 <script src="assets/js/auth-ui.js"></script>
+<script src="assets/js/chatbot.js"></script>
+<script src="assets/js/tour-card.js"></script>
 
 <script>
     // Chưa đăng nhập thì đá về trang login ngay
@@ -927,6 +1086,7 @@
                 fillForm(json.data);
                 $('pageLoading').classList.add('d-none');
                 $('pageContent').classList.remove('d-none');
+                TourCard.initDateNavs($('favGrid'));   // thẻ vẽ lúc trang còn ẩn → đo lại nút ‹ › dãy ngày
             } else {
                 $('pageLoading').innerHTML = '';
                 const p = document.createElement('p');
@@ -1174,8 +1334,472 @@
         }, 1500);
     });
 
-    // Mở thẳng tab từ link khác: profile.html#promo
+    // =====================================================================
+    // ĐƠN ĐẶT TOUR — CHƯA CÓ BE, ĐANG DÙNG DỮ LIỆU GIẢ LẬP (USE_MOCK)
+    // Khi có BE: đặt BOOKING_MOCK = false. API dự kiến (đều lấy user từ token):
+    //   GET /api/bookings/my?status=&page=&size=   → Page<MyBookingResponse>   (mới đặt xếp trước)
+    //   GET /api/bookings/my/{bookingId}           → chi tiết: + liên hệ, hành khách, giá từng loại
+    //   PUT /api/bookings/my/{bookingId}/cancel    → khách tự huỷ (BE chỉ cho khi PENDING)
+    // =====================================================================
+    const BOOKING_MOCK = true;
+    const BK_PAGE_SIZE = 5;
+    const BK_STATUS = {
+        PENDING:   'Chờ xác nhận',
+        CONFIRMED: 'Đã xác nhận',
+        PAID:      'Đã thanh toán',
+        COMPLETED: 'Hoàn thành',
+        CANCELLED: 'Đã huỷ'
+    };
+    const CANCELABLE = ['PENDING'];   // trạng thái khách được tự huỷ (BE vẫn phải kiểm tra lại)
+    const PAX_TYPE = { ADULT: 'Người lớn', CHILD: 'Trẻ em', TODDLER: 'Trẻ nhỏ' };
+
+    const bk = { status: '', items: [], total: 0, loading: false, loaded: false, seq: 0 };
+
+    // ----- Dữ liệu giả lập -----
+    const MOCK_BOOKINGS = (() => {
+        const tours = [
+            { tourId: 1, tourName: 'Hà Nội - Sa Pa - Fansipan 3N2Đ', duration: '3N2Đ', adult: 4590000, child: 3440000, toddler: 1150000, single: 900000 },
+            { tourId: 2, tourName: 'Đà Nẵng - Hội An - Bà Nà Hills 4N3Đ', duration: '4N3Đ', adult: 6290000, child: 4720000, toddler: 1570000, single: 1200000 },
+            { tourId: 3, tourName: 'Phú Quốc - Grand World - Hòn Thơm 3N2Đ', duration: '3N2Đ', adult: 5490000, child: 4120000, toddler: 1370000, single: 1000000 },
+            { tourId: 4, tourName: 'Hạ Long - Du thuyền 5 sao 2N1Đ', duration: '2N1Đ', adult: 3890000, child: 2920000, toddler: 970000, single: 800000 },
+            { tourId: 5, tourName: 'Hà Giang - Cao nguyên đá Đồng Văn 4N3Đ', duration: '4N3Đ', adult: 4190000, child: 3140000, toddler: 1050000, single: 700000 }
+        ];
+        const plan = [
+            ['PENDING', 0, 2, 1, 0, 12, 18, null], ['CONFIRMED', 1, 2, 0, 1, 3, 25, 'TET2027'],
+            ['PAID', 2, 1, 0, 0, 6, 9, null], ['COMPLETED', 3, 4, 2, 0, 40, -10, 'HE2026'],
+            ['CANCELLED', 4, 2, 0, 0, 20, 30, null], ['COMPLETED', 0, 2, 0, 0, 90, -60, null],
+            ['PAID', 1, 3, 1, 1, 15, 40, null]
+        ];
+        const now = new Date();
+        const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        return plan.map(([status, ti, a, c, t, createdAgo, depIn, coupon], i) => {
+            const tour = tours[ti];
+            const created = new Date(now.getTime() - createdAgo * 86400000 - i * 3600000);
+            const dep = new Date(now); dep.setDate(now.getDate() + depIn);
+            const ret = new Date(dep); ret.setDate(dep.getDate() + Number(tour.duration[0]) - 1);
+            const singleRooms = i % 3 === 1 ? 1 : 0;
+            const subtotal = a * tour.adult + c * tour.child + t * tour.toddler + singleRooms * tour.single;
+            const discount = coupon ? Math.min(Math.round(subtotal * 0.1), 1000000) : 0;
+            const passengers = [
+                ...Array.from({ length: a }, (_, k) => ({ passengerType: 'ADULT', fullName: k ? `Trần Thị ${'BCDE'[k - 1]}` : 'Nguyễn Văn A', gender: k ? 'FEMALE' : 'MALE', dateOfBirth: `199${k}-0${k + 3}-1${k}`, singleRoom: k === 0 && singleRooms > 0 })),
+                ...Array.from({ length: c }, (_, k) => ({ passengerType: 'CHILD', fullName: `Nguyễn Minh ${'KL'[k]}`, gender: 'MALE', dateOfBirth: `201${6 + k}-05-20`, singleRoom: false })),
+                ...Array.from({ length: t }, () => ({ passengerType: 'TODDLER', fullName: 'Nguyễn Bảo An', gender: 'FEMALE', dateOfBirth: '2023-08-02', singleRoom: false }))
+            ];
+            return {
+                bookingId: 100 + i,
+                bookingCode: 'BK' + (260900 - i * 37),
+                bookingStatus: status,
+                createdAt: created.toISOString().slice(0, 19),
+                tourId: tour.tourId, tourName: tour.tourName, thumbnailUrl: null,
+                departureLocation: 'Hà Nội', duration: tour.duration,
+                departureDate: iso(dep), returnDate: iso(ret),
+                numAdults: a, numChildren: c, numToddlers: t,
+                subtotal, discountAmount: discount, couponCode: coupon, totalAmount: subtotal - discount,
+                // ----- chỉ có ở API chi tiết -----
+                contactName: 'Nguyễn Văn A', contactPhone: '0912345678', contactEmail: 'nguyenvana@gmail.com',
+                contactAddress: 'Bắc Từ Liêm, Hà Nội', note: i === 1 ? 'Cho đoàn ngồi gần nhau' : null,
+                adultPrice: tour.adult, childPrice: tour.child, toddlerPrice: tour.toddler,
+                singleRoomSupplement: tour.single, singleRoomCount: singleRooms,
+                passengers
+            };
+        }).sort((x, y) => y.createdAt.localeCompare(x.createdAt));
+    })();
+    const delay = ms => new Promise(r => setTimeout(r, ms));
+
+    // ----- Gọi API (mock hoặc thật) -----
+    async function bkApi(url, options = {}) {
+        const res = await fetch(url, { ...options, headers: AuthUI.authHeaders() });
+        if (res.status === 401) { AuthUI.logout(); throw new Error('Phiên đăng nhập đã hết hạn'); }
+        const json = await readJson(res);
+        if (!res.ok || !json || !json.success) throw new Error(errorMessage(json, 'Có lỗi xảy ra, vui lòng thử lại.'));
+        return json.data;
+    }
+
+    async function fetchBookings(status, page) {
+        if (BOOKING_MOCK) {
+            await delay(300);
+            const all = MOCK_BOOKINGS.filter(b => !status || b.bookingStatus === status);
+            return { content: all.slice(page * BK_PAGE_SIZE, (page + 1) * BK_PAGE_SIZE), total: all.length };
+        }
+        const q = new URLSearchParams({ page, size: BK_PAGE_SIZE });
+        if (status) q.set('status', status);
+        return readPage(await bkApi('/api/bookings/my?' + q));
+    }
+
+    async function fetchBookingDetail(id) {
+        if (BOOKING_MOCK) { await delay(200); return MOCK_BOOKINGS.find(b => b.bookingId === id); }
+        return bkApi(`/api/bookings/my/${id}`);
+    }
+
+    async function cancelBookingApi(id) {
+        if (BOOKING_MOCK) {
+            await delay(400);
+            const b = MOCK_BOOKINGS.find(x => x.bookingId === id);
+            if (!CANCELABLE.includes(b.bookingStatus)) throw new Error('Đơn này không thể huỷ.');
+            b.bookingStatus = 'CANCELLED';
+            return b;
+        }
+        return bkApi(`/api/bookings/my/${id}/cancel`, { method: 'PUT' });
+    }
+
+    // ----- Định dạng -----
+    const vnDate = s => s ? s.slice(0, 10).split('-').reverse().join('/') : '—';
+    const vnDateTime = s => s ? `${vnDate(s)} ${s.slice(11, 16)}` : '—';
+    function paxText(b) {
+        return [[b.numAdults, 'người lớn'], [b.numChildren, 'trẻ em'], [b.numToddlers, 'trẻ nhỏ']]
+            .filter(([n]) => n > 0).map(([n, l]) => `${n} ${l}`).join(', ');
+    }
+    const statusBadge = s => `<span class="bk-status ${s}">${BK_STATUS[s] || s}</span>`;
+
+    function bookingHtml(b) {
+        const tourUrl = `tour-details.html?id=${b.tourId}`;
+        const img = b.thumbnailUrl ? `<img src="${escapeHtml(b.thumbnailUrl)}" alt="" loading="lazy">` : '';
+        return `
+        <div class="bk-item" data-bk-id="${b.bookingId}">
+            <div class="bk-item-head">
+                <span>Mã đơn: <b>${escapeHtml(b.bookingCode)}</b> · Đặt lúc ${vnDateTime(b.createdAt)}</span>
+                ${statusBadge(b.bookingStatus)}
+            </div>
+            <div class="bk-item-body">
+                <a class="bk-thumb" href="${tourUrl}" target="_blank" rel="noopener" aria-label="${escapeHtml(b.tourName)}">${img}</a>
+                <div class="bk-info">
+                    <div class="bk-tour"><a href="${tourUrl}" target="_blank" rel="noopener">${escapeHtml(b.tourName)}</a></div>
+                    <div class="bk-meta">
+                        <span><i class="bi bi-calendar3"></i>${vnDate(b.departureDate)} → ${vnDate(b.returnDate)}</span>
+                        <span><i class="bi bi-geo-alt"></i>Khởi hành từ ${escapeHtml(b.departureLocation)}</span>
+                        <span><i class="bi bi-people"></i>${paxText(b)}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="bk-item-foot">
+                <div class="bk-total">Tổng tiền:<b>${fmtMoney(b.totalAmount)}</b></div>
+                <div class="bk-actions">
+                    ${CANCELABLE.includes(b.bookingStatus)
+            ? `<button type="button" class="btn btn-outline-danger" data-bk-cancel="${b.bookingId}">Huỷ đơn</button>` : ''}
+                    ${['COMPLETED', 'CANCELLED'].includes(b.bookingStatus)
+            ? `<a class="btn btn-light" href="${tourUrl}" target="_blank" rel="noopener">Đặt lại</a>` : ''}
+                    <button type="button" class="btn btn-accent" data-bk-detail="${b.bookingId}">Xem chi tiết</button>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    // ----- Danh sách -----
+    async function loadBookings(reset) {
+        const seq = reset ? ++bk.seq : bk.seq;   // đổi bộ lọc liên tục → chỉ nhận kết quả lần bấm cuối
+        if (!reset && bk.loading) return;
+        bk.loading = true;
+        if (reset) {
+            bk.items = [];
+            $('bkList').innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div></div>';
+        }
+        updateBkMore();
+
+        try {
+            const page = await fetchBookings(bk.status, Math.floor(bk.items.length / BK_PAGE_SIZE));
+            if (seq !== bk.seq) return;
+            const shown = new Set(bk.items.map(b => b.bookingId));
+            const fresh = page.content.filter(b => !shown.has(b.bookingId));
+            bk.items.push(...fresh);
+            bk.total = page.total;
+            bk.loaded = true;
+
+            if (reset) $('bkList').innerHTML = bk.items.length ? '<div class="bk-list"></div>' : emptyBookingsHtml();
+            $('bkList').querySelector('.bk-list')?.insertAdjacentHTML('beforeend', fresh.map(bookingHtml).join(''));
+            $('bkCount').textContent = bk.total ? `${bk.total} đơn` : '';
+        } catch (err) {
+            if (seq !== bk.seq) return;
+            if (reset) {
+                $('bkList').innerHTML = `<div class="fav-empty text-danger">
+                    ${escapeHtml(err.message === 'Failed to fetch' ? 'Không kết nối được tới máy chủ.' : err.message)}
+                    <div><button type="button" class="btn btn-sm btn-light" id="bkRetry">Thử lại</button></div></div>`;
+                $('bkRetry').addEventListener('click', () => loadBookings(true));
+            } else {
+                $('bkMoreBtn').textContent = 'Tải lỗi, bấm để thử lại';
+            }
+        } finally {
+            if (seq === bk.seq) { bk.loading = false; updateBkMore(); }
+        }
+    }
+
+    function emptyBookingsHtml() {
+        return bk.status
+            ? `<div class="fav-empty"><i class="bi bi-inbox" style="color:#6c757d"></i>Không có đơn nào ở trạng thái "${BK_STATUS[bk.status]}".</div>`
+            : `<div class="fav-empty"><i class="bi bi-journal-text" style="color:#6c757d"></i>Bạn chưa đặt tour nào.
+                   <div><a href="tours.html" class="btn btn-accent">Khám phá tour</a></div></div>`;
+    }
+
+    function updateBkMore() {
+        $('bkMoreWrap').classList.toggle('d-none', !(bk.loaded && bk.items.length < bk.total));
+        $('bkMoreBtn').disabled = bk.loading;
+        if (bk.loading) $('bkMoreBtn').textContent = 'Đang tải...';
+        else if ($('bkMoreBtn').textContent === 'Đang tải...') $('bkMoreBtn').textContent = 'Xem thêm';
+    }
+
+    $('bkMoreBtn').addEventListener('click', () => loadBookings(false));
+
+    $('bkFilter').addEventListener('click', e => {
+        const btn = e.target.closest('button[data-status]');
+        if (!btn || btn.classList.contains('active')) return;
+        $('bkFilter').querySelectorAll('button').forEach(b => b.classList.toggle('active', b === btn));
+        bk.status = btn.dataset.status;
+        loadBookings(true);
+    });
+
+    // ----- Chi tiết -----
+    const bkDetailModal = new bootstrap.Modal($('bkDetailModal'));
+
+    function detailHtml(b) {
+        const lines = [
+            [`Người lớn × ${b.numAdults}`, b.adultPrice * b.numAdults],
+            [`Trẻ em × ${b.numChildren}`, b.childPrice * b.numChildren],
+            [`Trẻ nhỏ × ${b.numToddlers}`, b.toddlerPrice * b.numToddlers],
+            [`Phụ thu phòng đơn × ${b.singleRoomCount || 0}`, (b.singleRoomSupplement || 0) * (b.singleRoomCount || 0)]
+        ].filter(([, v]) => v > 0);
+
+        return `
+        <div class="bk-sec">
+            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                <div class="bk-tour mb-0">${escapeHtml(b.tourName)}</div>${statusBadge(b.bookingStatus)}
+            </div>
+            <dl class="bk-kv mb-0">
+                <dt>Mã đơn</dt><dd><b>${escapeHtml(b.bookingCode)}</b></dd>
+                <dt>Ngày đặt</dt><dd>${vnDateTime(b.createdAt)}</dd>
+                <dt>Khởi hành</dt><dd>${vnDate(b.departureDate)} → ${vnDate(b.returnDate)} · từ ${escapeHtml(b.departureLocation)}</dd>
+                <dt>Số khách</dt><dd>${paxText(b)}</dd>
+            </dl>
+        </div>
+        <div class="bk-sec">
+            <div class="bk-sec-title">Thông tin liên hệ</div>
+            <dl class="bk-kv mb-0">
+                <dt>Họ tên</dt><dd>${escapeHtml(b.contactName)}</dd>
+                <dt>Số điện thoại</dt><dd>${escapeHtml(b.contactPhone)}</dd>
+                <dt>Email</dt><dd>${escapeHtml(b.contactEmail)}</dd>
+                ${b.contactAddress ? `<dt>Địa chỉ</dt><dd>${escapeHtml(b.contactAddress)}</dd>` : ''}
+                ${b.note ? `<dt>Ghi chú</dt><dd>${escapeHtml(b.note)}</dd>` : ''}
+            </dl>
+        </div>
+        <div class="bk-sec">
+            <div class="bk-sec-title">Danh sách hành khách</div>
+            <div class="table-responsive">
+                <table class="table table-sm bk-pax">
+                    <thead><tr><th>#</th><th>Họ tên</th><th>Loại khách</th><th>Giới tính</th><th>Ngày sinh</th><th>Phòng đơn</th></tr></thead>
+                    <tbody>${(b.passengers || []).map((p, i) => `
+                        <tr><td>${i + 1}</td><td>${escapeHtml(p.fullName)}</td><td>${PAX_TYPE[p.passengerType] || p.passengerType}</td>
+                            <td>${p.gender === 'MALE' ? 'Nam' : p.gender === 'FEMALE' ? 'Nữ' : 'Khác'}</td>
+                            <td>${vnDate(p.dateOfBirth)}</td><td>${p.singleRoom ? '<i class="bi bi-check2 text-success"></i>' : ''}</td></tr>`).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="bk-sec bk-price">
+            <div class="bk-sec-title">Chi tiết giá</div>
+            ${lines.map(([l, v]) => `<div class="row-line"><span>${l}</span><span>${fmtMoney(v)}</span></div>`).join('')}
+            ${b.discountAmount > 0 ? `<div class="row-line discount"><span>Mã giảm giá ${escapeHtml(b.couponCode || '')}</span><span>− ${fmtMoney(b.discountAmount)}</span></div>` : ''}
+            <div class="row-line grand"><span>Tổng tiền</span><span>${fmtMoney(b.totalAmount)}</span></div>
+        </div>`;
+    }
+
+    async function openBookingDetail(id) {
+        $('bkDetailTitle').textContent = 'Chi tiết đơn';
+        $('bkDetailBody').innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+        $('bkDetailFoot').innerHTML = '<button type="button" class="btn btn-light" data-bs-dismiss="modal">Đóng</button>';
+        bkDetailModal.show();
+        try {
+            const b = await fetchBookingDetail(id);
+            $('bkDetailTitle').textContent = 'Chi tiết đơn ' + b.bookingCode;
+            $('bkDetailBody').innerHTML = detailHtml(b);
+            if (CANCELABLE.includes(b.bookingStatus)) {
+                $('bkDetailFoot').insertAdjacentHTML('afterbegin',
+                    `<button type="button" class="btn btn-outline-danger me-auto" data-bk-cancel="${b.bookingId}">Huỷ đơn</button>`);
+            }
+        } catch (err) {
+            $('bkDetailBody').innerHTML = `<div class="fav-empty text-danger">${escapeHtml(err.message)}</div>`;
+        }
+    }
+
+    // ----- Huỷ đơn -----
+    const bkCancelModal = new bootstrap.Modal($('bkCancelModal'));
+    let cancelingId = null;
+
+    function askCancel(id) {
+        const b = bk.items.find(x => x.bookingId === id) || MOCK_BOOKINGS.find(x => x.bookingId === id);
+        cancelingId = id;
+        $('bkCancelCode').textContent = b ? b.bookingCode : '';
+        $('bkCancelError').classList.add('d-none');
+        // Đang mở modal chi tiết → đóng hẳn rồi mới mở hộp xác nhận (mở chồng 2 modal Bootstrap bị lỗi nền mờ)
+        if ($('bkDetailModal').classList.contains('show')) {
+            $('bkDetailModal').addEventListener('hidden.bs.modal', () => bkCancelModal.show(), { once: true });
+            bkDetailModal.hide();
+        } else {
+            bkCancelModal.show();
+        }
+    }
+
+    $('bkCancelConfirm').addEventListener('click', async () => {
+        const btn = $('bkCancelConfirm');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+        try {
+            const updated = await cancelBookingApi(cancelingId);
+            bkCancelModal.hide();
+            // Đang lọc 1 trạng thái khác "Đã huỷ" → đơn không còn thuộc bộ lọc → tải lại; còn lại thì vẽ lại đúng thẻ đó
+            if (bk.status && bk.status !== 'CANCELLED') {
+                loadBookings(true);
+            } else {
+                const i = bk.items.findIndex(x => x.bookingId === cancelingId);
+                if (i >= 0) {
+                    bk.items[i] = { ...bk.items[i], bookingStatus: updated?.bookingStatus || 'CANCELLED' };
+                    $('bkList').querySelector(`[data-bk-id="${cancelingId}"]`).outerHTML = bookingHtml(bk.items[i]);
+                }
+            }
+        } catch (err) {
+            $('bkCancelError').textContent = err.message === 'Failed to fetch' ? 'Không kết nối được tới máy chủ.' : err.message;
+            $('bkCancelError').classList.remove('d-none');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Huỷ đơn';
+        }
+    });
+
+    // Nút trong danh sách + trong modal chi tiết
+    document.addEventListener('click', e => {
+        const d = e.target.closest('[data-bk-detail]');
+        if (d) return openBookingDetail(Number(d.dataset.bkDetail));
+        const c = e.target.closest('[data-bk-cancel]');
+        if (c) askCancel(Number(c.dataset.bkCancel));
+    });
+
+    // Mở tab lần đầu mới tải; mở lại thì tải mới (có thể vừa đặt thêm tour)
+    $('bookingTabBtn').addEventListener('shown.bs.tab', () => loadBookings(true));
+
+    // =====================================================================
+    // TOUR YÊU THÍCH: GET /api/favorites?page=&size= (Page<TourCardResponse>)
+    // Thẻ + nút tim dùng chung assets/js/tour-card.js với tours.html
+    // =====================================================================
+    const FAV_PAGE_SIZE = 9;   // 3 hàng x 3 thẻ
+    const fav = { tours: [], total: 0, loading: false, loaded: false };
+
+    /** Spring Page có 2 dạng JSON: { content, totalElements } hoặc { content, page: { totalElements } } */
+    function readPage(data) {
+        return { content: data.content || [], total: data.page ? data.page.totalElements : data.totalElements };
+    }
+
+    async function fetchFavPage(page) {
+        const res = await fetch(`/api/favorites?page=${page}&size=${FAV_PAGE_SIZE}`, { headers: tokenHeader() });
+        if (res.status === 401) { AuthUI.logout(); throw new Error('Phiên đăng nhập đã hết hạn'); }
+        const json = await readJson(res);
+        if (!res.ok || !json || !json.success) throw new Error(errorMessage(json, 'Không tải được tour yêu thích.'));
+        return readPage(json.data);
+    }
+
+    const favCol = t => `<div class="col-xl-4 col-md-6" data-fav-id="${t.tourId}">${TourCard.html(t, { view: 'grid' })}</div>`;
+
+    /**
+     * Tải tiếp từ vị trí đang hiện (fav.tours.length).
+     * Không đếm số trang: khách bỏ thích vài tour thì các tour sau dồn lên, trang 2 cũ sẽ bị hụt.
+     * Tính lại từ số thẻ đang hiện → lấy trang chứa vị trí đó (+ trang kế nếu lệch giữa trang), rồi bỏ trùng.
+     */
+    async function loadFavorites(reset) {
+        if (fav.loading) return;
+        fav.loading = true;
+        if (reset) {
+            fav.tours = [];
+            $('favGrid').innerHTML = '<div class="col-12 text-center py-4"><div class="spinner-border text-primary"></div></div>';
+        }
+        updateFavMore();
+
+        try {
+            const start = fav.tours.length;
+            const first = Math.floor(start / FAV_PAGE_SIZE);
+            const pages = [await fetchFavPage(first)];
+            if (start % FAV_PAGE_SIZE !== 0) pages.push(await fetchFavPage(first + 1));
+
+            const shown = new Set(fav.tours.map(t => t.tourId));
+            const fresh = pages.flatMap(p => p.content).filter(t => !shown.has(t.tourId)).slice(0, FAV_PAGE_SIZE);
+            fav.total = pages[pages.length - 1].total;
+            fav.tours.push(...fresh);
+            fav.loaded = true;
+
+            TourCard.markFavorites(fresh.map(t => t.tourId));   // trang này toàn tour đã thích → tim đỏ ngay
+            if (reset) $('favGrid').innerHTML = '';
+            appendFavCards(fresh);
+            renderFavState();
+        } catch (err) {
+            if (reset) {
+                $('favGrid').innerHTML = `<div class="col-12"><div class="fav-empty text-danger">
+                    ${escapeHtml(err.message === 'Failed to fetch' ? 'Không kết nối được tới máy chủ.' : err.message)}
+                    <div><button type="button" class="btn btn-sm btn-light" id="favRetry">Thử lại</button></div></div></div>`;
+                $('favRetry').addEventListener('click', () => loadFavorites(true));
+            } else {
+                $('favMoreBtn').textContent = 'Tải lỗi, bấm để thử lại';
+            }
+        } finally {
+            fav.loading = false;
+            updateFavMore();
+        }
+    }
+
+    function appendFavCards(tours) {
+        if (!tours.length) return;
+        const tmp = document.createElement('div');
+        tmp.innerHTML = tours.map(favCol).join('');
+        const added = [...tmp.children];
+        $('favGrid').append(...added);
+        added.forEach(el => TourCard.initDateNavs(el));
+    }
+
+    /** Số lượng + trạng thái trống */
+    function renderFavState() {
+        $('favCount').textContent = fav.total ? `${fav.total} tour` : '';
+        if (!fav.tours.length && fav.loaded) {
+            $('favGrid').innerHTML = `
+                <div class="col-12"><div class="fav-empty">
+                    <i class="bi bi-heart"></i>
+                    Bạn chưa có tour yêu thích nào.<br>Bấm vào biểu tượng trái tim trên thẻ tour để lưu lại.
+                    <div><a href="tours.html" class="btn btn-accent">Khám phá tour</a></div>
+                </div></div>`;
+        }
+    }
+
+    function updateFavMore() {
+        const more = fav.loaded && fav.tours.length < fav.total;
+        $('favMoreWrap').classList.toggle('d-none', !more);
+        $('favMoreBtn').disabled = fav.loading;
+        if (fav.loading) $('favMoreBtn').textContent = 'Đang tải...';
+        else if ($('favMoreBtn').textContent === 'Đang tải...') $('favMoreBtn').textContent = 'Xem thêm';
+    }
+
+    $('favMoreBtn').addEventListener('click', () => loadFavorites(false));
+
+    // Bỏ tim ngay trên trang này (tour-card.js gọi API xong mới phát sự kiện) → gỡ thẻ khỏi danh sách
+    document.addEventListener('favorite:change', e => {
+        const { tourId, on } = e.detail;
+        if (on || !fav.loaded) return;
+        const col = $('favGrid').querySelector(`[data-fav-id="${tourId}"]`);
+        if (!col) return;
+
+        fav.tours = fav.tours.filter(t => t.tourId !== tourId);
+        fav.total = Math.max(fav.total - 1, 0);
+        col.classList.add('is-removing');
+        setTimeout(() => {
+            col.remove();
+            renderFavState();
+            updateFavMore();
+            // Gỡ hết thẻ đang hiện mà vẫn còn tour ở trang sau → tải tiếp luôn
+            if (!fav.tours.length && fav.total > 0) loadFavorites(true);
+        }, 250);
+    });
+
+    // Chỉ tải khi mở tab. Mở lại tab → tải lại (có thể vừa thích thêm tour ở tab tours.html khác)
+    $('favTabBtn').addEventListener('shown.bs.tab', () => {
+        loadFavorites(true);
+    });
+
+    // Mở thẳng tab từ link khác: profile.html#promo, #favorites, #bookings
     if (location.hash === '#promo') bootstrap.Tab.getOrCreateInstance($('promoTabBtn')).show();
+    if (location.hash === '#favorites') bootstrap.Tab.getOrCreateInstance($('favTabBtn')).show();
+    if (location.hash === '#bookings') bootstrap.Tab.getOrCreateInstance($('bookingTabBtn')).show();
 
     // ---------- Đăng xuất ----------
     const logoutModal = new bootstrap.Modal($('logoutModal'));

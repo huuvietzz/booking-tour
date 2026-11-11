@@ -136,13 +136,21 @@
     window.addEventListener('resize', () => initDateNavs(document));
 
     /* ============================================================
-       YÊU THÍCH — HIỆN CHỈ LÀ GIAO DIỆN, CHƯA GỌI BE
-       Lưu tạm trong bộ nhớ trang: reload là mất.
-       Khi có BE: lúc tải trang lấy GET /api/favorites/ids đổ vào favorites;
-       bấm tim → PUT (thêm) / DELETE (bỏ) /api/favorites/{tourId}, lỗi thì trả tim về như cũ;
-       chưa đăng nhập (hoặc API trả 401) → hiện hộp "Vui lòng đăng nhập để lưu tour yêu thích".
+       YÊU THÍCH — nối BE /api/favorites (bắt buộc đăng nhập)
+         GET    /api/favorites/ids        → id các tour đã thích (tô đỏ tim)
+         PUT    /api/favorites/{tourId}   → thêm
+         DELETE /api/favorites/{tourId}   → bỏ
+       Bấm tim: đổi giao diện NGAY (không chờ mạng), API lỗi thì trả tim về như cũ.
+       Mỗi lần đổi thành công phát sự kiện "favorite:change" { tourId, on }
+       → trang khác (profile.html) nghe để gỡ thẻ khỏi danh sách.
        ============================================================ */
+    const FAV_API = '/api/favorites';
     const favorites = new Set();   // tourId đã thích
+    const pending = new Set();     // tourId đang chờ API → chặn bấm liên tục gửi nhiều request
+
+    function authHeader() {
+        return { 'Authorization': 'Bearer ' + localStorage.getItem('token') };
+    }
 
     function favButtonHtml(t) {
         const on = favorites.has(t.tourId);
@@ -151,6 +159,35 @@
                     title="${on ? 'Bỏ yêu thích' : 'Yêu thích'}">
               <i class="bi ${on ? 'bi-heart-fill' : 'bi-heart'}"></i>
             </button>`;
+    }
+
+    /** Cùng 1 tour có thể hiện ở nhiều chỗ trên trang → đổi hết các nút của tour đó */
+    function paintFav(id, on) {
+        document.querySelectorAll(`.tl-fav[data-tour-id="${id}"]`).forEach(b => {
+            b.classList.toggle('is-active', on);
+            b.setAttribute('aria-pressed', on);
+            b.setAttribute('aria-label', `${on ? 'Bỏ khỏi' : 'Thêm vào'} tour yêu thích`);
+            b.title = on ? 'Bỏ yêu thích' : 'Yêu thích';
+            b.querySelector('i').className = `bi ${on ? 'bi-heart-fill' : 'bi-heart'}`;
+        });
+    }
+
+    /** Trang tự biết chắc các tour này đã thích (vd: danh sách yêu thích) → tô đỏ ngay, không chờ /ids */
+    function markFavorites(ids) {
+        ids.forEach(id => { favorites.add(Number(id)); paintFav(Number(id), true); });
+    }
+
+    /** Lúc mở trang: lấy id đã thích. Thẻ có thể đã vẽ trước khi API về → tô lại các nút đang có. */
+    async function loadFavoriteIds() {
+        if (!window.AuthUI?.getCurrentUser()) return;
+        try {
+            const res = await fetch(FAV_API + '/ids', { headers: authHeader() });
+            if (!res.ok) return;   // 401 token hết hạn / 403 tài khoản nhân viên → coi như chưa thích gì
+            const json = await res.json();
+            if (json && json.success) markFavorites(json.data || []);
+        } catch (e) {
+            console.error(e);      // lỗi mạng: tim để trắng, không chặn trang
+        }
     }
 
     /** Hộp nhắc đăng nhập: tạo 1 lần khi cần, trang dùng thẻ không phải tự chèn HTML */
@@ -177,7 +214,7 @@
     }
 
     // 1 listener cho cả trang: thẻ được vẽ lại liên tục (lọc, Xem thêm, đổi danh mục)
-    document.addEventListener('click', e => {
+    document.addEventListener('click', async e => {
         const btn = e.target.closest('.tl-fav');
         if (!btn) return;
 
@@ -188,31 +225,53 @@
         }
 
         const id = Number(btn.dataset.tourId);
+        if (pending.has(id)) return;
         const on = !favorites.has(id);
+
+        // Đổi giao diện trước cho mượt
         on ? favorites.add(id) : favorites.delete(id);
-
-        // Cùng 1 tour có thể hiện ở nhiều chỗ trên trang → đổi hết các nút của tour đó
-        document.querySelectorAll(`.tl-fav[data-tour-id="${id}"]`).forEach(b => {
-            b.classList.toggle('is-active', on);
-            b.setAttribute('aria-pressed', on);
-            b.setAttribute('aria-label', `${on ? 'Bỏ khỏi' : 'Thêm vào'} tour yêu thích`);
-            b.title = on ? 'Bỏ yêu thích' : 'Yêu thích';
-            b.querySelector('i').className = `bi ${on ? 'bi-heart-fill' : 'bi-heart'}`;
-        });
-
+        paintFav(id, on);
         closeFavPop();
-        if (on) showFavPop(btn);   // chỉ báo khi THÊM; bỏ thích thì tim trắng lại là đủ rõ
+        pending.add(id);
+
+        try {
+            const res = await fetch(`${FAV_API}/${id}`, { method: on ? 'PUT' : 'DELETE', headers: authHeader() });
+            const json = await res.json().catch(() => null);
+            if (!res.ok || !json || !json.success) {
+                const err = new Error((json && json.message) || 'Không lưu được, vui lòng thử lại');
+                err.status = res.status;
+                throw err;
+            }
+            if (on && btn.isConnected) showFavPop(btn);   // chỉ báo khi THÊM; bỏ thích thì tim trắng lại là đủ rõ
+            document.dispatchEvent(new CustomEvent('favorite:change', { detail: { tourId: id, on } }));
+        } catch (err) {
+            // Trả tim về như cũ
+            on ? favorites.delete(id) : favorites.add(id);
+            paintFav(id, !on);
+            if (err.status === 401) {
+                showLoginRequired();   // token hết hạn
+            } else if (btn.isConnected) {
+                showFavPop(btn, err.status === 403
+                    ? 'Tài khoản nhân viên không dùng được chức năng này'
+                    : (err.message === 'Failed to fetch' ? 'Không kết nối được tới máy chủ' : err.message));
+            }
+        } finally {
+            pending.delete(id);
+        }
     });
 
     /* ----- Bong bóng "Đã lưu vào: Tour yêu thích" ----- */
     const FAV_POP_MS = 4000;   // tự ẩn sau 4 giây
     let favPop = null, favPopTimer = null;
 
-    function showFavPop(btn) {
+    /** errorText: có → bong bóng báo lỗi; không → "Đã lưu vào: Tour yêu thích" */
+    function showFavPop(btn, errorText) {
+        closeFavPop();
         favPop = document.createElement('div');
-        favPop.className = 'tl-fav-pop';
+        favPop.className = 'tl-fav-pop' + (errorText ? ' is-error' : '');
         favPop.setAttribute('role', 'status');   // trình đọc màn hình đọc thông báo
-        favPop.innerHTML = 'Đã lưu vào:<a href="favorites.html">Tour yêu thích</a>';
+        if (errorText) favPop.textContent = errorText;
+        else favPop.innerHTML = 'Đã lưu vào:<a href="profile.html#favorites">Tour yêu thích</a>';
         btn.after(favPop);
 
         // Đang rê chuột vào bong bóng (định bấm link) thì không tự ẩn
@@ -241,5 +300,8 @@
     // ----- Xuất ra ngoài -----
     window.scrollDates = scrollDates;
     window.updateDateNav = updateDateNav;
-    window.TourCard = { html, initDateNavs, CLASS_LABELS, durationText };
+    window.TourCard = { html, initDateNavs, markFavorites, CLASS_LABELS, durationText };
+
+    // Tự tải danh sách đã thích khi mở trang (script ở cuối body nên DOM đã sẵn)
+    loadFavoriteIds();
 })();

@@ -10,6 +10,7 @@ import com.example.tour.user.dto.request.CustomerFilterRequest;
 import com.example.tour.user.dto.request.CustomerUpdateRequest;
 import com.example.tour.user.dto.response.CustomerResponse;
 import com.example.tour.user.entity.User;
+import com.example.tour.user.repository.FavoriteRepository;
 import com.example.tour.user.repository.UserRepository;
 import com.example.tour.user.repository.UserTokenRepository;
 import com.example.tour.user.service.CustomerService;
@@ -33,6 +34,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     private final UserRepository userRepository;
     private final UserTokenRepository tokenRepository;
+    private final FavoriteRepository favoriteRepository;
     private final BookingRepository bookingRepository;
     private final PasswordEncoder passwordEncoder;
     private final FileStorageService fileStorageService;
@@ -144,7 +146,7 @@ public class CustomerServiceImpl implements CustomerService {
         // Xoá trước các dòng con trỏ khoá ngoại tới users, không thì DB chặn xoá
         tokenRepository.deleteByUser_UserId(userId);
         // ⚠ Có bảng khác trỏ tới users (favorites, reviews...) thì xoá thêm ở đây, VD:
-        // favoriteRepository.deleteByUser_UserId(userId);
+        favoriteRepository.deleteByUserId(userId);
 
         String avatarUrl = user.getAvatarUrl();
         userRepository.delete(user);

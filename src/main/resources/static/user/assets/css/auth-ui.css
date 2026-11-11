@@ -2,31 +2,63 @@
    Nút người dùng trên header. Thêm link này vào <head> sau main.css:
    <link href="assets/css/auth-ui.css" rel="stylesheet"> */
 
-.header .btn-getstarted.btn-user {
-    display: inline-flex;
+/* ===== Khung bọc nút + menu xổ xuống =====
+   Nút giờ nằm trong <div class="dropdown user-menu">, nên các vị trí (margin, order) mà main.css
+   đặt cho .btn-getstarted phải chuyển ra khung bọc, không thì trên điện thoại nút bị lệch chỗ. */
+.header .user-menu {
+    display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 6px 16px 6px 6px;
-    border-radius: 999px;
-    background-color: color-mix(in srgb, var(--accent-color), transparent 88%);
-    color: var(--accent-color);
-    font-weight: 500;
-    white-space: nowrap;
-    transition: background-color .25s;
+    margin-left: 30px;
 }
 
-.header .btn-getstarted.btn-user:hover {
-    background-color: color-mix(in srgb, var(--accent-color), transparent 78%);
+.header .user-menu .btn-getstarted {
+    margin: 0;
+}
+
+.header .btn-getstarted.btn-user {
+    /* Giống header admin: KHÔNG nền, ảnh tròn và tên đứng riêng; cả cụm là 1 nút → bấm ảnh hay tên đều xổ menu */
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
     color: var(--accent-color);
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.header .btn-getstarted.btn-user:hover,
+.header .btn-getstarted.btn-user:focus,
+.header .btn-getstarted.btn-user.show {
+    background: none;
+    color: color-mix(in srgb, var(--accent-color), #000 15%);
+}
+
+/* Rê chuột: ảnh có viền màu chủ đạo */
+.btn-user:hover .user-avatar,
+.btn-user.show .user-avatar {
+    box-shadow: 0 0 0 2px #fff, 0 0 0 4px color-mix(in srgb, var(--accent-color), transparent 55%);
+}
+
+/* Mũi tên ▾ cạnh tên */
+.btn-user.dropdown-toggle::after {
+    margin-left: 2px;
+    vertical-align: middle;
 }
 
 .btn-user .user-avatar {
-    width: 30px;
-    height: 30px;
-    flex: 0 0 30px;
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
     border-radius: 50%;
     overflow: hidden;              /* cắt SVG / ảnh theo khung tròn */
     background-color: #e4e6eb;     /* nền xám nhạt kiểu Facebook */
+    box-shadow: 0 0 0 2px #fff, 0 1px 6px rgba(0, 0, 0, .18);   /* viền trắng + bóng nhẹ như ảnh bên admin */
+    transition: box-shadow .2s;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -39,13 +71,76 @@
     text-overflow: ellipsis;
 }
 
+/* ===== Menu xổ xuống: Hồ sơ / Đăng xuất ===== */
+.user-dropdown {
+    min-width: 240px;
+    padding: 8px 0;
+    margin-top: 10px !important;
+    border: 0;
+    border-radius: 10px;
+    box-shadow: 0 8px 28px rgba(16, 24, 40, .14);
+    font-size: 15px;
+}
+
+.user-dropdown-head {
+    padding: 10px 20px 8px;
+    text-align: center;
+}
+
+.user-dropdown-head .ud-name {
+    font-weight: 600;
+    font-size: 17px;
+    color: #212529;
+    word-break: break-word;
+}
+
+.user-dropdown-head .ud-email {
+    font-size: 13px;
+    color: #6c757d;
+    word-break: break-all;
+    margin-top: 2px;
+}
+
+.user-dropdown .dropdown-divider {
+    margin: 6px 0;
+    border-color: #eef0f2;
+    opacity: 1;
+}
+
+.user-dropdown .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 20px;
+    color: #343a40;
+}
+
+.user-dropdown .dropdown-item i {
+    font-size: 18px;
+}
+
+.user-dropdown .dropdown-item:hover,
+.user-dropdown .dropdown-item:focus {
+    background-color: #f6f7f9;
+    color: var(--accent-color);
+}
+
+/* Header thu gọn (main.css xếp lại: logo → nút → menu ☰) */
+@media (max-width: 1199.98px) {
+    .header .user-menu {
+        order: 2;
+        margin: 0 15px 0 0;
+    }
+}
+
 /* Màn hình nhỏ chỉ giữ avatar cho gọn */
 @media (max-width: 575.98px) {
-    .btn-user .user-name {
+    .btn-user .user-name,
+    .btn-user.dropdown-toggle::after {
         display: none;
     }
 
     .header .btn-getstarted.btn-user {
-        padding: 6px;
+        padding: 4px 0;
     }
 }

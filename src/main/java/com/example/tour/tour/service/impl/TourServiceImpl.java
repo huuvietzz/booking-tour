@@ -11,12 +11,14 @@ import com.example.tour.tour.dto.request.TourFilterRequest;
 import com.example.tour.tour.dto.request.TourRequest;
 import com.example.tour.tour.dto.response.*;
 import com.example.tour.tour.entity.*;
+import com.example.tour.tour.mapper.TourCardMapper;
 import com.example.tour.tour.repository.CategoryRepository;
 import com.example.tour.tour.repository.LocationRepository;
 import com.example.tour.tour.repository.ScheduleRepository;
 import com.example.tour.tour.repository.TourRepository;
 import com.example.tour.tour.service.TourService;
 import com.example.tour.tour.specification.TourSpecification;
+import com.example.tour.user.repository.FavoriteRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
 import jakarta.persistence.criteria.*;
@@ -50,6 +52,8 @@ public class TourServiceImpl implements TourService {
     private final LocationRepository locationRepository;
     private final ScheduleRepository scheduleRepository;
     private final BookingRepository bookingRepository;
+    private final TourCardMapper tourCardMapper;
+    private final FavoriteRepository favoriteRepository;
     private final FileStorageService fileStorageService;
     private final EntityManager entityManager;
 
@@ -188,8 +192,7 @@ public class TourServiceImpl implements TourService {
 
         // Lịch khởi hành không cascade từ Tour (cố ý) → xoá tay. Chưa có booking nên xoá được.
         scheduleRepository.deleteAll(tour.getSchedules());
-
-        // Ảnh thư viện + lịch trình: cascade ALL → tự xoá theo tour
+        favoriteRepository.deleteByTourId(tourId);
         tourRepository.delete(tour);
 
         fileStorageService.cleanupAfterTransaction(urls, List.of());
@@ -225,23 +228,8 @@ public class TourServiceImpl implements TourService {
     @Override
     @Transactional(readOnly = true)
     public Page<TourCardResponse> getAllTours(PublicTourFilterRequest filter, Pageable pageable) {
-        Page<Tour> page = tourRepository.findAll(TourSpecification.publicFilter(filter, LocalDate.now()), pageable);
-
-        // 1 câu truy vấn cho ngày khởi hành của CẢ TRANG, rồi chia theo tourId
-        List<Integer> tourIds = page.getContent().stream().map(Tour::getTourId).toList();
-        Map<Integer, List<DepartureDateResponse>> datesByTour = tourIds.isEmpty()
-                ? Map.of()
-                : scheduleRepository.findUpcomingByTourIds(tourIds, LocalDate.now()).stream()
-                .collect(Collectors.groupingBy(
-                        s -> s.getTour().getTourId(),
-                        Collectors.mapping(s -> DepartureDateResponse.builder()
-                                .scheduleId(s.getScheduleId())
-                                .departureDate(s.getDepartureDate())
-                                .status(s.getStatus())
-                                .build(), Collectors.toList())));
-
-        return page.map(t -> toTourCardResponse(t,
-                datesByTour.getOrDefault(t.getTourId(), List.of())));
+        return tourCardMapper.toCardPage(
+                tourRepository.findAll(TourSpecification.publicFilter(filter, LocalDate.now()), pageable));
     }
 
     @Override
@@ -420,20 +408,6 @@ public class TourServiceImpl implements TourService {
                 .locationName(t.getLocation().getLocationName())
                 .basePrice(t.getBasePrice())
                 .isActive(t.getIsActive())
-                .build();
-    }
-
-    private TourCardResponse toTourCardResponse(Tour t, List<DepartureDateResponse> dates) {
-        return TourCardResponse.builder()
-                .tourId(t.getTourId())
-                .tourCode(t.getTourCode())
-                .thumbnailUrl(t.getThumbnailUrl())
-                .tourClass(t.getTourClass())
-                .tourName(t.getTourName())
-                .departureLocation(t.getDepartureLocation())
-                .duration(t.getDuration())
-                .basePrice(t.getBasePrice())
-                .departureDates(dates)
                 .build();
     }
 

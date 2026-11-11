@@ -61,9 +61,17 @@
         return fullName.substring(0, maxLength).trim() + '…';
     }
 
+    /**
+     * Đã đăng nhập: nút avatar + tên, bấm vào xổ menu (giống trang admin):
+     *   [Tên / email]  ─  Hồ sơ  ─  Đăng xuất
+     * Dùng dropdown của Bootstrap (bootstrap.bundle.min.js đã nhúng ở mọi trang).
+     */
     function renderLoggedIn(anchor, user) {
-        anchor.href = 'profile.html';
-        anchor.classList.add('btn-user');
+        anchor.href = '#';
+        anchor.classList.add('btn-user', 'dropdown-toggle');
+        anchor.setAttribute('role', 'button');
+        anchor.setAttribute('data-bs-toggle', 'dropdown');
+        anchor.setAttribute('aria-expanded', 'false');
         anchor.title = user.fullName + ' (' + user.email + ')';
 
         const avatar = document.createElement('span');
@@ -79,6 +87,28 @@
         name.textContent = shortenName(user.fullName, 10);   // textContent: không bao giờ chạy HTML
 
         anchor.replaceChildren(avatar, name);
+
+        // Bọc nút trong .dropdown rồi thêm menu ngay sau nút
+        const wrap = document.createElement('div');
+        wrap.className = 'dropdown user-menu';
+        anchor.replaceWith(wrap);
+        wrap.appendChild(anchor);
+
+        const menu = document.createElement('ul');
+        menu.className = 'dropdown-menu dropdown-menu-end user-dropdown';
+        menu.innerHTML = `
+            <li class="user-dropdown-head">
+                <div class="ud-name"></div>
+                <div class="ud-email"></div>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="profile.html"><i class="bi bi-person"></i><span>Hồ sơ</span></a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><button type="button" class="dropdown-item" data-user-logout><i class="bi bi-box-arrow-right"></i><span>Đăng xuất</span></button></li>`;
+        menu.querySelector('.ud-name').textContent = user.fullName || 'Tài khoản';
+        menu.querySelector('.ud-email').textContent = user.email;
+        menu.querySelector('[data-user-logout]').addEventListener('click', () => window.AuthUI.logout());
+        wrap.appendChild(menu);
     }
 
     /**

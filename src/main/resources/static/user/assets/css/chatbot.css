@@ -1,0 +1,177 @@
+/* =========================================================
+   assets/css/chatbot.css — Trợ lý AI góc dưới bên phải (mọi trang phía khách)
+   Tự được nạp bởi assets/js/chatbot.js, trang KHÔNG cần thêm <link>.
+   Mọi class bắt đầu bằng "cb-" để không đụng CSS template.
+   ========================================================= */
+:root {
+    --cb-primary: var(--accent-color, #0a5bd3);
+    --cb-primary-soft: color-mix(in srgb, var(--cb-primary) 10%, #fff);
+    --cb-text: #1d2433;
+    --cb-muted: #6b7385;
+    --cb-border: #e6e9f0;
+    --cb-bg: #f5f7fb;
+}
+
+/* Nút "lên đầu trang" của template dời lên trên nút chat (giống Vietravel: ↑ ở trên, trợ lý ở dưới) */
+#scroll-top.scroll-top { bottom: 96px; right: 26px; }
+body.cb-open #scroll-top.scroll-top { visibility: hidden; opacity: 0; }
+
+/* ---------- Nút tròn mở chat ---------- */
+.cb-launcher {
+    position: fixed; right: 20px; bottom: 20px; z-index: 9990;
+    width: 60px; height: 60px; border-radius: 50%; border: 0; padding: 0;
+    background: linear-gradient(135deg, var(--cb-primary), color-mix(in srgb, var(--cb-primary), #00c2a8 45%));
+    color: #fff; font-size: 28px; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 24px color-mix(in srgb, var(--cb-primary) 40%, transparent);
+    transition: transform .2s;
+}
+.cb-launcher:hover { transform: scale(1.06); }
+.cb-launcher:focus-visible { outline: 3px solid var(--cb-primary-soft); outline-offset: 3px; }
+/* Vòng sóng nhẹ thu hút chú ý (tắt khi người dùng chọn giảm chuyển động) */
+.cb-launcher::before {
+    content: ""; position: absolute; inset: 0; border-radius: 50%;
+    border: 2px solid var(--cb-primary); animation: cb-ring 2.4s ease-out infinite;
+}
+@keyframes cb-ring { from { transform: scale(1); opacity: .6; } to { transform: scale(1.45); opacity: 0; } }
+/* Rung rung: lắc nhanh ~0,8 giây rồi nghỉ, lặp mỗi 3 giây.
+   Lắc cái ICON bên trong, không lắc cả nút: nút đã dùng transform cho hiệu ứng phóng to khi rê chuột */
+.cb-launcher i { display: inline-block; animation: cb-shake 3s ease-in-out infinite; transform-origin: 50% 60%; }
+@keyframes cb-shake {
+    0%, 30%, 100% { transform: rotate(0); }
+    3%  { transform: rotate(-22deg); }
+    6%  { transform: rotate(14deg); }
+    9%  { transform: rotate(-12deg); }
+    12% { transform: rotate(10deg); }
+    15% { transform: rotate(-7deg); }
+    18% { transform: rotate(5deg); }
+    21% { transform: rotate(-3deg); }
+    24% { transform: rotate(2deg); }
+}
+.cb-launcher:hover i { animation: none; }   /* đang rê chuột (đọc thẻ chào) thì đứng yên */
+@media (prefers-reduced-motion: reduce) {
+    .cb-launcher::before { animation: none; display: none; }
+    .cb-launcher i { animation: none; }       /* người dùng bật "giảm chuyển động" trong hệ điều hành → không rung */
+}
+body.cb-open .cb-launcher { transform: scale(0); pointer-events: none; }
+
+/* Thẻ chào khi rê chuột vào nút tròn */
+.cb-hello {
+    position: fixed; right: 94px; bottom: 18px; z-index: 9990; width: 290px;
+    background: #fff; color: var(--cb-text); border-radius: 14px; padding: 16px 40px 16px 18px;
+    box-shadow: 0 8px 28px rgba(16, 24, 40, .16); cursor: pointer;
+    opacity: 0; visibility: hidden; transform: translateX(8px);
+    transition: opacity .18s, transform .18s, visibility 0s .18s;
+}
+.cb-hello.show { opacity: 1; visibility: visible; transform: none; transition: opacity .18s, transform .18s; }
+.cb-hello::after {   /* mũi nhọn chỉ sang nút tròn */
+    content: ""; position: absolute; right: -7px; bottom: 30px; width: 14px; height: 14px;
+    background: #fff; transform: rotate(45deg); box-shadow: 3px -3px 6px rgba(16, 24, 40, .05);
+}
+.cb-hello-title { font-weight: 700; font-size: 17px; color: var(--cb-primary); margin-bottom: 6px; }
+.cb-hello-text { font-size: 15px; line-height: 1.5; color: var(--cb-muted); }
+.cb-hello-close {
+    position: absolute; top: 10px; right: 10px; width: 26px; height: 26px; border-radius: 50%;
+    border: 0; background: var(--cb-bg); color: var(--cb-muted); font-size: 11px;
+    display: flex; align-items: center; justify-content: center;
+}
+.cb-hello-close:hover { background: #e9edf3; color: var(--cb-text); }
+body.cb-open .cb-hello { display: none; }
+
+/* ---------- Khung chat ---------- */
+.cb-panel {
+    position: fixed; right: 20px; bottom: 20px; z-index: 9991;
+    width: 380px; height: min(600px, calc(100vh - 40px));
+    background: #fff; border-radius: 18px; overflow: hidden;
+    box-shadow: 0 18px 50px rgba(16, 24, 40, .25);
+    display: flex; flex-direction: column;
+    transform-origin: bottom right; transform: scale(.4); opacity: 0; visibility: hidden;
+    transition: transform .22s ease, opacity .22s ease, visibility 0s .22s;
+    font-size: 14.5px; color: var(--cb-text);
+    margin: 0; padding: 0;   /* main.css của template có padding cho section/header/footer → không để lọt vào khung chat */
+}
+body.cb-open .cb-panel { transform: none; opacity: 1; visibility: visible; transition: transform .22s ease, opacity .22s ease; }
+
+.cb-head {
+    display: flex; align-items: center; gap: 12px; padding: 14px 14px 14px 16px; color: #fff;
+    background: linear-gradient(135deg, var(--cb-primary), color-mix(in srgb, var(--cb-primary), #00c2a8 45%));
+}
+.cb-head-avatar {
+    width: 40px; height: 40px; flex: 0 0 40px; border-radius: 50%; background: rgba(255, 255, 255, .2);
+    display: flex; align-items: center; justify-content: center; font-size: 21px;
+}
+.cb-head-title { font-weight: 700; font-size: 16px; line-height: 1.2; }
+.cb-head-status { font-size: 12.5px; opacity: .9; display: flex; align-items: center; gap: 6px; }
+.cb-head-status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #3ee08f; }
+.cb-head-btn {
+    border: 0; background: none; color: #fff; width: 34px; height: 34px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 18px; opacity: .9;
+}
+.cb-head-btn:hover { background: rgba(255, 255, 255, .18); opacity: 1; }
+
+/* Danh sách tin nhắn */
+.cb-body { flex: 1; overflow-y: auto; padding: 16px 14px 8px; background: var(--cb-bg); overscroll-behavior: contain; }
+.cb-msg { display: flex; gap: 8px; margin-bottom: 12px; align-items: flex-end; }
+.cb-msg.user { justify-content: flex-end; }
+.cb-msg-avatar {
+    width: 28px; height: 28px; flex: 0 0 28px; border-radius: 50%; background: var(--cb-primary-soft);
+    color: var(--cb-primary); display: flex; align-items: center; justify-content: center; font-size: 15px;
+}
+.cb-bubble {
+    max-width: 82%; padding: 9px 13px; border-radius: 16px; line-height: 1.5;
+    white-space: pre-wrap; word-break: break-word;
+}
+.cb-msg.bot .cb-bubble { background: #fff; border-bottom-left-radius: 4px; box-shadow: 0 1px 3px rgba(16, 24, 40, .06); }
+.cb-msg.user .cb-bubble { background: var(--cb-primary); color: #fff; border-bottom-right-radius: 4px; }
+.cb-bubble a { color: var(--cb-primary); font-weight: 600; text-decoration: underline; }
+.cb-msg.user .cb-bubble a { color: #fff; }
+.cb-msg.error .cb-bubble { background: #fff4f4; color: #b42318; }
+.cb-retry { display: inline-block; margin-top: 4px; border: 0; background: none; padding: 0; color: #b42318; font-weight: 600; text-decoration: underline; }
+
+/* Thẻ tour gợi ý trong câu trả lời */
+.cb-tours { display: flex; flex-direction: column; gap: 8px; margin: -4px 0 12px 36px; }
+.cb-tour {
+    display: flex; gap: 10px; align-items: center; background: #fff; border: 1px solid var(--cb-border);
+    border-radius: 12px; padding: 8px; color: var(--cb-text); text-decoration: none; transition: border-color .15s;
+}
+.cb-tour:hover { border-color: var(--cb-primary); color: var(--cb-text); }
+.cb-tour-img { width: 64px; height: 48px; flex: 0 0 64px; border-radius: 8px; background: #e3e8f0; object-fit: cover; }
+.cb-tour-name { font-weight: 600; font-size: 13.5px; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.cb-tour-price { font-size: 13px; color: #d6262c; font-weight: 700; margin-top: 2px; }
+
+/* Câu hỏi gợi ý */
+.cb-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px 36px; }
+.cb-chip {
+    border: 1px solid color-mix(in srgb, var(--cb-primary) 35%, #fff); background: #fff; color: var(--cb-primary);
+    border-radius: 999px; padding: 5px 12px; font-size: 13px; transition: all .15s;
+}
+.cb-chip:hover { background: var(--cb-primary); color: #fff; }
+
+/* "Đang soạn..." */
+.cb-typing .cb-bubble { display: flex; gap: 4px; padding: 13px 14px; }
+.cb-typing span { width: 7px; height: 7px; border-radius: 50%; background: #b5bcc9; animation: cb-dot 1.2s infinite; }
+.cb-typing span:nth-child(2) { animation-delay: .15s; }
+.cb-typing span:nth-child(3) { animation-delay: .3s; }
+@keyframes cb-dot { 0%, 60%, 100% { transform: none; opacity: .5; } 30% { transform: translateY(-4px); opacity: 1; } }
+
+/* Ô nhập */
+.cb-foot { border-top: 1px solid var(--cb-border); padding: 10px 12px; background: #fff; }
+.cb-form { display: flex; align-items: flex-end; gap: 8px; }
+.cb-input {
+    flex: 1; resize: none; border: 1px solid var(--cb-border); border-radius: 20px; padding: 9px 14px;
+    font-size: 14.5px; line-height: 1.4; max-height: 110px; outline: none; color: var(--cb-text); font-family: inherit;
+}
+.cb-input:focus { border-color: var(--cb-primary); box-shadow: 0 0 0 3px var(--cb-primary-soft); }
+.cb-send {
+    width: 40px; height: 40px; flex: 0 0 40px; border: 0; border-radius: 50%;
+    background: var(--cb-primary); color: #fff; font-size: 17px; display: flex; align-items: center; justify-content: center;
+}
+.cb-send:disabled { opacity: .45; }
+
+/* Điện thoại: chat chiếm cả màn hình */
+@media (max-width: 575.98px) {
+    .cb-panel { right: 0; bottom: 0; width: 100%; height: 100%; height: 100dvh; border-radius: 0; }
+    .cb-launcher { right: 14px; bottom: 14px; width: 54px; height: 54px; font-size: 25px; }
+    #scroll-top.scroll-top { bottom: 80px; right: 19px; }
+    .cb-hello { right: 80px; bottom: 10px; width: min(260px, calc(100vw - 100px)); }
+    body.cb-open { overflow: hidden; }   /* không cuộn trang phía sau */
+}

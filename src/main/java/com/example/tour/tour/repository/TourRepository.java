@@ -43,4 +43,11 @@ public interface TourRepository extends JpaRepository<Tour, Integer>, JpaSpecifi
 
     @Query("SELECT DISTINCT t.departureLocation FROM Tour t WHERE t.isActive = true ORDER BY t.departureLocation")
     List<String> findPublicDepartureLocations();
+
+    /** Tất cả tour khách đang xem được, nạp sẵn địa điểm — chatbot chọn tour liên quan */
+    @Query("SELECT t FROM Tour t " +
+            "JOIN FETCH t.location l " +
+            "JOIN t.category c " +
+            "WHERE t.isActive = true AND l.isActive = true AND c.isActive = true")
+    List<Tour> findAllPublicWithLocation();
 }

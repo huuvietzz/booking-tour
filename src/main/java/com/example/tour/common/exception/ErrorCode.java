@@ -26,6 +26,14 @@ public enum ErrorCode {
 
     // ========== USER ==========
     USER_NOT_FOUND(404, "Không tìm thấy người dùng", HttpStatus.NOT_FOUND),
+    CUSTOMER_NOT_FOUND(404, "Không tìm thấy khách hàng", HttpStatus.NOT_FOUND),
+    CUSTOMER_HAS_BOOKINGS(409, "Khách hàng đã có đơn đặt tour, không thể xoá. Hãy khoá tài khoản thay vì xoá", HttpStatus.CONFLICT),
+    STAFF_NOT_FOUND(404, "Không tìm thấy nhân viên", HttpStatus.NOT_FOUND),
+    INVALID_STAFF_ROLE(400, "Vai trò nhân viên chỉ được là ADMIN hoặc STAFF", HttpStatus.BAD_REQUEST),
+    CANNOT_MODIFY_SELF(400, "Không thể khoá, xoá hoặc đổi vai trò của chính mình", HttpStatus.BAD_REQUEST),
+    SELF_EMAIL_CHANGE_IN_PROFILE(400, "Hãy đổi email của bạn ở trang Hồ sơ", HttpStatus.BAD_REQUEST),
+    LAST_ADMIN(409, "Hệ thống phải còn ít nhất 1 quản trị viên đang hoạt động", HttpStatus.CONFLICT),
+    STAFF_HAS_RELATED_DATA(409, "Nhân viên đã có dữ liệu liên quan, không thể xoá. Hãy khoá tài khoản thay vì xoá", HttpStatus.CONFLICT),
 
     // ========== UPLOAD ẢNH ==========
     FILE_EMPTY(400, "Vui lòng chọn ảnh", HttpStatus.BAD_REQUEST),

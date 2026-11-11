@@ -12,4 +12,7 @@ public interface UserTokenRepository extends JpaRepository<Token, Integer> {
     Optional<Token> findByTokenAndTokenType(String token, TokenType tokenType);
 
     void deleteByUser_UserIdAndTokenType(Integer userId, TokenType tokenType);
+
+    // xoá mọi token của 1 user trước khi xoá user
+    void deleteByUser_UserId(Integer userId);
 }

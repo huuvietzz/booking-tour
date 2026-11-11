@@ -3,6 +3,7 @@ package com.example.tour.common.exception;
 import com.example.tour.common.dto.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -48,6 +49,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleParamValidation(HandlerMethodValidationException ex) {
         return ResponseEntity.badRequest()
                 .body(ApiResponse.error(400, "Tham số không hợp lệ"));   // dùng hàm error sẵn có của ApiResponse
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAccessDenied(AccessDeniedException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error(403, "Bạn không có quyền thực hiện chức năng này"));
     }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)

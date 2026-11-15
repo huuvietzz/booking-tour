@@ -95,8 +95,16 @@
     .bk-step-ctrl button:hover:not(:disabled) { background: #fff; }
     .bk-step-ctrl button:disabled { border-color: #c7ccd6; color: #c7ccd6; cursor: not-allowed; }
     .bk-step-ctrl span { min-width: 26px; text-align: center; font-size: 18px; }
-    .bk-slots-note { margin: 14px 0 0; color: var(--tl-muted); font-size: 12px; }
-    .bk-slots-note.warn { color: #e0252b; }
+    /* Thông báo nổi (hết chỗ...) — góc trên, tự ẩn sau 3 giây */
+    .bk-toasts { position: fixed; z-index: 1090; top: 24px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 10px; width: min(440px, calc(100% - 24px)); pointer-events: none; }
+    .bk-toast {
+      display: flex; align-items: center; gap: 14px; background: #fff; border-radius: 12px; padding: 16px 20px;
+      box-shadow: 0 10px 30px rgba(16, 24, 40, .16); font-size: 15px; line-height: 1.45; color: var(--tl-text);
+      pointer-events: auto; animation: bk-toast-in .25s ease-out; transition: opacity .3s, transform .3s;
+    }
+    .bk-toast i { flex: 0 0 auto; font-size: 24px; color: #e0252b; }
+    .bk-toast.hide { opacity: 0; transform: translateY(-8px); }
+    @keyframes bk-toast-in { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
 
     /* ---------- Thông tin từng hành khách ---------- */
     .bk-group + .bk-group { margin-top: 26px; }
@@ -204,6 +212,65 @@
     .bk-line b { font-weight: 500; text-align: right; }
 
     .bk-total-card { background: #fff; border-radius: 24px; padding: 26px 30px; margin-top: 24px; }
+
+    /* Chi tiết chi phí: tên | 2 x | đơn giá — giãn dòng như Vietravel */
+    .bk-cost { display: grid; grid-template-columns: 1fr auto minmax(120px, auto); align-items: center; gap: 0 16px; padding: 9px 0; font-size: 15px; }
+    .bk-cost span { color: var(--tl-text); }
+    .bk-cost em { font-style: normal; color: var(--tl-text); white-space: nowrap; }
+    .bk-cost b { font-weight: 500; text-align: right; white-space: nowrap; }
+    .bk-sub-line { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; font-size: 15px; }
+    .bk-sub-line b { font-weight: 500; white-space: nowrap; }
+    .bk-sub-line + .bk-total { padding-top: 10px; }
+
+    /* ---------- Ô ngày sinh dd / mm / yyyy + bảng chọn 3 cột ---------- */
+    .bk-dob { position: relative; }
+    .bk-dob-box {
+      display: flex; align-items: center; border: 1px solid transparent; border-radius: 999px; background: var(--tl-bg);
+      padding: 0 14px 0 20px; transition: border-color .15s, background .15s;
+    }
+    .bk-dob.open .bk-dob-box, .bk-dob-box:focus-within { border-color: var(--tl-primary); background: #fff; }
+    .bk-dob.is-invalid .bk-dob-box { border-color: #e0252b; background: #fff; }
+    .bk-dob.is-invalid + .bk-error { display: block; }
+    .bk-dob-seg { flex: 1 1 0; min-width: 0; border: 0; background: transparent; outline: 0; text-align: center; padding: 8px 0; font-size: 14px; color: var(--tl-text); }
+    .bk-dob-seg::placeholder { color: #9aa3b5; }
+    .bk-dob-seg.y { flex-grow: 1.4; }
+    .bk-dob-sep { color: var(--tl-text); padding: 0 2px; }
+    .bk-dob-btn { flex: 0 0 auto; border: 0; background: none; color: var(--tl-muted); font-size: 18px; padding: 4px 4px 4px 10px; line-height: 1; }
+    .bk-dob-btn:hover { color: var(--tl-primary); }
+    /* fixed: nổi đè lên cả khung hộp (không bị thân hộp có thanh cuộn cắt mất), vị trí tính bằng JS ngay dưới ô */
+    .bk-dpick {
+      position: fixed; z-index: 1070; top: 0; left: 0; display: none; gap: 8px;
+      background: transparent; filter: drop-shadow(0 10px 24px rgba(16, 24, 40, .14));
+    }
+    .bk-dob.open .bk-dpick { display: flex; }
+    .bk-dcol { width: 92px; height: var(--dpick-h, 280px); overflow-y: auto; background: #fff; border: 1px solid var(--tl-border); border-radius: 14px; padding: 6px; scrollbar-width: thin; }
+    .bk-dcol.y { width: 100px; }
+    .bk-dcol button { display: block; width: 100%; border: 0; background: none; padding: 11px 0; font-size: 14px; color: var(--tl-text); border-radius: 10px; }
+    .bk-dcol button + button { border-top: 1px solid #eef1f6; }
+    .bk-dcol button:hover { background: var(--tl-bg); }
+    .bk-dcol button.on { background: var(--tl-primary); color: #fff; font-weight: 600; }
+    .bk-dcol button:disabled { color: #c7ccd6; background: none; cursor: not-allowed; }
+
+    /* ---------- Combobox giới tính ---------- */
+    .bk-gsel { position: relative; }
+    .bk-gsel-btn {
+      width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      border: 1px solid #cdd3df; border-radius: 999px; background: #fff; padding: 8px 18px; font-size: 14px; color: var(--tl-text); text-align: left;
+      transition: border-color .15s;
+    }
+    .bk-gsel-btn i { transition: transform .2s; color: var(--tl-text); }
+    .bk-gsel.open .bk-gsel-btn { border-color: var(--tl-primary); }
+    .bk-gsel.open .bk-gsel-btn i { transform: rotate(180deg); }
+    .bk-gsel-menu {
+      position: absolute; z-index: 40; left: 0; right: 0; top: calc(100% + 6px); display: none; padding: 6px;
+      background: #fff; border: 1px solid var(--tl-border); border-radius: 16px; box-shadow: 0 10px 24px rgba(16, 24, 40, .12);
+    }
+    .bk-gsel.open .bk-gsel-menu { display: block; }
+    .bk-gsel-menu button { display: block; width: 100%; border: 0; background: none; text-align: left; padding: 11px 14px; border-radius: 10px; font-size: 14px; color: var(--tl-text); }
+    .bk-gsel-menu button + button { border-top: 1px solid #eef1f6; }
+    .bk-gsel-menu button:hover { background: var(--tl-bg); }
+    .bk-gsel-menu button.on { color: var(--tl-primary); font-weight: 600; }
+    .bk-gsel.up .bk-gsel-menu { top: auto; bottom: calc(100% + 6px); }
     .bk-total { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-bottom: 20px; border-bottom: 2px solid var(--tl-border); }
     .bk-total span { font-size: 21px; font-weight: 700; }
     .bk-total strong { font-size: 25px; font-weight: 700; color: var(--tl-price); white-space: nowrap; }
@@ -234,6 +301,38 @@
     .bk-coupon-on b { color: var(--tl-primary); }
     .bk-coupon-on button { flex: 0 0 auto; border: 0; background: none; color: #e0252b; font-size: 12px; white-space: nowrap; }
     .bk-line.discount b { color: #16a34a; }
+
+    /* Danh sách mã khuyến mãi của tour — xổ xuống khi bấm vào ô nhập */
+    .bk-coupon-wrap { position: relative; }
+    .bk-promo-dd {
+      position: absolute; z-index: 30; left: 0; right: 0; top: calc(100% + 8px); max-height: 340px; overflow-y: auto;
+      background: #fff; border: 1px solid var(--tl-border); border-radius: 16px; box-shadow: 0 12px 32px rgba(16, 24, 40, .12); padding: 6px;
+    }
+    .bk-promo-item {
+      width: 100%; border: 0; background: none; text-align: left; border-radius: 12px; padding: 10px 12px;
+      display: flex; gap: 12px; align-items: flex-start; transition: background .15s;
+    }
+    .bk-promo-item + .bk-promo-item { margin-top: 2px; }
+    .bk-promo-item:hover:not(:disabled), .bk-promo-item.active { background: var(--tl-primary-soft); }
+    .bk-promo-item:disabled { cursor: not-allowed; opacity: .55; }
+    .bk-promo-item > i { color: var(--tl-primary); font-size: 20px; margin-top: 1px; }
+    .bk-promo-item .code { font-weight: 700; color: var(--tl-primary); font-size: 14px; }
+    .bk-promo-item .name { font-size: 13px; color: var(--tl-text); }
+    .bk-promo-item .meta { font-size: 12px; color: var(--tl-muted); margin-top: 2px; }
+    .bk-promo-item .meta.warn { color: #e0252b; }
+    .bk-promo-empty { padding: 14px; text-align: center; color: var(--tl-muted); font-size: 13px; }
+    .bk-coupon-login { display: flex; align-items: center; gap: 10px; background: var(--tl-bg); border-radius: 14px; padding: 12px 16px; font-size: 13px; }
+    .bk-coupon-login i { color: var(--tl-primary); font-size: 18px; }
+    .bk-coupon-login a { color: var(--tl-primary); font-weight: 700; text-decoration: underline; }
+    .bk-apply.loading { pointer-events: none; opacity: .7; }
+
+    /* Đi 1 mình: công tắc phòng đơn bị khoá */
+    .bk-single .form-check-input:disabled, .bk-mpax .form-check-input:disabled { opacity: 1; cursor: not-allowed; }
+    .bk-hint { color: var(--tl-muted); font-size: 12px; margin-top: 4px; white-space: nowrap; }
+
+    /* Lỗi khi gửi đơn */
+    .bk-submit-msg { display: none; margin-top: 14px; padding: 10px 14px; border-radius: 12px; background: #fdecec; color: #c0262d; font-size: 13px; }
+    .bk-submit-msg.show { display: block; }
     .bk-ref { margin-bottom: 22px; }
     .bk-actions { display: flex; gap: 14px; align-items: center; }
     .bk-call {
@@ -290,7 +389,7 @@
       <a href="tours.html" id="bkErrorLink">Xem các tour khác</a>
     </div>
 
-    <!-- Sau khi bấm "Đặt tour" (chưa có BE) -->
+    <!-- Đặt tour thành công -->
     <div class="bk-state bk-done d-none" id="bkDone"></div>
 
     <form class="row g-4 d-none" id="bkForm" novalidate autocomplete="on">
@@ -304,7 +403,7 @@
           <h2>Thông tin liên lạc</h2>
           <div class="bk-login-tip d-none" id="bkLoginTip">
             <i class="bi bi-person-circle"></i>
-            <span><a href="pages-login.html">Đăng nhập</a> để nhận ưu đãi, tích điểm và quản lý đơn hàng dễ dàng hơn!</span>
+            <span><a href="pages-login.html" id="bkLoginLink">Đăng nhập</a> để nhận ưu đãi, tích điểm và quản lý đơn hàng dễ dàng hơn!</span>
           </div>
           <div class="row g-4">
             <div class="col-md-6">
@@ -333,7 +432,6 @@
         <section class="bk-card">
           <h2>Hành khách</h2>
           <div class="bk-counters" id="bkCounters"></div>
-          <p class="bk-slots-note" id="bkSlotsNote"></p>
         </section>
 
         <!-- Thông tin từng hành khách -->
@@ -370,8 +468,8 @@
               <div class="bk-acc-body" id="sumTrip"></div>
             </div>
 
-            <div class="bk-acc" id="accCost">
-              <button type="button" class="bk-acc-head" aria-expanded="false">
+            <div class="bk-acc open" id="accCost">
+              <button type="button" class="bk-acc-head" aria-expanded="true">
                 <i class="bi bi-receipt"></i>Chi tiết chi phí<i class="bi bi-chevron-down chev"></i>
               </button>
               <div class="bk-acc-body" id="sumCost"></div>
@@ -382,9 +480,18 @@
                 <i class="bi bi-patch-check-fill"></i>Mã giảm giá<i class="bi bi-chevron-down chev"></i>
               </button>
               <div class="bk-acc-body" id="couponBox">
-                <div class="bk-coupon" id="couponForm">
-                  <input class="bk-input" id="couponInput" maxlength="30" placeholder="Ví dụ: VIETTRIP100" autocomplete="off">
-                  <button type="button" class="bk-apply" id="couponApply" disabled>Áp dụng</button>
+                <!-- Khách chưa đăng nhập: không dùng được mã (BE trả PROMOTION_LOGIN_REQUIRED) -->
+                <div class="bk-coupon-login d-none" id="couponLogin">
+                  <i class="bi bi-lock"></i>
+                  <span><a href="pages-login.html" id="couponLoginLink">Đăng nhập</a> để sử dụng mã giảm giá</span>
+                </div>
+                <div class="bk-coupon-wrap d-none" id="couponWrap">
+                  <div class="bk-coupon" id="couponForm">
+                    <input class="bk-input" id="couponInput" maxlength="50" placeholder="Nhập hoặc chọn mã giảm giá" autocomplete="off"
+                           role="combobox" aria-expanded="false" aria-controls="couponList">
+                    <button type="button" class="bk-apply" id="couponApply" disabled>Áp dụng</button>
+                  </div>
+                  <div class="bk-promo-dd d-none" id="couponList" role="listbox"></div>
                 </div>
                 <div class="bk-coupon-on d-none" id="couponOn">
                   <span><i class="bi bi-ticket-perforated me-2"></i><b id="couponCode"></b> · <span id="couponDesc"></span></span>
@@ -396,7 +503,8 @@
           </div>
 
           <div class="bk-total-card">
-            <input class="bk-input bk-ref" id="bkReferral" maxlength="30" placeholder="Nhập mã giới thiệu (Nếu có)" autocomplete="off">
+            <div class="bk-sub-line"><span>Tạm tính</span><b id="sumTemp">0 ₫</b></div>
+            <div class="bk-sub-line"><span>Giảm giá</span><b id="sumDiscount">0 ₫</b></div>
             <div class="bk-total"><span>Tổng tiền</span><strong id="sumTotal">0 ₫</strong></div>
             <label class="bk-agree">
               <input type="checkbox" id="bkAgree">
@@ -407,6 +515,7 @@
               <a href="tel:+84123456789" class="bk-call" title="Gọi tư vấn: +84 123 456 789" aria-label="Gọi tư vấn"><i class="bi bi-telephone-fill"></i></a>
               <button type="submit" class="bk-submit" id="bkSubmit" disabled>Chưa nhập đủ thông tin</button>
             </div>
+            <div class="bk-submit-msg" id="bkSubmitMsg" role="alert"></div>
           </div>
         </div>
       </aside>
@@ -440,15 +549,15 @@
   /* ============================================================
      ĐẶT TOUR — booking.html?tourId=5&scheduleId=12 (từ nút "Đặt ngay" ở trang chi tiết tour)
 
-     ĐANG GIẢ LẬP (USE_MOCK = true): KHÔNG gọi API nào. Mở từ tour nào cũng hiện cùng 1 tour mẫu (MOCK_TOUR, MOCK_SCHEDULE),
-     mã giảm giá thử: MOCK_COUPONS. Bấm "Đặt tour" chỉ lưu đơn vào sessionStorage("bookingDraft").
+     API dùng:
+       GET  /api/public/tours/{tourId}               → tên, ảnh, nơi khởi hành...
+       GET  /api/public/tours/{tourId}/schedules     → đúng lịch: giá từng độ tuổi, số chỗ còn
+       GET  /api/public/promotions?tourId=           → danh sách mã áp dụng cho tour (xổ xuống ở ô mã)
+       POST /api/user/promotions/check               → "Áp dụng" mã (cần đăng nhập) → số tiền được giảm
+       POST /api/public/bookings                     → tạo đơn (khách vãng lai cũng đặt được; có token thì gắn vào tài khoản)
 
-     Khi có BE: đổi USE_MOCK = false → trang tự đọc tourId, scheduleId trên URL và gọi
-       GET  /api/public/tours/{tourId}            → TourResponse (tên, ảnh, nơi khởi hành...)
-       GET  /api/public/tours/{tourId}/schedules  → tìm đúng lịch: giá từng độ tuổi, số chỗ còn
-     rồi thay đoạn "CHƯA CÓ BE" trong sự kiện submit bằng lời gọi POST đặt tour, applyCoupon() bằng API kiểm tra mã.
+     Tổng tiền hiển thị chỉ để XEM; BE tự tính lại từ giá của lịch khi tạo đơn.
      ============================================================ */
-  const USE_MOCK = true;
 
   function $(id) { return document.getElementById(id); }
   function escapeHtml(str) {
@@ -457,7 +566,7 @@
   }
   const moneyFmt = new Intl.NumberFormat('vi-VN');
   const fmtMoney = v => moneyFmt.format(Number(v) || 0) + ' ₫';
-  function parseIso(s) { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); }
+  function parseIso(s) { const [y, m, d] = s.slice(0, 10).split('-').map(Number); return new Date(y, m - 1, d); }
   function toIso(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
   const WEEKDAYS = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
   const vnDate = iso => parseIso(iso).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -465,16 +574,43 @@
 
   const PHONE_RE = /^(0|\+84)\d{9}$/;
   const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  /** BE chỉ nhận 0xxxxxxxxx → đổi +84xxxxxxxxx về dạng 0 trước khi gửi */
+  const normPhone = v => { const s = (v || '').replace(/\s/g, ''); return s.startsWith('+84') ? '0' + s.slice(3) : s; };
 
-  async function getData(url) {
-    const res = await fetch(url);
+  /* ============================================================
+     GỌI API — lỗi trả về Error có .status và message tiếng Việt của BE
+     ============================================================ */
+  function errorMessage(json, fallback) {
+    if (json && Array.isArray(json.errors) && json.errors.length) return json.errors.join(' • ');
+    if (json && json.data && typeof json.data === 'object' && !Array.isArray(json.data)) {
+      const first = Object.values(json.data).find(v => typeof v === 'string');   // lỗi @Valid dạng { field: message }
+      if (first) return first;
+    }
+    return (json && json.message) || fallback;
+  }
+
+  /** auth = true: gửi kèm token (nếu đã đăng nhập). API public để false: token hết hạn cũng không làm hỏng trang */
+  async function api(url, { method = 'GET', body, auth = false } = {}) {
+    const headers = auth && window.AuthUI ? AuthUI.authHeaders() : { 'Content-Type': 'application/json' };
+    let res;
+    try {
+      res = await fetch(url, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
+    } catch (_) {
+      const err = new Error('Không kết nối được tới máy chủ. Vui lòng thử lại.'); err.status = 0; throw err;
+    }
     const json = await res.json().catch(() => null);
-    if (!res.ok || !json || !json.success) throw new Error((json && json.message) || 'Lỗi tải dữ liệu');
+    if (!res.ok || !json || !json.success) {
+      const err = new Error(res.status === 401 && auth
+              ? 'Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.'
+              : errorMessage(json, 'Có lỗi xảy ra, vui lòng thử lại.'));
+      err.status = res.status;
+      throw err;
+    }
     return json.data;
   }
 
   /* ============================================================
-     LOẠI HÀNH KHÁCH — độ tuổi tính tại NGÀY KHỞI HÀNH
+     LOẠI HÀNH KHÁCH — độ tuổi tính tại NGÀY KHỞI HÀNH (khớp checkAge ở BE)
      ============================================================ */
   const TYPES = [
     { key: 'ADULT',   label: 'Người lớn', age: 'Từ 12 tuổi trở lên', minAge: 12, maxAge: 120, price: s => s.adultPrice,   icon: 'bi-people',      minCount: 1 },
@@ -483,74 +619,35 @@
   ];
   const typeOf = key => TYPES.find(t => t.key === key);
 
-  /* ============================================================
-     DỮ LIỆU GIẢ — cùng tên field với TourResponse / ScheduleResponse để sau này bỏ đi là chạy với BE
-     ============================================================ */
-  const MOCK_TOUR = {
-    tourId: 4,
-    tourCode: 'TOUR00004',
-    tourName: 'Hà Nội - Ninh Bình - Hạ Long - Sapa - Fansipan | Nghỉ dưỡng 4 sao & Ẩm thực đặc sản',
-    thumbnailUrl: 'assets/img/travel/showcase-8.webp',
-    departureLocation: 'Hà Nội',
-    locationName: 'Ninh Bình, Hạ Long, Sapa',
-    duration: '5N4Đ'
-  };
-  /** Ngày đi luôn là 10 ngày sau hôm nay → trang giả lập không bao giờ "hết hạn" */
-  function mockSchedule() {
-    const dep = new Date(); dep.setHours(0, 0, 0, 0); dep.setDate(dep.getDate() + 10);
-    const ret = new Date(dep); ret.setDate(ret.getDate() + 4);
-    const depIso = toIso(dep);
-    return {
-      scheduleId: 400,
-      scheduleCode: `${MOCK_TOUR.tourCode}-${depIso.replace(/-/g, '')}`,
-      departureDate: depIso,
-      returnDate: toIso(ret),
-      totalSlots: 20,
-      availableSlots: 9,
-      adultPrice: 14290000,
-      childPrice: 10720000,
-      toddlerPrice: 4290000,
-      singleRoomSupplement: 3500000,
-      transport: 'Máy bay',
-      status: 'AVAILABLE'
-    };
-  }
-  /** Mã giảm giá thử: AMOUNT = trừ thẳng, PERCENT = % tổng tiền (tối đa max) */
-  const MOCK_COUPONS = {
-    VIETTRIP100: { type: 'AMOUNT', value: 100000, desc: 'Giảm 100.000 ₫' },
-    VIETTRIP10:  { type: 'PERCENT', value: 10, max: 1000000, desc: 'Giảm 10%, tối đa 1.000.000 ₫' }
-  };
-
   let tour = null, schedule = null;
-  let coupon = null;   // { code, type, value, max, desc }
+  let coupon = null;   // mã đang áp dụng: { promotionId, code, name, discountAmount }
   const counts = { ADULT: 1, CHILD: 0, TODDLER: 0 };
-  const pax    = { ADULT: [{}], CHILD: [], TODDLER: [] };   // { fullName, gender, dateOfBirth, phoneNumber, singleRoom }
+  const pax    = { ADULT: [{}], CHILD: [], TODDLER: [] };   // { fullName, gender, dateOfBirth, phoneNumber, singleRoom, autoSingle }
+
+  const user = () => window.AuthUI?.getCurrentUser();
+  /** Link đăng nhập quay lại đúng trang này sau khi đăng nhập xong */
+  const loginUrl = () => 'pages-login.html?redirect=' + encodeURIComponent(location.pathname.split('/').pop() + location.search);
 
   /* ============================================================
      TẢI DỮ LIỆU
      ============================================================ */
-  async function load() {
-    if (USE_MOCK) {
-      await new Promise(r => setTimeout(r, 300));   // cho thấy khung đang tải giống lúc gọi API thật
-      tour = MOCK_TOUR;
-      schedule = mockSchedule();
-      return render();
-    }
+  const q = new URLSearchParams(location.search);
+  const tourId = Number(q.get('tourId')), scheduleId = Number(q.get('scheduleId'));
 
-    const q = new URLSearchParams(location.search);
-    const tourId = Number(q.get('tourId')), scheduleId = Number(q.get('scheduleId'));
+  async function load() {
     if (!tourId || !scheduleId) return showError('Vui lòng chọn ngày khởi hành ở trang chi tiết tour.', 'tours.html', 'Xem danh sách tour');
 
     try {
       const [t, list] = await Promise.all([
-        getData(`/api/public/tours/${tourId}`),
-        getData(`/api/public/tours/${tourId}/schedules`)
+        api(`/api/public/tours/${tourId}`),
+        api(`/api/public/tours/${tourId}/schedules`)
       ]);
       tour = t;
       schedule = list.find(s => s.scheduleId === scheduleId);
     } catch (e) {
       console.error(e);
-      return showError('Không tải được thông tin tour. Vui lòng thử lại sau.', 'tours.html', 'Xem các tour khác');
+      return showError(e.status === 404 ? 'Tour không tồn tại hoặc đã ngừng mở bán.' : 'Không tải được thông tin tour. Vui lòng thử lại sau.',
+              'tours.html', 'Xem các tour khác');
     }
     // API chỉ trả lịch sắp tới, chưa huỷ → không thấy = đã qua / đã huỷ
     if (!schedule) return showError('Lịch khởi hành này không còn mở bán.', `tour-details.html?id=${tourId}`, 'Chọn ngày khác');
@@ -560,6 +657,17 @@
     render();
   }
 
+  /** Cập nhật lại số chỗ còn (sau khi đặt lỗi do người khác vừa đặt mất chỗ) */
+  async function refreshSchedule() {
+    try {
+      const fresh = (await api(`/api/public/tours/${tourId}/schedules`)).find(s => s.scheduleId === scheduleId);
+      if (!fresh) return;
+      schedule = fresh;
+      syncCounters();
+      if (seatsUsed() > schedule.availableSlots) slotsToast();
+    } catch (_) { /* giữ số cũ */ }
+  }
+
   function render() {
     document.title = `Đặt tour ${tour.tourName} - VietTrip`;
     prefillContact();
@@ -567,6 +675,7 @@
     renderCounters();
     renderPaxList();
     renderCost();
+    initCouponBox();
     $('bkLoading').classList.add('d-none');
     $('bkForm').classList.remove('d-none');
   }
@@ -580,17 +689,23 @@
   }
 
   /* ============================================================
-     THÔNG TIN LIÊN LẠC
+     THÔNG TIN LIÊN LẠC — đã đăng nhập thì điền sẵn từ hồ sơ
      ============================================================ */
-  const user = () => window.AuthUI?.getCurrentUser();
-
-  function prefillContact() {
+  async function prefillContact() {
     const u = user();
     $('bkLoginTip').classList.toggle('d-none', !!u);
-    if (u) {
-      $('cName').value = u.fullName || '';
-      $('cEmail').value = u.email || '';
-    }
+    $('bkLoginLink').href = loginUrl();
+    if (!u) return;
+    $('cName').value = u.fullName || '';
+    $('cEmail').value = u.email || '';
+    try {
+      // SĐT, địa chỉ chỉ có trong hồ sơ → chỉ điền vào ô khách CHƯA gõ
+      const p = await api('/api/users/account-info', { auth: true });
+      if (!$('cName').value) $('cName').value = p.fullName || '';
+      if (!$('cPhone').value) $('cPhone').value = p.phoneNumber || '';
+      if (!$('cAddress').value) $('cAddress').value = p.address || '';
+      updateSubmit();
+    } catch (_) { /* không lấy được hồ sơ → khách tự nhập */ }
   }
 
   const CONTACT_RULES = {
@@ -626,7 +741,7 @@
       <div class="bk-counter">
         <div>
           <b>${t.label}</b>
-          <small>${t.age} <i class="bi bi-info-circle-fill" title="${escapeHtml(counterTip(t))}"></i></small>
+          <small>${t.age} <i class="bi bi-info-circle-fill" title="${escapeHtml(fmtMoney(t.price(schedule)) + ' / khách')}"></i></small>
         </div>
         <div class="bk-step-ctrl">
           <button type="button" data-type="${t.key}" data-step="-1" aria-label="Bớt ${t.label}"><i class="bi bi-dash-lg"></i></button>
@@ -637,29 +752,40 @@
     syncCounters();
   }
 
-  function counterTip(t) {
-    return `${fmtMoney(t.price(schedule))} / khách`;
-  }
-
+  /** Nút "+" luôn bấm được (giống Vietravel): vượt số chỗ thì hiện thông báo thay vì làm mờ nút */
   function syncCounters() {
-    const left = schedule.availableSlots - seatsUsed();
     TYPES.forEach(t => {
       $(`cnt-${t.key}`).textContent = counts[t.key];
-      const minus = document.querySelector(`[data-type="${t.key}"][data-step="-1"]`);
-      const plus  = document.querySelector(`[data-type="${t.key}"][data-step="1"]`);
-      minus.disabled = counts[t.key] <= t.minCount;
-      plus.disabled = left <= 0;
+      document.querySelector(`[data-type="${t.key}"][data-step="-1"]`).disabled = counts[t.key] <= t.minCount;
     });
-    $('bkSlotsNote').classList.toggle('warn', left <= 0);
-    $('bkSlotsNote').textContent = left <= 0
-            ? `Đã đủ ${schedule.availableSlots} chỗ còn lại của ngày khởi hành này.`
-            : `Ngày khởi hành này còn ${schedule.availableSlots} chỗ.`;
+    updateSubmit();
   }
+
+  /* ----- Thông báo nổi ----- */
+  function toast(text) {
+    let box = $('bkToasts');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'bkToasts';
+      box.className = 'bk-toasts';
+      box.setAttribute('role', 'alert');
+      document.body.appendChild(box);
+    }
+    const el = document.createElement('div');
+    el.className = 'bk-toast';
+    el.innerHTML = '<i class="bi bi-x-circle-fill"></i><span></span>';
+    el.querySelector('span').textContent = text;
+    box.appendChild(el);
+    while (box.children.length > 3) box.firstElementChild.remove();   // bấm liên tục → tối đa 3 cái
+    setTimeout(() => { el.classList.add('hide'); setTimeout(() => el.remove(), 300); }, 3000);
+  }
+  const slotsToast = () => toast(`Rất tiếc Tour hiện tại số chỗ còn nhận chỉ còn: ${schedule.availableSlots} chỗ`);
 
   $('bkCounters').addEventListener('click', e => {
     const btn = e.target.closest('button[data-type]');
     if (!btn || btn.disabled) return;
     const key = btn.dataset.type, step = Number(btn.dataset.step);
+    if (step > 0 && seatsUsed() >= schedule.availableSlots) return slotsToast();
     counts[key] += step;
     if (step > 0) pax[key].push({});
     else pax[key].pop();                       // bớt khách → bỏ người cuối của nhóm đó
@@ -669,9 +795,27 @@
   });
 
   /* ============================================================
+     PHÒNG ĐƠN — đi 1 mình (1 người lớn, không trẻ em / trẻ nhỏ) thì BẮT BUỘC (BE cũng tự ép)
+     ============================================================ */
+  const travelsAlone = () => counts.ADULT === 1 && counts.CHILD === 0 && counts.TODDLER === 0;
+
+  /** autoSingle: phòng đơn do trang tự bật → hết đi 1 mình thì tự tắt, tránh khách bị tính phụ thu mà không để ý */
+  function syncSingleRoom() {
+    const first = pax.ADULT[0];
+    if (!first) return;
+    if (travelsAlone()) {
+      if (!first.singleRoom) { first.singleRoom = true; first.autoSingle = true; }
+    } else if (first.autoSingle) {
+      first.singleRoom = false;
+      first.autoSingle = false;
+    }
+  }
+
+  /* ============================================================
      THÔNG TIN TỪNG HÀNH KHÁCH
      ============================================================ */
   function renderPaxList() {
+    syncSingleRoom();
     const single = Number(schedule.singleRoomSupplement) || 0;
     $('bkPaxList').innerHTML = TYPES.filter(t => counts[t.key] > 0).map(t => `
       <div class="bk-group">
@@ -684,7 +828,8 @@
   }
 
   function paxRow(t, p, i, single) {
-    const filled = isFilled(t, p);
+    const filled = isFilled(p);
+    const locked = t.key === 'ADULT' && i === 0 && travelsAlone();
     const who = filled
             ? `${escapeHtml(p.fullName)}<small>${p.gender === 'MALE' ? 'Nam' : 'Nữ'} · ${vnDate(p.dateOfBirth)}</small>`
             : `${t.label} <span class="req">(*)</span>`;
@@ -699,29 +844,31 @@
         <div class="bk-single">
           <label for="single-${i}">Phòng đơn:</label>
           <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" role="switch" id="single-${i}" data-index="${i}" ${p.singleRoom ? 'checked' : ''}>
+            <input class="form-check-input" type="checkbox" role="switch" id="single-${i}" data-index="${i}"
+                   ${p.singleRoom ? 'checked' : ''} ${locked ? 'disabled title="Khách đi một mình bắt buộc phòng đơn"' : ''}>
           </div>
         </div>` : ''}
       </div>
       ${p.singleRoom ? '<div class="bk-pax-tag">Phòng đơn</div>' : ''}`;
   }
 
-  const isFilled = (t, p) => !!(p.fullName && p.gender && p.dateOfBirth);
+  const isFilled = p => !!(p.fullName && p.gender && p.dateOfBirth);
 
   $('bkPaxList').addEventListener('click', e => {
     const box = e.target.closest('.bk-pax-box');
-    if (box) openPax(box.dataset.type, Number(box.dataset.index));
+    if (box) openPax();
   });
   $('bkPaxList').addEventListener('change', e => {
     if (!e.target.matches('.bk-single input')) return;
-    pax.ADULT[Number(e.target.dataset.index)].singleRoom = e.target.checked;
+    const p = pax.ADULT[Number(e.target.dataset.index)];
+    p.singleRoom = e.target.checked;
+    p.autoSingle = false;   // khách tự chọn → không tự tắt nữa
     renderPaxList();
     renderCost();
   });
 
   /* ----- Hộp nhập thông tin TẤT CẢ hành khách ----- */
   const paxModal = new bootstrap.Modal($('paxModal'));
-  let focusTarget = null;   // khối hành khách vừa bấm → cuộn tới khi hộp mở xong
 
   /** Tuổi tròn tính tại ngày khởi hành */
   function ageAt(dobIso, atIso) {
@@ -748,35 +895,32 @@
 
   function renderPaxModal() {
     const single = Number(schedule.singleRoomSupplement) || 0;
+    const alone = travelsAlone();
     $('paxBody').innerHTML =
             (single > 0 ? `<div class="bk-mnote">Phòng đơn dành cho khách hàng từ 12 tuổi trở lên, giá phòng đơn là: <b>${fmtMoney(single)} / phòng</b></div>` : '') +
-            TYPES.filter(t => counts[t.key] > 0).map(t => {
-              const r = dobRange(t);
-              return `
+            TYPES.filter(t => counts[t.key] > 0).map(t => `
         <div class="bk-mgroup">
           <div class="bk-mgroup-title"><i class="bi ${t.icon}"></i><b>${t.label}</b>(${rangeText(t)})</div>
           ${pax[t.key].map((p, i) => {
-                const id = `${t.key}-${i}`;
-                return `
+              const id = `${t.key}-${i}`, r = dobRange(t);
+              const locked = t.key === 'ADULT' && i === 0 && alone;
+              return `
             <div class="bk-mpax" id="mp-${id}" data-type="${t.key}" data-index="${i}">
               <div class="bk-mpax-no">#${i + 1}</div>
               <div class="row g-3">
                 <div class="col-12">
                   <label class="bk-label" for="${id}-name">Họ tên <span class="req">(*)</span></label>
-                  <input class="bk-input f-name" id="${id}-name" maxlength="100" value="${escapeHtml(p.fullName || (t.key === 'ADULT' && i === 0 ? $('cName').value.trim() : ''))}" placeholder="Ví dụ: Nguyễn Văn A">
+                  <input class="bk-input f-name" id="${id}-name" maxlength="100" value="${escapeHtml(p.fullName || '')}" placeholder="Ví dụ: Nguyễn Văn A">
                   <div class="bk-error">Vui lòng nhập họ tên</div>
                 </div>
                 <div class="col-md-6">
-                  <label class="bk-label" for="${id}-dob">Ngày sinh <span class="req">(*)</span></label>
-                  <input class="bk-input f-dob" id="${id}-dob" type="date" min="${r.min}" max="${r.max}" value="${p.dateOfBirth || ''}">
+                  <label class="bk-label" for="${id}-dd">Ngày sinh <span class="req">(*)</span></label>
+                  ${dobFieldHtml(id, r, p.dateOfBirth)}
                   <div class="bk-error">Vui lòng nhập ngày sinh</div>
                 </div>
                 <div class="col-md-6">
                   <label class="bk-label" for="${id}-gender">Giới tính <span class="req">(*)</span></label>
-                  <select class="bk-input f-gender" id="${id}-gender">
-                    <option value="MALE" ${p.gender !== 'FEMALE' ? 'selected' : ''}>Nam</option>
-                    <option value="FEMALE" ${p.gender === 'FEMALE' ? 'selected' : ''}>Nữ</option>
-                  </select>
+                  ${genderFieldHtml(id, p.gender)}
                 </div>
                 ${t.key === 'ADULT' ? `
                 <div class="col">
@@ -788,38 +932,227 @@
                 <div class="col-auto bk-single-field">
                   <label class="bk-label" for="${id}-single">Phòng đơn</label>
                   <div class="form-check form-switch">
-                    <input class="form-check-input f-single" type="checkbox" role="switch" id="${id}-single" ${p.singleRoom ? 'checked' : ''}>
+                    <input class="form-check-input f-single" type="checkbox" role="switch" id="${id}-single"
+                           ${p.singleRoom ? 'checked' : ''} ${locked ? 'disabled' : ''}>
                   </div>
                 </div>` : ''}` : ''}
               </div>
             </div>`;
-              }).join('')}
-        </div>`;
-            }).join('');
+            }).join('')}
+        </div>`).join('');
   }
 
-  /** Bấm "Nhập thông tin" của bất kỳ ai → mở hộp có form của TẤT CẢ, cuộn tới đúng người vừa bấm */
-  function openPax(type, index) {
+  /* ============================================================
+     Ô NGÀY SINH tự làm: gõ dd / mm / yyyy hoặc bấm lịch → bảng 3 cột (ngày | tháng | năm)
+     Giá trị thật nằm ở <input type="hidden" class="f-dob"> dạng yyyy-mm-dd (rỗng nếu chưa đủ / sai)
+     ============================================================ */
+  const pad2 = n => String(n).padStart(2, '0');
+  const daysIn = (y, m) => new Date(y || 2000, m || 1, 0).getDate();   // chưa chọn năm → lấy năm nhuận để tháng 2 có 29
+
+  function dobFieldHtml(id, r, iso) {
+    const [y, m, d] = iso ? iso.split('-') : ['', '', ''];
+    return `
+      <div class="bk-dob" data-min="${r.min}" data-max="${r.max}">
+        <div class="bk-dob-box">
+          <input class="bk-dob-seg d" id="${id}-dd" inputmode="numeric" maxlength="2" placeholder="dd" value="${d}" aria-label="Ngày sinh" autocomplete="off">
+          <span class="bk-dob-sep">/</span>
+          <input class="bk-dob-seg m" inputmode="numeric" maxlength="2" placeholder="mm" value="${m}" aria-label="Tháng sinh" autocomplete="off">
+          <span class="bk-dob-sep">/</span>
+          <input class="bk-dob-seg y" inputmode="numeric" maxlength="4" placeholder="yyyy" value="${y}" aria-label="Năm sinh" autocomplete="off">
+          <button type="button" class="bk-dob-btn" aria-label="Mở lịch chọn ngày sinh"><i class="bi bi-calendar3"></i></button>
+        </div>
+        <input type="hidden" class="f-dob" value="${iso || ''}">
+        <div class="bk-dpick"><div class="bk-dcol d"></div><div class="bk-dcol m"></div><div class="bk-dcol y"></div></div>
+      </div>`;
+  }
+
+  const segs = box => ({ d: box.querySelector('.bk-dob-seg.d'), m: box.querySelector('.bk-dob-seg.m'), y: box.querySelector('.bk-dob-seg.y') });
+
+  /** Ghép 3 ô → yyyy-mm-dd vào ô ẩn; ngày không tồn tại (31/02...) → rỗng */
+  function syncDob(box) {
+    const s = segs(box);
+    const d = Number(s.d.value), m = Number(s.m.value), y = Number(s.y.value);
+    const ok = s.y.value.length === 4 && m >= 1 && m <= 12 && d >= 1 && d <= daysIn(y, m);
+    box.querySelector('.f-dob').value = ok ? `${y}-${pad2(m)}-${pad2(d)}` : '';
+    box.classList.remove('is-invalid');
+  }
+
+  function renderDobPicker(box) {
+    const s = segs(box);
+    const d = Number(s.d.value), m = Number(s.m.value), y = Number(s.y.value);
+    const minY = Number(box.dataset.min.slice(0, 4)), maxY = Number(box.dataset.max.slice(0, 4));
+    const item = (col, v, text, on) => `<button type="button" data-col="${col}" data-v="${v}" class="${on ? 'on' : ''}">${text}</button>`;
+    const days = daysIn(s.y.value.length === 4 ? y : 0, m);
+    box.querySelector('.bk-dcol.d').innerHTML = Array.from({ length: days }, (_, i) => item('d', i + 1, pad2(i + 1), d === i + 1)).join('');
+    box.querySelector('.bk-dcol.m').innerHTML = Array.from({ length: 12 }, (_, i) => item('m', i + 1, `Thg ${i + 1}`, m === i + 1)).join('');
+    box.querySelector('.bk-dcol.y').innerHTML = Array.from({ length: maxY - minY + 1 }, (_, i) => item('y', maxY - i, maxY - i, y === maxY - i)).join('');
+  }
+
+  /** Mở bảng: mở lên trên nếu phía dưới không đủ chỗ trong hộp (thân hộp có thanh cuộn sẽ cắt mất) */
+  function openPicker(wrap, height) {
+    closeAllPickers(wrap);
+    const body = $('paxBody').getBoundingClientRect(), r = wrap.getBoundingClientRect();
+    const below = body.bottom - r.bottom, above = r.top - body.top;
+    wrap.classList.toggle('up', below < height && above > below);
+    wrap.classList.add('open');
+  }
+  function closeAllPickers(except) {
+    $('paxBody').querySelectorAll('.bk-dob.open, .bk-gsel.open').forEach(w => {
+      if (w === except) return;
+      w.classList.remove('open', 'up');
+      w.querySelector('.bk-gsel-btn')?.setAttribute('aria-expanded', 'false');
+    });
+  }
+
+  function toggleDobPicker(box, forceOpen) {
+    if (box.classList.contains('open') && !forceOpen) return closeAllPickers();
+    if (box.classList.contains('open')) return;
+    renderDobPicker(box);
+    closeAllPickers(box);
+    box.classList.add('open');   // lịch LUÔN mở phía dưới ô
+    placeDobPicker(box);
+    // Cuộn mỗi cột tới mục đang chọn (năm chưa chọn → đứng ở năm lớn nhất, đầu danh sách)
+    box.querySelectorAll('.bk-dcol').forEach(col => {
+      const on = col.querySelector('.on');
+      col.scrollTop = on ? on.offsetTop - col.clientHeight / 2 + on.offsetHeight / 2 : 0;
+    });
+  }
+
+  /** Đặt lịch (position: fixed) sát dưới ô; thấp hơn đáy màn hình thì rút ngắn cột cho vừa */
+  function placeDobPicker(box) {
+    const r = box.querySelector('.bk-dob-box').getBoundingClientRect();
+    const pick = box.querySelector('.bk-dpick');
+    const top = r.bottom + 6;
+    pick.style.top = top + 'px';
+    pick.style.left = r.left + 'px';
+    pick.style.setProperty('--dpick-h', Math.max(160, Math.min(280, window.innerHeight - top - 12)) + 'px');
+  }
+  // Cuộn thân hộp / đổi cỡ cửa sổ → lịch bám theo ô
+  $('paxBody').addEventListener('scroll', () => {
+    const open = $('paxBody').querySelector('.bk-dob.open');
+    if (open) placeDobPicker(open);
+  });
+  window.addEventListener('resize', () => {
+    const open = $('paxBody').querySelector('.bk-dob.open');
+    if (open) placeDobPicker(open);
+  });
+
+  function pickDob(box, btn) {
+    const s = segs(box)[btn.dataset.col];
+    s.value = btn.dataset.col === 'y' ? btn.dataset.v : pad2(btn.dataset.v);
+    // Đổi tháng / năm làm ngày vượt quá số ngày của tháng (31 → tháng 2) → kéo về ngày cuối tháng
+    const all = segs(box);
+    if (all.d.value && all.m.value) {
+      const max = daysIn(all.y.value.length === 4 ? Number(all.y.value) : 0, Number(all.m.value));
+      if (Number(all.d.value) > max) all.d.value = pad2(max);
+    }
+    syncDob(box);
+    if (all.d.value && all.m.value && all.y.value.length === 4) return closeAllPickers();   // chọn đủ → đóng
+    const keep = [...box.querySelectorAll('.bk-dcol')].map(c => c.scrollTop);             // vẽ lại nhưng giữ vị trí cuộn
+    renderDobPicker(box);
+    box.querySelectorAll('.bk-dcol').forEach((c, i) => { c.scrollTop = keep[i]; });
+  }
+
+  /* ============================================================
+     COMBOBOX GIỚI TÍNH (thay <select> mặc định)
+     ============================================================ */
+  const GENDERS = [['MALE', 'Nam'], ['FEMALE', 'Nữ']];
+  function genderFieldHtml(id, gender) {
+    const v = gender === 'FEMALE' ? 'FEMALE' : 'MALE';
+    return `
+      <div class="bk-gsel">
+        <button type="button" class="bk-gsel-btn" id="${id}-gender" aria-haspopup="listbox" aria-expanded="false">
+          <span>${v === 'MALE' ? 'Nam' : 'Nữ'}</span><i class="bi bi-chevron-down"></i>
+        </button>
+        <input type="hidden" class="f-gender" value="${v}">
+        <div class="bk-gsel-menu" role="listbox">
+          ${GENDERS.map(([k, label]) => `<button type="button" role="option" data-g="${k}" class="${k === v ? 'on' : ''}">${label}</button>`).join('')}
+        </div>
+      </div>`;
+  }
+  function setGender(g, v) {
+    g.querySelector('.f-gender').value = v;
+    g.querySelector('.bk-gsel-btn span').textContent = v === 'MALE' ? 'Nam' : 'Nữ';
+    g.querySelectorAll('[data-g]').forEach(b => b.classList.toggle('on', b.dataset.g === v));
+  }
+
+  /* ----- Sự kiện chung cho ngày sinh + giới tính trong hộp ----- */
+  $('paxModal').addEventListener('click', e => {
+    const box = e.target.closest('.bk-dob'), g = e.target.closest('.bk-gsel');
+    if (!box && !g) return closeAllPickers();
+
+    if (box) {
+      const pick = e.target.closest('.bk-dcol button');
+      if (pick) return pickDob(box, pick);
+      if (e.target.closest('.bk-dob-btn')) return toggleDobPicker(box);
+      if (e.target.closest('.bk-dob-seg')) return toggleDobPicker(box, true);   // bấm vào ô → mở lịch, vẫn gõ được
+    }
+    if (g) {
+      const opt = e.target.closest('[data-g]');
+      if (opt) { setGender(g, opt.dataset.g); return closeAllPickers(); }
+      if (e.target.closest('.bk-gsel-btn')) {
+        if (g.classList.contains('open')) return closeAllPickers();
+        openPicker(g, 120);
+        g.querySelector('.bk-gsel-btn').setAttribute('aria-expanded', 'true');
+      }
+    }
+  });
+
+  // Gõ tay: chỉ nhận số, đủ ký tự thì nhảy sang ô sau; "/" cũng nhảy; Backspace ở ô trống lùi về ô trước
+  $('paxBody').addEventListener('input', e => {
+    const seg = e.target.closest('.bk-dob-seg');
+    if (!seg) return;
+    seg.value = seg.value.replace(/\D/g, '');
+    const box = seg.closest('.bk-dob');
+    if (seg.value.length === seg.maxLength) {
+      const next = seg.nextElementSibling?.nextElementSibling;
+      if (next?.classList.contains('bk-dob-seg')) next.focus();
+    }
+    syncDob(box);
+    if (box.classList.contains('open')) {
+      const keep = [...box.querySelectorAll('.bk-dcol')].map(c => c.scrollTop);
+      renderDobPicker(box);
+      box.querySelectorAll('.bk-dcol').forEach((c, i) => { c.scrollTop = keep[i]; });
+    }
+  });
+  $('paxBody').addEventListener('keydown', e => {
+    const seg = e.target.closest('.bk-dob-seg');
+    if (!seg) return;
+    if (e.key === '/' ) {
+      e.preventDefault();
+      seg.nextElementSibling?.nextElementSibling?.focus();
+    } else if (e.key === 'Backspace' && !seg.value) {
+      const prev = seg.previousElementSibling?.previousElementSibling;
+      if (prev?.classList.contains('bk-dob-seg')) { e.preventDefault(); prev.focus(); }
+    } else if (e.key === 'Tab') {
+      closeAllPickers();
+    }
+  });
+  // Rời ô ngày / tháng gõ 1 chữ số → thêm 0 (5 → 05)
+  $('paxBody').addEventListener('focusout', e => {
+    const seg = e.target.closest('.bk-dob-seg');
+    if (seg && !seg.classList.contains('y') && seg.value.length === 1 && seg.value !== '0') {
+      seg.value = pad2(seg.value);
+      syncDob(seg.closest('.bk-dob'));
+    }
+  });
+
+  /** Bấm "Nhập thông tin" của bất kỳ ai → mở hộp có form của TẤT CẢ, luôn bắt đầu từ người lớn #1, không focus ô nào */
+  function openPax() {
     renderPaxModal();
-    focusTarget = `mp-${type}-${index}`;
     paxModal.show();
   }
-  $('paxModal').addEventListener('shown.bs.modal', () => {
-    const el = focusTarget && $(focusTarget);
-    if (!el) return;
-    // Người đầu nhóm → cuộn tới cả tiêu đề nhóm ("Trẻ em sinh từ ... đến ...")
-    (el.previousElementSibling?.classList.contains('bk-mgroup-title') ? el.closest('.bk-mgroup') : el).scrollIntoView({ block: 'start' });
-    el.querySelector('.f-name').focus({ preventScroll: true });
-  });
+  $('paxModal').addEventListener('hide.bs.modal', closeAllPickers);
 
   /** Kiểm tra 1 khối, tô đỏ ô sai; trả về dữ liệu nếu hợp lệ, null nếu sai */
   function readPaxBlock(el) {
     const t = typeOf(el.dataset.type);
     const name = el.querySelector('.f-name'), dob = el.querySelector('.f-dob'), phone = el.querySelector('.f-phone');
-    const dobErr = dob.nextElementSibling;
+    const dobBox = dob.closest('.bk-dob'), dobErr = dobBox.nextElementSibling;
+    const typed = [...dobBox.querySelectorAll('.bk-dob-seg')].some(i => i.value);
 
     let dobMsg = '';
-    if (!dob.value) dobMsg = dob.validity.badInput ? 'Ngày sinh không hợp lệ' : 'Vui lòng nhập ngày sinh';
+    if (!dob.value) dobMsg = typed ? 'Ngày sinh không hợp lệ' : 'Vui lòng nhập ngày sinh';
     else if (dob.value > toIso(new Date())) dobMsg = 'Ngày sinh không được ở tương lai';
     else {
       const age = ageAt(dob.value, schedule.departureDate);
@@ -829,17 +1162,19 @@
     const phoneOk = !phoneVal || PHONE_RE.test(phoneVal);
 
     name.classList.toggle('is-invalid', !name.value.trim());
-    dob.classList.toggle('is-invalid', !!dobMsg);
+    dobBox.classList.toggle('is-invalid', !!dobMsg);
     if (dobMsg) dobErr.textContent = dobMsg;
     phone?.classList.toggle('is-invalid', !phoneOk);
 
     if (!name.value.trim() || dobMsg || !phoneOk) return null;
+    const single = el.querySelector('.f-single');
     return {
       fullName: name.value.trim(),
       dateOfBirth: dob.value,
       gender: el.querySelector('.f-gender').value,
       phoneNumber: phoneVal || null,
-      singleRoom: !!el.querySelector('.f-single')?.checked
+      // Lịch không có phụ thu phòng đơn → không có công tắc → giữ nguyên giá trị cũ
+      singleRoom: single ? single.checked : !!pax[el.dataset.type][Number(el.dataset.index)].singleRoom
     };
   }
 
@@ -854,22 +1189,27 @@
       firstBad.focus({ preventScroll: true });
       return;
     }
-    blocks.forEach((el, k) => Object.assign(pax[el.dataset.type][Number(el.dataset.index)], results[k]));
+    blocks.forEach((el, k) => {
+      const p = pax[el.dataset.type][Number(el.dataset.index)];
+      if (p.singleRoom !== results[k].singleRoom) p.autoSingle = false;   // khách tự đổi trong hộp
+      Object.assign(p, results[k]);
+    });
     paxModal.hide();
     renderPaxList();
     renderCost();   // phòng đơn có thể vừa bật / tắt trong hộp
   });
 
-  // Gõ lại vào ô đang đỏ → bỏ đỏ
   $('paxBody').addEventListener('input', e => {
     if (e.target.classList.contains('is-invalid')) e.target.classList.remove('is-invalid');
   });
 
-  // Đặt lại: xoá trắng mọi ô trong hộp (chỉ lưu khi bấm Xác nhận, nên đóng hộp là dữ liệu cũ vẫn còn)
+  // Đặt lại: xoá trắng mọi ô trong hộp (chỉ lưu khi bấm Xác nhận). Công tắc bị khoá (đi 1 mình) giữ nguyên
   $('paxReset').addEventListener('click', () => {
-    $('paxBody').querySelectorAll('.f-name, .f-dob, .f-phone').forEach(i => { i.value = ''; i.classList.remove('is-invalid'); });
-    $('paxBody').querySelectorAll('.f-gender').forEach(s => { s.value = 'MALE'; });
-    $('paxBody').querySelectorAll('.f-single').forEach(c => { c.checked = false; });
+    closeAllPickers();
+    $('paxBody').querySelectorAll('.f-name, .f-phone, .f-dob, .bk-dob-seg').forEach(i => { i.value = ''; i.classList.remove('is-invalid'); });
+    $('paxBody').querySelectorAll('.bk-dob').forEach(b => b.classList.remove('is-invalid'));
+    $('paxBody').querySelectorAll('.bk-gsel').forEach(g => setGender(g, 'MALE'));
+    $('paxBody').querySelectorAll('.f-single:not(:disabled)').forEach(c => { c.checked = false; });
     $('paxBody').querySelector('.f-name')?.focus();
   });
 
@@ -883,142 +1223,336 @@
     $('sumTrip').innerHTML = [
       ['Ngày đi', longDate(schedule.departureDate)],
       ['Ngày về', schedule.returnDate ? longDate(schedule.returnDate) : '—'],
-      ['Khởi hành', tour.departureLocation],
-      ['Điểm đến', tour.locationName],
-      ['Thời gian', TourCard.durationText(tour.duration)],
+      ['Khởi hành', tour.departureLocation || 'Đang cập nhật'],
+      ['Điểm đến', tour.locationName || 'Đang cập nhật'],
+      ['Thời gian', window.TourCard?.durationText ? TourCard.durationText(tour.duration) : (tour.duration || '—')],
       ['Phương tiện', schedule.transport || 'Đang cập nhật']
     ].map(([k, v]) => `<div class="bk-line"><span>${k}</span><b>${escapeHtml(v)}</b></div>`).join('');
   }
 
-  function calcTotal() {
-    let total = 0;
+  const singleRoomCount = () => pax.ADULT.filter(p => p.singleRoom).length;
+
+  /** Tạm tính — cùng công thức với BE (giá từng loại × số lượng + phụ thu phòng đơn × số phòng) */
+  function calcTemp() {
+    let temp = 0;
     const lines = [];
     TYPES.forEach(t => {
       if (!counts[t.key]) return;
       const price = Number(t.price(schedule)) || 0;
-      total += price * counts[t.key];
-      lines.push([`${t.label} x ${counts[t.key]}`, price ? fmtMoney(price * counts[t.key]) : 'Miễn phí']);
+      temp += price * counts[t.key];
+      lines.push([t.label, counts[t.key], price ? fmtMoney(price) : 'Miễn phí']);
     });
-    const singles = pax.ADULT.filter(p => p.singleRoom).length;
-    if (singles) {
-      const sup = (Number(schedule.singleRoomSupplement) || 0) * singles;
-      total += sup;
-      lines.push([`Phụ thu phòng đơn x ${singles}`, fmtMoney(sup)]);
+    const singles = singleRoomCount();
+    const sup = Number(schedule.singleRoomSupplement) || 0;
+    if (singles && sup) {
+      temp += sup * singles;
+      lines.push(['Phụ thu phòng đơn', singles, fmtMoney(sup)]);
+    } else {
+      lines.push(['Phụ thu phòng đơn', '', fmtMoney(0)]);   // không chọn phòng đơn → vẫn hiện dòng, 0 ₫
     }
-    const discount = couponDiscount(total);
-    if (discount) lines.push([`Mã giảm giá ${coupon.code}`, '- ' + fmtMoney(discount), 'discount']);
-    return { total: total - discount, lines, discount };
+    return { temp, lines };
   }
 
+  function calcTotal() {
+    const { temp, lines } = calcTemp();
+    const discount = coupon ? Math.min(Number(coupon.discountAmount) || 0, temp) : 0;
+    return { temp, total: temp - discount, lines, discount };
+  }
+
+  let lastTemp = null;
   function renderCost() {
-    const { total, lines } = calcTotal();
-    $('sumCost').innerHTML = lines.map(([k, v, cls]) => `<div class="bk-line ${cls || ''}"><span>${k}</span><b>${v}</b></div>`).join('');
+    const { temp, total, lines, discount } = calcTotal();
+    // Mỗi dòng: tên | số lượng x | đơn giá (giống Vietravel)
+    $('sumCost').innerHTML = lines.map(([k, qty, price]) =>
+            `<div class="bk-cost"><span>${k}</span><em>${qty === '' ? '' : qty + ' x'}</em><b>${price}</b></div>`).join('');
+    $('sumTemp').textContent = fmtMoney(temp);
+    $('sumDiscount').textContent = discount ? '- ' + fmtMoney(discount) : '0 ₫';
     $('sumTotal').textContent = fmtMoney(total);
+    // Tạm tính đổi (thêm / bớt khách, phòng đơn) → mã % hoặc đơn tối thiểu thay đổi → hỏi lại BE
+    if (lastTemp !== null && temp !== lastTemp) {
+      if (coupon) scheduleRecheck();
+      if (!$('couponList').classList.contains('d-none')) renderPromoList();
+    }
+    lastTemp = temp;
   }
 
   /* ============================================================
-     MÃ GIẢM GIÁ (giả lập) — có BE thì thay phần tra MOCK_COUPONS bằng API kiểm tra mã;
-     dù vậy BE vẫn phải tự kiểm tra lại mã lúc tạo đơn, không tin số tiền giảm phía khách
+     MÃ GIẢM GIÁ
+     - Chưa đăng nhập: ẩn ô nhập, hiện "Đăng nhập để sử dụng mã giảm giá"
+     - Bấm vào ô nhập: xổ danh sách mã áp dụng cho tour này (GET /api/public/promotions?tourId=)
+     - Chọn mã / gõ mã + "Áp dụng": POST /api/user/promotions/check → số tiền giảm do BE tính
      ============================================================ */
-  function couponDiscount(subtotal) {
-    if (!coupon) return 0;
-    const d = coupon.type === 'PERCENT' ? Math.min(Math.round(subtotal * coupon.value / 100), coupon.max) : coupon.value;
-    return Math.min(d, subtotal);
+  let promos = null;          // null = chưa tải; [] = tour không có mã nào
+  let promoLoading = null;    // Promise đang tải (bấm nhiều lần không gọi nhiều lần)
+  let activeIdx = -1;         // mục đang chọn bằng phím ↑ ↓
+
+  function initCouponBox() {
+    const loggedIn = !!user();
+    $('couponLogin').classList.toggle('d-none', loggedIn);
+    $('couponWrap').classList.toggle('d-none', !loggedIn);
+    $('couponLoginLink').href = loginUrl();
   }
+
+  function discountText(p) {
+    if (p.discountType === 'PERCENT') {
+      return `Giảm ${Number(p.discountValue)}%` + (Number(p.maxDiscountAmount) > 0 ? `, tối đa ${fmtMoney(p.maxDiscountAmount)}` : '');
+    }
+    return `Giảm ${fmtMoney(p.discountValue)}`;
+  }
+
+  function loadPromos() {
+    if (promos) return Promise.resolve(promos);
+    if (!promoLoading) {
+      promoLoading = api(`/api/public/promotions?tourId=${tourId}`)
+              .then(list => (promos = list || []))
+              .catch(e => { promoLoading = null; throw e; });   // lỗi → lần sau bấm thử lại
+    }
+    return promoLoading;
+  }
+
+  async function openPromoList() {
+    if (coupon) return;
+    const dd = $('couponList');
+    dd.classList.remove('d-none');
+    $('couponInput').setAttribute('aria-expanded', 'true');
+    if (!promos) {
+      dd.innerHTML = '<div class="bk-promo-empty"><span class="spinner-border spinner-border-sm me-2"></span>Đang tải mã giảm giá...</div>';
+      try { await loadPromos(); }
+      catch (e) { dd.innerHTML = `<div class="bk-promo-empty text-danger">${escapeHtml(e.message)}</div>`; return; }
+    }
+    renderPromoList();
+  }
+
+  function closePromoList() {
+    $('couponList').classList.add('d-none');
+    $('couponInput').setAttribute('aria-expanded', 'false');
+    activeIdx = -1;
+  }
+
+  /** Lọc theo chữ đang gõ (mã hoặc tên); mã chưa đủ đơn tối thiểu vẫn hiện nhưng không chọn được */
+  function renderPromoList() {
+    if (!promos) return;
+    const kw = $('couponInput').value.trim().toUpperCase();
+    const { temp } = calcTemp();
+    const list = promos.filter(p => !kw || p.promotionCode.toUpperCase().includes(kw) || (p.promotionName || '').toUpperCase().includes(kw));
+    activeIdx = -1;
+    $('couponList').innerHTML = list.length ? list.map(p => {
+      const min = Number(p.minOrderAmount) || 0;
+      const lack = min > temp;
+      const meta = [
+        min > 0 ? `Đơn từ ${fmtMoney(min)}` : 'Mọi đơn hàng',
+        p.endDate ? `HSD ${vnDate(p.endDate)}` : ''
+      ].filter(Boolean).join(' · ');
+      return `
+        <button type="button" class="bk-promo-item" role="option" data-code="${escapeHtml(p.promotionCode)}" ${lack ? 'disabled' : ''}>
+          <i class="bi bi-ticket-perforated"></i>
+          <span class="min-w-0">
+            <span class="code">${escapeHtml(p.promotionCode)}</span> · <span class="name">${escapeHtml(discountText(p))}</span>
+            ${p.promotionName ? `<div class="name">${escapeHtml(p.promotionName)}</div>` : ''}
+            <div class="meta">${escapeHtml(meta)}</div>
+            ${lack ? `<div class="meta warn">Mua thêm ${fmtMoney(min - temp)} để dùng mã này</div>` : ''}
+          </span>
+        </button>`;
+    }).join('') : `<div class="bk-promo-empty">${promos.length ? 'Không có mã nào khớp. Bạn vẫn có thể bấm "Áp dụng" để kiểm tra mã.' : 'Tour này hiện chưa có mã giảm giá.'}</div>`;
+  }
+
   function setCouponMsg(text, ok) {
     $('couponMsg').textContent = text;
     $('couponMsg').className = 'bk-coupon-msg ' + (ok ? 'ok' : 'err');
   }
-  function applyCoupon() {
-    const code = $('couponInput').value.trim().toUpperCase();
-    if (!code) return;
-    const found = MOCK_COUPONS[code];
-    if (!found) return setCouponMsg('Mã giảm giá không hợp lệ hoặc đã hết hạn', false);
-    coupon = { code, ...found };
-    $('couponCode').textContent = code;
-    $('couponDesc').textContent = found.desc;
+
+  /** Hỏi BE mã có dùng được với tạm tính hiện tại không → trả PromotionCheckResponse */
+  const checkCoupon = code => api('/api/user/promotions/check', {
+    method: 'POST', auth: true,
+    body: { promotionCode: code, tourId: tour.tourId, orderAmount: calcTemp().temp }
+  });
+
+  function showCouponOn() {
+    $('couponCode').textContent = coupon.code;
+    $('couponDesc').textContent = `Giảm ${fmtMoney(coupon.discountAmount)}`;
     $('couponForm').classList.add('d-none');
     $('couponOn').classList.remove('d-none');
-    renderCost();
-    setCouponMsg(`Đã áp dụng, bạn được giảm ${fmtMoney(calcTotal().discount)}`, true);
   }
-  $('couponInput').addEventListener('input', () => {
-    $('couponApply').disabled = !$('couponInput').value.trim();
-    $('couponMsg').textContent = '';
-  });
-  $('couponInput').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); applyCoupon(); } });
-  $('couponApply').addEventListener('click', applyCoupon);
-  $('couponRemove').addEventListener('click', () => {
+
+  async function applyCoupon(code) {
+    code = (code ?? $('couponInput').value).trim().toUpperCase();
+    if (!code) return;
+    closePromoList();
+    $('couponInput').value = code;
+    $('couponApply').classList.add('loading');
+    $('couponApply').textContent = 'Đang kiểm tra...';
+    try {
+      const r = await checkCoupon(code);
+      if (r.promotionId == null) throw new Error('BE chưa trả promotionId trong PromotionCheckResponse');
+      coupon = { promotionId: r.promotionId, code: r.promotionCode, name: r.promotionName, discountAmount: r.discountAmount };
+      showCouponOn();
+      renderCost();
+      $('couponMsg').textContent = '';   // áp dụng thành công: số tiền giảm đã hiện ở dòng mã + Giảm giá
+    } catch (e) {
+      setCouponMsg(e.message, false);
+    } finally {
+      $('couponApply').classList.remove('loading');
+      $('couponApply').textContent = 'Áp dụng';
+    }
+  }
+
+  function removeCoupon(msg) {
     coupon = null;
     $('couponInput').value = '';
     $('couponApply').disabled = true;
     $('couponForm').classList.remove('d-none');
     $('couponOn').classList.add('d-none');
-    $('couponMsg').textContent = '';
+    if (msg) setCouponMsg(msg, false); else $('couponMsg').textContent = '';
     renderCost();
+  }
+
+  /** Đổi số khách / phòng đơn khi đang có mã → tính lại số tiền giảm (đợi khách bấm xong mới gọi) */
+  let recheckTimer = null, recheckSeq = 0;
+  function scheduleRecheck() {
+    clearTimeout(recheckTimer);
+    recheckTimer = setTimeout(async () => {
+      if (!coupon) return;
+      const seq = ++recheckSeq, code = coupon.code;
+      try {
+        const r = await checkCoupon(code);
+        if (seq !== recheckSeq || !coupon || coupon.code !== code) return;   // đã có lần gọi mới hơn / đã bỏ mã
+        coupon.discountAmount = r.discountAmount;
+        showCouponOn();
+        renderCost();
+        $('couponMsg').textContent = '';
+      } catch (e) {
+        if (seq !== recheckSeq) return;
+        removeCoupon(`Mã ${code} không còn áp dụng: ${e.message}`);
+      }
+    }, 400);
+  }
+
+  $('couponInput').addEventListener('focus', openPromoList);
+  $('couponInput').addEventListener('click', openPromoList);
+  $('couponInput').addEventListener('input', () => {
+    $('couponApply').disabled = !$('couponInput').value.trim();
+    $('couponMsg').textContent = '';
+    if ($('couponList').classList.contains('d-none')) openPromoList(); else renderPromoList();
   });
+  $('couponInput').addEventListener('keydown', e => {
+    const items = [...$('couponList').querySelectorAll('.bk-promo-item:not(:disabled)')];
+    const open = !$('couponList').classList.contains('d-none');
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      if (!open || !items.length) return;
+      e.preventDefault();
+      activeIdx = (activeIdx + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
+      items.forEach((el, i) => el.classList.toggle('active', i === activeIdx));
+      items[activeIdx].scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (open && items[activeIdx]) applyCoupon(items[activeIdx].dataset.code);
+      else applyCoupon();
+    } else if (e.key === 'Escape') {
+      closePromoList();
+    }
+  });
+  // mousedown + preventDefault: ô nhập không mất focus trước khi kịp nhận cú bấm
+  $('couponList').addEventListener('mousedown', e => e.preventDefault());
+  $('couponList').addEventListener('click', e => {
+    const item = e.target.closest('.bk-promo-item');
+    if (item && !item.disabled) applyCoupon(item.dataset.code);
+  });
+  document.addEventListener('click', e => { if (!e.target.closest('#couponWrap')) closePromoList(); });
+  $('couponApply').addEventListener('click', () => applyCoupon());
+  $('couponRemove').addEventListener('click', () => removeCoupon());
 
   document.querySelectorAll('.bk-acc-head').forEach(h => h.addEventListener('click', () => {
     h.setAttribute('aria-expanded', h.parentElement.classList.toggle('open'));
   }));
 
   /* ============================================================
-     GỬI ĐƠN
+     GỬI ĐƠN — POST /api/public/bookings
      ============================================================ */
-  const allPaxFilled = () => TYPES.every(t => pax[t.key].every(p => isFilled(t, p)));
+  let submitting = false;
+  const allPaxFilled = () => TYPES.every(t => pax[t.key].every(isFilled));
+  const enoughSlots = () => !schedule || seatsUsed() <= schedule.availableSlots;
 
   function updateSubmit() {
-    const ready = contactValid(false) && allPaxFilled() && $('bkAgree').checked;
+    if (submitting) return;
+    const ready = contactValid(false) && allPaxFilled() && enoughSlots() && $('bkAgree').checked;
     $('bkSubmit').disabled = !ready;
-    $('bkSubmit').textContent = !ready ? 'Chưa nhập đủ thông tin' : (USE_MOCK || user() ? 'Đặt tour' : 'Đăng nhập để đặt tour');
+    $('bkSubmit').textContent = !enoughSlots() ? 'Không đủ chỗ' : ready ? 'Đặt tour' : 'Chưa nhập đủ thông tin';
   }
   $('bkAgree').addEventListener('change', updateSubmit);
 
-  /** Dữ liệu đơn — sau này có BE thì gửi nguyên object này (đổi tên field cho khớp BookingRequest) */
+  function setSubmitMsg(text) {
+    $('bkSubmitMsg').textContent = text || '';
+    $('bkSubmitMsg').classList.toggle('show', !!text);
+  }
+
+  /** Khớp BookingRequest + ParticipantRequest. Không gửi tiền: BE tự tính */
   function buildPayload() {
     return {
       scheduleId: schedule.scheduleId,
+      promotionId: coupon?.promotionId ?? null,
       contactName: $('cName').value.trim(),
-      contactPhone: $('cPhone').value.replace(/\s/g, ''),
       contactEmail: $('cEmail').value.trim(),
+      contactPhone: normPhone($('cPhone').value),
       contactAddress: $('cAddress').value.trim() || null,
+      totalAdults: counts.ADULT,
+      totalChildren: counts.CHILD,
+      totalToddlers: counts.TODDLER,
       note: $('bkNote').value.trim() || null,
-      couponCode: coupon?.code || null,
-      referralCode: $('bkReferral').value.trim() || null,
-      numAdults: counts.ADULT, numChildren: counts.CHILD, numToddlers: counts.TODDLER,
-      passengers: TYPES.flatMap(t => pax[t.key].map(p => ({
-        passengerType: t.key, fullName: p.fullName, gender: p.gender, dateOfBirth: p.dateOfBirth,
-        phoneNumber: p.phoneNumber || null, singleRoom: t.key === 'ADULT' && !!p.singleRoom
+      participants: TYPES.flatMap(t => pax[t.key].map(p => ({
+        fullName: p.fullName,
+        dateOfBirth: p.dateOfBirth,
+        gender: p.gender,
+        participantType: t.key,
+        phoneNumber: p.phoneNumber ? normPhone(p.phoneNumber) : null,
+        singleRoom: t.key === 'ADULT' && !!p.singleRoom
       })))
-      // Tổng tiền KHÔNG gửi: BE phải tự tính lại từ giá của lịch, không tin số tiền phía khách
     };
   }
 
-  $('bkForm').addEventListener('submit', e => {
+  $('bkForm').addEventListener('submit', async e => {
     e.preventDefault();
-    if (!contactValid(true) || !allPaxFilled() || !$('bkAgree').checked) return;
-    if (!USE_MOCK && !user()) { location.href = 'pages-login.html'; return; }   // giả lập: cho đặt không cần đăng nhập
+    if (submitting) return;
+    if (!contactValid(true) || !allPaxFilled() || !enoughSlots() || !$('bkAgree').checked) return;
 
-    // CHƯA CÓ BE: giữ đơn ở trình duyệt để bước "Thanh toán" (làm sau) đọc lại
-    const draft = { ...buildPayload(), tourId: tour.tourId, tourName: tour.tourName, total: calcTotal().total };
-    try { sessionStorage.setItem('bookingDraft', JSON.stringify(draft)); } catch (_) { /* chế độ ẩn danh: bỏ qua */ }
-    console.log('Đơn đặt tour (chưa gửi BE):', draft);
-    showDone(draft);
+    submitting = true;
+    setSubmitMsg('');
+    $('bkSubmit').disabled = true;
+    $('bkSubmit').innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang đặt tour...';
+    try {
+      // Có token → BE gắn đơn vào tài khoản; không có → đơn của khách vãng lai
+      const booking = await api('/api/public/bookings', { method: 'POST', body: buildPayload(), auth: !!user() });
+      showDone(booking);
+    } catch (err) {
+      setSubmitMsg(err.message);
+      // Mã KM vừa hết lượt / hết hạn → bỏ mã để khách đặt lại không cần mã
+      if (coupon && /mã giảm giá|khuyến mãi/i.test(err.message)) removeCoupon(err.message);
+      refreshSchedule();   // có thể người khác vừa đặt mất chỗ
+    } finally {
+      submitting = false;
+      updateSubmit();
+    }
   });
 
-  /** Màn hình xác nhận thay cho form; bước 1 xong, chuyển sang bước 2 */
-  function showDone(d) {
+  /** Màn hình đặt thành công (dữ liệu từ BookingResponse) */
+  function showDone(b) {
     const steps = document.querySelectorAll('.bk-step');
     steps[0].classList.remove('active'); steps[1].classList.add('active');
     $('bkForm').classList.add('d-none');
+    const loggedIn = !!user();
+    const people = (b.totalAdults || 0) + (b.totalChildren || 0) + (b.totalToddlers || 0);
     $('bkDone').innerHTML = `
       <i class="bi bi-check-circle-fill bk-done-icon"></i>
-      <h1 class="bk-title mt-3">Đã ghi nhận thông tin đặt tour</h1>
-      <p>${escapeHtml(d.tourName)} · ${escapeHtml(schedule.scheduleCode)} · ${longDate(schedule.departureDate)}</p>
-      <p>${d.passengers.length} hành khách · Tổng tiền <b class="bk-done-total">${fmtMoney(d.total)}</b></p>
-      <p class="text-muted small">Chức năng thanh toán đang được phát triển.</p>
-      <a href="tour-details.html?id=${tour.tourId}" class="bk-btn bk-btn-ghost">Quay lại tour</a>
-      <a href="index.html" class="bk-btn ms-2">Về trang chủ</a>`;
+      <h1 class="bk-title mt-3">Đặt tour thành công!</h1>
+      <p>Mã đơn: <b>${escapeHtml(b.bookingCode)}</b></p>
+      <p>${escapeHtml(b.tourName)} · ${escapeHtml(b.scheduleCode)} · ${longDate(b.departureDate)}</p>
+      <p>${people} hành khách${Number(b.discountAmount) > 0 ? ` · Giảm ${fmtMoney(b.discountAmount)}` : ''}
+         · Tổng tiền <b class="bk-done-total">${fmtMoney(b.totalAmount)}</b></p>
+      <p class="text-muted small">Chỗ của bạn đã được giữ. Đơn đang chờ VietTrip xác nhận, chúng tôi sẽ liên hệ qua
+         ${escapeHtml(b.contactPhone)} hoặc ${escapeHtml(b.contactEmail)}.<br>Vui lòng lưu lại mã đơn để tra cứu.</p>
+      <a href="tour-details.html?id=${encodeURIComponent(b.tourId)}" class="bk-btn bk-btn-ghost">Quay lại tour</a>
+      ${loggedIn
+            ? '<a href="profile.html#bookings" class="bk-btn ms-2">Xem đơn của tôi</a>'
+            : '<a href="index.html" class="bk-btn ms-2">Về trang chủ</a>'}`;
     $('bkDone').classList.remove('d-none');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }

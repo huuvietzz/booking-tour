@@ -1,8 +1,8 @@
 package com.example.tour.payment.entity;
 
 import com.example.tour.booking.entity.Booking;
-import com.example.tour.common.constant.PaymentMethod;
 import com.example.tour.common.entity.BaseEntity;
+import com.example.tour.payment.constant.PaymentMethod;
 import com.example.tour.payment.constant.TransactionStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -38,10 +38,9 @@ public class Payment extends BaseEntity {
     @Column(name = "method", nullable = false)
     private PaymentMethod method;
 
-    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(name = "transaction_status")
-    private TransactionStatus transactionStatus = TransactionStatus.PENDING;
+    private TransactionStatus transactionStatus;
 
     @Column(name = "payment_date", columnDefinition = "DATETIME(6)")
     private LocalDateTime paymentDate;

@@ -1,515 +1,428 @@
-//package com.example.tour.booking.service.impl;
-//
-//import com.alibaba.excel.EasyExcel;
-//import com.example.tour.booking.constant.BookingPaymentStatus;
-//import com.example.tour.booking.constant.BookingStatus;
-//import com.example.tour.booking.dto.export.BookingExcelModel;
-//import com.example.tour.booking.dto.export.ParticipantExcelModel;
-//import com.example.tour.booking.dto.request.BookingParticipantRequest;
-//import com.example.tour.booking.dto.request.BookingRequest;
-//import com.example.tour.booking.dto.response.BookingDetailResponse;
-//import com.example.tour.booking.dto.response.BookingResponse;
-//import com.example.tour.booking.entity.Booking;
-//import com.example.tour.booking.entity.BookingParticipant;
-//import com.example.tour.booking.repository.BookingRepository;
-//import com.example.tour.booking.service.BookingService;
-//import com.example.tour.booking.specification.BookingSpecification;
-//import com.example.tour.common.exception.AppException;
-//import com.example.tour.common.exception.ErrorCode;
-//import com.example.tour.tour.constant.ScheduleStatus;
-//import com.example.tour.tour.entity.Tour;
-//import com.example.tour.tour.entity.TourSchedule;
-//import com.example.tour.tour.repository.TourScheduleRepository;
-//import com.example.tour.user.entity.User;
-//import com.example.tour.user.repository.UserRepository;
-//import jakarta.servlet.http.HttpServletResponse;
-//import lombok.RequiredArgsConstructor;
-//import org.springframework.data.domain.Page;
-//import org.springframework.data.domain.Pageable;
-//import org.springframework.data.jpa.domain.Specification;
-//import org.springframework.stereotype.Service;
-//import org.springframework.transaction.annotation.Transactional;
-//
-//import java.io.IOException;
-//import java.math.BigDecimal;
-//import java.net.URLEncoder;
-//import java.nio.charset.StandardCharsets;
-//import java.time.LocalDate;
-//import java.time.LocalDateTime;
-//import java.time.format.DateTimeFormatter;
-//import java.util.*;
-//import java.util.concurrent.ThreadLocalRandom;
-//
-//@Service
-//@RequiredArgsConstructor
-//@Transactional
-//public class BookingServiceImpl implements BookingService {
-//
-//    private final BookingRepository bookingRepository;
-//    private final TourScheduleRepository tourScheduleRepository;
-//    private final UserRepository userRepository;
-//
-//    private static final String CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-//
-//    @Override
-//    public BookingResponse createBooking(int userId, BookingRequest request) {
-//        User user = userRepository.findById(userId)
-//                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-//
-//        TourSchedule schedule = tourScheduleRepository.findById(request.getScheduleId())
-//                .orElseThrow(() -> new AppException(ErrorCode.TOUR_SCHEDULE_NOT_FOUND));
-//
-//        // 1. Lịch phải còn nhận đặt
-//        if(schedule.getStatus() != ScheduleStatus.AVAILABLE) {
-//            throw new AppException(ErrorCode.SCHEDULE_NOT_AVAILABLE);
-//        }
-//
-//        // 2. Chưa khởi hành
-//        if(schedule.getDepartureDate().isBefore(LocalDate.now())) {
-//            throw new AppException(ErrorCode.SCHEDULE_ALREADY_DEPARTED);
-//        }
-//
-//        // 3. Mỗi khách chỉ có một đơn còn hiệu lực cho mỗi chuyến đi
-//        if (bookingRepository.existsActiveBookingForSchedule(userId, schedule.getScheduleId())) {
-//            throw new AppException(ErrorCode.DUPLICATE_ACTIVE_BOOKING);
-//        }
-//
-//        // 4. Số hành khách khai báo phải khớp số lượng đã chọn
-//        int declared = request.getTotalAdults() + request.getTotalChildren() + request.getTotalInfants();
-//        if(request.getParticipants().size() != declared) {
-//            throw new AppException(ErrorCode.INVALID_PARTICIPANT_COUNT);
-//        }
-//
-//        // 5. Đúng một người đại diện đoàn
-//        long primaryCount = request.getParticipants().stream()
-//                .filter(BookingParticipantRequest::isPrimary).count();
-//        if(primaryCount != 1) {
-//            throw new AppException(ErrorCode.PRIMARY_PARTICIPANT_REQUIRED);
-//        }
-//
-//        // 6. Phòng đơn chỉ dành cho người lớn
-//        boolean invalidSingleRoom = request.getParticipants().stream()
-//                .anyMatch(p -> p.isSingleRoom() && p.getParticipantType() != ParticipantType.ADULT);
-//        if (invalidSingleRoom) {
-//            throw new AppException(ErrorCode.SINGLE_ROOM_ADULT_ONLY);
-//        }
-//
-//        // 7. Còn đủ chỗ — em bé ngồi cùng người lớn nên không tính vào số chỗ
-//        int seatsNeeded = request.getTotalAdults() + request.getTotalChildren();
-//        if(schedule.getBookedSlots() + seatsNeeded > schedule.getAvailableSlots()) {
-//            throw new AppException(ErrorCode.NOT_ENOUGH_SLOTS);
-//        }
-//
-//        Tour tour = schedule.getTour();
-//        BigDecimal adjustment = schedule.getPriceAdjustment() != null
-//                ? schedule.getPriceAdjustment() : BigDecimal.ZERO;
-//
-//        BigDecimal adultPrice  = tour.getBasePrice().add(adjustment);
-//        BigDecimal childPrice  = (tour.getChildPrice() != null ? tour.getChildPrice() : tour.getBasePrice())
-//                .add(adjustment);
-//        BigDecimal infantPrice = tour.getInfantPrice() != null ? tour.getInfantPrice() : BigDecimal.ZERO;
-//
-//        // Phụ thu phòng đơn — chốt giá tại thời điểm đặt, không cộng adjustment
-//        BigDecimal singleRoomSurcharge = tour.getSingleRoomSurcharge() != null
-//                ? tour.getSingleRoomSurcharge() : BigDecimal.ZERO;
-//        int singleRoomCount = (int) request.getParticipants().stream()
-//                .filter(BookingParticipantRequest::isSingleRoom).count();
-//
-//        BigDecimal totalAmount = adultPrice.multiply(BigDecimal.valueOf(request.getTotalAdults()))
-//                .add(childPrice.multiply(BigDecimal.valueOf(request.getTotalChildren())))
-//                .add(infantPrice.multiply(BigDecimal.valueOf(request.getTotalInfants())))
-//                .add(singleRoomSurcharge.multiply(BigDecimal.valueOf(singleRoomCount)));
-//
-//        Booking booking = new Booking();
-//        booking.setUser(user);
-//        booking.setTourSchedule(schedule);
-//        booking.setBookingCode(generateBookingCode());
-//        booking.setTotalAdults(request.getTotalAdults());
-//        booking.setTotalChildren(request.getTotalChildren());
-//        booking.setTotalInfants(request.getTotalInfants());
-//        booking.setAdultPriceAtBooking(adultPrice);
-//        booking.setChildPriceAtBooking(childPrice);
-//        booking.setInfantPriceAtBooking(infantPrice);
-//        booking.setSingleRoomSurchargeAtBooking(singleRoomSurcharge);
-//        booking.setSingleRoomCount(singleRoomCount);
-//        booking.setTotalAmount(totalAmount);
-//        booking.setDiscountAmount(BigDecimal.ZERO);
-//        booking.setPointsDiscountAmount(BigDecimal.ZERO);
-//        booking.setFinalAmount(totalAmount);   // chưa trừ khuyến mãi/điểm ở giai đoạn này
-//        booking.setSpecialRequests(request.getSpecialRequests());
-//        booking.setBookingStatus(BookingStatus.PENDING);
-//        booking.setBookingPaymentStatus(BookingPaymentStatus.PENDING);
-//
-//        // Hành khách
-//        Set<BookingParticipant> participants = new HashSet<>();
-//        for(BookingParticipantRequest p : request.getParticipants()) {
-//            BookingParticipant bp = new BookingParticipant();
-//            bp.setBooking(booking);
-//            bp.setFullName(p.getFullName().trim());
-//            bp.setDateOfBirth(p.getDateOfBirth());
-//            bp.setGender(p.getGender());
-//            bp.setNationality(p.getNationality());
-//            bp.setIdentityType(p.getIdentityType());
-//            bp.setIdentityNumber(p.getIdentityNumber());
-//            bp.setIdentityExpiryDate(p.getIdentityExpiryDate());
-//            bp.setIdentityIssuePlace(p.getIdentityIssuePlace());
-//            bp.setParticipantType(p.getParticipantType());
-//            bp.setPrimary(p.isPrimary());
-//            bp.setSingleRoom(p.isSingleRoom());
-//            participants.add(bp);
-//        }
-//        booking.setParticipants(participants);
-//
-//        // Trừ chỗ, khóa lịch nếu vừa đủ
-//        schedule.setBookedSlots(schedule.getBookedSlots() + seatsNeeded);
-//        if(schedule.getBookedSlots() >= schedule.getAvailableSlots()) {
-//            schedule.setStatus(ScheduleStatus.FULL);
-//        }
-//        tourScheduleRepository.save(schedule);
-//
-//        return mapToResponse(bookingRepository.save(booking));
-//    }
-//
-//    @Override
-//    @Transactional(readOnly = true)
-//    public Page<BookingResponse> getAllBookingsForAdmin(String keyword, BookingStatus bookingStatus, BookingPaymentStatus bookingPaymentStatus, LocalDate fromDate, LocalDate toDate, Pageable pageable) {
-//        Specification<Booking> spec = BookingSpecification.filterForAdmin(
-//                keyword, bookingStatus, bookingPaymentStatus, fromDate, toDate);
-//        return bookingRepository.findAll(spec, pageable).map(this::mapToResponse);
-//    }
-//
-//    @Override
-//    @Transactional(readOnly = true)
-//    public BookingDetailResponse getBookingById(int bookingId) {
-//        Booking booking = findById(bookingId);
-//        return mapToDetailResponse(booking);
-//    }
-//
-//    @Override
-//    public BookingResponse confirmBooking(int bookingId) {
-//        Booking booking = findById(bookingId);
-//
-//        if(booking.getBookingStatus() == BookingStatus.CONFIRMED) {
-//            throw new AppException(ErrorCode.BOOKING_ALREADY_CONFIRMED);
-//        }
-//
-//        if (booking.getBookingStatus() != BookingStatus.PENDING) {
-//            throw new AppException(ErrorCode.BOOKING_CANNOT_CONFIRM);
-//        }
-//
-//        booking.setBookingStatus(BookingStatus.CONFIRMED);
-//        booking.setConfirmedAt(LocalDateTime.now());
-//        return mapToResponse(bookingRepository.save(booking));
-//    }
-//
-//    @Override
-//    public BookingResponse completeBooking(int bookingId) {
-//        Booking booking = findById(bookingId);
-//
-//        if(booking.getBookingStatus() != BookingStatus.CONFIRMED) {
-//            throw new AppException(ErrorCode.BOOKING_CANNOT_COMPLETE);
-//        }
-//
-//        // Chưa về mà đã đóng đơn là sai
-//        if(booking.getTourSchedule().getReturnDate().isAfter(LocalDate.now())) {
-//            throw new AppException(ErrorCode.SCHEDULE_NOT_FINISHED_YET);
-//        }
-//
-//        booking.setBookingStatus(BookingStatus.COMPLETED);
-//        booking.setCompletedAt(LocalDateTime.now());
-//        return mapToResponse(bookingRepository.save(booking));
-//    }
-//
-//    @Override
-//    public BookingResponse cancelBooking(int bookingId, String reason) {
-//        Booking booking = findById(bookingId);
-//
-//        if(booking.getBookingStatus() == BookingStatus.CANCELLED) {
-//            throw new AppException(ErrorCode.BOOKING_ALREADY_CANCELLED);
-//        }
-//
-//        if (booking.getBookingStatus() == BookingStatus.COMPLETED) {
-//            throw new AppException(ErrorCode.BOOKING_CANNOT_CANCEL);
-//        }
-//
-//        // Hoàn lại số chỗ cho lịch khởi hành
-//        TourSchedule schedule = booking.getTourSchedule();
-//        int seatsToReturn = booking.getTotalAdults() + booking.getTotalChildren();
-//        schedule.setBookedSlots(Math.max(0, schedule.getBookedSlots() - seatsToReturn));
-//
-//        // Lịch đang hết chỗ thì mở lại (trừ khi đã bị hủy hẳn)
-//        if (schedule.getStatus() == ScheduleStatus.FULL
-//                && schedule.getBookedSlots() < schedule.getAvailableSlots()) {
-//            schedule.setStatus(ScheduleStatus.AVAILABLE);
-//        }
-//        tourScheduleRepository.save(schedule);
-//
-//        booking.setBookingStatus(BookingStatus.CANCELLED);
-//        booking.setCancellationReason(reason);
-//        booking.setCancelledAt(LocalDateTime.now());
-//
-//        return mapToResponse(bookingRepository.save(booking));
-//    }
-//
-//    @Override
-//    @Transactional(readOnly = true)
-//    public void exportBookingsToExcel(HttpServletResponse response,
-//                                      String keyword,
-//                                      BookingStatus bookingStatus,
-//                                      BookingPaymentStatus bookingPaymentStatus,
-//                                      LocalDate fromDate,
-//                                      LocalDate toDate) throws IOException {
-//
-//        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-//        response.setCharacterEncoding("utf-8");
-//        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-//        String fileName = URLEncoder.encode("Don_dat_tour_" + timestamp, StandardCharsets.UTF_8);
-//        response.setHeader("Content-Disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
-//
-//        // Dùng lại đúng Specification của API danh sách
-//        Specification<Booking> spec = BookingSpecification.filterForAdmin(
-//                keyword, bookingStatus, bookingPaymentStatus, fromDate, toDate);
-//        List<Booking> bookings = bookingRepository.findAll(spec);
-//
-//        DateTimeFormatter dateFmt     = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-//        DateTimeFormatter dateTimeFmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-//
-//        List<BookingExcelModel> excelData = bookings.stream().map(b -> {
-//            TourSchedule schedule = b.getTourSchedule();
-//            Tour tour = schedule.getTour();
-//            User user = b.getUser();
-//
-//            return BookingExcelModel.builder()
-//                    .bookingCode(b.getBookingCode())
-//                    .bookingDate(b.getBookingDate() != null ? b.getBookingDate().format(dateTimeFmt) : "")
-//
-//                    .customerName(user.getFullName())
-//                    .customerPhone(user.getPhoneNumber() != null ? user.getPhoneNumber() : "")
-//                    .customerEmail(user.getEmail())
-//
-//                    .tourCode(tour.getTourCode())
-//                    .tourName(tour.getTourName())
-//                    .departureDate(schedule.getDepartureDate().format(dateFmt))
-//                    .returnDate(schedule.getReturnDate().format(dateFmt))
-//
-//                    .totalAdults(b.getTotalAdults())
-//                    .totalChildren(b.getTotalChildren())
-//                    .totalInfants(b.getTotalInfants())
-//
-//                    .totalAmount(b.getTotalAmount())
-//                    .discountAmount(b.getDiscountAmount())
-//                    .finalAmount(b.getFinalAmount())
-//
-//                    .bookingStatus(switch (b.getBookingStatus()) {
-//                        case PENDING   -> "Chờ xác nhận";
-//                        case CONFIRMED -> "Đã xác nhận";
-//                        case COMPLETED -> "Đã hoàn thành";
-//                        case CANCELLED -> "Đã hủy";
-//                    })
-//                    .paymentStatus(switch (b.getBookingPaymentStatus()) {
-//                        case PENDING  -> "Chưa thanh toán";
-//                        case PAID     -> "Đã thanh toán";
-//                        case PARTIAL  -> "Thanh toán một phần";
-//                        case REFUNDED -> "Đã hoàn tiền";
-//                        case FAILED   -> "Thanh toán thất bại";
-//                    })
-//                    .cancellationReason(b.getCancellationReason() != null ? b.getCancellationReason() : "")
-//                    .build();
-//        }).toList();
-//
-//        EasyExcel.write(response.getOutputStream(), BookingExcelModel.class)
-//                .sheet("Đơn đặt tour")
-//                .doWrite(excelData);
-//    }
-//
-//    @Override
-//    @Transactional(readOnly = true)
-//    public void exportParticipantsToExcel(HttpServletResponse response, int bookingId) throws IOException {
-//
-//        Booking booking = bookingRepository.findWithParticipants(bookingId)
-//                .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
-//
-//        TourSchedule schedule = booking.getTourSchedule();
-//        Tour tour = schedule.getTour();
-//
-//        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-//        response.setCharacterEncoding("utf-8");
-//
-//        // Tên file mang mã đơn và mã tour để dễ nhận biết khi in nhiều đoàn
-//        String rawName = String.format("Danh_sach_doan_%s_%s", booking.getBookingCode(), tour.getTourCode());
-//        String fileName = URLEncoder.encode(rawName, StandardCharsets.UTF_8);
-//        response.setHeader("Content-Disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
-//
-//        DateTimeFormatter dateFmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-//
-//        List<BookingParticipant> sorted = (booking.getParticipants() == null
-//                ? List.<BookingParticipant>of()
-//                : new ArrayList<>(booking.getParticipants()));
-//
-//        // Đại diện đoàn lên đầu, sau đó người lớn → trẻ em → em bé, cuối cùng theo tên
-//        sorted.sort(Comparator
-//                .comparing((BookingParticipant p) -> p.isPrimary() ? 0 : 1)
-//                .thenComparing(p -> p.getParticipantType().ordinal())
-//                .thenComparing(BookingParticipant::getFullName));
-//
-//        List<ParticipantExcelModel> excelData = new ArrayList<>();
-//        int i = 1;
-//        for (BookingParticipant p : sorted) {
-//            excelData.add(ParticipantExcelModel.builder()
-//                    .index(i++)
-//                    .fullName(p.getFullName())
-//                    .dateOfBirth(p.getDateOfBirth() != null ? p.getDateOfBirth().format(dateFmt) : "")
-//                    .gender(p.getGender() == null ? "" : switch (p.getGender()) {
-//                        case MALE   -> "Nam";
-//                        case FEMALE -> "Nữ";
-//                        case OTHER  -> "Khác";
-//                    })
-//                    .nationality(p.getNationality() != null ? p.getNationality() : "")
-//                    .participantType(switch (p.getParticipantType()) {
-//                        case ADULT  -> "Người lớn";
-//                        case CHILD  -> "Trẻ em";
-//                        case INFANT -> "Em bé";
-//                    })
-//                    .identityType(p.getIdentityType() == IdentityType.CCCD ? "CCCD" : "Hộ chiếu")
-//                    .identityNumber(p.getIdentityNumber() != null ? p.getIdentityNumber() : "")
-//                    .identityExpiryDate(p.getIdentityExpiryDate() != null
-//                            ? p.getIdentityExpiryDate().format(dateFmt) : "")
-//                    .identityIssuePlace(p.getIdentityIssuePlace() != null ? p.getIdentityIssuePlace() : "")
-//                    .primary(p.isPrimary() ? "X" : "")
-//                    .documentStatus(switch (p.getDocumentStatus()) {
-//                        case NOT_REQUIRED -> "Không yêu cầu";
-//                        case WAITING      -> "Chờ nộp";
-//                        case IN_REVIEW    -> "Đang duyệt";
-//                        case COMPLETED    -> "Đã đủ";
-//                        case REJECTED     -> "Bị từ chối";
-//                    })
-//                    .build());
-//        }
-//
-//        String sheetName = "Đoàn " + booking.getBookingCode();
-//        EasyExcel.write(response.getOutputStream(), ParticipantExcelModel.class)
-//                .sheet(sheetName)
-//                .doWrite(excelData);
-//    }
-//
-//    // ==================== HELPER ====================
-//    private Booking findById(int bookingId) {
-//        return bookingRepository.findById(bookingId)
-//                .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
-//    }
-//
-//    /** Mã đơn dạng BK260814-K7M2, thử lại nếu trùng (xác suất rất thấp). */
-//    private String generateBookingCode() {
-//        String datePart = LocalDate.now().format(DateTimeFormatter.ofPattern("yyMMdd"));
-//        String code;
-//        do {
-//            StringBuilder suffix = new StringBuilder();
-//            for (int i = 0; i < 4; i++) {
-//                suffix.append(CODE_CHARS.charAt(ThreadLocalRandom.current().nextInt(CODE_CHARS.length())));
-//            }
-//            code = "BK" + datePart + "-" + suffix;
-//        } while(bookingRepository.existsByBookingCode(code));
-//        return code;
-//    }
-//
-//    private BookingResponse mapToResponse(Booking b) {
-//        TourSchedule schedule = b.getTourSchedule();
-//        Tour tour = schedule.getTour();
-//        User user = b.getUser();
-//
-//        return BookingResponse.builder()
-//                .bookingId(b.getBookingId())
-//                .bookingCode(b.getBookingCode())
-//                .bookingDate(b.getBookingDate())
-//                .userId(user.getUserId())
-//                .customerName(user.getFullName())
-//                .customerPhone(user.getPhoneNumber())
-//                .scheduleId(schedule.getScheduleId())
-//                .tourCode(tour.getTourCode())
-//                .tourName(tour.getTourName())
-//                .departureDate(schedule.getDepartureDate())
-//                .returnDate(schedule.getReturnDate())
-//                .totalAdults(b.getTotalAdults())
-//                .totalChildren(b.getTotalChildren())
-//                .totalInfants(b.getTotalInfants())
-//                .totalAmount(b.getTotalAmount())
-//                .discountAmount(b.getDiscountAmount())
-//                .finalAmount(b.getFinalAmount())
-//                .bookingStatus(b.getBookingStatus())
-//                .bookingPaymentStatus(b.getBookingPaymentStatus())
-//                .build();
-//    }
-//
-//    private BookingDetailResponse mapToDetailResponse(Booking b) {
-//        TourSchedule schedule = b.getTourSchedule();
-//        Tour tour = schedule.getTour();
-//        User user = b.getUser();
-//
-//        List<BookingDetailResponse.ParticipantResponse> participants =
-//                (b.getParticipants() == null ? Set.<BookingParticipant>of() : b.getParticipants())
-//                        .stream()
-//                        // Người đại diện đoàn hiển thị đầu tiên
-//                        .sorted(Comparator.comparing((BookingParticipant p) -> p.isPrimary() ? 0 : 1)
-//                                .thenComparing(BookingParticipant::getFullName))
-//                        .map(p -> BookingDetailResponse.ParticipantResponse.builder()
-//                                .participantId(p.getParticipantId())
-//                                .fullName(p.getFullName())
-//                                .dateOfBirth(p.getDateOfBirth())
-//                                .gender(p.getGender())
-//                                .nationality(p.getNationality())
-//                                .identityType(p.getIdentityType())
-//                                .identityNumber(p.getIdentityNumber())
-//                                .participantType(p.getParticipantType())
-//                                .primary(p.isPrimary())
-//                                .singleRoom(p.isSingleRoom())
-//                                .documentStatus(p.getDocumentStatus())
-//                                .build())
-//                        .toList();
-//
-//        return BookingDetailResponse.builder()
-//                .bookingId(b.getBookingId())
-//                .bookingCode(b.getBookingCode())
-//                .bookingDate(b.getBookingDate())
-//                .bookingStatus(b.getBookingStatus())
-//                .bookingPaymentStatus(b.getBookingPaymentStatus())
-//
-//                .userId(user.getUserId())
-//                .customerName(user.getFullName())
-//                .customerEmail(user.getEmail())
-//                .customerPhone(user.getPhoneNumber())
-//
-//                .scheduleId(schedule.getScheduleId())
-//                .tourCode(tour.getTourCode())
-//                .tourName(tour.getTourName())
-//                .departureDate(schedule.getDepartureDate())
-//                .returnDate(schedule.getReturnDate())
-//                .durationDays(tour.getDurationDays())
-//                .durationNights(tour.getDurationNights())
-//                .scheduleStatus(schedule.getStatus())
-//
-//                .totalAdults(b.getTotalAdults())
-//                .totalChildren(b.getTotalChildren())
-//                .totalInfants(b.getTotalInfants())
-//                .adultPriceAtBooking(b.getAdultPriceAtBooking())
-//                .childPriceAtBooking(b.getChildPriceAtBooking())
-//                .infantPriceAtBooking(b.getInfantPriceAtBooking())
-//
-//                .singleRoomSurchargeAtBooking(b.getSingleRoomSurchargeAtBooking())
-//                .singleRoomCount(b.getSingleRoomCount())
-//
-//                .totalAmount(b.getTotalAmount())
-//                .discountAmount(b.getDiscountAmount())
-//                .pointsDiscountAmount(b.getPointsDiscountAmount())
-//                .pointsRedeemed(b.getPointsRedeemed())
-//                .finalAmount(b.getFinalAmount())
-//
-//                .specialRequests(b.getSpecialRequests())
-//                .cancellationReason(b.getCancellationReason())
-//                .cancelledAt(b.getCancelledAt())
-//                .confirmedAt(b.getConfirmedAt())
-//                .completedAt(b.getCompletedAt())
-//
-//                .participants(participants)
-//                .build();
-//    }
-//}
+package com.example.tour.booking.service.impl;
+
+import com.example.tour.booking.constant.BookingStatus;
+import com.example.tour.booking.constant.ParticipantType;
+import com.example.tour.booking.constant.PaymentStatus;
+import com.example.tour.booking.dto.request.*;
+import com.example.tour.booking.dto.response.BookingAdminRowResponse;
+import com.example.tour.booking.dto.response.BookingCardResponse;
+import com.example.tour.booking.dto.response.BookingResponse;
+import com.example.tour.booking.entity.Booking;
+import com.example.tour.booking.entity.Participant;
+import com.example.tour.booking.repository.BookingRepository;
+import com.example.tour.booking.service.BookingService;
+import com.example.tour.booking.specification.BookingSpecification;
+import com.example.tour.common.exception.AppException;
+import com.example.tour.common.exception.ErrorCode;
+import com.example.tour.promotion.entity.Promotion;
+import com.example.tour.promotion.repository.PromotionRepository;
+import com.example.tour.promotion.service.PromotionService;
+import com.example.tour.tour.constant.ScheduleStatus;
+import com.example.tour.tour.entity.Schedule;
+import com.example.tour.tour.entity.Tour;
+import com.example.tour.tour.repository.ScheduleRepository;
+import com.example.tour.tour.repository.TourRepository;
+import com.example.tour.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class BookingServiceImpl implements BookingService {
+    private static final DateTimeFormatter CODE_DATE = DateTimeFormatter.ofPattern("yyMMdd");
+
+    private final BookingRepository bookingRepository;
+    private final UserRepository userRepository;
+    private final ScheduleRepository scheduleRepository;
+    private final TourRepository tourRepository;
+    private final PromotionRepository promotionRepository;
+    private final PromotionService promotionService;
+
+    // ========== USER ==========
+    /** userId lấy từ token ở controller; null = khách đặt không đăng nhập */
+    @Override
+    @Transactional
+    public BookingResponse createBooking(BookingRequest request, Integer userId) {
+        // 1. Khoá dòng lịch: 2 người đặt cùng lúc phải xếp hàng → không bán quá số chỗ
+        Schedule schedule = scheduleRepository.findByIdForUpdate(request.getScheduleId())
+                .orElseThrow(() -> new AppException(ErrorCode.SCHEDULE_NOT_FOUND));
+        Tour tour = schedule.getTour();
+
+        // Tour (cùng danh mục, địa điểm) phải đang hiển thị với khách
+        tourRepository.findPublicById(tour.getTourId())
+                .orElseThrow(() -> new AppException(ErrorCode.TOUR_NOT_FOUND));
+        // Lịch đã huỷ hoặc đã tới ngày đi thì không nhận đặt
+        if (schedule.getStatus() == ScheduleStatus.CANCELLED
+                || !schedule.getDepartureDate().isAfter(LocalDate.now())) {
+            throw new AppException(ErrorCode.SCHEDULE_NOT_AVAILABLE);
+        }
+
+        // 2. Hành khách: đúng số lượng từng loại, đúng tuổi, phòng đơn chỉ cho người lớn
+        validateParticipants(request, schedule.getDepartureDate());
+
+        // 3. Còn đủ chỗ không
+        int seats = request.getTotalAdults() + request.getTotalChildren() + request.getTotalToddlers();
+        if (schedule.getAvailableSlots() < seats) {
+            throw new AppException(ErrorCode.SCHEDULE_NOT_ENOUGH_SLOTS);
+        }
+
+        // 4. Giữ chỗ: trừ chỗ ngay (lịch đang bị khoá nên an toàn), hết chỗ thì FULL
+        schedule.setAvailableSlots(schedule.getAvailableSlots() - seats);
+        if (schedule.getAvailableSlots() == 0) {
+            schedule.setStatus(ScheduleStatus.FULL);
+        }
+
+        // Khách đi 1 mình (1 người lớn, không trẻ em / trẻ nhỏ) → không có ai ở ghép → BẮT BUỘC phòng đơn
+        boolean travelsAlone = request.getTotalAdults() == 1
+                && request.getTotalChildren() == 0
+                && request.getTotalToddlers() == 0;
+
+        // 5. Tạm tính = giá từng loại × số lượng + phụ thu phòng đơn × số phòng
+        int singleRooms = travelsAlone ? 1 : (int) request.getParticipants().stream()
+                .filter(p -> Boolean.TRUE.equals(p.getSingleRoom()))
+                .count();
+        BigDecimal tempAmount = price(schedule.getAdultPrice(), request.getTotalAdults())
+                .add(price(schedule.getChildPrice(), request.getTotalChildren()))
+                .add(price(schedule.getToddlerPrice(), request.getTotalToddlers()))
+                .add(price(schedule.getSingleRoomSupplement(), singleRooms));
+
+        // 6. Mã khuyến mãi (không bắt buộc)
+        Promotion promotion = null;
+        BigDecimal discount = BigDecimal.ZERO;
+        if (request.getPromotionId() != null) {
+            if (userId == null) {
+                throw new AppException(ErrorCode.PROMOTION_LOGIN_REQUIRED);
+            }
+            Promotion p = promotionRepository.findById(request.getPromotionId())
+                    .orElseThrow(() -> new AppException(ErrorCode.PROMOTION_NOT_FOUND));
+            // Kiểm tra còn hạn, còn lượt, đúng tour, đủ đơn tối thiểu, chưa dùng quá số lần / khách
+            promotion = promotionService.validateForBooking(p.getPromotionCode(), tour.getTourId(), tempAmount, userId);
+            discount = promotionService.calculateDiscount(promotion, tempAmount);   // cố định hoặc %, có giới hạn
+            promotionService.consume(promotion.getPromotionId());                   // lấy 1 lượt dùng
+        }
+        BigDecimal totalAmount = tempAmount.subtract(discount);
+
+        // 7. Lưu đơn
+        Booking booking = Booking.builder()
+                .bookingCode("TMP-" + UUID.randomUUID())   // mã tạm để INSERT được (NOT NULL + UNIQUE)
+                .user(userId == null ? null : userRepository.getReferenceById(userId))
+                .schedule(schedule)
+                .promotion(promotion)
+                .contactName(request.getContactName().trim())
+                .contactEmail(request.getContactEmail().trim().toLowerCase())
+                .contactPhone(request.getContactPhone().trim())
+                .contactAddress(trimToNull(request.getContactAddress()))
+                .totalAdults(request.getTotalAdults())
+                .totalChildren(request.getTotalChildren())
+                .totalToddlers(request.getTotalToddlers())
+                .tempAmount(tempAmount)
+                .totalAmount(totalAmount)
+                .bookingStatus(BookingStatus.PENDING)
+                .paymentStatus(PaymentStatus.PENDING)
+                .note(trimToNull(request.getNote()))
+                .build();
+
+        // Hành khách: addParticipant gắn 2 chiều (booking ↔ participant); cascade ALL tự lưu theo booking
+        request.getParticipants().forEach(p -> booking.addParticipant(Participant.builder()
+                .fullName(p.getFullName().trim())
+                .dateOfBirth(p.getDateOfBirth())
+                .gender(p.getGender())
+                .participantType(p.getParticipantType())
+                .phoneNumber(trimToNull(p.getPhoneNumber()))
+                // Đi 1 mình → luôn phòng đơn, dù request gửi gì
+                .singleRoom(travelsAlone || Boolean.TRUE.equals(p.getSingleRoom()))
+                .build()));
+
+        Booking saved = bookingRepository.save(booking);
+
+        // Mã thật sinh từ id (không bao giờ trùng): BK + ngày đặt + id → BK26111500017
+        // Không cần save lại: entity đang được Hibernate theo dõi, commit tự UPDATE
+        saved.setBookingCode("BK" + LocalDate.now().format(CODE_DATE) + String.format("%05d", saved.getBookingId()));
+
+        return toBookingResponse(saved);
+    }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<BookingCardResponse> getMyBookings(Integer userId, BookingStatus bookingStatus,
+                                                   PaymentStatus paymentStatus, Pageable pageable) {
+        return bookingRepository
+                .findAll(BookingSpecification.ofUser(userId, bookingStatus, paymentStatus), pageable)
+                .map(this::toBookingCardResponse);
+    }
+
+    // ========== ADMIN ==========
+    @Override
+    @Transactional(readOnly = true)
+    public Page<BookingAdminRowResponse> getBookingsForAdmin(BookingFilterRequest filter, Pageable pageable) {
+        return bookingRepository.findAll(BookingSpecification.adminFilter(filter), pageable)
+                .map(this::toAdminRowResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public BookingResponse getBookingByIdForAdmin(Integer bookingId) {
+        // Nạp sẵn lịch, tour, mã KM, người đặt trong 1 câu (toBookingResponse đọc hết các thứ này)
+        Booking booking = bookingRepository.findWithDetailsByBookingId(bookingId)
+                .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+        return toBookingResponse(booking);
+    }
+
+    @Override
+    @Transactional
+    public BookingResponse updateBooking(BookingUpdateRequest request, Integer bookingId) {
+        Booking booking = lock(bookingId);
+
+        // Đơn đã huỷ / hoàn thành là lịch sử, không sửa
+        if (booking.getBookingStatus() != BookingStatus.PENDING
+                && booking.getBookingStatus() != BookingStatus.CONFIRMED) {
+            throw new AppException(ErrorCode.BOOKING_INVALID_STATUS);
+        }
+
+        // 1. Thông tin liên hệ + ghi chú
+        booking.setContactName(request.getContactName().trim());
+        booking.setContactEmail(request.getContactEmail().trim().toLowerCase());
+        booking.setContactPhone(request.getContactPhone().trim());
+        booking.setContactAddress(trimToNull(request.getContactAddress()));
+        booking.setNote(trimToNull(request.getNote()));
+
+        // 2. Hành khách: phải gửi đúng ĐỦ những người đang có trong đơn (không thêm, không bớt)
+        Map<Integer, Participant> current = booking.getParticipants().stream()
+                .collect(Collectors.toMap(Participant::getParticipantId, p -> p));
+        Set<Integer> sentIds = request.getParticipants().stream()
+                .map(ParticipantUpdateRequest::getParticipantId)
+                .collect(Collectors.toSet());
+        if (sentIds.size() != request.getParticipants().size()   // gửi trùng id
+                || !sentIds.equals(current.keySet())) {            // thiếu người / id của đơn khác
+            throw new AppException(ErrorCode.INVALID_PARTICIPANT_COUNT);
+        }
+
+        LocalDate departure = booking.getSchedule().getDepartureDate();
+        for (ParticipantUpdateRequest r : request.getParticipants()) {
+            Participant p = current.get(r.getParticipantId());
+            // Sửa ngày sinh vẫn phải đúng độ tuổi của loại khách (giá đã tính theo loại)
+            checkAge(p.getParticipantType(), r.getDateOfBirth(), departure);
+
+            p.setFullName(r.getFullName().trim());
+            p.setDateOfBirth(r.getDateOfBirth());
+            p.setGender(r.getGender());
+            p.setPhoneNumber(trimToNull(r.getPhoneNumber()));
+        }
+
+        // Không cần save: booking + participants đang được Hibernate theo dõi, commit tự UPDATE
+        return toBookingResponse(booking);
+    }
+
+    @Override
+    @Transactional
+    public BookingResponse confirmBooking(Integer bookingId) {
+        Booking booking = lock(bookingId);
+        // Chỉ đơn đang chờ mới xác nhận được
+        if (booking.getBookingStatus() != BookingStatus.PENDING) {
+            throw new AppException(ErrorCode.BOOKING_INVALID_STATUS);
+        }
+        booking.setBookingStatus(BookingStatus.CONFIRMED);
+        Booking savedBooking = bookingRepository.save(booking);
+        return toBookingResponse(savedBooking);
+    }
+
+    @Override
+    @Transactional
+    public BookingResponse cancelBooking(Integer bookingId) {
+        Booking booking = lock(bookingId);
+        // Đã huỷ / đã hoàn thành thì không huỷ nữa (tránh trả chỗ 2 lần)
+        if (booking.getBookingStatus() != BookingStatus.PENDING
+                && booking.getBookingStatus() != BookingStatus.CONFIRMED) {
+            throw new AppException(ErrorCode.BOOKING_CANNOT_CANCEL);
+        }
+        booking.setBookingStatus(BookingStatus.CANCELLED);
+        releaseSeats(booking);
+        if (booking.getPromotion() != null) {
+            promotionService.release(booking.getPromotion().getPromotionId());   // trả 1 lượt dùng mã
+        }
+
+        Booking savedBooking = bookingRepository.save(booking);
+        return toBookingResponse(savedBooking);
+    }
+
+    @Override
+    @Transactional
+    public BookingResponse completeBooking(Integer bookingId) {
+        Booking booking = lock(bookingId);
+        if (booking.getBookingStatus() != BookingStatus.CONFIRMED) {
+            throw new AppException(ErrorCode.BOOKING_INVALID_STATUS);
+        }
+        // Tour chưa khởi hành thì chưa thể hoàn thành
+        if (booking.getSchedule().getDepartureDate().isAfter(LocalDate.now())) {
+            throw new AppException(ErrorCode.BOOKING_NOT_DEPARTED);
+        }
+        booking.setBookingStatus(BookingStatus.COMPLETED);
+        return toBookingResponse(booking);
+    }
+
+    // ========== HỖ TRỢ ==========
+    private void validateParticipants(BookingRequest request, LocalDate departure) {
+        int adults = 0, children = 0, toddlers = 0;
+        for (ParticipantRequest p : request.getParticipants()) {
+            checkAge(p.getParticipantType(), p.getDateOfBirth(), departure);
+            switch (p.getParticipantType()) {
+                case ADULT -> adults++;
+                case CHILD -> children++;
+                case TODDLER -> toddlers++;
+            }
+            if (Boolean.TRUE.equals(p.getSingleRoom()) && p.getParticipantType() != ParticipantType.ADULT) {
+                throw new AppException(ErrorCode.SINGLE_ROOM_ADULT_ONLY);
+            }
+        }
+        if (adults != request.getTotalAdults() || children != request.getTotalChildren()
+                || toddlers != request.getTotalToddlers()) {
+            throw new AppException(ErrorCode.INVALID_PARTICIPANT_COUNT);
+        }
+    }
+
+    /** Tuổi tính tại NGÀY KHỞI HÀNH: người lớn ≥ 12, trẻ em 5–11, trẻ nhỏ 2–4 */
+    private static void checkAge(ParticipantType type, LocalDate dateOfBirth, LocalDate departure) {
+        int age = Period.between(dateOfBirth, departure).getYears();
+        boolean ok = switch (type) {
+            case ADULT -> age >= 12;
+            case CHILD -> age >= 5 && age <= 11;
+            case TODDLER -> age >= 2 && age <= 4;
+        };
+        if (!ok) throw new AppException(ErrorCode.INVALID_PARTICIPANT_AGE);
+    }
+
+    /** Khoá dòng đơn: 2 admin thao tác cùng lúc thì người sau phải chờ, rồi đọc trạng thái MỚI */
+    private Booking lock(Integer bookingId) {
+        return bookingRepository.findByIdForUpdate(bookingId)
+                .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+    }
+
+    /** Trả chỗ cho lịch. Tour đã khởi hành thì chỗ không bán lại được → bỏ qua */
+    private void releaseSeats(Booking booking) {
+        Schedule schedule = scheduleRepository.findByIdForUpdate(booking.getSchedule().getScheduleId())
+                .orElseThrow(() -> new AppException(ErrorCode.SCHEDULE_NOT_FOUND));
+        if (!schedule.getDepartureDate().isAfter(LocalDate.now())) return;
+
+        int seats = booking.getTotalAdults() + booking.getTotalChildren() + booking.getTotalToddlers();
+        schedule.setAvailableSlots(Math.min(schedule.getAvailableSlots() + seats, schedule.getTotalSlots()));
+        // Đang FULL mà có chỗ lại → mở bán lại. Lịch admin đã huỷ (CANCELLED) thì giữ nguyên
+        if (schedule.getStatus() == ScheduleStatus.FULL && schedule.getAvailableSlots() > 0) {
+            schedule.setStatus(ScheduleStatus.AVAILABLE);
+        }
+    }
+
+    private static BigDecimal price(BigDecimal unitPrice, int quantity) {
+        return unitPrice == null || quantity == 0 ? BigDecimal.ZERO : unitPrice.multiply(BigDecimal.valueOf(quantity));
+    }
+
+    private static String trimToNull(String s) {
+        return s == null || s.isBlank() ? null : s.trim();
+    }
+
+    private BookingAdminRowResponse toAdminRowResponse(Booking b) {
+        Schedule s = b.getSchedule();
+        return BookingAdminRowResponse.builder()
+                .bookingId(b.getBookingId())
+                .bookingCode(b.getBookingCode())
+                .contactName(b.getContactName())
+                .contactPhone(b.getContactPhone())
+                .tourName(s.getTour().getTourName())
+                .scheduleCode(s.getScheduleCode())
+                .departureDate(s.getDepartureDate())
+                .totalPeople(b.getTotalAdults() + b.getTotalChildren() + b.getTotalToddlers())
+                .totalAmount(b.getTotalAmount())
+                .bookingStatus(b.getBookingStatus())
+                .paymentStatus(b.getPaymentStatus())
+                .createdAt(b.getCreatedAt())
+                .build();
+    }
+
+    private BookingCardResponse toBookingCardResponse(Booking b) {
+        return BookingCardResponse.builder()
+                .bookingId(b.getBookingId())
+                .tourName(b.getSchedule().getTour().getTourName())
+                .bookingCode(b.getBookingCode())
+                .scheduleCode(b.getSchedule().getScheduleCode())
+                .totalAmount(b.getTotalAmount())
+                .bookingDate(b.getCreatedAt())
+                .paymentStatus(b.getPaymentStatus())
+                .bookingStatus(b.getBookingStatus())
+                .build();
+    }
+
+    private BookingResponse toBookingResponse(Booking b) {
+        Schedule s = b.getSchedule();
+        Tour t = s.getTour();
+
+        // Tạm tính null (đơn cũ chưa lưu) → coi như bằng tổng tiền, giảm giá = 0
+        BigDecimal temp = b.getTempAmount() != null ? b.getTempAmount() : b.getTotalAmount();
+
+        int singleRoomCount = (int) b.getParticipants().stream()
+                .filter(p -> Boolean.TRUE.equals(p.getSingleRoom()))
+                .count();
+
+        return BookingResponse.builder()
+                .bookingId(b.getBookingId())
+                .bookingCode(b.getBookingCode())
+                // Khách đặt không đăng nhập → user = null; đơn không dùng mã → promotion = null
+                .userId(b.getUser() != null ? b.getUser().getUserId() : null)
+                .promotionId(b.getPromotion() != null ? b.getPromotion().getPromotionId() : null)
+                .promotionCode(b.getPromotion() != null ? b.getPromotion().getPromotionCode() : null)
+                .contactName(b.getContactName())
+                .contactPhone(b.getContactPhone())
+                .contactEmail(b.getContactEmail())
+                .contactAddress(b.getContactAddress())
+                .totalAdults(b.getTotalAdults())
+                .totalChildren(b.getTotalChildren())
+                .totalToddlers(b.getTotalToddlers())
+                .adultPrice(s.getAdultPrice())
+                .childPrice(s.getChildPrice())
+                .toddlerPrice(s.getToddlerPrice())
+                .singleRoomSupplement(s.getSingleRoomSupplement())
+                .singleRoomCount(singleRoomCount)
+                .tempAmount(temp)
+                .discountAmount(temp.subtract(b.getTotalAmount()))
+                .totalAmount(b.getTotalAmount())
+                .bookingStatus(b.getBookingStatus())
+                .paymentStatus(b.getPaymentStatus())
+                .note(b.getNote())
+                .tourId(t.getTourId())
+                .tourName(t.getTourName())
+                .thumbnailUrl(t.getThumbnailUrl())
+                .scheduleId(s.getScheduleId())
+                .scheduleCode(s.getScheduleCode())
+                .departureDate(s.getDepartureDate())
+                .returnDate(s.getReturnDate())
+                .transport(s.getTransport())
+                .participants(b.getParticipants().stream()
+                        // Người lớn → trẻ em → trẻ nhỏ (theo thứ tự khai báo trong enum)
+                        .sorted(Comparator.comparing(p -> p.getParticipantType().ordinal()))
+                        .map(p -> new BookingResponse.Participant(
+                                p.getParticipantId(),
+                                p.getFullName(),
+                                p.getDateOfBirth(),
+                                p.getGender(),
+                                p.getParticipantType(),
+                                p.getPhoneNumber(),
+                                Boolean.TRUE.equals(p.getSingleRoom())))
+                        .toList())
+                .createdAt(b.getCreatedAt())
+                .updatedAt(b.getUpdatedAt())
+                .build();
+    }
+}
+

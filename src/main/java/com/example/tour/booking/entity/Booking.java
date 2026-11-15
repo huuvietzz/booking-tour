@@ -3,7 +3,6 @@ package com.example.tour.booking.entity;
 import com.example.tour.booking.constant.BookingStatus;
 import com.example.tour.booking.constant.PaymentStatus;
 import com.example.tour.common.entity.BaseEntity;
-import com.example.tour.payment.constant.TransactionStatus;
 import com.example.tour.payment.entity.Payment;
 import com.example.tour.promotion.entity.Promotion;
 import com.example.tour.tour.entity.Schedule;

@@ -120,6 +120,7 @@ public class PromotionServiceImpl implements PromotionService {
         Promotion p = validateForBooking(request.getPromotionCode(), request.getTourId(), request.getOrderAmount(), userId);
         BigDecimal discount = calculateDiscount(p, request.getOrderAmount());
         return PromotionCheckResponse.builder()
+                .promotionId(p.getPromotionId())
                 .promotionCode(p.getPromotionCode())
                 .promotionName(p.getPromotionName())
                 .discountType(p.getDiscountType())

@@ -401,6 +401,17 @@
         topAlert.classList.remove('d-none');
     }
 
+    /**
+     * Trang cần quay lại sau khi đăng nhập: pages-login.html?redirect=booking.html%3FtourId%3D1%26scheduleId%3D3
+     * Chỉ nhận trang nội bộ dạng "xxx.html?a=1&b=2" → chặn open redirect (?redirect=https://trang-gia-mao.com)
+     */
+    function safeRedirect() {
+        const back = params.get('redirect');   // URLSearchParams tự giải mã %3F, %26
+        return back && /^[\w-]+\.html(\?[\w=&%.-]*)?$/.test(back) && !/^pages-login\.html/.test(back)
+            ? back
+            : 'index.html';
+    }
+
     document.querySelectorAll('[data-toggle-password]').forEach(btn => {
         btn.addEventListener('click', () => {
             const input = document.getElementById(btn.dataset.togglePassword);
@@ -480,7 +491,7 @@
                     localStorage.removeItem('avatarUrl');
                 }
 
-                window.location.href = 'index.html';
+                window.location.href = safeRedirect();
                 return;
             }
 

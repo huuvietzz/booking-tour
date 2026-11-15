@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 @Data
 @Builder
 public class PromotionCheckResponse {
+    private Integer promotionId;
     private String promotionCode;
     private String promotionName;
     private DiscountType discountType;

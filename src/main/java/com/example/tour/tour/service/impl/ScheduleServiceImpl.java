@@ -33,7 +33,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     /** Booking còn hiệu lực: chưa huỷ, chưa hoàn thành → còn "giữ chỗ" trên lịch */
     private static final List<BookingStatus> ACTIVE_BOOKING_STATUSES =
-            List.of(BookingStatus.PENDING, BookingStatus.CONFIRMED, BookingStatus.PAID);
+            List.of(BookingStatus.PENDING, BookingStatus.CONFIRMED);
 
     private static final DateTimeFormatter CODE_DATE = DateTimeFormatter.ofPattern("yyyyMMdd");
     private static final Pattern DURATION_DAYS = Pattern.compile("^\\s*(\\d+)\\s*N", Pattern.CASE_INSENSITIVE);

@@ -871,7 +871,7 @@
       $('sec-schedules').scrollIntoView({ behavior: 'smooth' });
     });
     $('tdBook').addEventListener('click', () => {
-      if (selected) location.href = `booking.html?scheduleId=${selected.scheduleId}`;   // trang đặt tour tự kiểm tra đăng nhập
+      if (selected) location.href = `booking.html?tourId=${tourId}&scheduleId=${selected.scheduleId}`;  // trang đặt tour tự kiểm tra đăng nhập
     });
   }
 

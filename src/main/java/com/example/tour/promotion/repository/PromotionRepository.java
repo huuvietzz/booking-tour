@@ -24,7 +24,7 @@ public interface PromotionRepository extends JpaRepository<Promotion, Integer>, 
      * được "còn 1 lượt" và cùng ghi thành công → vượt quantity.
      * @return 1 = lấy được lượt, 0 = hết lượt
      */
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Modifying(flushAutomatically = true)
     @Query("""
             update Promotion p set p.usedCount = p.usedCount + 1
             where p.promotionId = :id and (p.quantity is null or p.usedCount < p.quantity)
@@ -32,20 +32,33 @@ public interface PromotionRepository extends JpaRepository<Promotion, Integer>, 
     int increaseUsedCount(@Param("id") Integer promotionId);
 
     /** Huỷ đơn có dùng mã → trả lại lượt */
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Modifying(flushAutomatically = true)
     @Query("update Promotion p set p.usedCount = p.usedCount - 1 where p.promotionId = :id and p.usedCount > 0")
     int decreaseUsedCount(@Param("id") Integer promotionId);
 
-    /**
-     * Số đơn CÒN HIỆU LỰC của 1 khách đã dùng mã này (kiểm tra maxUsesPerUser).
-     * ⚠ Viết theo giả định entity Booking có: promotion (ManyToOne), user (ManyToOne), status (enum có CANCELLED).
-     *   Tên field khác thì sửa câu JPQL này — sai tên field thì ứng dụng báo lỗi ngay lúc khởi động.
-     */
     /** Số đơn CÒN HIỆU LỰC của 1 khách đã dùng mã này (kiểm tra maxUsesPerUser). Đơn đã huỷ không tính */
     @Query("""
-        select count(b) from Booking b
-        where b.promotion.promotionId = :promotionId and b.user.userId = :userId
-          and b.bookingStatus <> com.example.tour.booking.constant.BookingStatus.CANCELLED
-        """)
+    select count(b) from Booking b
+    where b.promotion.promotionId = :promotionId and b.user.userId = :userId
+      and b.bookingStatus <> com.example.tour.booking.constant.BookingStatus.CANCELLED
+    """)
     long countActiveUsesByUser(@Param("promotionId") Integer promotionId, @Param("userId") Integer userId);
+
+    /**
+     * Số lần 1 khách đã dùng mã (đơn chưa huỷ): khớp tài khoản HOẶC email HOẶC SĐT liên hệ.
+     * Khách vãng lai (userId = null) vẫn bị đếm theo email / SĐT → không lách giới hạn được
+     * bằng cách đặt nhiều đơn không đăng nhập.
+     */
+    @Query("""
+    select count(b) from Booking b
+    where b.promotion.promotionId = :promotionId
+      and b.bookingStatus <> com.example.tour.booking.constant.BookingStatus.CANCELLED
+      and ( (:userId is not null and b.user.userId = :userId)
+            or lower(b.contactEmail) = lower(:email)
+            or b.contactPhone = :phone )
+    """)
+    long countUsesByCustomer(@Param("promotionId") Integer promotionId,
+                             @Param("userId") Integer userId,
+                             @Param("email") String email,
+                             @Param("phone") String phone);
 }

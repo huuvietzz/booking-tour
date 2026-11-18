@@ -55,7 +55,7 @@ public class VnpayServiceImpl implements VnpayService {
         Booking booking = bookingRepository.findByBookingCodeForUpdate(bookingCode.trim().toUpperCase())
                 .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
 
-        if (booking.getBookingStatus() != BookingStatus.PENDING || booking.getPaymentStatus() != PaymentStatus.PENDING) {
+        if (booking.getBookingStatus() != BookingStatus.CONFIRMED || booking.getPaymentStatus() != PaymentStatus.PENDING) {
             throw new AppException(ErrorCode.BOOKING_NOT_PAYABLE);
         }
 
@@ -93,6 +93,8 @@ public class VnpayServiceImpl implements VnpayService {
         p.put("vnp_IpAddr", clientIp);
         p.put("vnp_CreateDate", now.format(VNP_TIME));
         p.put("vnp_ExpireDate", expire.format(VNP_TIME));
+        //p.put("vnp_BankCode", "VNBANK");   // sandbox: mở thẳng màn nhập thẻ ATM (thẻ test NCB)
+        // p.put("vnp_BankCode", "VNPAYQR"); // production: mở thẳng màn QR như Vietravel
 
         String query = VnpayUtil.buildHashData(p);
         String secureHash = VnpayUtil.hmacSHA512(props.getHashSecret(), query);
@@ -153,8 +155,7 @@ public class VnpayServiceImpl implements VnpayService {
         }
 
         payment.setTransactionStatus(TransactionStatus.SUCCESS);
-        if (booking.getBookingStatus() == BookingStatus.PENDING && booking.getPaymentStatus() == PaymentStatus.PENDING) {
-            booking.setBookingStatus(BookingStatus.CONFIRMED);
+        if (booking.getBookingStatus() == BookingStatus.CONFIRMED && booking.getPaymentStatus() == PaymentStatus.PENDING) {
             booking.setPaymentStatus(PaymentStatus.PAID);            // dirty checking, không cần save
             log.info("[VNPAY] Đơn {} đã thanh toán, txn={}", code, payment.getTransactionId());
         } else {

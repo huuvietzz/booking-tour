@@ -135,7 +135,8 @@ public class BookingServiceImpl implements BookingService {
                 .totalToddlers(request.getTotalToddlers())
                 .tempAmount(tempAmount)
                 .totalAmount(totalAmount)
-                .bookingStatus(BookingStatus.PENDING)
+                // Còn chỗ + đã giữ chỗ → đơn được XÁC NHẬN TỰ ĐỘNG; tiền theo dõi riêng ở paymentStatus
+                .bookingStatus(BookingStatus.CONFIRMED)
                 .paymentStatus(PaymentStatus.PENDING)
                 .note(trimToNull(request.getNote()))
                 .build();
@@ -245,19 +246,20 @@ public class BookingServiceImpl implements BookingService {
         return toBookingResponse(booking);
     }
 
+    /**
+     * Admin "Xác nhận thanh toán" (dự phòng): khách chuyển khoản sai nội dung, webhook lỗi, trả tiền mặt...
+     * Đơn đã CONFIRMED sẵn → chỉ chuyển thanh toán sang PAID.
+     */
     @Override
     @Transactional
     public BookingResponse confirmBooking(Integer bookingId) {
         Booking booking = lock(bookingId);
-        // Chỉ đơn đang chờ mới xác nhận được
-        if (booking.getBookingStatus() != BookingStatus.PENDING) {
+        if (booking.getBookingStatus() != BookingStatus.CONFIRMED
+                || booking.getPaymentStatus() != PaymentStatus.PENDING) {
             throw new AppException(ErrorCode.BOOKING_INVALID_STATUS);
         }
-        // Admin xác nhận = đã nhận đủ tiền → đơn xác nhận + đã thanh toán
-        booking.setBookingStatus(BookingStatus.CONFIRMED);
         booking.setPaymentStatus(PaymentStatus.PAID);
-        Booking savedBooking = bookingRepository.save(booking);
-        return toBookingResponse(savedBooking);
+        return toBookingResponse(booking);
     }
 
     @Override
@@ -269,18 +271,29 @@ public class BookingServiceImpl implements BookingService {
                 && booking.getBookingStatus() != BookingStatus.CONFIRMED) {
             throw new AppException(ErrorCode.BOOKING_CANNOT_CANCEL);
         }
-        booking.setBookingStatus(BookingStatus.CANCELLED);
         // Khách đã trả tiền mà đơn bị huỷ → phải hoàn tiền
         if (booking.getPaymentStatus() == PaymentStatus.PAID) {
             booking.setPaymentStatus(PaymentStatus.REFUNDED);
         }
-        releaseSeats(booking);
-        if (booking.getPromotion() != null) {
-            promotionService.release(booking.getPromotion().getPromotionId());   // trả 1 lượt dùng mã
-        }
+        cancelAndRelease(booking);
+        return toBookingResponse(booking);
+    }
 
-        Booking savedBooking = bookingRepository.save(booking);
-        return toBookingResponse(savedBooking);
+    /**
+     * Job gọi: đơn quá hạn giữ chỗ mà chưa thanh toán → Đã hủy, thanh toán giữ "Chưa thanh toán", trả chỗ + trả lượt mã KM.
+     * Khoá dòng rồi KIỂM TRA LẠI: có thể khách vừa thanh toán xong ngay trước khi job chạy tới đơn này.
+     * @return true nếu đã huỷ
+     */
+    @Override
+    @Transactional
+    public boolean expireUnpaidBooking(Integer bookingId) {
+        Booking booking = lock(bookingId);
+        if (booking.getBookingStatus() != BookingStatus.CONFIRMED
+                || booking.getPaymentStatus() != PaymentStatus.PENDING) {
+            return false;
+        }
+        cancelAndRelease(booking);
+        return true;
     }
 
     @Override
@@ -289,6 +302,10 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = lock(bookingId);
         if (booking.getBookingStatus() != BookingStatus.CONFIRMED) {
             throw new AppException(ErrorCode.BOOKING_INVALID_STATUS);
+        }
+        // Luồng mới: CONFIRMED có cả đơn chưa trả tiền → chưa thanh toán thì không cho hoàn thành
+        if (booking.getPaymentStatus() != PaymentStatus.PAID) {
+            throw new AppException(ErrorCode.BOOKING_NOT_PAID);
         }
         // Tour chưa khởi hành thì chưa thể hoàn thành
         if (booking.getSchedule().getDepartureDate().isAfter(LocalDate.now())) {
@@ -313,11 +330,13 @@ public class BookingServiceImpl implements BookingService {
         LocalDate today = LocalDate.now();
         return BookingStatsResponse.builder()
                 .total(bookingRepository.count())
-                .pending(bookingRepository.countByBookingStatus(BookingStatus.PENDING))
+                // Đơn đang giữ chỗ, chờ khách trả tiền (thay cho "Chờ xác nhận" cũ)
+                .unpaid(bookingRepository.countByPaymentStatus(PaymentStatus.PENDING))
                 .confirmed(bookingRepository.countByBookingStatus(BookingStatus.CONFIRMED))
                 .paid(bookingRepository.countByPaymentStatus(PaymentStatus.PAID))
-                .upcoming(bookingRepository.countByBookingStatusAndSchedule_DepartureDateBetween(
-                        BookingStatus.CONFIRMED, today, today.plusDays(upcomingDays)))
+                // Sắp khởi hành: chỉ đếm đơn ĐÃ TRẢ TIỀN (đơn chưa trả có thể bị huỷ)
+                .upcoming(bookingRepository.countByBookingStatusAndPaymentStatusAndSchedule_DepartureDateBetween(
+                        BookingStatus.CONFIRMED, PaymentStatus.PAID, today, today.plusDays(upcomingDays)))
                 .completed(bookingRepository.countByBookingStatus(BookingStatus.COMPLETED))
                 .cancelled(bookingRepository.countByBookingStatus(BookingStatus.CANCELLED))
                 .build();
@@ -411,6 +430,15 @@ public class BookingServiceImpl implements BookingService {
     private Booking lock(Integer bookingId) {
         return bookingRepository.findByIdForUpdate(bookingId)
                 .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+    }
+
+    /** Huỷ đơn + trả chỗ + trả 1 lượt dùng mã KM (dùng chung cho admin huỷ và job hết hạn) */
+    private void cancelAndRelease(Booking booking) {
+        booking.setBookingStatus(BookingStatus.CANCELLED);
+        releaseSeats(booking);
+        if (booking.getPromotion() != null) {
+            promotionService.release(booking.getPromotion().getPromotionId());
+        }
     }
 
     /** Trả chỗ cho lịch. Tour đã khởi hành thì chỗ không bán lại được → bỏ qua */

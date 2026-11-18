@@ -74,27 +74,16 @@ public interface BookingRepository extends JpaRepository<Booking, Integer>, JpaS
     @Query("select b from Booking b where b.bookingCode = :code")
     Optional<Booking> findByBookingCodeForUpdate(@Param("code") String code);
 
-    /**
-     * Đơn giữ chỗ quá hạn: còn PENDING, tạo trước mốc cutoff, và KHÔNG có giao dịch nào đang chờ / thành công
-     * (khách đã bấm "Tôi đã thanh toán" thì không tự huỷ, chờ admin kiểm tra tiền).
-     */
-//    @Query("""
-//            SELECT b.bookingId FROM Booking b
-//            WHERE b.bookingStatus = com.example.tour.booking.constant.BookingStatus.PENDING
-//              AND b.createdAt < :cutoff
-//              AND NOT EXISTS (
-//                  SELECT 1 FROM Payment p WHERE p.booking = b
-//                  AND p.transactionStatus IN (
-//                                             com.example.tour.payment.constant.TransactionStatus.SUCCESS))
-//            """)
-//    List<Integer> findExpiredHoldIds(@Param("cutoff") LocalDateTime cutoff);
+    long countByBookingStatusAndPaymentStatus(BookingStatus bookingStatus, PaymentStatus paymentStatus);
 
-    /** Tour đã về: CONFIRMED → COMPLETED (1 câu UPDATE cho tất cả) */
-//    @Modifying(clearAutomatically = true, flushAutomatically = true)
-//    @Query("""
-//            UPDATE Booking b SET b.bookingStatus = com.example.tour.booking.constant.BookingStatus.COMPLETED
-//            WHERE b.bookingStatus = com.example.tour.booking.constant.BookingStatus.CONFIRMED
-//              AND b.schedule.scheduleId IN (SELECT s.scheduleId FROM Schedule s WHERE s.returnDate < :today)
-//            """)
-//    int completeFinishedTours(@Param("today") LocalDate today);
+    long countByBookingStatusAndPaymentStatusAndSchedule_DepartureDateBetween(
+            BookingStatus bookingStatus, PaymentStatus paymentStatus, LocalDate from, LocalDate to);
+
+    @Query("""
+            select b.bookingId from Booking b
+            where b.bookingStatus = :status and b.paymentStatus = :payment and b.createdAt < :before
+            """)
+    List<Integer> findIdsByStatusCreatedBefore(@Param("status") BookingStatus status,
+                                               @Param("payment") PaymentStatus payment,
+                                               @Param("before") LocalDateTime before);
 }

@@ -8,7 +8,7 @@ import lombok.Getter;
 @Builder
 public class BookingStatsResponse {
     private long total;       // Tất cả
-    private long pending;     // Chờ xác nhận
+    private long unpaid;     // đã xác nhận, chờ thanh toán
     private long confirmed;   // Đã xác nhận
     private long paid;        // Đã thanh toán
     private long upcoming;    // Sắp khởi hành (đã xác nhận, đi trong N ngày tới)

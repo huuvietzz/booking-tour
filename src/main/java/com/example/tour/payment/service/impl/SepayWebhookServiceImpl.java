@@ -57,7 +57,7 @@ public class SepayWebhookServiceImpl implements SepayWebhookService {
             log.warn("[SePay] Giao dịch {}: không tìm thấy đơn {}", txnId, req.getCode());
             return;
         }
-        if (booking.getBookingStatus() != BookingStatus.PENDING || booking.getPaymentStatus() != PaymentStatus.PENDING) {
+        if (booking.getBookingStatus() != BookingStatus.CONFIRMED || booking.getPaymentStatus() != PaymentStatus.PENDING) {
             log.warn("[SePay] Giao dịch {}: đơn {} đang {}/{}, bỏ qua", txnId, booking.getBookingCode(),
                     booking.getBookingStatus(), booking.getPaymentStatus());
             return;
@@ -68,7 +68,6 @@ public class SepayWebhookServiceImpl implements SepayWebhookService {
             return;
         }
 
-        booking.setBookingStatus(BookingStatus.CONFIRMED);
         booking.setPaymentStatus(PaymentStatus.PAID);   // dirty checking, không cần save
 
         paymentRepository.save(Payment.builder()

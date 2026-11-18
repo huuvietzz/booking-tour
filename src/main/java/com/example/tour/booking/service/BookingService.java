@@ -31,6 +31,8 @@ public interface BookingService {
 
     BookingResponse cancelBooking(Integer bookingId);
 
+    boolean expireUnpaidBooking(Integer bookingId);
+
     BookingResponse completeBooking(Integer bookingId);
 
     BookingStatsResponse getBookingStats(int upcomingDays);

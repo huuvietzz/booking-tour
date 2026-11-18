@@ -94,6 +94,7 @@ public enum ErrorCode {
     PAYMENT_NOT_FOUND(404, "Không tìm thấy giao dịch", HttpStatus.NOT_FOUND),
     BOOKING_NOT_PAYABLE(400, "Đơn không ở trạng thái chờ thanh toán", HttpStatus.BAD_REQUEST),
     PAYMENT_EXPIRED(400, "Đã quá hạn thanh toán", HttpStatus.BAD_REQUEST),
+    BOOKING_NOT_PAID(400, "Đơn chưa thanh toán, không thể hoàn thành", HttpStatus.BAD_REQUEST),
 
     // ========== PROMOTION ==========
     PROMOTION_NOT_FOUND(404, "Không tìm thấy mã khuyến mãi", HttpStatus.NOT_FOUND),

@@ -1,10 +1,12 @@
 package com.example.tour.booking.repository;
 
 import com.example.tour.booking.constant.BookingStatus;
+import com.example.tour.booking.constant.PaymentStatus;
 import com.example.tour.booking.entity.Booking;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
@@ -51,6 +53,26 @@ public interface BookingRepository extends JpaRepository<Booking, Integer>, JpaS
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT b FROM Booking b WHERE b.bookingId = :id")
     Optional<Booking> findByIdForUpdate(@Param("id") Integer id);
+
+    long countByBookingStatus(BookingStatus status);
+
+    long countByPaymentStatus(PaymentStatus status);
+
+    /** Sắp khởi hành: đơn đã xác nhận, ngày đi trong [from, to] */
+    long countByBookingStatusAndSchedule_DepartureDateBetween(BookingStatus status, LocalDate from, LocalDate to);
+
+    /**
+     * Ghi đè findAll(spec, sort) của JpaSpecificationExecutor CHỈ để gắn EntityGraph.
+     * Hàm phân trang findAll(spec, pageable) của trang danh sách KHÔNG bị ảnh hưởng.
+     */
+    @Override
+    @EntityGraph(attributePaths = {"schedule", "schedule.tour", "promotion"})
+    List<Booking> findAll(Specification<Booking> spec, Sort sort);
+
+    // method khoá dòng theo mã đơn
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select b from Booking b where b.bookingCode = :code")
+    Optional<Booking> findByBookingCodeForUpdate(@Param("code") String code);
 
     /**
      * Đơn giữ chỗ quá hạn: còn PENDING, tạo trước mốc cutoff, và KHÔNG có giao dịch nào đang chờ / thành công

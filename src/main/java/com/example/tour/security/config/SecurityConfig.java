@@ -55,6 +55,10 @@ public class SecurityConfig {
                         // Các chức năng quản trị còn lại: ADMIN và STAFF
                         .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "STAFF")
 
+                        // mở endpoint webhook (SePay không có JWT)
+                        .requestMatchers("/api/webhooks/**").permitAll()
+                        .requestMatchers("/api/payments/vnpay/**").permitAll()    // VNPAY return + IPN
+
                         // Còn lại đều cần xác thực
                         .anyRequest().authenticated()
                 )

@@ -360,6 +360,7 @@
 
 <body class="booking-page">
 
+
 <!-- Header trang thanh toán: logo | 3 bước | đăng nhập -->
 <header class="bk-header">
   <div class="bk-wrap">
@@ -1518,18 +1519,31 @@
     setSubmitMsg('');
     $('bkSubmit').disabled = true;
     $('bkSubmit').innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang đặt tour...';
+    let redirecting = false;
     try {
       // Có token → BE gắn đơn vào tài khoản; không có → đơn của khách vãng lai
       const booking = await api('/api/public/bookings', { method: 'POST', body: buildPayload(), auth: !!user() });
-      showDone(booking);
+      // Chỗ đã được giữ → sang trang thanh toán. Lưu tạm đơn vào localStorage (tab mới mở từ link email vẫn đọc được) cho payment.html (đang giả lập, chưa có API)
+      try { localStorage.setItem('booking:' + booking.bookingCode, JSON.stringify({ ...booking, thumbnailUrl: booking.thumbnailUrl || tour.thumbnailUrl })); } catch (_) { /* bỏ qua */ }
+      const params = new URLSearchParams({ code: booking.bookingCode });
+      if (booking.paymentToken) params.set('token', booking.paymentToken);   // khách vãng lai: BE trả token để xem / thanh toán đơn
+      // Giữ nút đang quay tới khi trang thanh toán mở hẳn (không để finally đổi nút về "Đặt tour")
+      redirecting = true;
+      location.replace('payment.html?' + params);   // replace: bấm Back không quay lại form đã gửi
+      return;
     } catch (err) {
       setSubmitMsg(err.message);
+      $('bkSubmitMsg').scrollIntoView({ block: 'center', behavior: 'smooth' });
       // Mã KM vừa hết lượt / hết hạn → bỏ mã để khách đặt lại không cần mã
       if (coupon && /mã giảm giá|khuyến mãi/i.test(err.message)) removeCoupon(err.message);
       refreshSchedule();   // có thể người khác vừa đặt mất chỗ
     } finally {
-      submitting = false;
-      updateSubmit();
+      // Thành công thì KHÔNG trả nút về như cũ: trình duyệt còn mất một lúc mới mở xong payment.html,
+      // trả nút về "Đặt tour" lúc đó khiến khách tưởng chưa gửi và bấm thêm lần nữa
+      if (!redirecting) {
+        submitting = false;
+        updateSubmit();
+      }
     }
   });
 

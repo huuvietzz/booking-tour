@@ -35,7 +35,12 @@ public class Review extends BaseEntity {
     @Column(name = "admin_response", columnDefinition = "TEXT")
     private String adminResponse;
 
+    // Không duyệt trước: gửi là hiện ngay. Admin chỉ ẩn khi vi phạm (tục tĩu, spam, lộ thông tin cá nhân...)
     @Builder.Default
-    @Column(name = "is_approved")
-    private Boolean is_approved = false;
+    @Column(name = "is_hidden", nullable = false)
+    private Boolean hidden = false;
+
+    // Bắt buộc khi ẩn (validate ở service / DTO admin), để khách và admin khác biết lý do
+    @Column(name = "hidden_reason", length = 255)
+    private String hiddenReason;
 }

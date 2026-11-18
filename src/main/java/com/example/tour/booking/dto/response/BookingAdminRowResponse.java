@@ -19,6 +19,7 @@ public class BookingAdminRowResponse {
     private String tourName;
     private String scheduleCode;
     private LocalDate departureDate;
+    private LocalDate returnDate;
     private Integer totalPeople;
     private BigDecimal totalAmount;
     private BookingStatus bookingStatus;

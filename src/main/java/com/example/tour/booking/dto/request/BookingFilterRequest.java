@@ -5,6 +5,7 @@ import com.example.tour.booking.constant.PaymentStatus;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
@@ -19,4 +20,7 @@ public class BookingFilterRequest {
     private LocalDate departureFrom;      // ngày khởi hành từ
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate departureTo;        // ngày khởi hành đến
+
+    private BigDecimal minAmount;   // tổng tiền từ
+    private BigDecimal maxAmount;   // tổng tiền đến
 }

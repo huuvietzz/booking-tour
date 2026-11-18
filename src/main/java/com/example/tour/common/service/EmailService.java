@@ -1,11 +1,19 @@
-package com.example.tour.user.service;
+package com.example.tour.common.service;
 
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import java.io.UnsupportedEncodingException;
+import org.springframework.core.io.ByteArrayResource;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -13,6 +21,9 @@ import org.springframework.stereotype.Service;
 public class EmailService {
 
     private final JavaMailSender mailSender;
+
+    @Value("${spring.mail.username}")
+    private String from;
 
     /**
      * @Async để request đăng ký không phải chờ SMTP.
@@ -57,5 +68,33 @@ public class EmailService {
         } catch (Exception e) {
             log.error("Gửi mail reset password thất bại cho {}", toEmail, e);
         }
+    }
+
+    public void sendHtmlEmail(String to, String subject, String html) throws MessagingException, UnsupportedEncodingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8");
+        helper.setFrom(from, "VietTrip");
+        helper.setTo(to);
+        helper.setSubject(subject);
+        helper.setText(html, true);
+        mailSender.send(message);
+    }
+
+    /**
+     * Gửi email HTML kèm ảnh nhúng. Trong HTML dùng <img src="cid:TÊN">, Map: TÊN → byte[] PNG.
+     * Ảnh nhúng (inline) hiện ngay trong nội dung, không phải file đính kèm để tải.
+     */
+    public void sendHtmlEmail(String to, String subject, String html, Map<String, byte[]> inlineImages)
+            throws MessagingException, UnsupportedEncodingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+        helper.setFrom(from, "VietTrip");
+        helper.setTo(to);
+        helper.setSubject(subject);
+        helper.setText(html, true);
+        for (Map.Entry<String, byte[]> img : inlineImages.entrySet()) {
+            helper.addInline(img.getKey(), new ByteArrayResource(img.getValue()), "image/png");
+        }
+        mailSender.send(message);
     }
 }

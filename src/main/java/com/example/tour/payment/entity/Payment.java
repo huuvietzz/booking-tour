@@ -11,12 +11,13 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "payments")
-@Getter
-@Setter
+@Table(name = "payments",
+        uniqueConstraints = @UniqueConstraint(name = "uk_payments_method_txn",
+                columnNames = {"method", "transaction_id"}))
+@Getter @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Payment extends BaseEntity {
 
     @Id
@@ -28,6 +29,7 @@ public class Payment extends BaseEntity {
     @JoinColumn(name = "booking_id", nullable = false)
     private Booking booking;
 
+    // SePay: trường "id" của webhook; VNPAY: vnp_TransactionNo — dùng chống xử lý trùng
     @Column(name = "transaction_id", length = 100)
     private String transactionId;
 
@@ -39,9 +41,15 @@ public class Payment extends BaseEntity {
     private PaymentMethod method;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "transaction_status")
+    @Column(name = "transaction_status", nullable = false)
     private TransactionStatus transactionStatus;
 
-    @Column(name = "payment_date", columnDefinition = "DATETIME(6)")
+    @Column(name = "payment_date")
     private LocalDateTime paymentDate;
+
+    @Column(name = "gateway", length = 50)
+    private String gateway;            // MBBank, Vietcombank...
+
+    @Column(name = "reference_code", length = 100)
+    private String referenceCode;
 }

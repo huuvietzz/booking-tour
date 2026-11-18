@@ -2,6 +2,7 @@ package com.example.tour.user.service;
 
 import com.example.tour.common.exception.AppException;
 import com.example.tour.common.exception.ErrorCode;
+import com.example.tour.common.service.EmailService;
 import com.example.tour.user.constant.TokenType;
 import com.example.tour.user.dto.request.ForgotPasswordRequest;
 import com.example.tour.user.dto.response.MessageResponse;

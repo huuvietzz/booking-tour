@@ -30,6 +30,7 @@
 		<java.version>17</java.version>
 		<!-- Spring AI dòng 1.1.x chạy với Spring Boot 3.5. KHÔNG dùng 2.x (2.x bắt buộc Spring Boot 4) -->
 		<spring-ai.version>1.1.1</spring-ai.version>
+		<itext.version>8.0.5</itext.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -130,6 +131,30 @@
 		<dependency>
 			<groupId>org.springframework.ai</groupId>
 			<artifactId>spring-ai-starter-model-openai</artifactId>
+		</dependency>
+
+		<!-- Xuất PDF: iText 8 (kernel = lõi PDF, layout = Document / Table / Paragraph) -->
+		<dependency>
+			<groupId>com.itextpdf</groupId>
+			<artifactId>kernel</artifactId>
+			<version>${itext.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.itextpdf</groupId>
+			<artifactId>layout</artifactId>
+			<version>${itext.version}</version>
+		</dependency>
+
+		<!-- Tạo mã QR -->
+		<dependency>
+			<groupId>com.google.zxing</groupId>
+			<artifactId>core</artifactId>
+			<version>3.5.3</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.zxing</groupId>
+			<artifactId>javase</artifactId>
+			<version>3.5.3</version>
 		</dependency>
 
 	</dependencies>

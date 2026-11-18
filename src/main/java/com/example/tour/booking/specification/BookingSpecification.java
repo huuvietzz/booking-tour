@@ -4,10 +4,9 @@ import com.example.tour.booking.constant.BookingStatus;
 import com.example.tour.booking.constant.PaymentStatus;
 import com.example.tour.booking.dto.request.BookingFilterRequest;
 import com.example.tour.booking.entity.Booking;
-import com.example.tour.payment.constant.TransactionStatus;
-import com.example.tour.payment.entity.Payment;
 import com.example.tour.tour.entity.Schedule;
-import jakarta.persistence.criteria.*;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
@@ -35,6 +34,8 @@ public final class BookingSpecification {
             if (f.getTourId() != null) ps.add(cb.equal(schedule.get("tour").get("tourId"), f.getTourId()));
             if (f.getDepartureFrom() != null) ps.add(cb.greaterThanOrEqualTo(schedule.get("departureDate"), f.getDepartureFrom()));
             if (f.getDepartureTo() != null) ps.add(cb.lessThanOrEqualTo(schedule.get("departureDate"), f.getDepartureTo()));
+            if (f.getMinAmount() != null) ps.add(cb.greaterThanOrEqualTo(root.get("totalAmount"), f.getMinAmount()));
+            if (f.getMaxAmount() != null) ps.add(cb.lessThanOrEqualTo(root.get("totalAmount"), f.getMaxAmount()));
 
             return cb.and(ps.toArray(new Predicate[0]));
         };

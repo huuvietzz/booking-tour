@@ -3,98 +3,127 @@ package com.example.tour.booking.dto.export;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.write.style.ColumnWidth;
 import com.alibaba.excel.annotation.write.style.ContentFontStyle;
+import com.alibaba.excel.annotation.write.style.ContentStyle;
 import com.alibaba.excel.annotation.write.style.HeadFontStyle;
+import com.alibaba.excel.annotation.write.style.HeadRowHeight;
+import com.alibaba.excel.annotation.write.style.HeadStyle;
 import com.alibaba.excel.enums.BooleanEnum;
+import com.alibaba.excel.enums.poi.FillPatternTypeEnum;
+import com.alibaba.excel.enums.poi.HorizontalAlignmentEnum;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
+/**
+ * 1 dòng trong file Excel "Đơn đặt tour".
+ * - Thứ tự cột = index trong @ExcelProperty
+ * - Ngày, trạng thái để dạng chữ tiếng Việt (đọc được ngay, không phụ thuộc định dạng ngày của máy)
+ * - Tiền để dạng SỐ (BigDecimal) + dataFormat 3 = "#,##0" → Excel vẫn cộng / lọc / SUM được
+ */
 @Data
 @Builder
-@ColumnWidth(20)
+@NoArgsConstructor
+@AllArgsConstructor
+@HeadRowHeight(24)
+@HeadStyle(fillPatternType = FillPatternTypeEnum.SOLID_FOREGROUND, fillForegroundColor = 44)   // 44 = xanh nhạt (PALE_BLUE)
 @HeadFontStyle(fontName = "Calibri", fontHeightInPoints = 12, bold = BooleanEnum.TRUE)
 @ContentFontStyle(fontName = "Calibri", fontHeightInPoints = 11)
 public class BookingExcelModel {
 
-    @ExcelProperty("Mã Đơn")
+    @ExcelProperty(value = "STT", index = 0)
+    @ColumnWidth(6)
+    @ContentStyle(horizontalAlignment = HorizontalAlignmentEnum.CENTER)
+    private Integer stt;
+
+    @ExcelProperty(value = "Mã đơn", index = 1)
     @ColumnWidth(18)
     private String bookingCode;
 
-    @ExcelProperty("Ngày Đặt")
-    @ColumnWidth(20)
-    private String bookingDate;
+    @ExcelProperty(value = "Ngày đặt", index = 2)
+    @ColumnWidth(18)
+    private String createdAt;
 
-    // --- Khách hàng ---
-    @ExcelProperty("Khách Hàng")
-    @ColumnWidth(28)
-    private String customerName;
+    @ExcelProperty(value = "Khách hàng", index = 3)
+    @ColumnWidth(24)
+    private String contactName;
 
-    @ExcelProperty("Số Điện Thoại")
-    @ColumnWidth(16)
-    private String customerPhone;
-
-    @ExcelProperty("Email")
-    @ColumnWidth(30)
-    private String customerEmail;
-
-    // --- Chuyến đi ---
-    @ExcelProperty("Mã Tour")
+    @ExcelProperty(value = "Số điện thoại", index = 4)
     @ColumnWidth(14)
-    private String tourCode;
+    private String contactPhone;
 
-    @ExcelProperty("Tên Tour")
-    @ColumnWidth(40)
+    @ExcelProperty(value = "Email", index = 5)
+    @ColumnWidth(28)
+    private String contactEmail;
+
+    @ExcelProperty(value = "Tour", index = 6)
+    @ColumnWidth(45)
     private String tourName;
 
-    @ExcelProperty("Ngày Khởi Hành")
-    @ColumnWidth(18)
+    @ExcelProperty(value = "Mã khởi hành", index = 7)
+    @ColumnWidth(22)
+    private String scheduleCode;
+
+    @ExcelProperty(value = "Ngày khởi hành", index = 8)
+    @ColumnWidth(15)
+    @ContentStyle(horizontalAlignment = HorizontalAlignmentEnum.CENTER)
     private String departureDate;
 
-    @ExcelProperty("Ngày Trở Về")
-    @ColumnWidth(18)
+    @ExcelProperty(value = "Ngày về", index = 9)
+    @ColumnWidth(13)
+    @ContentStyle(horizontalAlignment = HorizontalAlignmentEnum.CENTER)
     private String returnDate;
 
-    // --- Số khách ---
-    @ExcelProperty("Người Lớn")
-    @ColumnWidth(12)
+    @ExcelProperty(value = "Người lớn", index = 10)
+    @ColumnWidth(10)
+    @ContentStyle(horizontalAlignment = HorizontalAlignmentEnum.CENTER)
     private Integer totalAdults;
 
-    @ExcelProperty("Trẻ Em")
-    @ColumnWidth(12)
+    @ExcelProperty(value = "Trẻ em", index = 11)
+    @ColumnWidth(9)
+    @ContentStyle(horizontalAlignment = HorizontalAlignmentEnum.CENTER)
     private Integer totalChildren;
 
-    @ExcelProperty("Em Bé")
-    @ColumnWidth(12)
-    private Integer totalInfants;
+    @ExcelProperty(value = "Trẻ nhỏ", index = 12)
+    @ColumnWidth(9)
+    @ContentStyle(horizontalAlignment = HorizontalAlignmentEnum.CENTER)
+    private Integer totalToddlers;
 
-    @ExcelProperty("Phụ Thu Phòng Đơn")
-    private BigDecimal singleRoomSurcharge;
+    @ExcelProperty(value = "Tổng khách", index = 13)
+    @ColumnWidth(11)
+    @ContentStyle(horizontalAlignment = HorizontalAlignmentEnum.CENTER)
+    private Integer totalPeople;
 
-    @ExcelProperty("Số Phòng Đơn")
+    @ExcelProperty(value = "Tạm tính (₫)", index = 14)
+    @ColumnWidth(15)
+    @ContentStyle(dataFormat = 3)
+    private BigDecimal tempAmount;
+
+    @ExcelProperty(value = "Giảm giá (₫)", index = 15)
     @ColumnWidth(14)
-    private Integer singleRoomCount;
-
-    // --- Tiền ---
-    @ExcelProperty("Tổng Tiền")
-    private BigDecimal totalAmount;
-
-    @ExcelProperty("Giảm Giá")
+    @ContentStyle(dataFormat = 3)
     private BigDecimal discountAmount;
 
-    @ExcelProperty("Thành Tiền")
-    private BigDecimal finalAmount;
+    @ExcelProperty(value = "Mã giảm giá", index = 16)
+    @ColumnWidth(14)
+    private String promotionCode;
 
-    // --- Trạng thái ---
-    @ExcelProperty("Trạng Thái Đơn")
-    @ColumnWidth(18)
+    @ExcelProperty(value = "Tổng tiền (₫)", index = 17)
+    @ColumnWidth(15)
+    @ContentStyle(dataFormat = 3)
+    private BigDecimal totalAmount;
+
+    @ExcelProperty(value = "Trạng thái", index = 18)
+    @ColumnWidth(15)
     private String bookingStatus;
 
-    @ExcelProperty("Trạng Thái Thanh Toán")
-    @ColumnWidth(22)
+    @ExcelProperty(value = "TT Thanh toán", index = 19)
+    @ColumnWidth(16)
     private String paymentStatus;
 
-    @ExcelProperty("Lý Do Hủy")
-    @ColumnWidth(30)
-    private String cancellationReason;
+    @ExcelProperty(value = "Ghi chú", index = 20)
+    @ColumnWidth(40)
+    private String note;
 }

@@ -9,6 +9,7 @@ import com.example.tour.tour.entity.Schedule;
 import com.example.tour.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Formula;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -98,6 +99,10 @@ public class Booking extends BaseEntity {
     @OneToMany(mappedBy = "booking")
     @OrderBy("createdAt DESC")
     private List<Payment> payments = new ArrayList<>();
+
+    /** Tổng số khách = người lớn + trẻ em + trẻ nhỏ (chỉ đọc, dùng để sắp xếp) */
+    @Formula("(total_adults + total_children + total_toddlers)")
+    private Integer totalPeople;
 
     public void addParticipant(Participant participant) {
         participants.add(participant);

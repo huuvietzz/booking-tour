@@ -85,10 +85,15 @@ public enum ErrorCode {
     INVALID_PASSENGER_AGE(400, "Tuổi hành khách không đúng loại khách (người lớn ≥ 12, trẻ em 5-11, trẻ nhỏ 2-4 tuổi tại ngày khởi hành)", HttpStatus.BAD_REQUEST),
     BOOKING_HOLD_EXPIRED(409, "Đơn đã hết thời gian giữ chỗ, vui lòng đặt lại", HttpStatus.CONFLICT),
     BOOKING_INVALID_STATUS(409, "Trạng thái đơn không cho phép thao tác này", HttpStatus.CONFLICT),
-    BOOKING_NOT_DEPARTED(409, "Tour chưa khởi hành, chưa thể chuyển sang Hoàn thành", HttpStatus.CONFLICT),
+    BOOKING_NOT_DEPARTED(409, "Tour chưa khởi hành", HttpStatus.CONFLICT),
     TRANSACTION_ID_EXISTS(409, "Mã giao dịch này đã được ghi nhận cho đơn khác", HttpStatus.CONFLICT),
     INVALID_PARTICIPANT_AGE(400, "Tuổi hành khách không đúng loại khách", HttpStatus.BAD_REQUEST),
     PROMOTION_LOGIN_REQUIRED(401, "Vui lòng đăng nhập để sử dụng mã giảm giá", HttpStatus.UNAUTHORIZED),
+    BOOKING_TOUR_NOT_FINISHED(400, "Tour chưa kết thúc", HttpStatus.BAD_REQUEST),
+    EXPORT_TOO_MANY_ROWS(400, "Quá nhiều dòng để xuất (tối đa 10.000). Vui lòng lọc bớt rồi xuất lại", HttpStatus.BAD_REQUEST),
+    PAYMENT_NOT_FOUND(404, "Không tìm thấy giao dịch", HttpStatus.NOT_FOUND),
+    BOOKING_NOT_PAYABLE(400, "Đơn không ở trạng thái chờ thanh toán", HttpStatus.BAD_REQUEST),
+    PAYMENT_EXPIRED(400, "Đã quá hạn thanh toán", HttpStatus.BAD_REQUEST),
 
     // ========== PROMOTION ==========
     PROMOTION_NOT_FOUND(404, "Không tìm thấy mã khuyến mãi", HttpStatus.NOT_FOUND),

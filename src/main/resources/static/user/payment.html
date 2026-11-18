@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Thanh toán - VietTrip</title>
+
+    <link href="assets/img/favicon.png" rel="icon">
+    <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+
+    <link href="assets/css/main.css" rel="stylesheet">
+    <link href="assets/css/auth-ui.css" rel="stylesheet">
+    <link href="assets/css/tour-card.css" rel="stylesheet">
+
+    <style>
+        /* =========================================================
+           THANH TOÁN — cùng giao diện với booking.html (class "bk-"), biến màu --tl-*: tour-card.css
+           ========================================================= */
+        body.booking-page { background: var(--tl-bg); color: var(--tl-text); }
+        .bk-wrap { max-width: 1640px; margin: 0 auto; padding: 0 24px; }
+        @media (max-width: 575.98px) { .bk-wrap { padding: 0 12px; } }
+        .booking-page a { text-decoration: none; }
+
+        /* ---------- Header: logo | các bước | tài khoản ---------- */
+        .bk-header { background: #fff; box-shadow: 0 2px 12px rgba(16, 24, 40, .05); }
+        .bk-header .bk-wrap { display: flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 92px; }
+        .bk-logo img { height: 56px; }
+        .bk-steps { display: flex; align-items: center; gap: 14px 22px; flex-wrap: wrap; margin-left: auto; }
+        .bk-step { display: inline-flex; align-items: center; gap: 10px; color: var(--tl-muted); font-size: 15px; white-space: nowrap; }
+        .bk-step b {
+            width: 30px; height: 30px; border-radius: 50%; background: #6b7385; color: #fff; font-size: 12px;
+            display: inline-flex; align-items: center; justify-content: center;
+        }
+        .bk-step.done { color: #16a34a; }
+        .bk-step.done b { background: #16a34a; }
+        .bk-step.active { color: var(--tl-primary); font-weight: 500; }
+        .bk-step.active b { background: var(--tl-primary); }
+        .bk-step.fail { color: #e0252b; font-weight: 500; }
+        .bk-step.fail b { background: #e0252b; }
+        .bk-step-sep { color: var(--tl-muted); }
+        .bk-header .btn-getstarted { margin-left: 12px; }
+        @media (max-width: 991.98px) { .bk-steps { display: none; } }
+
+        /* ---------- Bố cục ---------- */
+        .bk-main { padding: 40px 0 70px; }
+        .bk-title { font-size: clamp(24px, 2.1vw, 30px); font-weight: 700; margin: 0 0 8px; }
+        .bk-sub { color: var(--tl-muted); font-size: 15px; margin: 0 0 28px; }
+        .bk-card { background: #fff; border-radius: 24px; padding: 30px; margin-bottom: 24px; }
+        .bk-card > h2 { font-size: 21px; font-weight: 700; margin: 0 0 20px; }
+        @media (max-width: 575.98px) { .bk-card { padding: 22px 16px; border-radius: 18px; } }
+
+        .bk-btn { border: 0; border-radius: 999px; background: var(--tl-primary); color: #fff; font-weight: 600; padding: 13px 30px; font-size: 14px; }
+        .bk-btn:hover { filter: brightness(.93); color: #fff; }
+        .bk-btn-ghost { background: var(--tl-bg); color: var(--tl-text); }
+        .bk-btn-ghost:hover { color: var(--tl-text); }
+
+        /* ---------- Hạn thanh toán + đếm ngược ---------- */
+        .pm-deadline {
+            display: flex; align-items: center; justify-content: space-between; gap: 12px 20px; flex-wrap: wrap;
+            border: 1px solid var(--tl-border); border-radius: 16px; padding: 16px 22px; margin-bottom: 22px;
+        }
+        .pm-deadline .lbl { font-size: 15px; }
+        .pm-deadline .lbl b { font-size: 17px; }
+        .pm-deadline .lbl em { font-size: 13px; margin-left: 8px; }
+
+        /* ---------- Phương thức thanh toán ---------- */
+        .pm-method {
+            display: flex; align-items: center; gap: 14px; padding: 16px 4px; border-bottom: 1px solid var(--tl-border); cursor: pointer;
+        }
+        .pm-method:last-child { border-bottom: 0; }
+        .pm-method input { width: 22px; height: 22px; flex: 0 0 22px; accent-color: var(--tl-primary); cursor: pointer; margin: 0; }
+        .pm-method .ico {
+            flex: 0 0 42px; height: 42px; border-radius: 12px; background: var(--tl-primary-soft); color: var(--tl-primary);
+            display: inline-flex; align-items: center; justify-content: center; font-size: 20px;
+        }
+        .pm-method .txt { flex: 1; min-width: 0; }
+        .pm-method .txt b { display: block; font-weight: 500; font-size: 16px; }
+        .pm-method .txt small { color: var(--tl-muted); font-size: 13px; }
+        .pm-method.disabled { cursor: not-allowed; opacity: .55; }
+        .pm-method.disabled input { cursor: not-allowed; }
+        .pm-soon { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: #eef0f4; color: #6b7385; white-space: nowrap; }
+
+        /* ---------- Thông tin đơn (cột trái, dưới phương thức) ---------- */
+        .pm-kv { display: grid; grid-template-columns: 170px 1fr; gap: 10px 16px; font-size: 15px; margin: 0; }
+        .pm-kv dt { font-weight: 400; color: var(--tl-muted); }
+        .pm-kv dd { margin: 0; overflow-wrap: anywhere; }
+        @media (max-width: 575.98px) { .pm-kv { grid-template-columns: 1fr; gap: 2px; } .pm-kv dd { margin-bottom: 8px; } }
+        .pm-detail dd { font-weight: 500; }
+        .pm-detail .code { color: #f26b1d; font-size: 18px; font-weight: 600; letter-spacing: .02em; }
+        .pm-detail .red { color: #e0252b; }
+        .pm-expired-note { display: block; color: #e0252b; font-size: 13px; font-weight: 400; margin-top: 4px; }
+        .bk-submit.home { background: var(--tl-primary); }
+
+        /* Popup hết hạn thanh toán */
+        .pm-expired .modal-content { border: 0; border-radius: 24px; text-align: center; padding: 34px 28px 28px; }
+        .pm-expired .ico {
+            width: 92px; height: 92px; border-radius: 50%; margin: 0 auto 16px; background: #fff4e5; color: #f59e0b;
+            display: flex; align-items: center; justify-content: center; font-size: 46px;
+        }
+        .pm-expired h5 { font-weight: 700; font-size: 22px; margin-bottom: 12px; }
+        .pm-expired p { color: var(--tl-muted); font-size: 15px; margin-bottom: 22px; }
+        .pm-expired .bk-btn { padding: 11px 30px; }
+        .pm-copy-code {
+            border: 0; background: var(--tl-primary-soft); color: var(--tl-primary); border-radius: 8px; padding: 4px 10px;
+            font-size: 13px; margin-left: 10px; vertical-align: middle;
+        }
+        .pm-copy-code.copied { background: #dcfce7; color: #16a34a; }
+        .pm-pax { width: 100%; font-size: 14px; }
+        .pm-pax th { color: var(--tl-muted); font-weight: 500; padding: 8px 10px; border-bottom: 1px solid var(--tl-border); white-space: nowrap; }
+        .pm-pax td { padding: 10px; border-bottom: 1px dashed var(--tl-border); }
+        .pm-pax tr:last-child td { border-bottom: 0; }
+
+        /* ---------- Cột phải: phiếu xác nhận + tổng tiền ---------- */
+        .bk-side { position: sticky; top: 24px; }
+        .bk-summary { background: #fff; border-radius: 24px; padding: 30px; }
+        .bk-summary h2 { font-size: 23px; font-weight: 700; margin: 0 0 22px; }
+        .bk-tour { display: flex; gap: 16px; padding-bottom: 22px; border-bottom: 1px solid var(--tl-border); }
+        .bk-tour-img { flex: 0 0 120px; height: 120px; border-radius: 16px; overflow: hidden; background: #e9edf4; }
+        .bk-tour-img img { width: 100%; height: 100%; object-fit: cover; }
+        .bk-tour-name { font-size: 15px; line-height: 1.5; margin-bottom: 6px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; }
+        .bk-tour-code { color: var(--tl-primary); font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+        .bk-acc + .bk-acc, .bk-tour + .bk-acc { border-top: 1px solid var(--tl-border); }
+        .bk-acc-head {
+            width: 100%; border: 0; background: none; padding: 16px 0; display: flex; align-items: center; gap: 12px;
+            color: var(--tl-primary); font-size: 17px; font-weight: 500; text-align: left;
+        }
+        .bk-acc-head > i:first-child { font-size: 19px; }
+        .bk-acc-head .chev { margin-left: auto; color: var(--tl-primary); transition: transform .2s; }
+        .bk-acc.open .bk-acc-head .chev { transform: rotate(180deg); }
+        .bk-acc-body { display: none; padding: 0 0 18px; }
+        .bk-acc.open .bk-acc-body { display: block; }
+        .bk-line { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; font-size: 13px; }
+        .bk-line span { color: var(--tl-muted); }
+        .bk-line b { font-weight: 500; text-align: right; }
+        .bk-cost { display: grid; grid-template-columns: 1fr auto minmax(110px, auto); align-items: center; gap: 0 16px; padding: 7px 0; font-size: 15px; }
+        .bk-cost em { font-style: normal; white-space: nowrap; }
+        .bk-cost b { font-weight: 500; text-align: right; white-space: nowrap; }
+
+        .bk-total-card { background: #fff; border-radius: 24px; padding: 26px 30px; margin-top: 24px; }
+        .bk-sub-line { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; font-size: 15px; }
+        .bk-sub-line b { font-weight: 500; white-space: nowrap; }
+        .bk-total { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 0 0 20px; border-bottom: 2px solid var(--tl-border); }
+        .bk-total span { font-size: 21px; font-weight: 700; }
+        .bk-total strong { font-size: 25px; font-weight: 700; color: var(--tl-price); white-space: nowrap; }
+        .bk-submit {
+            width: 100%; border: 0; border-radius: 999px; padding: 14px; font-size: 16px; font-weight: 600; margin-top: 22px;
+            background: var(--tl-price); color: #fff; transition: filter .15s, background .15s;
+        }
+        .bk-submit:hover:not(:disabled) { filter: brightness(.92); }
+        .bk-submit:disabled { background: var(--tl-bg); color: #9aa3b5; cursor: not-allowed; }
+
+        /* ---------- Trạng thái: đang tải / lỗi / hoàn tất ---------- */
+        .bk-skel { border-radius: 24px; background: linear-gradient(90deg, #eceff5 25%, #f7f9fc 50%, #eceff5 75%); background-size: 200% 100%; animation: pm-shimmer 1.2s infinite linear; }
+        @keyframes pm-shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+        .bk-state { background: #fff; border-radius: 24px; padding: 64px 20px; text-align: center; color: var(--tl-muted); }
+        .bk-state > i { font-size: 3rem; display: block; margin-bottom: 10px; }
+        .bk-state h1 { font-size: clamp(22px, 2vw, 28px); font-weight: 700; color: var(--tl-text); margin: 12px 0 10px; }
+        .bk-state p { margin-bottom: 8px; }
+        .bk-state .bk-btn { display: inline-block; margin: 16px 4px 0; }
+        .pm-ok { color: #16a34a; }
+        .pm-wait { color: #f59e0b; }
+        .pm-bad { color: #e0252b; }
+
+        /* ---------- Hộp chuyển khoản (mã QR) ---------- */
+        .pm-modal .modal-content { border: 0; border-radius: 24px; overflow: hidden; }
+        .pm-modal .modal-header { padding: 16px 24px; border-bottom: 1px solid var(--tl-border); }
+        .pm-modal .modal-title { font-weight: 700; font-size: 18px; }
+        .pm-modal .modal-body { padding: 22px 24px; }
+        .pm-modal .modal-footer { padding: 14px 24px; gap: 12px; border-top: 1px solid var(--tl-border); }
+        .pm-qr { width: 100%; max-width: 260px; aspect-ratio: 1; border-radius: 16px; border: 1px solid var(--tl-border); background: #f7f9fc; display: block; margin: 0 auto; object-fit: contain; }
+        .pm-qr-note { text-align: center; font-size: 13px; color: var(--tl-muted); margin-top: 10px; }
+        .pm-bank-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 0; border-bottom: 1px dashed var(--tl-border); font-size: 15px; }
+        .pm-bank-row:last-child { border-bottom: 0; }
+        .pm-bank-row span { color: var(--tl-muted); white-space: nowrap; }
+        .pm-bank-row b { font-weight: 600; text-align: right; overflow-wrap: anywhere; }
+        .pm-bank-row b.hl { color: var(--tl-price); }
+        .pm-copy { border: 0; background: var(--tl-primary-soft); color: var(--tl-primary); border-radius: 8px; width: 30px; height: 30px; flex: 0 0 30px; }
+        .pm-copy.copied { background: #dcfce7; color: #16a34a; }
+        .pm-warn { background: #fff8e6; border-radius: 12px; padding: 10px 14px; font-size: 13px; color: #8a5a00; margin-top: 14px; }
+        .pm-modal .bk-btn { padding: 11px 24px; }
+        .pm-waiting { display: inline-flex; align-items: center; gap: 8px; color: var(--tl-primary); font-size: 14px; font-weight: 500; margin-right: auto; }
+    </style>
+</head>
+
+<body class="booking-page">
+
+<header class="bk-header">
+    <div class="bk-wrap">
+        <a href="index.html" class="bk-logo"><img src="assets/img/logo.webp" alt="VietTrip"></a>
+        <nav class="bk-steps" aria-label="Các bước đặt tour">
+            <span class="bk-step done"><b>1</b>Nhập thông tin</span><i class="bi bi-chevron-right bk-step-sep"></i>
+            <span class="bk-step active" id="step2"><b>2</b>Thanh toán</span><i class="bi bi-chevron-right bk-step-sep"></i>
+            <span class="bk-step" id="step3"><b>3</b>Hoàn tất</span>
+        </nav>
+        <a class="btn-getstarted" href="pages-login.html">Đăng nhập</a>
+    </div>
+</header>
+
+<main class="bk-main">
+    <div class="bk-wrap">
+
+        <!-- Đang tải -->
+        <div class="row g-4" id="pmLoading">
+            <div class="col-lg-8"><div class="bk-skel" style="height: 520px;"></div></div>
+            <div class="col-lg-4"><div class="bk-skel" style="height: 520px;"></div></div>
+        </div>
+
+        <!-- Lỗi / đã thanh toán / chờ xác minh / hết hạn -->
+        <div class="bk-state d-none" id="pmState"></div>
+
+        <div class="row g-4 d-none" id="pmPage">
+            <!-- ===================== CỘT TRÁI ===================== -->
+            <div class="col-lg-8">
+                <h1 class="bk-title">Đơn hàng của bạn</h1>
+                <p class="bk-sub">Chọn phương thức thanh toán và kiểm tra đơn hàng của bạn</p>
+
+                <section class="bk-card" id="pmMethodCard">
+                    <h2>Chọn phương thức thanh toán</h2>
+
+                    <div class="pm-deadline">
+                        <ul class="mb-0 ps-3"><li class="lbl">Hạn thanh toán: <b id="pmDeadlineText"></b><em>Thanh toán khi đặt chỗ</em></li></ul>
+                    </div>
+
+                    <!-- Báo kết quả VNPAY không thành công (khách huỷ / lỗi) -->
+                    <div class="alert alert-warning d-flex align-items-start gap-2 d-none" id="pmVnpayAlert" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill mt-1"></i><span id="pmVnpayAlertText"></span>
+                    </div>
+
+                    <div id="pmMethods" role="radiogroup" aria-label="Phương thức thanh toán"></div>
+                </section>
+
+                <section class="bk-card">
+                    <h2>Thông tin liên lạc</h2>
+                    <dl class="pm-kv" id="pmContact"></dl>
+                </section>
+
+                <section class="bk-card">
+                    <h2>Chi tiết booking</h2>
+                    <dl class="pm-kv pm-detail" id="pmDetail"></dl>
+                </section>
+
+                <section class="bk-card">
+                    <h2>Danh sách hành khách</h2>
+                    <div class="table-responsive">
+                        <table class="pm-pax">
+                            <thead><tr><th>#</th><th>Họ tên</th><th>Loại khách</th><th>Giới tính</th><th>Ngày sinh</th><th>Phòng đơn</th></tr></thead>
+                            <tbody id="pmPax"></tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <!-- ===================== CỘT PHẢI ===================== -->
+            <aside class="col-lg-4">
+                <div class="bk-side">
+                    <div class="bk-summary">
+                        <h2>Phiếu xác nhận booking</h2>
+                        <div class="bk-tour">
+                            <div class="bk-tour-img" id="sumImg"></div>
+                            <div class="min-w-0">
+                                <div class="bk-tour-name" id="sumName"></div>
+                                <div class="bk-tour-code"><i class="bi bi-upc-scan"></i><span id="sumSchedule"></span></div>
+                            </div>
+                        </div>
+                        <div class="bk-acc" id="accTrip">
+                            <button type="button" class="bk-acc-head" aria-expanded="false">
+                                <i class="bi bi-signpost-2"></i>Thông tin chuyến đi<i class="bi bi-chevron-down chev"></i>
+                            </button>
+                            <div class="bk-acc-body" id="sumTrip"></div>
+                        </div>
+                    </div>
+
+                    <div class="bk-total-card">
+                        <div class="bk-total" id="pmTotalLine"><span>Cần thanh toán</span><strong id="sumTotal"></strong></div>
+                        <button type="button" class="bk-submit" id="pmSubmit">Xác nhận thanh toán</button>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+    </div>
+</main>
+
+<!-- Popup: quá hạn thanh toán -->
+<div class="modal fade pm-expired" id="expiredModal" tabindex="-1" aria-labelledby="expiredTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 520px;">
+        <div class="modal-content">
+            <div class="ico"><i class="bi bi-exclamation-triangle-fill"></i></div>
+            <h5 id="expiredTitle">Đã quá hạn thanh toán</h5>
+            <p>Thời hạn thanh toán đã hết. Quý khách vui lòng quay lại để tìm và đặt lại dịch vụ.</p>
+            <div><button type="button" class="bk-btn" data-bs-dismiss="modal">Quay lại</button></div>
+        </div>
+    </div>
+</div>
+
+<!-- Hộp chuyển khoản / thanh toán tại văn phòng -->
+<div class="modal fade pm-modal" id="payModal" tabindex="-1" aria-labelledby="payModalTitle" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="payModalTitle">Chuyển khoản ngân hàng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body" id="payModalBody"></div>
+            <div class="modal-footer">
+                <span class="pm-waiting"><span class="spinner-border spinner-border-sm"></span>Đang chờ thanh toán...</span>
+                <button type="button" class="bk-btn bk-btn-ghost" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/auth-ui.js"></script>
+<script src="assets/js/chatbot.js"></script>
+<script>
+    /* ============================================================
+       THANH TOÁN — payment.html?code=BK26111700020
+       Luồng (SePay):
+         1. Khách mở QR (SePay) — số tiền + nội dung = mã đơn đã điền sẵn → quét bằng app ngân hàng
+         2. Tiền vào TK → SePay gọi webhook BE (/api/webhooks/sepay) → BE tự chuyển đơn CONFIRMED + PAID
+         3. Trang này hỏi BE mỗi vài giây (/payment-status) → thấy PAID thì chuyển sang "Thanh toán thành công"
+         - Quá 1 giờ chưa thanh toán → BE tự huỷ (làm sau)
+
+       PAY_MOCK = true: thông tin đơn (tour, khách...) vẫn đọc từ localStorage do booking.html lưu,
+       còn TRẠNG THÁI thanh toán luôn lấy từ BE thật: GET /api/public/bookings/{code}/payment-status
+       ============================================================ */
+    const PAY_MOCK = true;
+    const HOLD_MINUTES = 60;   // giữ chỗ 1 giờ (khớp job tự huỷ ở BE sau này)
+    const POLL_MS = 3000;      // hỏi trạng thái mỗi 3 giây
+
+    // Tài khoản nhận tiền (đã liên kết SePay) — sau này lấy từ BE (GET /api/public/bank-account)
+    const BANK = {
+        bankCode: 'MBBank',                // mã ngân hàng theo SePay: MBBank, Vietcombank, ACB...
+        bankName: 'MB Bank',
+        accountNo: '0327117388',      // TODO: thay bằng STK MB đã liên kết SePay
+        accountName: 'NGUYEN HUU VIET'
+    };
+    const HOTLINE = '+84 123 456 789';
+
+    const METHODS = [
+        { key: 'BANK_TRANSFER', name: 'Chuyển khoản' },
+        { key: 'VNPAY',         name: 'Thanh toán VNPAY' }
+    ];
+
+    function $(id) { return document.getElementById(id); }
+    function escapeHtml(str) {
+        return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+    const moneyFmt = new Intl.NumberFormat('vi-VN');
+    const fmtMoney = v => moneyFmt.format(Number(v) || 0) + ' ₫';
+    const pad = n => String(n).padStart(2, '0');
+    const WEEKDAYS = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+    function parseLocal(s) {   // "2026-11-17T11:29:00" hoặc "2026-11-17" → Date giờ máy
+        const [d, t = '00:00:00'] = String(s).split('T');
+        const [y, m, day] = d.split('-').map(Number);
+        const [hh, mm, ss] = t.split(':').map(Number);
+        return new Date(y, m - 1, day, hh || 0, mm || 0, ss || 0);
+    }
+    const vnDate = s => s ? String(s).slice(0, 10).split('-').reverse().join('/') : '—';
+    const longDate = s => s ? `${WEEKDAYS[parseLocal(s).getDay()]}, ${vnDate(s)}` : '—';
+    const fmtDateTime = d => `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    const PAX_TYPE = { ADULT: 'Người lớn', CHILD: 'Trẻ em', TODDLER: 'Trẻ nhỏ' };
+
+    const q = new URLSearchParams(location.search);
+    const code = (q.get('code') || '').trim();
+    const token = q.get('token') || '';
+
+    let booking = null, deadline = null, timer = null, pollTimer = null;
+
+    /* ============================================================
+       GỌI API
+       ============================================================ */
+    async function api(url, options = {}) {
+        const headers = window.AuthUI?.getCurrentUser() ? AuthUI.authHeaders() : { 'Content-Type': 'application/json' };
+        const res = await fetch(url, { ...options, headers });
+        const json = await res.json().catch(() => null);
+        if (!res.ok || !json || !json.success) {
+            const err = new Error((json && json.message) || 'Có lỗi xảy ra, vui lòng thử lại.');
+            err.status = res.status;
+            throw err;
+        }
+        return json.data;
+    }
+
+    const tokenQuery = () => token ? `?token=${encodeURIComponent(token)}` : '';
+
+    async function loadBooking() {
+        if (PAY_MOCK) {
+            const saved = localStorage.getItem('booking:' + code);
+            if (!saved) { const e = new Error('NOT_FOUND'); e.status = 404; throw e; }
+            return JSON.parse(saved);
+        }
+        return api(`/api/public/bookings/${encodeURIComponent(code)}/payment${tokenQuery()}`);
+    }
+
+    /** Trạng thái thật từ BE: { bookingCode, bookingStatus, paymentStatus } */
+    async function fetchStatus() {
+        const res = await fetch(`/api/public/bookings/${encodeURIComponent(code)}/payment-status`, { cache: 'no-store' });
+        const json = await res.json().catch(() => null);
+        if (!res.ok || !json || !json.success) {
+            const err = new Error((json && json.message) || 'Không lấy được trạng thái đơn.');
+            err.status = res.status;
+            throw err;
+        }
+        return json.data;
+    }
+
+    /** Ghép trạng thái mới vào đơn + cập nhật bản lưu localStorage (mock) */
+    function applyStatus(s) {
+        booking = { ...booking, bookingStatus: s.bookingStatus, paymentStatus: s.paymentStatus };
+        if (PAY_MOCK) { try { localStorage.setItem('booking:' + code, JSON.stringify(booking)); } catch (_) {} }
+    }
+
+    /* ---------- Hỏi trạng thái định kỳ: thấy PAID / CANCELLED thì đổi màn hình ---------- */
+    function startPolling() {
+        stopPolling();
+        pollTimer = setInterval(pollOnce, POLL_MS);
+    }
+    function stopPolling() { clearInterval(pollTimer); pollTimer = null; }
+
+    async function pollOnce() {
+        if (document.hidden) return;                 // tab ẩn thì không hỏi, đỡ tốn request
+        try {
+            applyStatus(await fetchStatus());
+        } catch (_) { return; }                       // lỗi mạng tạm thời → lần sau hỏi lại
+        if (booking.paymentStatus === 'PAID') {
+            stopPolling(); clearInterval(timer);
+            bootstrap.Modal.getInstance($('payModal'))?.hide();
+            showPaid();
+        } else if (booking.bookingStatus === 'CANCELLED') {
+            stopPolling(); clearInterval(timer);
+            bootstrap.Modal.getInstance($('payModal'))?.hide();
+            showCancelled();
+        }
+    }
+    // quay lại tab (vd. vừa chuyển khoản trên điện thoại xong) → hỏi ngay, không đợi 3 giây
+    document.addEventListener('visibilitychange', () => { if (!document.hidden && pollTimer) pollOnce(); });
+
+    /* ============================================================
+       KHỞI ĐỘNG: đơn ở trạng thái nào thì hiện màn hình đó
+       ============================================================ */
+    async function init() {
+        if (!code) return showState('bad', 'bi-x-circle', 'Không tìm thấy đơn đặt tour', 'Đường dẫn thanh toán không hợp lệ.', homeButtons());
+        try {
+            booking = await loadBooking();
+        } catch (e) {
+            return showState('bad', 'bi-x-circle', 'Không tìm thấy đơn đặt tour',
+                e.status === 404 || e.message === 'NOT_FOUND'
+                    ? `Không tìm thấy đơn <b>${escapeHtml(code)}</b>, hoặc bạn không có quyền xem đơn này.`
+                    : escapeHtml(e.message), homeButtons());
+        }
+
+        // Trạng thái lấy từ BE (bản trong localStorage có thể đã cũ: webhook đã xác nhận, admin đã huỷ...)
+        try {
+            applyStatus(await fetchStatus());
+        } catch (e) {
+            if (e.status === 404) {   // đơn không còn trong DB (vd. đã xoá dữ liệu test)
+                return showState('bad', 'bi-x-circle', 'Không tìm thấy đơn đặt tour',
+                    `Không tìm thấy đơn <b>${escapeHtml(code)}</b>.`, homeButtons());
+            }
+            /* lỗi mạng → vẫn hiện trang theo dữ liệu đang có, polling sẽ thử lại */
+        }
+
+        document.title = `Thanh toán ${booking.bookingCode} - VietTrip`;
+        // BE trả sẵn paymentDeadline; chưa có thì tính = giờ đặt + 1 giờ
+        deadline = booking.paymentDeadline ? parseLocal(booking.paymentDeadline)
+            : new Date(parseLocal(booking.createdAt).getTime() + HOLD_MINUTES * 60000);
+
+        if (booking.bookingStatus === 'CANCELLED') return showCancelled();
+        if (booking.paymentStatus === 'PAID' || booking.bookingStatus === 'COMPLETED') return showPaid();
+        render();
+        if (Date.now() >= deadline.getTime()) return showExpired();
+        showVnpayResult();
+        startPolling();
+    }
+
+    /**
+     * VNPAY trả khách về: BE (/api/payments/vnpay/return) đã kiểm tra chữ ký + cập nhật đơn,
+     * rồi chuyển về đây kèm ?vnpay=success|failed|invalid.
+     * success → init() đã thấy PAID và hiện "Thanh toán thành công", không tới được đây.
+     */
+    function showVnpayResult() {
+        const r = q.get('vnpay');
+        if (!r) return;
+        showVnpayAlert(r === 'invalid'
+            ? 'Không xác thực được kết quả thanh toán VNPAY. Nếu quý khách đã bị trừ tiền, vui lòng gọi hotline ' + HOTLINE + '.'
+            : 'Thanh toán VNPAY chưa thành công. Quý khách vui lòng thử lại hoặc chọn phương thức khác.');
+        // bỏ ?vnpay= khỏi thanh địa chỉ để F5 không hiện lại thông báo
+        q.delete('vnpay');
+        history.replaceState(null, '', location.pathname + '?' + q.toString());
+    }
+
+    function showVnpayAlert(msg) {
+        $('pmVnpayAlertText').textContent = msg;
+        $('pmVnpayAlert').classList.remove('d-none');
+    }
+
+    /* ============================================================
+       TRANG CHỌN PHƯƠNG THỨC
+       ============================================================ */
+    function render() {
+        renderMethods();
+        renderContact();
+        renderDetail();
+        renderPax();
+        renderSummary();
+        $('pmDeadlineText').textContent = fmtDateTime(deadline);
+        timer = setInterval(checkExpired, 15000);   // không hiện đồng hồ; quá hạn khi đang mở trang → chuyển sang chế độ hết hạn
+        $('pmLoading').classList.add('d-none');
+        $('pmPage').classList.remove('d-none');
+    }
+
+    function renderMethods() {
+        $('pmMethods').innerHTML = METHODS.map((m, i) => `
+      <label class="pm-method ${m.soon ? 'disabled' : ''}">
+        <input type="radio" name="pmMethod" value="${m.key}" ${i === 0 ? 'checked' : ''} ${m.soon ? 'disabled' : ''}>
+        <span class="txt"><b>${m.name}</b></span>
+        ${m.soon ? '<span class="pm-soon">Sắp ra mắt</span>' : ''}
+      </label>`).join('');
+    }
+
+    function renderContact() {
+        const b = booking;
+        $('pmContact').innerHTML = `
+      <dt>Họ tên</dt><dd>${escapeHtml(b.contactName)}</dd>
+      <dt>Điện thoại</dt><dd>${escapeHtml(b.contactPhone)}</dd>
+      <dt>Email</dt><dd>${escapeHtml(b.contactEmail)}</dd>
+      ${b.contactAddress ? `<dt>Địa chỉ</dt><dd>${escapeHtml(b.contactAddress)}</dd>` : ''}
+      ${b.note ? `<dt>Ghi chú</dt><dd>${escapeHtml(b.note)}</dd>` : ''}`;
+    }
+
+    function renderPax() {
+        $('pmPax').innerHTML = (booking.participants || []).map((p, i) => `
+      <tr><td>${i + 1}</td><td><b class="fw-medium">${escapeHtml(p.fullName)}</b></td>
+          <td>${PAX_TYPE[p.participantType] || escapeHtml(p.participantType)}</td>
+          <td>${p.gender === 'MALE' ? 'Nam' : p.gender === 'FEMALE' ? 'Nữ' : 'Khác'}</td>
+          <td>${vnDate(p.dateOfBirth)}</td>
+          <td>${p.singleRoom ? '<i class="bi bi-check2 text-success"></i>' : ''}</td></tr>`).join('');
+    }
+
+    function renderSummary() {
+        const b = booking;
+        $('sumImg').innerHTML = b.thumbnailUrl ? `<img src="${escapeHtml(b.thumbnailUrl)}" alt="">` : '';
+        $('sumName').textContent = b.tourName;
+        $('sumSchedule').textContent = b.scheduleCode || '';
+        $('sumTrip').innerHTML = [
+            ['Ngày đi', longDate(b.departureDate)],
+            ['Ngày về', longDate(b.returnDate)],
+            ['Phương tiện', b.transport || 'Đang cập nhật'],
+            ['Số khách', [[b.totalAdults, 'người lớn'], [b.totalChildren, 'trẻ em'], [b.totalToddlers, 'trẻ nhỏ']]
+                .filter(([n]) => n > 0).map(([n, l]) => `${n} ${l}`).join(', ')]
+        ].map(([k, v]) => `<div class="bk-line"><span>${k}</span><b>${escapeHtml(v)}</b></div>`).join('');
+
+        $('sumTotal').textContent = fmtMoney(b.totalAmount);
+    }
+
+    function checkExpired() {
+        if (Date.now() < deadline.getTime()) return;
+        clearInterval(timer);
+        bootstrap.Modal.getInstance($('payModal'))?.hide();
+        showExpired();
+    }
+
+    /** Chi tiết booking (giống Vietravel): mã đơn, ngày tạo, trị giá, đã trả, còn lại, tình trạng, hạn thanh toán */
+    function renderDetail() {
+        const b = booking;
+        const total = Number(b.totalAmount) || 0;
+        const paid = b.paymentStatus === 'PAID' ? total : 0;
+        $('pmDetail').innerHTML = `
+      <dt>Mã đặt chỗ:</dt>
+      <dd><span class="code">${escapeHtml(b.bookingCode)}</span>
+          <button type="button" class="pm-copy-code" id="pmCopyCode"><i class="bi bi-copy me-1"></i>Sao chép</button></dd>
+      <dt>Ngày tạo:</dt><dd>${fmtDateTime(parseLocal(b.createdAt))}</dd>
+      <dt>Trị giá booking:</dt><dd>${fmtMoney(total)}</dd>
+      <dt>Số tiền đã thanh toán:</dt><dd>${fmtMoney(paid)}</dd>
+      <dt>Số tiền còn lại:</dt><dd>${fmtMoney(total - paid)}</dd>
+      <dt>Tình trạng:</dt><dd id="pmStatusText">Booking của quý khách đã được xác nhận thành công</dd>
+      <dt>Thời hạn thanh toán:</dt>
+      <dd><span class="red">${fmtDateTime(deadline)}</span> - (Booking sẽ tự động hủy nếu quá thời hạn thanh toán trên)
+          <span class="pm-expired-note d-none" id="pmExpiredNote">Đã quá hạn thanh toán.</span></dd>`;
+        $('pmCopyCode').addEventListener('click', async e => {
+            const btn = e.currentTarget;
+            try {
+                await navigator.clipboard.writeText(b.bookingCode);
+                btn.classList.add('copied');
+                btn.innerHTML = '<i class="bi bi-check2 me-1"></i>Đã chép';
+                setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = '<i class="bi bi-copy me-1"></i>Sao chép'; }, 1500);
+            } catch (_) { /* trình duyệt chặn clipboard */ }
+        });
+    }
+
+    document.querySelectorAll('.bk-acc-head').forEach(h => h.addEventListener('click', () => {
+        h.setAttribute('aria-expanded', h.parentElement.classList.toggle('open'));
+    }));
+
+    /* ============================================================
+       XÁC NHẬN THANH TOÁN → hộp hướng dẫn theo phương thức
+       ============================================================ */
+    const payModal = new bootstrap.Modal($('payModal'));
+    let chosen = 'BANK_TRANSFER';
+
+    let expired = false;
+
+    $('pmSubmit').addEventListener('click', () => {
+        if (expired) { location.href = 'index.html'; return; }
+        chosen = document.querySelector('input[name="pmMethod"]:checked')?.value || 'BANK_TRANSFER';
+        if (chosen === 'VNPAY') return payByVnpay();
+        $('payModalTitle').textContent = 'Chuyển khoản';
+        $('payModalBody').innerHTML = bankTransferHtml();
+        payModal.show();
+        pollOnce();   // hỏi ngay 1 lần khi mở QR
+    });
+
+    /** VNPAY: BE tạo giao dịch PENDING + URL có chữ ký → chuyển hẳn sang trang VNPAY */
+    async function payByVnpay() {
+        const btn = $('pmSubmit');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang chuyển sang VNPAY...';
+        $('pmVnpayAlert').classList.add('d-none');
+        try {
+            const res = await fetch(`/api/public/bookings/${encodeURIComponent(code)}/vnpay`, { method: 'POST' });
+            const json = await res.json().catch(() => null);
+            if (!res.ok || !json || !json.success) throw new Error((json && json.message) || 'Không tạo được giao dịch VNPAY.');
+            stopPolling();
+            location.href = json.data.paymentUrl;   // giữ spinner cho tới khi trang VNPAY mở
+        } catch (e) {
+            showVnpayAlert(e.message);
+            btn.disabled = false;
+            btn.textContent = 'Xác nhận thanh toán';
+        }
+    }
+
+    /** Ảnh QR của SePay (chuẩn VietQR): số tiền + nội dung = mã đơn đã điền sẵn, app ngân hàng không phải gõ tay */
+    function qrUrl() {
+        const p = new URLSearchParams({
+            acc: BANK.accountNo,
+            bank: BANK.bankCode,
+            amount: Math.round(Number(booking.totalAmount) || 0),
+            des: booking.bookingCode,          // CHỈ mã đơn, không dấu/cách → SePay tách đúng "Mã thanh toán"
+            template: 'compact'
+        });
+        return `https://qr.sepay.vn/img?${p}`;
+    }
+
+    function bankRow(label, value, copy, hl) {
+        return `<div class="pm-bank-row"><span>${label}</span>
+              <span class="d-flex align-items-center gap-2 min-w-0"><b class="${hl ? 'hl' : ''}">${escapeHtml(value)}</b>
+              ${copy ? `<button type="button" class="pm-copy" data-copy="${escapeHtml(copy)}" title="Sao chép" aria-label="Sao chép ${label}"><i class="bi bi-copy"></i></button>` : ''}</span></div>`;
+    }
+
+    function bankTransferHtml() {
+        return `
+      <img class="pm-qr" src="${qrUrl()}" alt="Mã QR chuyển khoản ${escapeHtml(booking.bookingCode)}">
+      <div class="mt-3">
+        ${bankRow('Ngân hàng', BANK.bankName)}
+        ${bankRow('Số tài khoản', BANK.accountNo, BANK.accountNo)}
+        ${bankRow('Chủ tài khoản', BANK.accountName)}
+        ${bankRow('Số tiền', fmtMoney(booking.totalAmount), String(Math.round(Number(booking.totalAmount) || 0)), true)}
+        ${bankRow('Nội dung', booking.bookingCode, booking.bookingCode, true)}
+      </div>`;
+    }
+
+    $('payModalBody').addEventListener('click', async e => {
+        const btn = e.target.closest('[data-copy]');
+        if (!btn) return;
+        try {
+            await navigator.clipboard.writeText(btn.dataset.copy);
+            btn.classList.add('copied');
+            btn.innerHTML = '<i class="bi bi-check2"></i>';
+            setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = '<i class="bi bi-copy"></i>'; }, 1500);
+        } catch (_) { /* trình duyệt chặn clipboard → bỏ qua */ }
+    });
+
+    /* ============================================================
+       CÁC MÀN HÌNH TRẠNG THÁI
+       ============================================================ */
+    function showState(kind, icon, title, html, buttons, finished) {
+        $('pmLoading').classList.add('d-none');
+        $('pmPage').classList.add('d-none');
+        $('pmState').innerHTML = `
+      <i class="bi ${icon} pm-${kind}"></i>
+      <h1>${title}</h1>
+      ${html ? `<p>${html}</p>` : ''}
+      <div>${buttons || ''}</div>`;
+        $('pmState').classList.remove('d-none');
+        if (finished) {   // bước 3 "Hoàn tất" sáng lên
+            $('step2').className = 'bk-step done';
+            // bước 2 xong: chỉ đổi màu xanh lá, giữ số 2
+            $('step3').className = 'bk-step active';
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    const loggedIn = () => !!window.AuthUI?.getCurrentUser();
+    function homeButtons() {
+        return (loggedIn() ? '<a href="profile.html#bookings" class="bk-btn">Xem đơn của tôi</a>' : '')
+            + '<a href="index.html" class="bk-btn bk-btn-ghost">Về trang chủ</a>';
+    }
+    const codeHtml = () => `<b>${escapeHtml(booking.bookingCode)}</b>`;
+
+    function showPaid() {
+        showState('ok', 'bi-check-circle-fill', 'Thanh toán thành công',
+            `Đơn ${codeHtml()} đã thanh toán thành công.<br>
+       Nếu cần hỗ trợ, gọi hotline <b>${HOTLINE}</b>. Chúc quý khách có chuyến đi vui vẻ!`,
+            homeButtons(), true);
+    }
+
+    /**
+     * Quá hạn thanh toán (giống Vietravel): vẫn hiện thông tin đơn nhưng
+     * - bước 3 thành "Hủy thanh toán" (đỏ), ẩn phần chọn phương thức
+     * - Tình trạng: "Booking đã tự hủy do quá thời hạn thanh toán" + dòng nhỏ đỏ "Đã quá hạn thanh toán."
+     * - nút "Xác nhận thanh toán" → "Quay về trang chủ"; hiện popup báo hết hạn
+     */
+    function showExpired() {
+        clearInterval(timer);
+        stopPolling();
+        $('step2').className = 'bk-step done';
+        // bước 2 xong: chỉ đổi màu xanh lá, giữ số 2
+        $('step3').className = 'bk-step fail';
+        $('step3').innerHTML = '<b>3</b>Hủy thanh toán';
+
+        $('pmMethodCard').classList.add('d-none');
+        $('pmStatusText').textContent = 'Booking đã tự hủy do quá thời hạn thanh toán';
+        $('pmExpiredNote').classList.remove('d-none');
+
+        $('pmTotalLine').classList.add('d-none');
+        const btn = $('pmSubmit');
+        btn.textContent = 'Quay về trang chủ';
+        btn.classList.add('home');
+        expired = true;   // nút giờ là "Quay về trang chủ" (xử lý trong sự kiện click của pmSubmit)
+
+        bootstrap.Modal.getOrCreateInstance($('expiredModal')).show();
+    }
+
+    function showCancelled() {
+        showState('bad', 'bi-x-circle', 'Đơn đã bị huỷ',
+            `Đơn ${codeHtml()} đã bị huỷ. Cần hỗ trợ, vui lòng gọi hotline <b>${HOTLINE}</b>.`,
+            `<a href="tour-details.html?id=${encodeURIComponent(booking.tourId)}" class="bk-btn">Đặt lại tour</a>` + homeButtons());
+    }
+
+    init();
+</script>
+</body>
+</html>

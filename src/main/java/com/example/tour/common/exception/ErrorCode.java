@@ -64,7 +64,6 @@ public enum ErrorCode {
     SCHEDULE_HAS_ACTIVE_BOOKINGS(409, "Lịch còn đơn đặt đang hiệu lực, hãy xử lý các đơn trước khi huỷ lịch", HttpStatus.CONFLICT),
     SCHEDULE_HAS_BOOKINGS(409, "Lịch đã có đơn đặt, không thể xoá. Hãy huỷ lịch thay vì xoá", HttpStatus.CONFLICT),
 
-
     // ========== BOOKING ==========
     BOOKING_NOT_FOUND(404, "Không tìm thấy đơn đặt tour", HttpStatus.NOT_FOUND),
     SCHEDULE_NOT_AVAILABLE(400, "Lịch khởi hành này không còn nhận đặt chỗ", HttpStatus.BAD_REQUEST),
@@ -95,6 +94,12 @@ public enum ErrorCode {
     BOOKING_NOT_PAYABLE(400, "Đơn không ở trạng thái chờ thanh toán", HttpStatus.BAD_REQUEST),
     PAYMENT_EXPIRED(400, "Đã quá hạn thanh toán", HttpStatus.BAD_REQUEST),
     BOOKING_NOT_PAID(400, "Đơn chưa thanh toán, không thể hoàn thành", HttpStatus.BAD_REQUEST),
+    REPORT_INVALID_RANGE(400, "Khoảng thời gian không hợp lệ: từ ngày phải trước đến ngày, tối đa 3 năm", HttpStatus.BAD_REQUEST),
+
+    // ========== REVIEW ==========
+    REVIEW_NOT_FOUND(404, "Không tìm thấy đánh giá", HttpStatus.NOT_FOUND),
+    REVIEW_ALREADY_EXISTS(409, "Đơn này đã được đánh giá", HttpStatus.CONFLICT),
+    REVIEW_NOT_ALLOWED(400, "Chỉ đánh giá được chuyến đi đã hoàn thành", HttpStatus.BAD_REQUEST),
 
     // ========== PROMOTION ==========
     PROMOTION_NOT_FOUND(404, "Không tìm thấy mã khuyến mãi", HttpStatus.NOT_FOUND),

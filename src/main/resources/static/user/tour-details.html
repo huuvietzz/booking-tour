@@ -235,6 +235,59 @@
     @media (max-width: 991.98px)  { .td-others { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     @media (max-width: 575.98px)  { .td-others { grid-template-columns: 1fr; } }
 
+    /* ===== ĐÁNH GIÁ ===== */
+    /* Dòng điểm dưới tiêu đề: ★ 4.6 (12 đánh giá) → bấm cuộn tới mục Đánh giá */
+    .td-rating-line { display: inline-flex; align-items: center; gap: 8px; margin-top: 10px; color: var(--tl-muted); font-size: 15px; }
+    .td-rating-line b { color: var(--tl-text); font-size: 16px; }
+    .td-rating-line:hover span { color: var(--tl-primary); text-decoration: underline; }
+    .td-stars { color: #f5a524; letter-spacing: 1px; white-space: nowrap; }
+    .td-stars .off { color: #dde1e8; }
+
+    /* Tổng quan (giống Tiki): điểm lớn + sao, số đánh giá, các thanh 5★ → 1★ */
+    .td-rv-title { font-size: 17px; font-weight: 600; color: var(--tl-text); margin: 0 0 10px; }
+    .td-rv-score { display: flex; align-items: center; gap: 16px; }
+    .td-rv-avg { font-size: 44px; font-weight: 700; color: var(--tl-text); line-height: 1; }
+    .td-rv-score .td-stars { font-size: 26px; letter-spacing: 3px; }
+    .td-rv-total { color: var(--tl-muted); font-size: 15px; margin: 6px 0 14px; }
+    .td-rv-bars { max-width: 380px; }
+    .td-rv-bar { display: flex; align-items: center; gap: 12px; padding: 4px 0; font-size: 14px; color: var(--tl-muted); }
+    .td-rv-bar .td-stars { font-size: 14px; letter-spacing: 1px; }
+    .td-rv-bar .track { flex: 1; height: 7px; border-radius: 999px; background: #edf0f5; overflow: hidden; }
+    .td-rv-bar .fill { display: block; height: 100%; border-radius: 999px; background: var(--tl-primary); }
+    .td-rv-bar .cnt { width: 24px; text-align: right; }
+
+    /* Lọc theo: Tất cả · 5 sao · ... · 1 sao */
+    .td-rv-filter { border-top: 1px solid var(--tl-border); margin-top: 20px; padding: 18px 0; border-bottom: 1px solid var(--tl-border); }
+    .td-rv-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+    .td-rv-chip {
+      border: 1px solid var(--tl-border); background: #fff; color: var(--tl-text); border-radius: 999px;
+      padding: 7px 18px; font-size: 15px; transition: border-color .15s, color .15s, background .15s;
+    }
+    .td-rv-chip:hover { border-color: var(--tl-primary); color: var(--tl-primary); }
+    .td-rv-chip.active { border-color: var(--tl-primary); background: var(--tl-primary-soft); color: var(--tl-primary); font-weight: 600; }
+
+    /* Mỗi đánh giá (giống Shopee): avatar | tên, sao, thời gian, nội dung, phản hồi */
+    .td-rv-item { display: flex; gap: 14px; padding: 20px 0; border-bottom: 1px solid var(--tl-border); }
+    .td-rv-avatar {
+      flex: 0 0 44px; height: 44px; border-radius: 50%; background: #eef0f4; color: #9aa3b5;
+      display: flex; align-items: center; justify-content: center; font-size: 22px; overflow: hidden;
+    }
+    .td-rv-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .td-rv-body { flex: 1; min-width: 0; }
+    .td-rv-name { font-size: 14px; color: var(--tl-text); margin-bottom: 4px; }
+    .td-rv-body > .td-stars { font-size: 15px; letter-spacing: 2px; }
+    .td-rv-time { color: var(--tl-muted); font-size: 13px; margin: 4px 0 12px; }
+    .td-rv-text { color: var(--tl-text); font-size: 15px; line-height: 1.6; white-space: pre-line; overflow-wrap: anywhere; }
+    .td-rv-text.empty { color: var(--tl-muted); font-style: italic; }
+    .td-rv-reply { margin-top: 14px; background: #f5f5f5; border-radius: 4px; padding: 14px 16px; }
+    .td-rv-reply-title { font-size: 15px; color: var(--tl-text); margin-bottom: 8px; }
+    .td-rv-reply-text { font-size: 14px; color: #555; line-height: 1.6; white-space: pre-line; overflow-wrap: anywhere; }
+
+    .td-rv-more { display: block; margin: 18px auto 0; border: 1px solid var(--tl-border); background: #fff; color: var(--tl-text); border-radius: 999px; padding: 9px 26px; font-weight: 500; }
+    .td-rv-more:hover { border-color: var(--tl-primary); color: var(--tl-primary); }
+    .td-rv-empty { text-align: center; color: var(--tl-muted); padding: 32px 10px; }
+    .td-rv-empty i { display: block; font-size: 2.2rem; opacity: .45; margin-bottom: 6px; }
+
     /* Đang tải / lỗi */
     .td-skel { border-radius: 20px; background: linear-gradient(90deg, #eceff5 25%, #f7f9fc 50%, #eceff5 75%); background-size: 200% 100%; animation: tl-shimmer 1.2s infinite linear; }
     .td-error { background: #fff; border-radius: 24px; padding: 70px 20px; text-align: center; color: var(--tl-muted); }
@@ -277,6 +330,7 @@
       <a href="#sec-intro" id="tabIntro">Giới thiệu</a>
       <a href="#sec-itinerary" id="tabItinerary">Lịch trình</a>
       <a href="#sec-notes">Lưu ý</a>
+      <a href="#sec-reviews">Đánh giá</a>
     </nav>
   </div>
 </div>
@@ -309,6 +363,7 @@
       <!-- Tiêu đề -->
       <div class="td-box mb-4">
         <h1 class="td-title" id="tdTitle"></h1>
+        <a href="#sec-reviews" class="td-rating-line d-none" id="tdRatingLine"></a>
       </div>
 
       <!-- KHÔNG align-items-start: cột phải phải cao bằng cột trái thì khung giá mới "dính" được khi cuộn -->
@@ -485,6 +540,22 @@
               </div>
             </div>
           </section>
+
+          <!-- Đánh giá của khách (chỉ khách đã hoàn thành tour mới đánh giá được) -->
+          <section class="td-section" id="sec-reviews">
+            <h2>Đánh giá của khách hàng</h2>
+            <div class="td-box">
+              <!-- Tổng quan: điểm TB + thanh từng mức sao -->
+              <div id="tdRvSummary"></div>
+              <!-- Lọc theo số sao -->
+              <div class="td-rv-filter">
+                <div class="td-rv-title">Lọc theo</div>
+                <div class="td-rv-chips" id="tdRvChips" role="tablist" aria-label="Lọc đánh giá theo số sao"></div>
+              </div>
+              <div id="tdRvList"></div>
+              <button type="button" class="td-rv-more d-none" id="tdRvMore">Xem thêm đánh giá</button>
+            </div>
+          </section>
         </div>
 
         <!-- ===================== CỘT PHẢI: GIÁ ===================== -->
@@ -602,6 +673,7 @@
        GET /api/public/tours/{id}            → TourResponse (tăng lượt xem)
        GET /api/public/tours/{id}/schedules  → List<ScheduleResponse>: lịch sắp tới, chưa huỷ, tăng dần
        GET /api/public/tours?categoryId=...  → "Các chương trình khác"
+       GET /api/public/tours/{id}/reviews[/summary] → Đánh giá của khách
      ============================================================ */
   function $(id) { return document.getElementById(id); }
 
@@ -672,6 +744,7 @@
 
     if (wantDate) focusSchedule(wantDate);
     loadOthers();
+    loadReviews();
   }
 
   function showError(text) {
@@ -967,6 +1040,145 @@
     const head = e.target.closest('.td-day-head');
     if (head) head.setAttribute('aria-expanded', head.parentElement.classList.toggle('open'));
   });
+
+  /* ============================================================
+     ĐÁNH GIÁ CỦA KHÁCH
+       GET /api/public/tours/{id}/reviews/summary → { averageRating, totalReviews, ratingCounts {5..1} }
+       GET /api/public/tours/{id}/reviews?page&size&rating → Page<PublicReviewResponse> (chỉ đánh giá đang hiển thị)
+     ============================================================ */
+  const RV_SIZE = 5;
+  const rv = { summary: null, rating: null, page: 0, loading: false };
+
+  function starsHtml(n) {
+    const full = Math.round(n);
+    return `<span class="td-stars" aria-label="${n} trên 5 sao">${
+            [1, 2, 3, 4, 5].map(i => `<i class="bi bi-star-fill ${i <= full ? '' : 'off'}"></i>`).join('')}</span>`;
+  }
+  /** "2026-11-19T14:05:33.12" → "2026-11-19 14:05" (giống Shopee) */
+  const reviewTime = s => s ? String(s).slice(0, 16).replace('T', ' ') : '';
+
+  async function loadReviews() {
+    try {
+      rv.summary = await getData(`/api/public/tours/${tourId}/reviews/summary`);
+    } catch (e) {
+      console.error(e);
+      $('sec-reviews').classList.add('d-none');   // phần phụ: lỗi thì ẩn mục, không ảnh hưởng trang
+      document.querySelector('#tdTabs a[href="#sec-reviews"]').classList.add('d-none');
+      return;
+    }
+    renderRatingLine();
+    renderSummary();
+    renderChips();
+    fetchReviewPage(true);
+  }
+
+  /** ★ 4.6 (12 đánh giá) dưới tiêu đề tour */
+  function renderRatingLine() {
+    const s = rv.summary;
+    if (!s.totalReviews) return;
+    $('tdRatingLine').innerHTML = `${starsHtml(s.averageRating)}<b>${s.averageRating.toFixed(1)}</b><span>(${s.totalReviews} đánh giá)</span>`;
+    $('tdRatingLine').classList.remove('d-none');
+  }
+
+  /** Tổng quan (giống Tiki): 4.7 ★★★★★ · (3 đánh giá) · thanh 5★ → 1★ kèm số lượt */
+  function renderSummary() {
+    const s = rv.summary;
+    const max = Math.max(...Object.values(s.ratingCounts), 1);
+    $('tdRvSummary').innerHTML = `
+      <div class="td-rv-title">Tổng quan</div>
+      <div class="td-rv-score">
+        <span class="td-rv-avg">${s.totalReviews ? s.averageRating.toFixed(1) : '0'}</span>${starsHtml(s.averageRating)}
+      </div>
+      <div class="td-rv-total">(${s.totalReviews} đánh giá)</div>
+      <div class="td-rv-bars">
+        ${[5, 4, 3, 2, 1].map(star => {
+      const n = s.ratingCounts[star] || 0;
+      return `<div class="td-rv-bar">
+                    ${starsHtml(star)}
+                    <span class="track"><span class="fill" style="width:${(n / max) * 100}%"></span></span>
+                    <span class="cnt">${n}</span>
+                  </div>`;
+    }).join('')}
+      </div>`;
+  }
+
+  /** Lọc theo: Tất cả · 5 sao · 4 sao · 3 sao · 2 sao · 1 sao */
+  function renderChips() {
+    const chip = (star, label) => {
+      const on = (rv.rating ?? 0) === star;
+      return `<button type="button" class="td-rv-chip ${on ? 'active' : ''}" role="tab" aria-selected="${on}" data-rv-star="${star}">${label}</button>`;
+    };
+    $('tdRvChips').innerHTML = chip(0, 'Tất cả')
+            + [5, 4, 3, 2, 1].map(star => chip(star, `${star} sao`)).join('');
+  }
+
+  /** reset = true: tải lại từ trang đầu (đổi bộ lọc); false: "Xem thêm" nối tiếp */
+  async function fetchReviewPage(reset) {
+    if (rv.loading) return;
+    rv.loading = true;
+    if (reset) { rv.page = 0; $('tdRvList').innerHTML = '<div class="td-rv-empty"><div class="spinner-border text-secondary"></div></div>'; }
+    $('tdRvMore').disabled = true;
+
+    try {
+      const q = new URLSearchParams({ page: rv.page, size: RV_SIZE });
+      if (rv.rating) q.set('rating', rv.rating);
+      const data = await getData(`/api/public/tours/${tourId}/reviews?${q}`);
+      const pageInfo = data.page || { number: data.number, totalPages: data.totalPages };
+      const html = data.content.map(reviewItemHtml).join('');
+
+      if (reset) $('tdRvList').innerHTML = html || emptyReviewsHtml();
+      else $('tdRvList').insertAdjacentHTML('beforeend', html);
+
+      rv.page = pageInfo.number + 1;
+      $('tdRvMore').classList.toggle('d-none', rv.page >= pageInfo.totalPages);
+    } catch (e) {
+      console.error(e);
+      if (reset) $('tdRvList').innerHTML = '<div class="td-rv-empty"><i class="bi bi-wifi-off"></i>Không tải được đánh giá.</div>';
+    } finally {
+      rv.loading = false;
+      $('tdRvMore').disabled = false;
+    }
+  }
+
+  function emptyReviewsHtml() {
+    return rv.rating
+            ? `<div class="td-rv-empty"><i class="bi bi-chat-square"></i>Chưa có đánh giá ${rv.rating} sao.</div>`
+            : `<div class="td-rv-empty"><i class="bi bi-chat-square-heart"></i>Tour chưa có đánh giá nào.</div>`;
+  }
+
+  /** 1 đánh giá (giống Shopee): ảnh đại diện + họ tên tài khoản · sao · thời gian · nội dung · Phản Hồi Của VietTrip */
+  function reviewItemHtml(r) {
+    return `
+      <div class="td-rv-item">
+        <span class="td-rv-avatar" aria-hidden="true">${r.reviewerAvatar
+            ? `<img src="${escapeHtml(r.reviewerAvatar)}" alt="" loading="lazy"
+                      onerror="this.replaceWith(Object.assign(document.createElement('i'), { className: 'bi bi-person' }))">`
+            : '<i class="bi bi-person"></i>'}</span>
+        <div class="td-rv-body">
+          <div class="td-rv-name">${escapeHtml(r.reviewerName)}</div>
+          ${starsHtml(r.rating)}
+          <div class="td-rv-time">${reviewTime(r.createdAt)}</div>
+          <div class="td-rv-text ${r.comment ? '' : 'empty'}">${r.comment ? escapeHtml(r.comment) : 'Khách không để lại bình luận.'}</div>
+          ${r.adminResponse ? `
+          <div class="td-rv-reply">
+            <div class="td-rv-reply-title">Phản Hồi Của VietTrip</div>
+            <div class="td-rv-reply-text">${escapeHtml(r.adminResponse)}</div>
+          </div>` : ''}
+        </div>
+      </div>`;
+  }
+
+  // Bấm 1 nút lọc → tải lại danh sách theo số sao đó
+  $('tdRvChips').addEventListener('click', e => {
+    const chip = e.target.closest('[data-rv-star]');
+    if (!chip) return;
+    const star = Number(chip.dataset.rvStar) || null;
+    if (star === rv.rating) return;
+    rv.rating = star;
+    renderChips();
+    fetchReviewPage(true);
+  });
+  $('tdRvMore').addEventListener('click', () => fetchReviewPage(false));
 
   /* ============================================================
      CÁC CHƯƠNG TRÌNH KHÁC: cùng loại tour, thẻ y hệt tours.html

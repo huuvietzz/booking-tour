@@ -7,6 +7,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,6 +35,14 @@ public interface TourRepository extends JpaRepository<Tour, Integer>, JpaSpecifi
     @Modifying
     @Query("UPDATE Tour t SET t.viewCount = t.viewCount + 1 WHERE t.tourId = :id")
     void incrementViewCount(@Param("id") Integer id);
+
+    /**
+     * Ghi điểm TB + số đánh giá đang hiển thị (ReviewServiceImpl.syncTourRating gọi).
+     * UPDATE thẳng: không phải nạp entity Tour, không đụng updatedAt của tour (đánh giá không phải "sửa tour").
+     */
+    @Modifying(flushAutomatically = true)
+    @Query("UPDATE Tour t SET t.averageRating = :rating, t.totalReviews = :total WHERE t.tourId = :id")
+    void updateRating(@Param("id") Integer id, @Param("rating") BigDecimal rating, @Param("total") Integer total);
 
     /** Số tour thuộc địa điểm (tính cả tour đang ẩn) — chặn xoá địa điểm */
     long countByLocation_LocationId(Integer locationId);

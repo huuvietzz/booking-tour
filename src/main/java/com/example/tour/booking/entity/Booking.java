@@ -89,6 +89,10 @@ public class Booking extends BaseEntity {
     @Column(name = "note", columnDefinition = "TEXT")
     private String note;
 
+    /** Token bí mật để xem/thanh toán đơn qua link (khách vãng lai, link email) */
+    @Column(name = "payment_token", length = 36, unique = true, updatable = false)
+    private String paymentToken;
+
     // Hành khách tạo cùng booking -> cascade
     @Builder.Default
     @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -183,32 +183,6 @@
     }
     .contact-name { font-weight: 600; color: #212529; max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-    /* ===== THANH SỐ LIỆU (tab lọc nhanh kèm số đơn) ===== */
-    /* flex-wrap: hẹp thì xuống dòng, không sinh thanh cuộn ngang */
-    .stat-tabs {
-      display: flex; flex-wrap: wrap; gap: 2px 6px; padding: 6px 8px; margin-bottom: 16px;
-      background: #fff; border: 1px solid #e6e9f0; border-radius: 10px;
-    }
-    .stat-tab {
-      flex: 0 0 auto; display: inline-flex; align-items: center; gap: 7px; white-space: nowrap;
-      border: 0; background: none; border-radius: 7px;
-      padding: 5px 8px; font-size: .84rem; color: #495057; transition: background .15s, color .15s;
-    }
-    .stat-tab:hover { background: #f4f6fb; }
-    .stat-tab.active { background: #eef0fd; color: #4154f1; font-weight: 600; }
-    .stat-tab i { font-size: .9rem; color: #8a94a6; }
-    .stat-tab.active i { color: #4154f1; }
-    .stat-count {
-      min-width: 18px; padding: 0 5px; border-radius: 4px; font-size: .7rem; font-weight: 700; line-height: 16px; text-align: center;
-      border: 1px solid currentColor;
-    }
-    .stat-count.c-all       { color: #4154f1; background: #eef0fd; }
-    .stat-count.c-pending   { color: #b25e00; background: #fff4e5; }
-    .stat-count.c-confirmed { color: #2948b8; background: #e8eefc; }
-    .stat-count.c-paid      { color: #1e7e43; background: #e7f6ec; }
-    .stat-count.c-upcoming  { color: #0b6e7f; background: #e0f4f7; }
-    .stat-count.c-completed { color: #1e7e43; background: #e7f6ec; }
-    .stat-count.c-cancelled { color: #c12a3a; background: #fdecee; }
 
     /* ===== NÚT XUẤT EXCEL ===== */
     .btn-export {
@@ -352,9 +326,6 @@
             <i class="bi bi-file-earmark-excel"></i> Xuất Excel
           </button>
         </div>
-
-        <!-- Số liệu: bấm để lọc danh sách bên dưới (GET /api/admin/bookings/stats) -->
-        <div class="stat-tabs" id="statTabs" role="tablist"></div>
 
         <!-- Thanh công cụ -->
         <div class="d-flex flex-wrap align-items-end gap-3 mb-2">
@@ -740,60 +711,6 @@
       tourChoices.setChoiceByValue(String(value));
     }
     $(id).value = String(value);
-  }
-
-  /* ============================================================
-     0. THANH SỐ LIỆU: GET /api/admin/bookings/stats
-        Bấm 1 mục → lọc bảng bên dưới. Mục đặt giá trị vào các ô trong modal Bộ lọc
-        (chip "Bộ lọc đang kích hoạt" hiện đúng như lọc tay; lọc tay trùng mục nào thì mục đó tự sáng)
-     ============================================================ */
-  const UPCOMING_DAYS = 7;
-  const addDaysIso = n => { const d = new Date(); d.setDate(d.getDate() + n); return toIsoDate(d); };
-
-  const STAT_TABS = [
-    { key: 'total',     label: 'Tất cả',        icon: 'bi-list-ul',         cls: 'c-all',       set: () => ({}) },
-    { key: 'unpaid',    label: 'Chưa thanh toán', icon: 'bi-hourglass-split', cls: 'c-pending', set: () => ({ filterPaymentStatus: 'PENDING' }) },
-    { key: 'confirmed', label: 'Đã xác nhận',   icon: 'bi-check-circle',    cls: 'c-confirmed', set: () => ({ filterBookingStatus: 'CONFIRMED' }) },
-    { key: 'paid',      label: 'Đã thanh toán', icon: 'bi-currency-dollar', cls: 'c-paid',      set: () => ({ filterPaymentStatus: 'PAID' }) },
-    { key: 'upcoming',  label: 'Sắp khởi hành', icon: 'bi-calendar-event',  cls: 'c-upcoming',
-      title: `Đã xác nhận, khởi hành trong ${UPCOMING_DAYS} ngày tới`,
-      set: () => ({ filterBookingStatus: 'CONFIRMED', filterPaymentStatus: 'PAID', filterFromDate: todayIso(), filterToDate: addDaysIso(UPCOMING_DAYS) }) },
-    { key: 'completed', label: 'Hoàn thành',    icon: 'bi-flag',            cls: 'c-completed', set: () => ({ filterBookingStatus: 'COMPLETED' }) },
-    { key: 'cancelled', label: 'Đã hủy',        icon: 'bi-x-circle',        cls: 'c-cancelled', set: () => ({ filterBookingStatus: 'CANCELLED' }) }
-  ];
-  // Các ô lọc do mục điều khiển; tour, tổng tiền, từ khoá giữ nguyên khi đổi mục
-  const TAB_FIELDS = ['filterBookingStatus', 'filterPaymentStatus', 'filterFromDate', 'filterToDate'];
-  let stats = null;
-
-  function renderStatTabs() {
-    const active = STAT_TABS.find(t => {
-      const want = t.set();
-      return TAB_FIELDS.every(id => ($(id).value || '') === (want[id] || ''));
-    });
-    $('statTabs').innerHTML = STAT_TABS.map(t => `
-            <button type="button" class="stat-tab ${active === t ? 'active' : ''}" role="tab" aria-selected="${active === t}"
-                    ${t.title ? `title="${t.title}"` : ''} onclick="selectStatTab('${t.key}')">
-                <i class="bi ${t.icon}"></i>${t.label}
-                <span class="stat-count ${t.cls}">${stats ? (stats[t.key] ?? 0) : '…'}</span>
-            </button>`).join('');
-  }
-
-  function selectStatTab(key) {
-    const want = STAT_TABS.find(t => t.key === key).set();
-    TAB_FIELDS.forEach(id => setFilterValue(id, want[id] || ''));
-    $('dateRangeError').classList.add('d-none');
-    ['filterFromDate', 'filterToDate'].forEach(id => $(id).classList.remove('is-invalid'));
-    onFilterChange();
-  }
-
-  async function loadStats() {
-    try {
-      const { res, json } = await api(`${API}/stats?upcomingDays=${UPCOMING_DAYS}`);
-      if (res.ok && json && json.success) stats = json.data;
-    } catch (e) {
-      if (e.message !== 'UNAUTHORIZED') console.error('Không tải được số liệu đơn', e);
-    }
-    renderStatTabs();
   }
 
   /* ============================================================
@@ -1312,7 +1229,7 @@
     btn.disabled = true;
     try {
       const { res, json } = await api(`${API}/${btn.dataset.id}/${action}`, { method: 'PATCH' });
-      if (res.ok && json && json.success) { showToast(okMsg); fetchBookings(); loadStats(); }
+      if (res.ok && json && json.success) { showToast(okMsg); fetchBookings(); }
       else { showError(errTitle, errorMessage(json, 'Vui lòng thử lại.')); btn.disabled = false; }
     } catch (e) {
       btn.disabled = false;
@@ -1474,7 +1391,6 @@
   }
 
   function updateFilterUI() {
-    renderStatTabs();   // lọc tay trùng mục nào thì mục đó sáng
     const active = activeFilters();
     $('filterCount').textContent = active.length;
     $('filterCount').classList.toggle('d-none', active.length === 0);
@@ -1534,7 +1450,6 @@
      KHỞI ĐỘNG
      ============================================================ */
   (async () => {
-    loadStats();
     loadTourOptions();   // không chờ: danh sách đơn hiện ngay, ô lọc tour tải song song
     fetchBookings();
   })();

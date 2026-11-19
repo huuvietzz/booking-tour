@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta name="robots" content="noindex">
+    <title>Đánh giá chuyến đi - VietTrip</title>
+
+    <link href="assets/img/favicon.png" rel="icon">
+    <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+    <link href="assets/css/main.css" rel="stylesheet">
+    <link href="assets/css/auth-ui.css" rel="stylesheet">
+    <link href="assets/css/tour-card.css" rel="stylesheet">
+
+    <style>
+        /* =========================================================
+           ĐÁNH GIÁ CHUYẾN ĐI — mở từ email (khách vãng lai không cần đăng nhập)
+           cùng giao diện payment.html (class "bk-"), biến màu --tl-*: tour-card.css
+           ========================================================= */
+        body.review-page { background: var(--tl-bg); color: var(--tl-text); }
+        .review-page a { text-decoration: none; }
+        .bk-header { background: #fff; box-shadow: 0 2px 12px rgba(16, 24, 40, .05); }
+        .bk-header .rv-wrap { display: flex; align-items: center; justify-content: space-between; min-height: 92px; }
+        .bk-logo img { height: 56px; }
+        .rv-wrap { max-width: 760px; margin: 0 auto; padding: 0 20px; }
+        .rv-main { padding: 40px 0 70px; }
+
+        .rv-card { background: #fff; border-radius: 24px; padding: 30px; margin-bottom: 20px; }
+        @media (max-width: 575.98px) { .rv-card { padding: 22px 16px; border-radius: 18px; } }
+        .rv-title { font-size: clamp(22px, 2.2vw, 28px); font-weight: 700; margin: 0 0 6px; }
+        .rv-sub { color: var(--tl-muted); margin: 0 0 22px; }
+
+        /* Chuyến đi */
+        .rv-trip { display: flex; gap: 16px; align-items: center; }
+        .rv-trip-img { flex: 0 0 110px; height: 82px; border-radius: 14px; overflow: hidden; background: #e9edf4; }
+        .rv-trip-img img { width: 100%; height: 100%; object-fit: cover; }
+        .rv-trip-name { font-weight: 600; font-size: 16px; line-height: 1.45; margin-bottom: 4px; color: var(--tl-text); }
+        .rv-trip-meta { color: var(--tl-muted); font-size: 14px; }
+
+        /* Chọn sao */
+        .rv-pick { text-align: center; padding: 6px 0 4px; }
+        .rv-pick-stars { display: inline-flex; gap: 6px; }
+        .rv-star { border: 0; background: none; padding: 2px 4px; font-size: 40px; line-height: 1; color: #dde1e8; transition: transform .1s, color .1s; }
+        .rv-star:hover { transform: scale(1.12); }
+        .rv-star.on { color: #f5a524; }
+        .rv-star:focus-visible { outline: 2px solid var(--tl-primary); border-radius: 8px; }
+        .rv-pick-label { min-height: 24px; margin-top: 6px; font-weight: 600; color: #b07400; }
+
+        .rv-textarea { border-radius: 14px; min-height: 140px; resize: vertical; }
+        .rv-count { font-size: 12px; color: var(--tl-muted); }
+        .rv-btn { border: 0; border-radius: 999px; background: var(--tl-primary); color: #fff; font-weight: 600; padding: 13px 34px; font-size: 15px; }
+        .rv-btn:hover:not(:disabled) { filter: brightness(.93); color: #fff; }
+        .rv-btn:disabled { opacity: .6; }
+        .rv-btn-ghost { background: var(--tl-bg); color: var(--tl-text); }
+        .rv-btn-ghost:hover { color: var(--tl-text); }
+
+        /* Đánh giá đã gửi */
+        .rv-done-stars { color: #f5a524; font-size: 22px; letter-spacing: 3px; }
+        .rv-done-stars .off { color: #dde1e8; }
+        .rv-done-text { white-space: pre-line; overflow-wrap: anywhere; margin: 10px 0 0; line-height: 1.6; }
+        .rv-reply { margin-top: 14px; background: #f5f5f5; border-radius: 6px; padding: 12px 16px; font-size: 14px; color: #555; white-space: pre-line; }
+        .rv-reply b { display: block; color: var(--tl-text); font-weight: 500; margin-bottom: 4px; }
+        .rv-hidden-note { background: #fdecee; color: #a12232; border-radius: 10px; padding: 8px 12px; font-size: 13px; margin-bottom: 12px; }
+
+        /* Trạng thái */
+        .rv-state { background: #fff; border-radius: 24px; padding: 56px 20px; text-align: center; color: var(--tl-muted); }
+        .rv-state > i { font-size: 3rem; display: block; margin-bottom: 10px; }
+        .rv-state h1 { font-size: clamp(21px, 2vw, 26px); font-weight: 700; color: var(--tl-text); margin: 10px 0; }
+        .rv-state .rv-btn { display: inline-block; margin: 16px 4px 0; }
+        .rv-skel { border-radius: 24px; height: 420px; background: linear-gradient(90deg, #eceff5 25%, #f7f9fc 50%, #eceff5 75%); background-size: 200% 100%; animation: rv-shimmer 1.2s infinite linear; }
+        @keyframes rv-shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+    </style>
+</head>
+
+<body class="review-page">
+
+<header class="bk-header">
+    <div class="rv-wrap">
+        <a href="index.html" class="bk-logo"><img src="assets/img/logo.webp" alt="VietTrip"></a>
+    </div>
+</header>
+
+<main class="rv-main">
+    <div class="rv-wrap">
+        <div class="rv-skel" id="rvLoading"></div>
+        <div class="rv-state d-none" id="rvState"></div>
+
+        <div class="d-none" id="rvPage">
+            <h1 class="rv-title">Đánh giá chuyến đi</h1>
+            <p class="rv-sub" id="rvGreeting"></p>
+
+            <section class="rv-card"><div class="rv-trip" id="rvTrip"></div></section>
+
+            <!-- Đã đánh giá: xem lại + nút sửa -->
+            <section class="rv-card d-none" id="rvDone"></section>
+
+            <!-- Form đánh giá -->
+            <section class="rv-card d-none" id="rvFormCard">
+                <form id="rvForm" novalidate>
+                    <div class="rv-pick">
+                        <div class="fw-semibold mb-2">Quý khách đánh giá chuyến đi này thế nào?</div>
+                        <div class="rv-pick-stars" id="rvStars" role="radiogroup" aria-label="Số sao"></div>
+                        <div class="rv-pick-label" id="rvStarLabel"></div>
+                    </div>
+                    <label class="form-label mt-3" for="rvComment">Nhận xét <span class="text-muted small">(không bắt buộc)</span></label>
+                    <textarea class="form-control rv-textarea" id="rvComment" maxlength="1000"></textarea>
+                    <div class="d-flex justify-content-between mt-1">
+                        <span class="small text-danger" id="rvError"></span>
+                        <span class="rv-count" id="rvCount">0/1000</span>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2 mt-3">
+                        <button type="button" class="rv-btn rv-btn-ghost d-none" id="rvCancel">Huỷ</button>
+                        <button type="submit" class="rv-btn" id="rvSubmit">Gửi đánh giá</button>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </div>
+</main>
+
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script>
+    /* ============================================================
+       ĐÁNH GIÁ QUA LINK EMAIL — review.html?code=BK...&token=...[&rating=5]
+         GET /api/public/bookings/{code}/review?token=  → chuyến đi + đánh giá đã có
+         PUT /api/public/bookings/{code}/review?token=  {rating, comment} → tạo / sửa
+       Token bí mật của đơn nằm trong link → khách vãng lai không cần đăng nhập
+       ============================================================ */
+    const RATING_TEXT = ['', 'Rất tệ', 'Tệ', 'Bình thường', 'Tốt', 'Tuyệt vời'];
+
+    function $(id) { return document.getElementById(id); }
+    function escapeHtml(str) {
+        return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+    const vnDate = s => s ? String(s).slice(0, 10).split('-').reverse().join('/') : '—';
+    const reviewTime = s => s ? String(s).slice(0, 16).replace('T', ' ') : '';
+    const starsHtml = n => [1, 2, 3, 4, 5].map(i => `<i class="bi bi-star-fill ${i <= n ? '' : 'off'}"></i>`).join('');
+
+    const q = new URLSearchParams(location.search);
+    const code = (q.get('code') || '').trim();
+    const token = (q.get('token') || '').trim();
+    const presetRating = Number(q.get('rating')) || 0;   // bấm sao trong email → chọn sẵn
+    const API = `/api/public/bookings/${encodeURIComponent(code)}/review?token=${encodeURIComponent(token)}`;
+
+    let ctx = null, rating = 0;
+
+    async function call(url, options = {}) {
+        const res = await fetch(url, { ...options, headers: { 'Content-Type': 'application/json' } });
+        const json = await res.json().catch(() => null);
+        if (!res.ok || !json || !json.success) {
+            const err = new Error((json && (json.errors?.join(' • ') || json.message)) || 'Có lỗi xảy ra, vui lòng thử lại.');
+            err.status = res.status;
+            throw err;
+        }
+        return json.data;
+    }
+
+    function showState(icon, color, title, html, buttons = '') {
+        $('rvLoading').classList.add('d-none');
+        $('rvPage').classList.add('d-none');
+        $('rvState').innerHTML = `<i class="bi ${icon}" style="color:${color}"></i><h1>${title}</h1>${html ? `<p>${html}</p>` : ''}<div>${buttons}</div>`;
+        $('rvState').classList.remove('d-none');
+    }
+    const homeBtn = '<a href="index.html" class="rv-btn rv-btn-ghost">Về trang chủ</a>';
+
+    async function init() {
+        if (!code || !token) return showState('bi-link-45deg', '#e0252b', 'Đường dẫn không hợp lệ',
+            'Vui lòng mở lại đường dẫn trong email mời đánh giá của VietTrip.', homeBtn);
+        try {
+            ctx = await call(API);
+        } catch (e) {
+            return showState('bi-x-circle', '#e0252b', 'Không tìm thấy chuyến đi',
+                e.status === 404 ? 'Đường dẫn không đúng hoặc đã hết hiệu lực. Vui lòng mở lại đường dẫn trong email.' : escapeHtml(e.message),
+                homeBtn);
+        }
+        if (ctx.bookingStatus !== 'COMPLETED') {
+            return showState('bi-hourglass-split', '#f59e0b', 'Chưa thể đánh giá',
+                `Chuyến đi <b>${escapeHtml(ctx.tourName)}</b> chưa kết thúc. Quý khách có thể đánh giá sau khi hoàn thành chuyến đi.`, homeBtn);
+        }
+        render();
+    }
+
+    function render() {
+        document.title = `Đánh giá ${ctx.tourName} - VietTrip`;
+        $('rvGreeting').innerHTML = `Xin chào <b>${escapeHtml(ctx.reviewerName)}</b>, cảm ơn Quý khách đã đồng hành cùng VietTrip.`;
+        $('rvTrip').innerHTML = `
+          <div class="rv-trip-img">${ctx.thumbnailUrl ? `<img src="${escapeHtml(ctx.thumbnailUrl)}" alt="">` : ''}</div>
+          <div class="min-w-0">
+            <a class="rv-trip-name d-block" href="tour-details.html?id=${encodeURIComponent(ctx.tourId)}">${escapeHtml(ctx.tourName)}</a>
+            <div class="rv-trip-meta"><i class="bi bi-calendar3 me-1"></i>${vnDate(ctx.departureDate)} → ${vnDate(ctx.returnDate)}
+              · Mã đặt chỗ <b>${escapeHtml(ctx.bookingCode)}</b></div>
+          </div>`;
+        $('rvLoading').classList.add('d-none');
+        $('rvPage').classList.remove('d-none');
+
+        if (ctx.review && !presetRating) showDone();
+        else showForm(ctx.review, presetRating);
+    }
+
+    /* ---------- Đã đánh giá ---------- */
+    function showDone() {
+        const r = ctx.review;
+        $('rvFormCard').classList.add('d-none');
+        $('rvDone').innerHTML = `
+          ${r.hidden ? `<div class="rv-hidden-note"><i class="bi bi-eye-slash me-1"></i>Đánh giá đang bị ẩn khỏi trang tour${
+            r.hiddenReason ? ` · Lý do: ${escapeHtml(r.hiddenReason)}` : ''}</div>` : ''}
+          <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+            <div>
+              <div class="fw-semibold mb-1">Đánh giá của Quý khách</div>
+              <div class="rv-done-stars">${starsHtml(r.rating)}</div>
+              <div class="rv-trip-meta">${reviewTime(r.updatedAt || r.createdAt)}${r.updatedAt ? ' (đã sửa)' : ''}</div>
+            </div>
+            <button type="button" class="rv-btn rv-btn-ghost" id="rvEdit"><i class="bi bi-pencil me-1"></i>Sửa đánh giá</button>
+          </div>
+          ${r.comment ? `<p class="rv-done-text">${escapeHtml(r.comment)}</p>` : ''}
+          ${r.adminResponse ? `<div class="rv-reply"><b>Phản Hồi Của VietTrip</b>${escapeHtml(r.adminResponse)}</div>` : ''}
+          <div class="mt-3"><a href="tour-details.html?id=${encodeURIComponent(ctx.tourId)}#sec-reviews">Xem các đánh giá khác của tour <i class="bi bi-arrow-right"></i></a></div>`;
+        $('rvDone').classList.remove('d-none');
+        $('rvEdit').addEventListener('click', () => showForm(ctx.review));
+    }
+
+    /* ---------- Form ---------- */
+    function showForm(existing, preset = 0) {
+        $('rvDone').classList.add('d-none');
+        $('rvFormCard').classList.remove('d-none');
+        $('rvComment').value = existing?.comment || '';
+        $('rvCancel').classList.toggle('d-none', !existing);
+        $('rvSubmit').textContent = existing ? 'Cập nhật đánh giá' : 'Gửi đánh giá';
+        $('rvError').textContent = '';
+        setRating(preset || existing?.rating || 0);
+        updateCount();
+    }
+
+    function setRating(n) {
+        rating = n;
+        $('rvStars').innerHTML = [1, 2, 3, 4, 5].map(i => `
+          <button type="button" class="rv-star ${i <= n ? 'on' : ''}" role="radio" aria-checked="${i === n}"
+                  aria-label="${i} sao - ${RATING_TEXT[i]}" data-star="${i}"><i class="bi bi-star-fill"></i></button>`).join('');
+        $('rvStarLabel').textContent = RATING_TEXT[n] || '';
+    }
+
+    $('rvStars').addEventListener('click', e => {
+        const b = e.target.closest('[data-star]');
+        if (b) { setRating(Number(b.dataset.star)); $('rvError').textContent = ''; }
+    });
+    // rê chuột: xem trước số sao
+    $('rvStars').addEventListener('mouseover', e => {
+        const b = e.target.closest('[data-star]');
+        if (!b) return;
+        const n = Number(b.dataset.star);
+        $('rvStars').querySelectorAll('.rv-star').forEach((s, i) => s.classList.toggle('on', i < n));
+        $('rvStarLabel').textContent = RATING_TEXT[n];
+    });
+    $('rvStars').addEventListener('mouseleave', () => setRating(rating));
+
+    const updateCount = () => { $('rvCount').textContent = `${$('rvComment').value.length}/1000`; };
+    $('rvComment').addEventListener('input', updateCount);
+    $('rvCancel').addEventListener('click', showDone);
+
+    $('rvForm').addEventListener('submit', async e => {
+        e.preventDefault();
+        if (!rating) { $('rvError').textContent = 'Vui lòng chọn số sao.'; return; }
+        const btn = $('rvSubmit'), old = btn.textContent;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang gửi...';
+        try {
+            ctx.review = await call(API, { method: 'PUT', body: JSON.stringify({ rating, comment: $('rvComment').value.trim() }) });
+            // bỏ ?rating= khỏi link để tải lại trang thì xem đánh giá, không mở lại form
+            q.delete('rating');
+            history.replaceState(null, '', location.pathname + '?' + q.toString());
+            showState('bi-check-circle-fill', '#16a34a', 'Cảm ơn Quý khách đã đánh giá!',
+                'Đánh giá của Quý khách giúp VietTrip phục vụ tốt hơn và giúp du khách khác chọn tour phù hợp.',
+                `<a href="tour-details.html?id=${encodeURIComponent(ctx.tourId)}#sec-reviews" class="rv-btn">Xem đánh giá trên trang tour</a>`
+                + `<button type="button" class="rv-btn rv-btn-ghost" onclick="backToReview()">Xem lại đánh giá</button>`);
+        } catch (err) {
+            $('rvError').textContent = err.message;
+        } finally {
+            btn.disabled = false;
+            btn.textContent = old;
+        }
+    });
+
+    function backToReview() {
+        $('rvState').classList.add('d-none');
+        $('rvPage').classList.remove('d-none');
+        showDone();
+    }
+
+    init();
+</script>
+</body>
+</html>

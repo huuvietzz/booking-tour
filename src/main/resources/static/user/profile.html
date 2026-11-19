@@ -371,6 +371,7 @@
         .bk-review.pending { background: #fffaf0; color: #8a5a00; }
         .bk-review.pending i.bi-chat-heart { margin-right: 6px; }
         .bk-review.done { background: #fbfcfe; color: #495057; }
+        .rv-hidden-note { background: #fdecee; color: #a12232; border-radius: 10px; padding: 8px 12px; font-size: 13px; }
         .bk-review .btn-link { font-size: 14px; color: var(--accent-color); text-decoration: none; font-weight: 600; }
         .btn-review { background: #ffb400; color: #fff; border: 0; border-radius: 8px; font-size: 14px; font-weight: 600; padding: 6px 14px; }
         .btn-review:hover { background: #f0a500; color: #fff; }
@@ -1627,14 +1628,14 @@
 
     // =====================================================================
     // ĐÁNH GIÁ TOUR — chỉ đơn "Hoàn thành", mỗi đơn 1 đánh giá (reviews.booking_id UNIQUE), sửa lại được
-    // CHƯA CÓ BE → REVIEW_MOCK = true: lưu tạm trong localStorage của trình duyệt.
-    // Khi có BE đặt REVIEW_MOCK = false. API dự kiến (user lấy từ token):
-    //   - BookingCardResponse / BookingResponse có thêm field  review: { rating, comment, approved, adminResponse, createdAt } | null
+    // API (user lấy từ token):
+    //   - BookingCardResponse / BookingResponse có field  review: { reviewId, rating, comment, adminResponse,
+    //       hidden, hiddenReason, createdAt, updatedAt } | null
     //   - POST /api/users/bookings/my/{bookingId}/review   body { rating: 1..5, comment }  → tạo mới
     //   - PUT  /api/users/bookings/my/{bookingId}/review   body { rating: 1..5, comment }  → sửa đánh giá đã có
     //     BE kiểm tra: đơn của chính mình, đã COMPLETED; POST thì chưa có review, PUT thì phải có rồi
     // =====================================================================
-    const REVIEW_MOCK = true;
+    const REVIEW_MOCK = false;   // true = giả lập bằng localStorage (chỉ dùng khi chưa có BE)
     const REVIEW_MAX = 1000;
     const RATING_TEXT = ['', 'Rất tệ', 'Tệ', 'Bình thường', 'Tốt', 'Tuyệt vời'];
 
@@ -1718,6 +1719,9 @@
 
     function reviewViewHtml(r) {
         return `
+            ${r.hidden ? `
+            <div class="rv-hidden-note mb-2"><i class="bi bi-eye-slash me-1"></i>Đánh giá đang bị ẩn khỏi trang tour${
+            r.hiddenReason ? ` · Lý do: ${escapeHtml(r.hiddenReason)}` : ''}</div>` : ''}
             <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
                 ${starsHtml(r.rating, 'lg')}<b>${RATING_TEXT[r.rating]}</b>
             </div>

@@ -28,4 +28,12 @@ public final class SecurityUtils {
     public static Integer getCurrentUserId() {
         return getCurrentUser().getUserId();
     }
+
+    /** Đã đăng nhập → userId; khách vãng lai (API public, không có / sai JWT) → null. KHÔNG ném lỗi */
+    public static Integer getCurrentUserIdOrNull() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof User user
+                ? user.getUserId()
+                : null;
+    }
 }

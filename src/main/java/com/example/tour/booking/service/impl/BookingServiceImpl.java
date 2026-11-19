@@ -1,5 +1,6 @@
 package com.example.tour.booking.service.impl;
 
+import com.example.tour.booking.constant.BookingConstants;
 import com.example.tour.booking.constant.BookingStatus;
 import com.example.tour.booking.constant.ParticipantType;
 import com.example.tour.booking.constant.PaymentStatus;
@@ -8,6 +9,7 @@ import com.example.tour.booking.dto.request.*;
 import com.example.tour.booking.dto.response.*;
 import com.example.tour.booking.entity.Booking;
 import com.example.tour.booking.entity.Participant;
+import com.example.tour.booking.event.BookingCompletedEvent;
 import com.example.tour.booking.event.BookingCreatedEvent;
 import com.example.tour.booking.repository.BookingRepository;
 import com.example.tour.booking.service.BookingService;
@@ -17,6 +19,9 @@ import com.example.tour.common.exception.ErrorCode;
 import com.example.tour.promotion.entity.Promotion;
 import com.example.tour.promotion.repository.PromotionRepository;
 import com.example.tour.promotion.service.PromotionService;
+import com.example.tour.review.dto.response.ReviewResponse;
+import com.example.tour.review.entity.Review;
+import com.example.tour.review.repository.ReviewRepository;
 import com.example.tour.tour.constant.ScheduleStatus;
 import com.example.tour.tour.entity.Schedule;
 import com.example.tour.tour.entity.Tour;
@@ -53,6 +58,7 @@ public class BookingServiceImpl implements BookingService {
     private final ScheduleRepository scheduleRepository;
     private final TourRepository tourRepository;
     private final PromotionRepository promotionRepository;
+    private final ReviewRepository reviewRepository;
     private final PromotionService promotionService;
     private final ApplicationEventPublisher eventPublisher;
 
@@ -139,6 +145,7 @@ public class BookingServiceImpl implements BookingService {
                 .bookingStatus(BookingStatus.CONFIRMED)
                 .paymentStatus(PaymentStatus.PENDING)
                 .note(trimToNull(request.getNote()))
+                .paymentToken(UUID.randomUUID().toString())     // 122 bit ngẫu nhiên, không đoán được
                 .build();
 
         // Hành khách: addParticipant gắn 2 chiều (booking ↔ participant); cascade ALL tự lưu theo booking
@@ -169,9 +176,15 @@ public class BookingServiceImpl implements BookingService {
     @Transactional(readOnly = true)
     public Page<BookingCardResponse> getMyBookings(Integer userId, BookingStatus bookingStatus,
                                                    PaymentStatus paymentStatus, Pageable pageable) {
-        return bookingRepository
-                .findAll(BookingSpecification.ofUser(userId, bookingStatus, paymentStatus), pageable)
-                .map(this::toBookingCardResponse);
+        Page<Booking> page = bookingRepository.findAll(
+                BookingSpecification.ofUser(userId, bookingStatus, paymentStatus), pageable);
+
+        List<Integer> ids = page.getContent().stream().map(Booking::getBookingId).toList();
+        Map<Integer, Review> reviews = ids.isEmpty() ? Map.of()
+                : reviewRepository.findByBooking_BookingIdIn(ids).stream()
+                .collect(Collectors.toMap(r -> r.getBooking().getBookingId(), r -> r));
+
+        return page.map(b -> toBookingCardResponse(b, reviews.get(b.getBookingId())));
     }
 
     /** Chi tiết đơn của CHÍNH khách đang đăng nhập. Đơn của người khác → báo "không tìm thấy" (không lộ là có tồn tại) */
@@ -181,7 +194,12 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingRepository.findWithDetailsByBookingId(bookingId)
                 .filter(b -> isOwner(b, userId))
                 .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
-        return toBookingResponse(booking);
+
+        BookingResponse response = toBookingResponse(booking);
+        // Gắn đánh giá của khách (nếu có) để popup chi tiết hiện "Đánh giá của bạn" / nút "Đánh giá ngay"
+        response.setReview(ReviewResponse.of(
+                reviewRepository.findByBooking_BookingId(bookingId).orElse(null)));
+        return response;
     }
 
     // ========== ADMIN ==========
@@ -321,6 +339,11 @@ public class BookingServiceImpl implements BookingService {
             throw new AppException(ErrorCode.BOOKING_TOUR_NOT_FINISHED);
         }
         booking.setBookingStatus(BookingStatus.COMPLETED);
+        Schedule s = booking.getSchedule();
+        eventPublisher.publishEvent(new BookingCompletedEvent(
+                booking.getBookingCode(), booking.getPaymentToken(),
+                booking.getContactName(), booking.getContactEmail(),
+                s.getTour().getTourName(), s.getDepartureDate(), s.getReturnDate()));
         return toBookingResponse(booking);
     }
 
@@ -395,6 +418,16 @@ public class BookingServiceImpl implements BookingService {
                 .build();
     }
 
+    /** Trang thanh toán: đúng token HOẶC là chủ đơn. Sai → "không tìm thấy" */
+    @Override
+    @Transactional(readOnly = true)
+    public BookingResponse getBookingForPayment(String bookingCode, String token, Integer userId) {
+        Booking booking = bookingRepository.findWithDetailsByBookingCode(bookingCode.trim().toUpperCase())
+                .filter(b -> isOwner(b, userId) || tokenMatches(b.getPaymentToken(), token))
+                .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+        return toBookingResponse(booking);
+    }
+
     // ========== HỖ TRỢ ==========
     private void validateParticipants(BookingRequest request, LocalDate departure) {
         int adults = 0, children = 0, toddlers = 0;
@@ -455,6 +488,14 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
+    /** So sánh constant-time: không lộ token qua thời gian phản hồi */
+    private static boolean tokenMatches(String expected, String given) {
+        return expected != null && given != null
+                && java.security.MessageDigest.isEqual(
+                expected.getBytes(java.nio.charset.StandardCharsets.UTF_8),
+                given.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    }
+
     /** Nhãn tiếng Việt — giống badge trên trang admin */
     private static String bookingStatusText(BookingStatus s) {
         if (s == null) return "";
@@ -507,7 +548,7 @@ public class BookingServiceImpl implements BookingService {
                 .build();
     }
 
-    private BookingCardResponse toBookingCardResponse(Booking b) {
+    private BookingCardResponse toBookingCardResponse(Booking b, Review review) {
         Schedule s = b.getSchedule();
         Tour t = s.getTour();
         return BookingCardResponse.builder()
@@ -526,6 +567,7 @@ public class BookingServiceImpl implements BookingService {
                 .totalAmount(b.getTotalAmount())
                 .paymentStatus(b.getPaymentStatus())
                 .bookingStatus(b.getBookingStatus())
+                .review(ReviewResponse.of(review))
                 .build();
     }
 
@@ -586,6 +628,9 @@ public class BookingServiceImpl implements BookingService {
                                 p.getPhoneNumber(),
                                 Boolean.TRUE.equals(p.getSingleRoom())))
                         .toList())
+                .paymentToken(b.getPaymentToken())
+                .paymentDeadline(b.getCreatedAt() != null
+                        ? b.getCreatedAt().plusSeconds(BookingConstants.HOLD_SECONDS) : null)
                 .createdAt(b.getCreatedAt())
                 .updatedAt(b.getUpdatedAt())
                 .build();

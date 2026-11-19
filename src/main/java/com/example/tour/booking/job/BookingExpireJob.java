@@ -1,5 +1,6 @@
 package com.example.tour.booking.job;
 
+import com.example.tour.booking.constant.BookingConstants;
 import com.example.tour.booking.constant.BookingStatus;
 import com.example.tour.booking.constant.PaymentStatus;
 import com.example.tour.booking.repository.BookingRepository;
@@ -23,16 +24,12 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class BookingExpireJob {
-
-    /** Giữ chỗ 1 giờ — khớp HOLD_MINUTES ở payment.html, email và VnpayServiceImpl */
-    public static final int HOLD_MINUTES = 60;
-
     private final BookingRepository bookingRepository;
     private final BookingService bookingService;
 
     @Scheduled(fixedDelay = 60_000, initialDelay = 30_000)
     public void cancelExpiredBookings() {
-        LocalDateTime before = LocalDateTime.now().minusMinutes(HOLD_MINUTES);
+        LocalDateTime before = LocalDateTime.now().minusSeconds(BookingConstants.HOLD_SECONDS);
         List<Integer> ids = bookingRepository.findIdsByStatusCreatedBefore(
                 BookingStatus.CONFIRMED, PaymentStatus.PENDING, before);
 

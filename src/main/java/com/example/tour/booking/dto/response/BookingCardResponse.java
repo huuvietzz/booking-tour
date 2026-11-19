@@ -2,6 +2,7 @@ package com.example.tour.booking.dto.response;
 
 import com.example.tour.booking.constant.BookingStatus;
 import com.example.tour.booking.constant.PaymentStatus;
+import com.example.tour.review.dto.response.ReviewResponse;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -35,4 +36,6 @@ public class BookingCardResponse {
     private BigDecimal totalAmount;
     private PaymentStatus paymentStatus;
     private BookingStatus bookingStatus;
+
+    private ReviewResponse review;   // null = chưa đánh giá
 }

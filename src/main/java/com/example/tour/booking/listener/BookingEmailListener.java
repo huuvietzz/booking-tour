@@ -1,5 +1,6 @@
 package com.example.tour.booking.listener;
 
+import com.example.tour.booking.constant.BookingConstants;
 import com.example.tour.booking.constant.ParticipantType;
 import com.example.tour.booking.dto.response.BookingResponse;
 import com.example.tour.booking.event.BookingCreatedEvent;
@@ -37,10 +38,6 @@ import java.util.Map;
 @Component
 @RequiredArgsConstructor
 public class BookingEmailListener {
-
-    /** Giữ chỗ 1 giờ — khớp HOLD_MINUTES ở payment.html và job tự huỷ (làm sau) */
-    public static final int HOLD_MINUTES = 60;
-
     private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final DateTimeFormatter DATE_TIME = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
@@ -61,7 +58,10 @@ public class BookingEmailListener {
         BookingResponse b = event.getBooking();
         try {
             LocalDateTime created = b.getCreatedAt() != null ? b.getCreatedAt() : LocalDateTime.now();
-            LocalDateTime deadline = created.plusMinutes(HOLD_MINUTES);
+            // Hạn thanh toán do BE tính sẵn (createdAt + BookingConstants.HOLD_SECONDS) → khớp job tự huỷ + payment.html
+            LocalDateTime deadline = b.getPaymentDeadline() != null
+                    ? b.getPaymentDeadline()
+                    : LocalDateTime.now().plusSeconds(BookingConstants.HOLD_SECONDS);
             String subject = "Thông tin đặt chỗ tour trọn gói tại VietTrip - Mã đặt chỗ " + b.getBookingCode();
 
             // QR = link trang đơn hàng / thanh toán: khách quét bằng điện thoại là mở ngay đơn của mình
@@ -76,9 +76,13 @@ public class BookingEmailListener {
     // NỘI DUNG EMAIL (HTML, style inline vì Gmail / Outlook bỏ thẻ <style>)
     // Mọi dữ liệu khách nhập đều qua esc() → chống chèn HTML vào email
     // =====================================================================
-    /** Trang đơn hàng: chưa trả tiền → chọn phương thức thanh toán; đã trả / đã huỷ → hiện trạng thái đơn */
+    /** Link trang đơn hàng / thanh toán — kèm token để mở được trên mọi thiết bị, không cần đăng nhập */
     private String bookingUrl(BookingResponse b) {
-        return baseUrl + "/user/payment.html?code=" + URLEncoder.encode(b.getBookingCode(), StandardCharsets.UTF_8);
+        String url = baseUrl + "/user/payment.html?code=" + URLEncoder.encode(b.getBookingCode(), StandardCharsets.UTF_8);
+        if (b.getPaymentToken() != null) {
+            url += "&token=" + URLEncoder.encode(b.getPaymentToken(), StandardCharsets.UTF_8);
+        }
+        return url;
     }
 
     private String buildHtml(BookingResponse b, LocalDateTime deadline) {

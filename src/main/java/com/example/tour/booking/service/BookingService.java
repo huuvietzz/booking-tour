@@ -40,4 +40,6 @@ public interface BookingService {
     List<BookingExcelModel> exportBookings(BookingFilterRequest filter, Sort sort);
 
     BookingPaymentStatusResponse getPaymentStatus(String bookingCode);
+
+    BookingResponse getBookingForPayment(String bookingCode, String token, Integer userId);
 }

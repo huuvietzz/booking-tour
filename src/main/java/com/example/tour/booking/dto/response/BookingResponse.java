@@ -4,9 +4,11 @@ import com.example.tour.booking.constant.BookingStatus;
 import com.example.tour.booking.constant.ParticipantType;
 import com.example.tour.booking.constant.PaymentStatus;
 import com.example.tour.common.constant.Gender;
+import com.example.tour.review.dto.response.ReviewResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -73,4 +75,11 @@ public class BookingResponse {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    private String paymentToken;              // để booking.html gắn vào link payment.html
+    private LocalDateTime paymentDeadline;    // hạn thanh toán = createdAt + HOLD_SECONDS
+
+    /** Đánh giá của khách cho đơn này (null = chưa đánh giá). Chỉ gán ở API "đơn của tôi" */
+    @Setter
+    private ReviewResponse review;   // null = chưa đánh giá
 }

@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface PaymentRepository extends JpaRepository<Payment, Integer>, JpaSpecificationExecutor<Payment> {
@@ -38,4 +39,16 @@ public interface PaymentRepository extends JpaRepository<Payment, Integer>, JpaS
     // ReturnUrl chỉ đọc (khi confirm-on-return=false)
     @EntityGraph(attributePaths = {"booking"})
     Optional<Payment> findByMethodAndTransactionId(PaymentMethod method, String transactionId);
+
+    /** UPDATE 1 câu cho tất cả dòng quá hạn. Set updatedAt tay vì UPDATE hàng loạt không chạy auditing */
+    @Modifying
+    @Query("""
+           update Payment p set p.transactionStatus = :failed, p.updatedAt = :now
+           where p.method = :method and p.transactionStatus = :pending and p.createdAt < :before
+           """)
+    int expirePending(@Param("method") PaymentMethod method,
+                      @Param("pending") TransactionStatus pending,
+                      @Param("failed") TransactionStatus failed,
+                      @Param("before") LocalDateTime before,
+                      @Param("now") LocalDateTime now);
 }

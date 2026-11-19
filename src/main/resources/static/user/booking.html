@@ -1523,10 +1523,9 @@
     try {
       // Có token → BE gắn đơn vào tài khoản; không có → đơn của khách vãng lai
       const booking = await api('/api/public/bookings', { method: 'POST', body: buildPayload(), auth: !!user() });
-      // Chỗ đã được giữ → sang trang thanh toán. Lưu tạm đơn vào localStorage (tab mới mở từ link email vẫn đọc được) cho payment.html (đang giả lập, chưa có API)
-      try { localStorage.setItem('booking:' + booking.bookingCode, JSON.stringify({ ...booking, thumbnailUrl: booking.thumbnailUrl || tour.thumbnailUrl })); } catch (_) { /* bỏ qua */ }
+      // Chỗ đã được giữ → sang trang thanh toán. payment.html tự lấy đơn từ BE bằng mã đơn + token (không lưu gì ở trình duyệt)
       const params = new URLSearchParams({ code: booking.bookingCode });
-      if (booking.paymentToken) params.set('token', booking.paymentToken);   // khách vãng lai: BE trả token để xem / thanh toán đơn
+      params.set('token', booking.paymentToken);   // token bí mật của đơn: ai có link mới xem / thanh toán được
       // Giữ nút đang quay tới khi trang thanh toán mở hẳn (không để finally đổi nút về "Đặt tour")
       redirecting = true;
       location.replace('payment.html?' + params);   // replace: bấm Back không quay lại form đã gửi

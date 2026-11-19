@@ -1,5 +1,6 @@
 package com.example.tour.payment.service.impl;
 
+import com.example.tour.booking.constant.BookingConstants;
 import com.example.tour.booking.constant.BookingStatus;
 import com.example.tour.booking.constant.PaymentStatus;
 import com.example.tour.booking.entity.Booking;
@@ -38,7 +39,6 @@ public class VnpayServiceImpl implements VnpayService {
     private static final DateTimeFormatter VNP_TIME = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
     private static final DateTimeFormatter TXN_SUFFIX = DateTimeFormatter.ofPattern("HHmmssSSS");
 
-    private static final int HOLD_MINUTES = 60;      // giữ chỗ 1 giờ (khớp payment.html)
     private static final int VNPAY_LINK_MINUTES = 15; // link VNPAY hết hạn sau 15 phút
 
     private final VnpayProperties props;
@@ -60,7 +60,7 @@ public class VnpayServiceImpl implements VnpayService {
         }
 
         LocalDateTime now = LocalDateTime.now(VN);
-        LocalDateTime deadline = booking.getCreatedAt().plusMinutes(HOLD_MINUTES);
+        LocalDateTime deadline = booking.getCreatedAt().plusSeconds(BookingConstants.HOLD_SECONDS);
         if (!now.isBefore(deadline)) {
             throw new AppException(ErrorCode.PAYMENT_EXPIRED);
         }

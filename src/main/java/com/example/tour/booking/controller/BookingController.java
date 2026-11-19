@@ -11,6 +11,7 @@ import com.example.tour.booking.dto.response.*;
 import com.example.tour.booking.service.BookingPdfService;
 import com.example.tour.booking.service.BookingService;
 import com.example.tour.common.dto.ApiResponse;
+import com.example.tour.common.util.SecurityUtils;
 import com.example.tour.user.entity.User;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -19,7 +20,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.*;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -59,6 +62,14 @@ public class BookingController {
     public ResponseEntity<ApiResponse<BookingPaymentStatusResponse>> getPaymentStatus(@PathVariable String code) {
         BookingPaymentStatusResponse data = bookingService.getPaymentStatus(code);
         return ResponseEntity.ok(ApiResponse.success("Lấy trạng thái thanh toán thành công", data));
+    }
+
+    @GetMapping("/public/bookings/{code}/payment")
+    public ResponseEntity<ApiResponse<BookingResponse>> getBookingForPayment(
+            @PathVariable String code,
+            @RequestParam(required = false) String token) {
+        return ResponseEntity.ok(ApiResponse.success("Lấy thông tin đơn thành công",
+                bookingService.getBookingForPayment(code, token, SecurityUtils.getCurrentUserIdOrNull())));
     }
 
     // ===== USER =====

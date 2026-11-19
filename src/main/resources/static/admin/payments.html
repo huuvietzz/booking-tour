@@ -135,29 +135,6 @@
 
     .contact-name { font-weight: 600; color: #212529; max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-    /* ===== THANH SỐ LIỆU (tab lọc nhanh kèm số đơn) ===== */
-    /* flex-wrap: hẹp thì xuống dòng, không sinh thanh cuộn ngang */
-    .stat-tabs {
-      display: flex; flex-wrap: wrap; gap: 2px 6px; padding: 6px 8px; margin-bottom: 16px;
-      background: #fff; border: 1px solid #e6e9f0; border-radius: 10px;
-    }
-    .stat-tab {
-      flex: 0 0 auto; display: inline-flex; align-items: center; gap: 7px; white-space: nowrap;
-      border: 0; background: none; border-radius: 7px;
-      padding: 5px 8px; font-size: .84rem; color: #495057; transition: background .15s, color .15s;
-    }
-    .stat-tab:hover { background: #f4f6fb; }
-    .stat-tab.active { background: #eef0fd; color: #4154f1; font-weight: 600; }
-    .stat-tab i { font-size: .9rem; color: #8a94a6; }
-    .stat-tab.active i { color: #4154f1; }
-    .stat-count {
-      min-width: 18px; padding: 0 5px; border-radius: 4px; font-size: .7rem; font-weight: 700; line-height: 16px; text-align: center;
-      border: 1px solid currentColor;
-    }
-    .stat-count.c-all       { color: #4154f1; background: #eef0fd; }
-    .stat-count.c-success   { color: #1e7e43; background: #e7f6ec; }
-    .stat-count.c-pending   { color: #b25e00; background: #fff4e5; }
-    .stat-count.c-failed    { color: #c12a3a; background: #fdecee; }
 
     /* ===== MODAL CHI TIẾT ===== */
     .detail-head { display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap; padding-bottom: 14px; margin-bottom: 16px; border-bottom: 1px solid #ebeef4; }
@@ -176,13 +153,6 @@
     .method-main { font-weight: 600; color: #212529; white-space: nowrap; }
     .booking-link { font-weight: 600; color: #4154f1; }
     .customer-sub { font-size: .78rem; color: #6c757d; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-    /* Tổng đã thu: nằm cuối thanh số liệu */
-    .stat-sum {
-      margin-left: auto; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;
-      padding: 5px 10px; font-size: .84rem; color: #495057;
-    }
-    .stat-sum b { color: #1e7e43; font-size: .95rem; }
 
     /* Nút xem chi tiết (1 hành động → nút tròn, không cần menu 3 chấm) */
     .btn-view {
@@ -299,9 +269,6 @@
         <div class="d-flex justify-content-between align-items-center mt-3 mb-3 flex-wrap gap-2">
           <h5 class="card-title p-0 m-0">Danh sách giao dịch</h5>
         </div>
-
-        <!-- Số liệu: bấm để lọc danh sách bên dưới (GET /api/admin/payments/stats) -->
-        <div class="stat-tabs" id="statTabs" role="tablist"></div>
 
         <!-- Thanh công cụ -->
         <div class="d-flex flex-wrap align-items-end gap-3 mb-2">
@@ -474,7 +441,6 @@
      QUẢN LÝ THANH TOÁN — API (PaymentAdminController)
        GET /api/admin/payments?page&size&sort=field,dir + PaymentFilterRequest
        GET /api/admin/payments/{id}      → PaymentDetailResponse
-       GET /api/admin/payments/stats     → PaymentStatsResponse
      Giao dịch do webhook SePay (sau này VNPAY) tự tạo → trang này chỉ XEM, không sửa/xoá
      ============================================================ */
   const API = '/api/admin/payments';
@@ -562,46 +528,6 @@
     return `<span class="st-badge ${m.cls}">${m.text}</span>`;
   };
   const methodText = p => (METHOD[p.method]?.text || escapeHtml(p.method || '—'));
-
-  /* ============================================================
-     0. THANH SỐ LIỆU: GET /api/admin/payments/stats
-        Bấm 1 mục → đặt ô "Trạng thái" trong modal Bộ lọc → lọc bảng
-     ============================================================ */
-  const STAT_TABS = [
-    { key: 'total',   label: 'Tất cả',     icon: 'bi-list-ul',        cls: 'c-all',     status: ''        },
-    { key: 'success', label: 'Thành công', icon: 'bi-check-circle',   cls: 'c-success', status: 'SUCCESS' },
-    { key: 'pending', label: 'Đang chờ',   icon: 'bi-clock',          cls: 'c-pending', status: 'PENDING' },
-    { key: 'failed',  label: 'Thất bại',   icon: 'bi-x-circle',       cls: 'c-failed',  status: 'FAILED'  }
-  ];
-  let stats = null;
-
-  function renderStatTabs() {
-    const current = $('filterStatus').value;
-    $('statTabs').innerHTML = STAT_TABS.map(t => `
-            <button type="button" class="stat-tab ${t.status === current ? 'active' : ''}" role="tab"
-                    aria-selected="${t.status === current}" onclick="selectStatTab('${t.status}')">
-                <i class="bi ${t.icon}"></i>${t.label}
-                <span class="stat-count ${t.cls}">${stats ? (stats[t.key] ?? 0) : '…'}</span>
-            </button>`).join('') + `
-            <span class="stat-sum" title="Tổng tiền các giao dịch thành công">
-                <i class="bi bi-cash-stack"></i>Đã thu: <b>${stats ? fmtMoney(stats.successAmount) : '…'}</b>
-            </span>`;
-  }
-
-  function selectStatTab(status) {
-    $('filterStatus').value = status;
-    onFilterChange();
-  }
-
-  async function loadStats() {
-    try {
-      const { res, json } = await api(`${API}/stats`);
-      if (res.ok && json && json.success) stats = json.data;
-    } catch (e) {
-      if (e.message !== 'UNAUTHORIZED') console.error('Không tải được số liệu thanh toán', e);
-    }
-    renderStatTabs();
-  }
 
   /* ============================================================
      1. DANH SÁCH: GET /api/admin/payments
@@ -866,7 +792,6 @@
   }
 
   function updateFilterUI() {
-    renderStatTabs();   // lọc tay trạng thái trùng mục nào thì mục đó sáng
     const active = activeFilters();
     $('filterCount').textContent = active.length;
     $('filterCount').classList.toggle('d-none', active.length === 0);
@@ -922,7 +847,6 @@
   /* ============================================================
      KHỞI ĐỘNG
      ============================================================ */
-  loadStats();
   fetchPayments();
 </script>
 

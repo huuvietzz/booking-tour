@@ -1,40 +1,209 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-
-    <title>Đánh giá & Phản hồi - Admin</title>
-    <meta content="" name="description">
-    <meta content="" name="keywords">
+    <title>Quản lý đánh giá - Admin</title>
 
     <link href="assets/img/favicon.png" rel="icon">
     <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
-
     <link href="https://fonts.gstatic.com" rel="preconnect">
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Nunito:300,400,600,700|Poppins:300,400,500,600,700" rel="stylesheet">
     <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
-    <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
-    <link href="assets/vendor/quill/quill.snow.css" rel="stylesheet">
-    <link href="assets/vendor/quill/quill.bubble.css" rel="stylesheet">
-    <link href="assets/vendor/remixicon/remixicon.css" rel="stylesheet">
-    <link href="assets/vendor/simple-datatables/style.css" rel="stylesheet">
     <link href="assets/css/style.css" rel="stylesheet">
 
     <script src="assets/js/admin-auth.js"></script>
     <script>AdminAuth.requireLogin();</script>
 
     <style>
+        /* ===== PAGINATION ===== */
+        .custom-pagination-wrapper {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 2px 4px; flex-wrap: wrap; gap: 10px;
+        }
+        .pagination-info { font-size: .82rem; color: #6c757d; white-space: nowrap; }
+        .pagination-info span { font-weight: 600; color: #333; }
+        .custom-pagination { display: flex; align-items: center; gap: 4px; list-style: none; margin: 0; padding: 0; }
+        .custom-pagination .page-item { display: flex; }
+        .custom-pagination .page-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            min-width: 34px; height: 34px; padding: 0 10px;
+            font-size: .82rem; font-weight: 500; color: #4154f1;
+            background: #fff; border: 1.5px solid #c8cef7; border-radius: 6px;
+            cursor: pointer; transition: background .15s, border-color .15s; line-height: 1; user-select: none;
+        }
+        .custom-pagination .page-btn:hover:not(.active):not(.disabled):not(.ellipsis) { background: #eef0fd; border-color: #4154f1; }
+        .custom-pagination .page-btn.active {
+            background: #4154f1; border-color: #4154f1; color: #fff; font-weight: 700;
+            box-shadow: 0 2px 8px rgba(65, 84, 241, .25); pointer-events: none;
+        }
+        .custom-pagination .page-btn.disabled { color: #b8bfd8; border-color: #e6e9f5; background: #f7f8fc; pointer-events: none; }
+        .custom-pagination .page-btn.ellipsis { border: none; background: transparent; color: #9aa0bc; pointer-events: none; min-width: 24px; }
 
+        /* ===== LOADING OVERLAY ===== */
+        .table-wrapper { position: relative; }
+        #tableLoadingOverlay {
+            display: none; position: absolute; inset: 0;
+            background: rgba(255, 255, 255, .7); z-index: 10;
+            align-items: center; justify-content: center;
+        }
+        #tableLoadingOverlay.show { display: flex; }
+
+        .code-text {
+            background: #f1f3f9; color: #5a6a85; padding: 2px 6px;
+            border-radius: 4px; font-size: .8rem; font-family: monospace; white-space: nowrap;
+        }
+        .price-text { font-weight: 600; color: #333; white-space: nowrap; }
+
+        /* Tên tour dài: tối đa 2 dòng */
+        .tour-name {
+            display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2;
+            overflow: hidden; overflow-wrap: anywhere;
+            max-width: 300px; line-height: 1.35; font-weight: 600; color: #212529;
+        }
+
+        /* ===== NGÀY ĐI / VỀ ===== */
+        .date-main { font-weight: 600; color: #212529; white-space: nowrap; }
+        .date-sub  { font-size: .78rem; color: #6c757d; white-space: nowrap; }
+
+        /* ===== BADGE TRẠNG THÁI ===== */
+        .st-badge {
+            display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;
+            padding: 3px 10px; border-radius: 999px; font-size: .78rem; font-weight: 600;
+        }
+        .st-badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+        /* ===== NÚT LỌC + CHIP BỘ LỌC ===== */
+        .btn-filter { position: relative; height: 31px; width: 38px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+        .btn-filter .filter-count {
+            position: absolute; top: -7px; right: -7px; font-size: .68rem; min-width: 18px;
+            padding: 2px 5px; border-radius: 10px;
+        }
+        .active-filter-bar {
+            display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+            padding: 10px 2px; border-top: 1px solid #ebeef4; font-size: .85rem; color: #555;
+        }
+        .filter-chip {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: #eef0fd; color: #4154f1; border: 1px solid #d5dafb;
+            border-radius: 6px; padding: 2px 4px 2px 10px; font-size: .8rem;
+        }
+        .filter-chip button { border: 0; background: none; color: inherit; padding: 0 4px; line-height: 1; }
+        .filter-chip button:hover { color: #dc3545; }
+        .btn-clear-all { border: 0; background: none; color: #6c757d; margin-left: auto; padding: 2px 6px; }
+        .btn-clear-all:hover { color: #dc3545; }
+
+        /* ===== SẮP XẾP THEO CỘT ===== */
+        .sort-btn {
+            border: 0; background: none; padding: 0; font: inherit; font-weight: inherit; color: inherit;
+            display: inline-flex; align-items: center; gap: 4px; cursor: pointer; white-space: nowrap;
+        }
+        .sort-btn:hover { color: #4154f1; }
+        .sort-btn:focus-visible { outline: 2px solid #4154f1; outline-offset: 2px; border-radius: 4px; }
+        .sort-btn .sort-icon { font-size: .8rem; color: #adb5bd; opacity: 0; transition: opacity .15s; }
+        .sort-btn:hover .sort-icon { opacity: .6; }
+        .sort-btn.sort-active { color: #4154f1; }
+        .sort-btn.sort-active .sort-icon { opacity: 1; color: #4154f1; font-size: 1rem; }
+
+        #reviewTable th { white-space: nowrap; }
+
+        /* ===== BADGE TRẠNG THÁI ĐƠN / THANH TOÁN ===== */
+        .st-pending   { background: #fff4e5; color: #b25e00; }
+        .st-confirmed { background: #e8eefc; color: #2948b8; }
+        .st-completed { background: #e7f6ec; color: #1e7e43; }
+        .st-cancelled { background: #fdecee; color: #c12a3a; }
+        .st-paid      { background: #e7f6ec; color: #1e7e43; }
+        .st-unpaid    { background: #fff8e1; color: #a86a00; }
+        .st-refunded  { background: #eef0f3; color: #5f6b7a; }
+
+        /* ===== NÚT 3 CHẤM + MENU HÀNH ĐỘNG ===== */
+        .btn-action-menu {
+            width: 32px; height: 32px; padding: 0; border: 0; border-radius: 50%;
+            display: inline-flex; align-items: center; justify-content: center; color: #6c757d; font-size: 1.1rem;
+        }
+        .btn-action-menu:hover, .btn-action-menu[aria-expanded="true"] { background: #eef0fd; color: #4154f1; }
+        .action-menu { min-width: 170px; padding: 6px; font-size: .88rem; border: 1px solid #e6e9f0; border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(16, 24, 40, .12); }
+        .action-menu .dropdown-item { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 6px; }
+        .action-menu .dropdown-item:hover { background: #f4f6fb; }
+        .action-menu .dropdown-item.text-danger:hover { background: #fdecee; color: #c12a3a; }
+        .action-menu .dropdown-item i { width: 16px; text-align: center; }
+        .action-menu .dropdown-divider { margin: 4px 0; }
+        .money-cancelled { text-decoration: line-through; color: #9e9e9e !important; }
+
+        .contact-name { font-weight: 600; color: #212529; max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        /* ===== THANH SỐ LIỆU (tab lọc nhanh kèm số đơn) ===== */
+        /* flex-wrap: hẹp thì xuống dòng, không sinh thanh cuộn ngang */
+        .stat-tabs {
+            display: flex; flex-wrap: wrap; gap: 2px 6px; padding: 6px 8px; margin-bottom: 16px;
+            background: #fff; border: 1px solid #e6e9f0; border-radius: 10px;
+        }
+        .stat-tab {
+            flex: 0 0 auto; display: inline-flex; align-items: center; gap: 7px; white-space: nowrap;
+            border: 0; background: none; border-radius: 7px;
+            padding: 5px 8px; font-size: .84rem; color: #495057; transition: background .15s, color .15s;
+        }
+        .stat-tab:hover { background: #f4f6fb; }
+        .stat-tab.active { background: #eef0fd; color: #4154f1; font-weight: 600; }
+        .stat-tab i { font-size: .9rem; color: #8a94a6; }
+        .stat-tab.active i { color: #4154f1; }
+        .stat-count {
+            min-width: 18px; padding: 0 5px; border-radius: 4px; font-size: .7rem; font-weight: 700; line-height: 16px; text-align: center;
+            border: 1px solid currentColor;
+        }
+        .stat-count.c-all       { color: #4154f1; background: #eef0fd; }
+        .stat-count.c-visible   { color: #1e7e43; background: #e7f6ec; }
+        .stat-count.c-hidden    { color: #5f6b7a; background: #eef0f3; }
+        .stat-count.c-unreplied { color: #b25e00; background: #fff4e5; }
+
+        /* ===== MODAL CHI TIẾT ===== */
+        .detail-head { display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap; padding-bottom: 14px; margin-bottom: 16px; border-bottom: 1px solid #ebeef4; }
+        .detail-label { font-size: .78rem; color: #6c757d; margin-bottom: 2px; }
+        .detail-value { font-weight: 600; color: #333; font-size: .92rem; overflow-wrap: anywhere; }
+        .detail-section-title {
+            font-size: .75rem; font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
+            color: #4154f1; margin-bottom: 10px;
+        }
+        .money-row { display: flex; justify-content: space-between; gap: 12px; padding: 5px 0; font-size: .9rem; }
+        .money-row .text-muted { white-space: nowrap; }
+        .money-row.total { border-top: 1.5px solid #dee2e6; margin-top: 6px; padding-top: 10px; font-weight: 700; font-size: 1rem; color: #4154f1; }
+        /* ===== RIÊNG TRANG ĐÁNH GIÁ ===== */
+        .rv-stars { color: #f5a524; white-space: nowrap; font-size: .85rem; letter-spacing: 1px; }
+        .rv-stars .off { color: #d8dce5; }
+        .rv-stars.lg { font-size: 1.15rem; }
+        .rv-comment {
+            display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2;
+            overflow: hidden; overflow-wrap: anywhere; max-width: 340px; color: #333; font-size: .88rem; line-height: 1.4;
+        }
+        .rv-comment.empty { color: #9aa0ad; font-style: italic; }
+        .rv-tour { max-width: 220px; font-size: .85rem; }
+        .customer-name { font-weight: 600; color: #212529; max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .row-hidden td { background: #fafbfc; }
+        .row-hidden .rv-comment { color: #8a909c; }
+
+        .reply-yes { color: #1e7e43; font-size: .8rem; white-space: nowrap; }
+        .reply-no  { color: #b25e00; font-size: .8rem; white-space: nowrap; }
+
+        /* Thanh số liệu: điểm trung bình ở cuối */
+        .stat-sum { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; padding: 5px 10px; font-size: .84rem; color: #495057; }
+        .stat-sum b { color: #f5a524; font-size: .95rem; }
+
+        /* Popup chi tiết */
+        .detail-quote { background: #f7f8fb; border-radius: 10px; padding: 12px 14px; white-space: pre-line; overflow-wrap: anywhere; font-size: .92rem; }
+        .detail-reply { background: #eef6f8; border-left: 3px solid #0e8ba8; border-radius: 8px; padding: 10px 14px; white-space: pre-line; overflow-wrap: anywhere; font-size: .9rem; }
+        .detail-hidden { background: #fdecee; color: #a12232; border-radius: 8px; padding: 10px 14px; font-size: .88rem; }
+        #replyText { min-height: 110px; }
+        .char-count { font-size: .75rem; color: #8a909c; }
     </style>
 </head>
 
 <body>
-<header id="header" class="header fixed-top d-flex align-items-center">
 
+<!-- ======================= HEADER ======================= -->
+<header id="header" class="header fixed-top d-flex align-items-center">
     <div class="d-flex align-items-center justify-content-between">
         <a href="index.html" class="logo d-flex align-items-center">
             <img src="assets/img/logo.png" alt="">
@@ -42,21 +211,8 @@
         </a>
         <i class="bi bi-list toggle-sidebar-btn"></i>
     </div>
-
-    <div class="search-bar">
-        <form class="search-form d-flex align-items-center" method="POST" action="#">
-            <input type="text" name="query" placeholder="Tìm kiếm nhanh..." title="Nhập từ khóa tìm kiếm">
-            <button type="submit" title="Search"><i class="bi bi-search"></i></button>
-        </form>
-    </div>
-
     <nav class="header-nav ms-auto">
         <ul class="d-flex align-items-center">
-            <li class="nav-item d-block d-lg-none">
-                <a class="nav-link nav-icon search-bar-toggle " href="#">
-                    <i class="bi bi-search"></i>
-                </a>
-            </li>
             <li class="nav-item dropdown pe-3">
                 <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
                     <img src="assets/img/profile-img.jpg" alt="Profile" class="rounded-circle">
@@ -66,10 +222,10 @@
                     <li class="dropdown-header"><h6 data-admin-name></h6><span data-admin-role></span></li>
                     <li><hr class="dropdown-divider"></li>
                     <li><a class="dropdown-item d-flex align-items-center" href="profile.html">
-                        <i class="bi bi-person"></i><span>Hồ sơ của tôi</span>
+                        <i class="bi bi-person"></i><span>Hồ sơ</span>
                     </a></li>
                     <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item d-flex align-items-center" href="#" id="btnLogout" data-admin-logout>
+                    <li><a class="dropdown-item d-flex align-items-center" href="#" data-admin-logout>
                         <i class="bi bi-box-arrow-right"></i><span>Đăng xuất</span>
                     </a></li>
                 </ul>
@@ -77,318 +233,779 @@
         </ul>
     </nav>
 </header>
+<script>AdminAuth.renderUser();</script>
 
+<!-- ======================= SIDEBAR ======================= -->
 <aside id="sidebar" class="sidebar">
     <ul class="sidebar-nav" id="sidebar-nav">
-
         <li class="nav-item">
-            <a class="nav-link" href="index.html">
-                <i class="bi bi-grid"></i><span>Bảng điều khiển</span>
-            </a>
+            <a class="nav-link collapsed" href="index.html"><i class="bi bi-grid"></i><span>Bảng điều khiển</span></a>
         </li>
 
-        <!-- ================= KINH DOANH ================= -->
         <li class="nav-heading">Kinh doanh</li>
-
         <li class="nav-item">
-            <a class="nav-link collapsed" href="bookings.html">
-                <i class="bi bi-cart-check"></i><span>Quản lý đặt tour</span>
-            </a>
+            <a class="nav-link collapsed" href="bookings.html"><i class="bi bi-cart-check"></i><span>Quản lý đặt tour</span></a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="payments.html"><i class="bi bi-credit-card"></i><span>Quản lý thanh toán</span></a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="promotions.html"><i class="bi bi-tags"></i><span>Quản lý khuyến mãi</span></a>
         </li>
 
-        <li class="nav-item">
-            <a class="nav-link collapsed" href="payments.html">
-                <i class="bi bi-credit-card"></i><span>Quản lý thanh toán</span>
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a class="nav-link collapsed" href="promotions.html">
-                <i class="bi bi-tags"></i><span>Quản lý khuyến mãi</span>
-            </a>
-        </li>
-
-        <!-- ================= SẢN PHẨM ================= -->
         <li class="nav-heading">Sản phẩm</li>
-
         <li class="nav-item">
-            <a class="nav-link collapsed" href="tours.html">
-                <i class="bi bi-map"></i><span>Quản lý tour</span>
-            </a>
+            <a class="nav-link collapsed" href="tours.html" data-pages="tour-form.html"><i class="bi bi-map"></i><span>Quản lý tour</span></a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="tour-schedules.html"><i class="bi bi-calendar-event"></i><span>Quản lý lịch khởi hành</span></a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="locations.html"><i class="bi bi-geo-alt"></i><span>Quản lý địa điểm</span></a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="categories.html"><i class="bi bi-bookmarks"></i><span>Quản lý danh mục</span></a>
         </li>
 
-        <li class="nav-item">
-            <a class="nav-link collapsed" href="tour-schedules.html">
-                <i class="bi bi-calendar-event"></i><span>Quản lý lịch khởi hành</span>
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a class="nav-link collapsed" href="locations.html">
-                <i class="bi bi-geo-alt"></i><span>Quản lý địa điểm</span>
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a class="nav-link collapsed" href="categories.html">
-                <i class="bi bi-bookmarks"></i><span>Quản lý danh mục</span>
-            </a>
-        </li>
-
-        <!-- ================= QUẢN LÝ CHUNG ================= -->
         <li class="nav-heading">Quản lý chung</li>
-
         <li class="nav-item">
-            <a class="nav-link collapsed" href="customers.html">
-                <i class="bi bi-people"></i><span>Quản lý khách hàng</span>
-            </a>
+            <a class="nav-link collapsed" href="customers.html"><i class="bi bi-people"></i><span>Quản lý khách hàng</span></a>
         </li>
-
         <li class="nav-item">
-            <a class="nav-link collapsed" href="reviews.html">
-                <i class="bi bi-star"></i><span>Quản lý đánh giá</span>
-            </a>
+            <a class="nav-link collapsed" href="reviews.html"><i class="bi bi-star"></i><span>Quản lý đánh giá</span></a>
         </li>
-
-        <!-- Chỉ ADMIN thấy: admin-auth.js gỡ phần tử này nếu là STAFF -->
         <li class="nav-item" data-admin-only>
-            <a class="nav-link collapsed" href="staff.html">
-                <i class="bi bi-person-badge"></i><span>Quản lý nhân viên</span>
-            </a>
+            <a class="nav-link collapsed" href="staff.html"><i class="bi bi-person-badge"></i><span>Quản lý nhân viên</span></a>
         </li>
-
         <li class="nav-item">
-            <a class="nav-link collapsed" href="report-revenue.html">
-                <i class="bi bi-bar-chart"></i><span>Báo cáo thống kê</span>
-            </a>
+            <a class="nav-link collapsed" href="report-revenue.html"><i class="bi bi-bar-chart"></i><span>Báo cáo thống kê</span></a>
         </li>
-
     </ul>
 </aside>
 
+<!-- ======================= NỘI DUNG ======================= -->
 <main id="main" class="main">
-
     <div class="pagetitle">
-        <h1>Đánh giá & Phản hồi</h1>
+        <h1>Quản lý đánh giá</h1>
         <nav>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="index.html">Trang chủ</a></li>
-                <li class="breadcrumb-item">Khách hàng</li>
+                <li class="breadcrumb-item">Quản lý chung</li>
                 <li class="breadcrumb-item active">Đánh giá</li>
             </ol>
         </nav>
     </div>
 
     <section class="section">
-        <div class="row">
-            <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
 
-                <div class="card mb-3">
-                    <div class="card-body p-3">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div class="d-flex gap-2">
-                                <a href="#" class="btn btn-outline-primary btn-sm active">Tất cả</a>
-                                <a href="#" class="btn btn-outline-warning btn-sm">Chờ duyệt</a>
-                                <a href="#" class="btn btn-outline-success btn-sm">Đã duyệt</a>
-                            </div>
-                            <div class="d-flex gap-2">
-                                <select class="form-select form-select-sm" title="Lọc theo Số sao">
-                                    <option selected>Lọc theo Sao</option>
-                                    <option value="5">5 Sao</option>
-                                    <option value="4">4 Sao</option>
-                                    <option value="3">3 Sao</option>
-                                    <option value="1">1-2 Sao</option>
-                                </select>
+                <div class="d-flex justify-content-between align-items-center mt-3 mb-3 flex-wrap gap-2">
+                    <h5 class="card-title p-0 m-0">Danh sách đánh giá</h5>
+                </div>
+
+                <!-- Thanh công cụ -->
+                <div class="d-flex flex-wrap align-items-end gap-3 mb-2">
+                    <div>
+                        <label class="form-label text-muted small mb-1" for="selectPerPage">Hiển thị</label>
+                        <select class="form-select form-select-sm" id="selectPerPage" onchange="onPerPageChange(this.value)" style="min-width: 95px;">
+                            <option value="5">5 mục</option>
+                            <option value="10" selected>10 mục</option>
+                            <option value="20">20 mục</option>
+                        </select>
+                    </div>
+                    <div class="ms-auto d-flex align-items-end gap-2">
+                        <div>
+                            <label class="form-label text-muted small mb-1" for="searchInput">Tìm kiếm</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                                <input type="text" class="form-control border-start-0" id="searchInput"
+                                       placeholder="Nội dung, tên khách, mã đơn, tên tour..." oninput="onSearchInput(this.value)"
+                                       style="min-width: 280px;">
                             </div>
                         </div>
+                        <button type="button" class="btn btn-sm btn-outline-secondary btn-filter" title="Bộ lọc"
+                                aria-label="Mở bộ lọc" onclick="openFilterModal()">
+                            <i class="bi bi-funnel"></i>
+                            <span class="badge bg-primary filter-count d-none" id="filterCount">0</span>
+                        </button>
                     </div>
                 </div>
 
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Quản lý nhận xét từ Khách hàng</h5>
+                <!-- Bộ lọc đang áp dụng -->
+                <div class="active-filter-bar d-none" id="activeFilterBar">
+                    <span>Bộ lọc đang kích hoạt</span>
+                    <span class="d-flex flex-wrap gap-2" id="activeChips"></span>
+                    <button type="button" class="btn-clear-all" title="Xoá tất cả bộ lọc" onclick="clearFilters()">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+                <div class="border-bottom mb-3"></div>
 
-                        <table class="table table-hover align-middle">
-                            <thead class="table-light">
+                <!-- Bảng -->
+                <div class="table-wrapper">
+                    <div id="tableLoadingOverlay">
+                        <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Đang tải...</span></div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle" id="reviewTable" style="min-width: 1080px;">
+                            <thead>
                             <tr>
-                                <th scope="col" style="width: 20%;">Khách hàng & Thời gian</th>
-                                <th scope="col" style="width: 20%;">Tour được đánh giá</th>
-                                <th scope="col" style="width: 35%;">Số sao & Nội dung</th>
-                                <th scope="col" style="width: 10%;">Trạng thái</th>
-                                <th scope="col" class="text-center" style="width: 15%;">Hành động</th>
+                                <th style="width: 110px;">
+                                    <button type="button" class="sort-btn" data-sort="createdAt" onclick="sortBy('createdAt')">
+                                        Ngày gửi <i class="bi bi-arrow-down-up sort-icon"></i>
+                                    </button>
+                                </th>
+                                <th style="width: 180px;">Khách hàng</th>
+                                <th style="width: 230px;">Tour</th>
+                                <th style="width: 110px;">
+                                    <button type="button" class="sort-btn" data-sort="rating" onclick="sortBy('rating')">
+                                        Đánh giá <i class="bi bi-arrow-down-up sort-icon"></i>
+                                    </button>
+                                </th>
+                                <th>Nội dung</th>
+                                <th style="width: 120px;">Phản hồi</th>
+                                <th class="text-center" style="width: 120px;">Trạng thái</th>
+                                <th class="text-center" style="width: 80px;">Hành động</th>
                             </tr>
                             </thead>
-                            <tbody>
-
-                            <tr>
-                                <td>
-                                    <span class="fw-bold text-dark">Nguyễn Hải Đăng</span><br>
-                                    <small class="text-muted"><i class="bi bi-clock"></i> 2 giờ trước</small>
-                                </td>
-                                <td>
-                                    <a href="tour-detail.html?id=1" class="text-primary fw-bold d-block text-truncate">T001 - Hà Nội Sapa</a>
-                                    <small class="text-muted">Mã đơn: BK-260515-01</small>
-                                </td>
-                                <td>
-                                    <div class="text-warning mb-1">
-                                        <i class="bi bi-star-fill"></i>
-                                        <i class="bi bi-star-fill"></i>
-                                        <i class="bi bi-star-fill"></i>
-                                        <i class="bi bi-star-fill"></i>
-                                        <i class="bi bi-star-fill"></i>
-                                    </div>
-                                    <p class="mb-0 text-dark small" style="max-width: 300px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                                        Tour cực kỳ chất lượng, HDV Anh Tuấn rất nhiệt tình và chụp ảnh đẹp. Đồ ăn ngon, KS sạch sẽ. Sẽ tiếp tục ủng hộ công ty!
-                                    </p>
-                                </td>
-                                <td>
-                                    <span class="badge bg-warning text-dark">Chờ duyệt</span>
-                                </td>
-                                <td class="text-center">
-                                    <button type="button" class="btn btn-sm btn-success" title="Duyệt hiển thị"><i class="bi bi-check-lg"></i></button>
-                                    <button type="button" class="btn btn-sm btn-primary" title="Viết phản hồi"><i class="bi bi-reply"></i></button>
-                                    <button type="button" class="btn btn-sm btn-danger" title="Ẩn/Xóa"><i class="bi bi-eye-slash"></i></button>
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td>
-                                    <span class="fw-bold text-dark">Trần Thu Hương</span><br>
-                                    <small class="text-muted"><i class="bi bi-clock"></i> Hôm qua, 15:30</small>
-                                </td>
-                                <td>
-                                    <a href="tour-detail.html?id=2" class="text-primary fw-bold d-block text-truncate">T002 - Đà Nẵng Hội An</a>
-                                    <small class="text-muted">Mã đơn: BK-260516-02</small>
-                                </td>
-                                <td>
-                                    <div class="text-warning mb-1">
-                                        <i class="bi bi-star-fill"></i>
-                                        <i class="bi bi-star-fill"></i>
-                                        <i class="bi bi-star-fill"></i>
-                                        <i class="bi bi-star text-muted"></i>
-                                        <i class="bi bi-star text-muted"></i>
-                                    </div>
-                                    <p class="mb-0 text-dark small" style="max-width: 300px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                                        Lịch trình hơi dày, đi bộ nhiều nên người lớn tuổi hơi mệt. Cảnh đẹp nhưng buffet ở KS chưa phong phú lắm.
-                                    </p>
-                                </td>
-                                <td>
-                                    <span class="badge bg-success">Đã duyệt</span>
-                                </td>
-                                <td class="text-center">
-                                    <button type="button" class="btn btn-sm btn-outline-primary" title="Viết phản hồi xin lỗi/cảm ơn"><i class="bi bi-reply"></i> Trả lời</button>
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td>
-                                    <span class="fw-bold text-dark">Lê Minh Tuấn</span><br>
-                                    <small class="text-muted"><i class="bi bi-clock"></i> 05/03/2026</small>
-                                </td>
-                                <td>
-                                    <a href="tour-detail.html?id=4" class="text-primary fw-bold d-block text-truncate">T004 - Miền Tây 2N1Đ</a>
-                                    <small class="text-muted">Mã đơn: BK-260510-03</small>
-                                </td>
-                                <td>
-                                    <div class="text-warning mb-1">
-                                        <i class="bi bi-star-fill"></i>
-                                        <i class="bi bi-star-fill"></i>
-                                        <i class="bi bi-star-fill"></i>
-                                        <i class="bi bi-star-fill"></i>
-                                        <i class="bi bi-star-half"></i>
-                                    </div>
-                                    <p class="mb-1 text-dark small">
-                                        Trải nghiệm tuyệt vời, sông nước miền Tây rất đẹp.
-                                    </p>
-                                    <div class="p-2 bg-light border-start border-primary border-3 mt-2">
-                                        <small class="fw-bold text-primary">Admin trả lời:</small><br>
-                                        <small class="text-muted">Cảm ơn anh Tuấn đã đồng hành cùng công ty...</small>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="badge bg-primary">Đã phản hồi</span>
-                                </td>
-                                <td class="text-center">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" title="Chỉnh sửa câu trả lời"><i class="bi bi-pencil-square"></i></button>
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td>
-                                    <span class="fw-bold text-dark">Spam User</span><br>
-                                    <small class="text-muted"><i class="bi bi-clock"></i> 01/03/2026</small>
-                                </td>
-                                <td>
-                                    <a href="#" class="text-secondary fw-bold d-block text-truncate">T001 - Hà Nội Sapa</a>
-                                    <small class="text-muted">Không xác định</small>
-                                </td>
-                                <td>
-                                    <div class="text-warning mb-1">
-                                        <i class="bi bi-star-fill"></i>
-                                        <i class="bi bi-star text-muted"></i>
-                                        <i class="bi bi-star text-muted"></i>
-                                        <i class="bi bi-star text-muted"></i>
-                                        <i class="bi bi-star text-muted"></i>
-                                    </div>
-                                    <p class="mb-0 text-muted small fst-italic">
-                                        [Nội dung chứa link rác hoặc từ ngữ không phù hợp]
-                                    </p>
-                                </td>
-                                <td>
-                                    <span class="badge bg-secondary">Đã ẩn</span>
-                                </td>
-                                <td class="text-center">
-                                    <button type="button" class="btn btn-sm btn-outline-danger" title="Xóa vĩnh viễn"><i class="bi bi-trash"></i></button>
-                                </td>
-                            </tr>
-
+                            <tbody id="reviewListBody">
+                            <tr><td colspan="8" class="text-center py-4">Đang tải dữ liệu...</td></tr>
                             </tbody>
                         </table>
-
-                        <nav aria-label="Page navigation example" class="mt-4">
-                            <ul class="pagination justify-content-center">
-                                <li class="page-item disabled"><a class="page-link" href="#" tabindex="-1" aria-disabled="true">Trước</a></li>
-                                <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                <li class="page-item"><a class="page-link" href="#">Sau</a></li>
-                            </ul>
-                        </nav>
-
                     </div>
+                </div>
+
+                <!-- Phân trang -->
+                <div class="custom-pagination-wrapper">
+                    <div class="pagination-info" id="paginationInfo">—</div>
+                    <ul class="custom-pagination" id="paginationControls"></ul>
                 </div>
 
             </div>
         </div>
     </section>
-
 </main>
+
+<!-- ======================= MODAL BỘ LỌC ======================= -->
+<div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="filterModalTitle">Bộ lọc</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <label class="form-label" for="filterTour">Tour <span class="text-muted small">(điểm thấp xếp trước)</span></label>
+                        <select class="form-select" id="filterTour" onchange="onFilterChange()">
+                            <option value="">Tất cả tour</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="filterRating">Số sao</label>
+                        <select class="form-select" id="filterRating" onchange="onFilterChange()">
+                            <option value="">Tất cả</option>
+                            <option value="5">5 sao</option>
+                            <option value="4">4 sao</option>
+                            <option value="3">3 sao</option>
+                            <option value="2">2 sao</option>
+                            <option value="1">1 sao</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="filterHidden">Trạng thái</label>
+                        <select class="form-select" id="filterHidden" onchange="onFilterChange()">
+                            <option value="">Tất cả</option>
+                            <option value="false">Đang hiển thị</option>
+                            <option value="true">Đã ẩn</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="filterReplied">Phản hồi</label>
+                        <select class="form-select" id="filterReplied" onchange="onFilterChange()">
+                            <option value="">Tất cả</option>
+                            <option value="true">Đã phản hồi</option>
+                            <option value="false">Chưa phản hồi</option>
+                        </select>
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label" for="filterFromDate">Ngày gửi</label>
+                        <div class="input-group">
+                            <input type="date" class="form-control" id="filterFromDate" aria-label="Từ ngày" onchange="onDateRangeChange()">
+                            <span class="input-group-text">–</span>
+                            <input type="date" class="form-control" id="filterToDate" aria-label="Đến ngày" onchange="onDateRangeChange()">
+                        </div>
+                        <div class="small text-danger mt-1 d-none" id="dateRangeError">
+                            <i class="bi bi-exclamation-circle me-1"></i>Từ ngày không được sau đến ngày.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-start">
+                <button type="button" class="btn btn-danger" onclick="clearFilters()">Đặt lại bộ lọc</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ======================= MODAL CHI TIẾT ======================= -->
+<div class="modal fade" id="viewModal" tabindex="-1" aria-labelledby="viewModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="viewModalTitle">Chi tiết đánh giá</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body" id="viewBody"></div>
+            <div class="modal-footer" id="viewFoot"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ======================= MODAL PHẢN HỒI ======================= -->
+<div class="modal fade" id="replyModal" tabindex="-1" aria-labelledby="replyModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="replyModalTitle">Phản hồi đánh giá</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3" id="replyContext"></div>
+                <label class="form-label" for="replyText">Nội dung phản hồi <span class="text-muted small">(hiển thị công khai dưới đánh giá)</span></label>
+                <textarea class="form-control" id="replyText" maxlength="1000"></textarea>
+                <div class="d-flex justify-content-between mt-1">
+                    <span class="small text-danger d-none" id="replyError"></span>
+                    <span class="char-count ms-auto" id="replyCount">0/1000</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-danger me-auto d-none" id="replyDelete">Xoá phản hồi</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Huỷ</button>
+                <button type="button" class="btn btn-primary" id="replySave">Lưu phản hồi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 
-<script src="assets/vendor/apexcharts/apexcharts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-<script src="assets/vendor/chart.js/chart.umd.js"></script>
-<script src="assets/vendor/echarts/echarts.min.js"></script>
-<script src="assets/vendor/quill/quill.js"></script>
-<script src="assets/vendor/simple-datatables/simple-datatables.js"></script>
-<script src="assets/vendor/tinymce/tinymce.min.js"></script>
-<script src="assets/vendor/php-email-form/validate.js"></script>
-
 <script src="assets/js/main.js"></script>
-
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const userData = JSON.parse(localStorage.getItem('user'));
-        if (userData) {
-            const nameElements = document.querySelectorAll('.nav-profile span, .dropdown-header h6');
-            nameElements.forEach(el => el.innerText = userData.fullName);
+    /* ============================================================
+       QUẢN LÝ ĐÁNH GIÁ — API (AdminReviewController)
+         GET   /api/admin/reviews?page&size&sort=field,dir + ReviewFilterRequest
+         GET   /api/admin/reviews/{id}
+         PATCH /api/admin/reviews/{id}/hide   {hiddenReason}
+         PATCH /api/admin/reviews/{id}/unhide
+         PUT   /api/admin/reviews/{id}/response {adminResponse}  (trống = xoá)
+       Không có "xoá đánh giá": đánh giá là dữ liệu của khách, vi phạm thì ẨN kèm lý do.
+       ============================================================ */
+    const API = '/api/admin/reviews';
 
-            const roleElement = document.querySelector('.dropdown-header span');
-            if (roleElement) roleElement.innerText = userData.role;
+    let currentPage   = 0;
+    let perPage       = 10;
+    let searchKeyword = '';
+    let searchTimer   = null;
+    let sortCol    = 'createdAt';   // mặc định: mới nhất lên đầu
+    let sortAsc    = false;
+    let userSorted = false;
+    let rowsById   = {};            // dữ liệu dòng đang hiển thị, dùng cho menu hành động
+
+    function $(id) { return document.getElementById(id); }
+
+    // Bộ lọc trong modal: id ô → nhãn chip → tham số API (khớp ReviewFilterRequest)
+    const FILTERS = [
+        { id: 'filterTour',     label: 'Tour',       param: 'tourId'   },
+        { id: 'filterRating',   label: 'Số sao',     param: 'rating'   },
+        { id: 'filterHidden',   label: 'Trạng thái', param: 'hidden'   },
+        { id: 'filterReplied',  label: 'Phản hồi',   param: 'replied'  },
+        { id: 'filterFromDate', label: 'Từ ngày',    param: 'fromDate', format: 'date' },
+        { id: 'filterToDate',   label: 'Đến ngày',   param: 'toDate',   format: 'date' }
+    ];
+    const RATING_TEXT = ['', 'Rất tệ', 'Tệ', 'Bình thường', 'Tốt', 'Tuyệt vời'];
+
+    /* ============================================================
+       TIỆN ÍCH
+       ============================================================ */
+    function escapeHtml(str) {
+        return String(str ?? '').replace(/[&<>"']/g, c =>
+            ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+    function fmtDate(s) { if (!s) return '—'; const [y, m, d] = String(s).slice(0, 10).split('-'); return `${d}/${m}/${y}`; }
+    function splitDateTime(s) {
+        if (!s) return { date: '—', time: '' };
+        const [d, t = ''] = String(s).split('T');
+        return { date: fmtDate(d), time: t.slice(0, 5) };
+    }
+    const fmtDateTime = s => { const x = splitDateTime(s); return `${x.time} ${x.date}`.trim(); };
+    function stars(n, size = '') {
+        return `<span class="rv-stars ${size}" aria-label="${n} trên 5 sao">${
+            [1, 2, 3, 4, 5].map(i => `<i class="bi bi-star-fill ${i <= n ? '' : 'off'}"></i>`).join('')}</span>`;
+    }
+
+    async function readJson(res) { try { return await res.json(); } catch (_) { return null; } }
+    function errorMessage(json, fallback) {
+        if (json && json.errors && json.errors.length) return json.errors.join(' • ');
+        return (json && json.message) || fallback;
+    }
+    function showLoading(show) { $('tableLoadingOverlay').classList.toggle('show', show); }
+
+    /** fetch kèm token; 401 → đăng xuất */
+    async function api(url, options = {}) {
+        const res = await fetch(url, { ...options, headers: { ...AdminAuth.authHeaders(), 'Content-Type': 'application/json' } });
+        if (res.status === 401) { AdminAuth.logout(); throw new Error('UNAUTHORIZED'); }
+        return { res, json: await readJson(res) };
+    }
+
+    const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 2000, timerProgressBar: true });
+    const showToast = (msg, icon = 'success') => Toast.fire({ icon, title: msg });
+
+    /* ============================================================
+       1. DANH SÁCH
+       ============================================================ */
+    function activeFilters() { return FILTERS.filter(f => $(f.id).value !== ''); }
+    function isFiltering() { return searchKeyword !== '' || activeFilters().length > 0; }
+
+    function filterParams() {
+        const params = new URLSearchParams();
+        if (searchKeyword) params.set('keyword', searchKeyword);
+        const badDate = !$('dateRangeError').classList.contains('d-none');
+        FILTERS.forEach(f => {
+            const v = $(f.id).value;
+            if (v === '' || (badDate && f.format === 'date')) return;
+            params.set(f.param, v);
+        });
+        return params;
+    }
+
+    async function fetchReviews() {
+        showLoading(true);
+        updateFilterUI();
+        const params = filterParams();
+        params.set('page', currentPage);
+        params.set('size', perPage);
+        params.set('sort', `${sortCol},${sortAsc ? 'asc' : 'desc'}`);
+
+        try {
+            const { res, json } = await api(`${API}?${params}`);
+            if (res.ok && json && json.success) {
+                const data = json.data;
+                const page = data.page || { totalElements: data.totalElements, totalPages: data.totalPages, number: data.number, size: data.size };
+                if (data.content.length === 0 && currentPage > 0) { currentPage--; return fetchReviews(); }
+                renderRows(data.content);
+                updateSortUI();
+                renderPagination(page.totalElements, page.totalPages, page.number, page.size);
+            } else {
+                showTableError(errorMessage(json, 'Không tải được danh sách đánh giá.'));
+            }
+        } catch (e) {
+            if (e.message === 'UNAUTHORIZED') return;
+            console.error(e);
+            showTableError('Không kết nối được tới máy chủ.');
+        } finally {
+            showLoading(false);
         }
+    }
+
+    function renderRows(rows) {
+        rowsById = Object.fromEntries(rows.map(r => [r.reviewId, r]));
+        const tbody = $('reviewListBody');
+        if (!rows.length) {
+            tbody.innerHTML = `
+                <tr><td colspan="8" class="text-center text-muted py-5">
+                    <i class="bi bi-chat-square-text fs-3 d-block mb-2 opacity-50"></i>
+                    ${isFiltering() ? 'Không có đánh giá nào khớp bộ lọc.' : 'Chưa có đánh giá nào.'}
+                </td></tr>`;
+            return;
+        }
+        tbody.innerHTML = rows.map(r => {
+            const at = splitDateTime(r.createdAt);
+            return `
+            <tr class="${r.hidden ? 'row-hidden' : ''}">
+                <td><div class="date-main">${at.date}</div><div class="date-sub">${at.time}</div></td>
+                <td>
+                    <div class="customer-name" title="${escapeHtml(r.customerName)}">${escapeHtml(r.customerName || '—')}</div>
+                    <span class="code-text">${escapeHtml(r.bookingCode)}</span>
+                </td>
+                <td><div class="tour-name rv-tour" title="${escapeHtml(r.tourName)}">${escapeHtml(r.tourName)}</div></td>
+                <td>${stars(r.rating)}</td>
+                <td>${r.comment
+                ? `<div class="rv-comment" title="${escapeHtml(r.comment)}">${escapeHtml(r.comment)}</div>`
+                : '<div class="rv-comment empty">Không có bình luận</div>'}</td>
+                <td>${r.replied
+                ? '<span class="reply-yes"><i class="bi bi-check2-circle me-1"></i>Đã phản hồi</span>'
+                : '<span class="reply-no"><i class="bi bi-hourglass-split me-1"></i>Chưa phản hồi</span>'}</td>
+                <td class="text-center">${r.hidden
+                ? '<span class="st-badge st-refunded">Đã ẩn</span>'
+                : '<span class="st-badge st-paid">Hiển thị</span>'}</td>
+                <td class="text-center">${actionMenu(r)}</td>
+            </tr>`;
+        }).join('');
+    }
+
+    /** Menu 3 chấm: Xem · Phản hồi / Sửa phản hồi · Ẩn / Hiện lại */
+    function actionMenu(r) {
+        const item = (icon, text, onclick, cls = '') =>
+            `<li><button type="button" class="dropdown-item ${cls}" onclick="${onclick}"><i class="bi ${icon}"></i>${text}</button></li>`;
+        return `
+            <div class="dropdown">
+                <button type="button" class="btn btn-action-menu" data-bs-toggle="dropdown" aria-expanded="false"
+                        data-bs-popper-config='{"strategy":"fixed"}' title="Hành động" aria-label="Hành động đánh giá ${r.reviewId}">
+                    <i class="bi bi-three-dots-vertical"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end action-menu">
+                    ${item('bi-eye text-info', 'Xem chi tiết', `openViewModal(${r.reviewId})`)}
+                    ${item('bi-reply text-primary', r.replied ? 'Sửa phản hồi' : 'Phản hồi', `openReplyModal(${r.reviewId})`)}
+                    <li><hr class="dropdown-divider"></li>
+                    ${r.hidden
+            ? item('bi-eye text-success', 'Hiện lại', `unhideReview(${r.reviewId})`)
+            : item('bi-eye-slash', 'Ẩn đánh giá', `hideReview(${r.reviewId})`, 'text-danger')}
+                </ul>
+            </div>`;
+    }
+
+    function showTableError(msg) {
+        $('reviewListBody').innerHTML =
+            `<tr><td colspan="8" class="text-center text-danger py-4"><i class="bi bi-exclamation-triangle me-2"></i>${escapeHtml(msg)}</td></tr>`;
+        $('paginationInfo').textContent = '—';
+        $('paginationControls').innerHTML = '';
+    }
+
+    /* ============================================================
+       2. XEM CHI TIẾT
+       ============================================================ */
+    const viewModal = new bootstrap.Modal($('viewModal'));
+
+    async function openViewModal(id) {
+        $('viewBody').innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div></div>';
+        $('viewFoot').innerHTML = '<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>';
+        viewModal.show();
+        try {
+            const { res, json } = await api(`${API}/${id}`);
+            if (!res.ok || !json || !json.success) throw new Error(errorMessage(json, 'Không tải được đánh giá.'));
+            renderDetail(json.data);
+        } catch (e) {
+            if (e.message !== 'UNAUTHORIZED') $('viewBody').innerHTML = `<div class="text-danger text-center py-3">${escapeHtml(e.message)}</div>`;
+        }
+    }
+
+    let lastDetail = null;   // chi tiết vừa xem → nút "Phản hồi" trong popup dùng luôn, không tải lại
+
+    function renderDetail(d) {
+        lastDetail = d;
+        const field = (label, value) => `<div class="mb-2"><div class="detail-label">${label}</div><div class="detail-value">${value}</div></div>`;
+        const edited = d.updatedAt && d.createdAt && d.updatedAt.slice(0, 16) !== d.createdAt.slice(0, 16);
+        $('viewBody').innerHTML = `
+            <div class="detail-head">
+                <div>
+                    <div class="detail-label">Đánh giá</div>
+                    <div class="d-flex align-items-center gap-2">${stars(d.rating, 'lg')}<b>${RATING_TEXT[d.rating] || ''}</b></div>
+                </div>
+                <div>
+                    <div class="detail-label">Trạng thái</div>
+                    ${d.hidden ? '<span class="st-badge st-refunded">Đã ẩn</span>' : '<span class="st-badge st-paid">Hiển thị</span>'}
+                </div>
+                <div class="ms-auto text-end">
+                    <div class="detail-label">Gửi lúc</div>
+                    <div class="detail-value">${fmtDateTime(d.createdAt)}${edited ? `<div class="date-sub">sửa lúc ${fmtDateTime(d.updatedAt)}</div>` : ''}</div>
+                </div>
+            </div>
+
+            ${d.hidden ? `<div class="detail-hidden mb-3"><i class="bi bi-eye-slash me-1"></i><b>Lý do ẩn:</b> ${escapeHtml(d.hiddenReason || '—')}</div>` : ''}
+
+            <div class="detail-section-title"><i class="bi bi-chat-quote me-1"></i>Nội dung</div>
+            <div class="detail-quote mb-3">${d.comment ? escapeHtml(d.comment) : '<span class="text-muted fst-italic">Không có bình luận</span>'}</div>
+
+            <div class="detail-section-title"><i class="bi bi-reply me-1"></i>Phản hồi của VietTrip</div>
+            <div class="mb-3">${d.adminResponse ? `<div class="detail-reply">${escapeHtml(d.adminResponse)}</div>` : '<span class="text-muted small">Chưa phản hồi.</span>'}</div>
+
+            <hr>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="detail-section-title"><i class="bi bi-person me-1"></i>Khách hàng</div>
+                    ${field('Họ tên', escapeHtml(d.contactName || '—'))}
+                    ${field('Điện thoại', escapeHtml(d.contactPhone || '—'))}
+                    ${field('Email', escapeHtml(d.contactEmail || '—'))}
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-section-title"><i class="bi bi-map me-1"></i>Chuyến đi</div>
+                    ${field('Mã đơn', `<span class="code-text">${escapeHtml(d.bookingCode)}</span>`)}
+                    ${field('Tour', escapeHtml(d.tourName))}
+                    ${field('Mã khởi hành', `<span class="code-text">${escapeHtml(d.scheduleCode || '—')}</span>`)}
+                    ${field('Ngày đi - về', `${fmtDate(d.departureDate)} → ${fmtDate(d.returnDate)}`)}
+                </div>
+            </div>`;
+
+        $('viewFoot').innerHTML = `
+            ${d.hidden
+            ? `<button type="button" class="btn btn-outline-success me-auto" onclick="unhideReview(${d.reviewId})"><i class="bi bi-eye me-1"></i>Hiện lại</button>`
+            : `<button type="button" class="btn btn-outline-danger me-auto" onclick="hideReview(${d.reviewId})"><i class="bi bi-eye-slash me-1"></i>Ẩn đánh giá</button>`}
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
+            <button type="button" class="btn btn-primary" onclick="openReplyModal(${d.reviewId})">
+                <i class="bi bi-reply me-1"></i>${d.adminResponse ? 'Sửa phản hồi' : 'Phản hồi'}</button>`;
+    }
+
+    /* ============================================================
+       3. PHẢN HỒI
+       ============================================================ */
+    const replyModal = new bootstrap.Modal($('replyModal'));
+    let replyId = null;
+
+    /** Nội dung phản hồi hiện có: lấy từ popup chi tiết vừa xem; mở từ bảng thì tải chi tiết */
+    async function openReplyModal(id) {
+        replyId = id;
+        const current = lastDetail && lastDetail.reviewId === id ? (lastDetail.adminResponse || '') : undefined;
+        const r = rowsById[id];
+        $('replyError').classList.add('d-none');
+        $('replyContext').innerHTML = r
+            ? `<div class="d-flex align-items-center gap-2 mb-1">${stars(r.rating)}<b>${escapeHtml(r.customerName || '')}</b></div>
+               <div class="rv-comment" style="max-width:none">${r.comment ? escapeHtml(r.comment) : '<span class="text-muted fst-italic">Không có bình luận</span>'}</div>`
+            : '';
+        $('replyText').value = current ?? '';
+        if (current === undefined && r?.replied) {   // mở từ bảng: tải phản hồi hiện có
+            try {
+                const { res, json } = await api(`${API}/${id}`);
+                if (res.ok && json?.success) $('replyText').value = json.data.adminResponse || '';
+            } catch (_) { /* bỏ qua, admin tự nhập lại */ }
+        }
+        $('replyModalTitle').textContent = $('replyText').value ? 'Sửa phản hồi' : 'Phản hồi đánh giá';
+        $('replyDelete').classList.toggle('d-none', !$('replyText').value);
+        updateReplyCount();
+        viewModal.hide();
+        replyModal.show();
+    }
+
+    function updateReplyCount() { $('replyCount').textContent = `${$('replyText').value.length}/1000`; }
+    $('replyText').addEventListener('input', updateReplyCount);
+    $('replyModal').addEventListener('shown.bs.modal', () => $('replyText').focus());
+
+    async function saveReply(text) {
+        const btn = text === '' ? $('replyDelete') : $('replySave');
+        const old = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Đang lưu...';
+        try {
+            const { res, json } = await api(`${API}/${replyId}/response`, { method: 'PUT', body: JSON.stringify({ adminResponse: text }) });
+            if (!res.ok || !json?.success) throw new Error(errorMessage(json, 'Không lưu được phản hồi.'));
+            replyModal.hide();
+            showToast(text ? 'Đã lưu phản hồi' : 'Đã xoá phản hồi');
+            fetchReviews();
+        } catch (e) {
+            if (e.message === 'UNAUTHORIZED') return;
+            $('replyError').textContent = e.message;
+            $('replyError').classList.remove('d-none');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = old;
+        }
+    }
+
+    $('replySave').addEventListener('click', () => {
+        const text = $('replyText').value.trim();
+        if (!text) {
+            $('replyError').textContent = 'Vui lòng nhập nội dung phản hồi.';
+            return $('replyError').classList.remove('d-none');
+        }
+        saveReply(text);
     });
+    $('replyDelete').addEventListener('click', async () => {
+        const ok = await Swal.fire({ icon: 'warning', title: 'Xoá phản hồi?', text: 'Phản hồi sẽ không còn hiển thị dưới đánh giá.',
+            showCancelButton: true, confirmButtonText: 'Xoá', cancelButtonText: 'Huỷ', confirmButtonColor: '#dc3545' });
+        if (ok.isConfirmed) saveReply('');
+    });
+
+    /* ============================================================
+       4. ẨN / HIỆN LẠI
+       ============================================================ */
+    async function hideReview(id) {
+        viewModal.hide();
+        const { value: reason, isConfirmed } = await Swal.fire({
+            icon: 'warning',
+            title: 'Ẩn đánh giá?',
+            html: 'Đánh giá sẽ không hiển thị trên trang tour. Khách vẫn thấy đánh giá của mình kèm lý do ẩn.',
+            input: 'select',
+            inputOptions: {
+                'Ngôn từ không phù hợp': 'Ngôn từ không phù hợp',
+                'Spam / quảng cáo': 'Spam / quảng cáo',
+                'Chứa thông tin cá nhân': 'Chứa thông tin cá nhân',
+                'Nội dung không liên quan đến tour': 'Nội dung không liên quan đến tour',
+                __other: 'Lý do khác...'
+            },
+            inputPlaceholder: 'Chọn lý do ẩn',
+            showCancelButton: true,
+            confirmButtonText: 'Tiếp tục',
+            cancelButtonText: 'Huỷ',
+            confirmButtonColor: '#dc3545',
+            inputValidator: v => !v && 'Vui lòng chọn lý do'
+        });
+        if (!isConfirmed) return;
+
+        let finalReason = reason;
+        if (reason === '__other') {
+            const other = await Swal.fire({
+                title: 'Lý do ẩn', input: 'text', inputAttributes: { maxlength: 255 }, inputPlaceholder: 'Nhập lý do...',
+                showCancelButton: true, confirmButtonText: 'Ẩn đánh giá', cancelButtonText: 'Huỷ', confirmButtonColor: '#dc3545',
+                inputValidator: v => !v.trim() && 'Vui lòng nhập lý do'
+            });
+            if (!other.isConfirmed) return;
+            finalReason = other.value.trim();
+        }
+        await patch(id, 'hide', { hiddenReason: finalReason }, 'Đã ẩn đánh giá', 'Không ẩn được đánh giá');
+    }
+
+    async function unhideReview(id) {
+        viewModal.hide();
+        const ok = await Swal.fire({ icon: 'question', title: 'Hiện lại đánh giá?', text: 'Đánh giá sẽ hiển thị lại trên trang tour.',
+            showCancelButton: true, confirmButtonText: 'Hiện lại', cancelButtonText: 'Huỷ', confirmButtonColor: '#198754' });
+        if (ok.isConfirmed) await patch(id, 'unhide', null, 'Đã hiện lại đánh giá', 'Không hiện lại được đánh giá');
+    }
+
+    async function patch(id, action, body, okMsg, errMsg) {
+        try {
+            const { res, json } = await api(`${API}/${id}/${action}`, { method: 'PATCH', body: body ? JSON.stringify(body) : undefined });
+            if (res.ok && json?.success) { showToast(okMsg); fetchReviews(); }
+            else Swal.fire({ icon: 'error', title: errMsg, text: errorMessage(json, 'Vui lòng thử lại.') });
+        } catch (e) {
+            if (e.message !== 'UNAUTHORIZED') Swal.fire({ icon: 'error', title: errMsg, text: 'Không kết nối được tới máy chủ.' });
+        }
+    }
+
+    /* ============================================================
+       PHÂN TRANG
+       ============================================================ */
+    function renderPagination(total, totalPages, pageIndex, size) {
+        const start = total === 0 ? 0 : pageIndex * size + 1;
+        const end   = Math.min((pageIndex + 1) * size, total);
+        $('paginationInfo').innerHTML = total === 0 ? 'Không có mục nào'
+            : `Hiển thị <span>${start}–${end}</span> trong tổng số <span>${total}</span> đánh giá`;
+
+        const ul = $('paginationControls');
+        ul.innerHTML = '';
+        if (totalPages <= 1) return;
+        const addBtn = (label, page, extra = '') => {
+            const li = document.createElement('li');
+            li.className = 'page-item';
+            const btn = document.createElement('button');
+            btn.className = `page-btn ${extra}`.trim();
+            btn.innerHTML = label;
+            if (!extra) btn.addEventListener('click', () => { currentPage = page; fetchReviews(); });
+            li.appendChild(btn);
+            ul.appendChild(li);
+        };
+        addBtn('<i class="bi bi-chevron-left"></i>', pageIndex - 1, pageIndex === 0 ? 'disabled' : '');
+        getPageNumbers(pageIndex + 1, totalPages).forEach(p => {
+            if (p === '...') addBtn('…', -1, 'ellipsis');
+            else addBtn(String(p), p - 1, p === pageIndex + 1 ? 'active' : '');
+        });
+        addBtn('<i class="bi bi-chevron-right"></i>', pageIndex + 1, pageIndex === totalPages - 1 ? 'disabled' : '');
+    }
+
+    function getPageNumbers(current, total) {
+        if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+        const pages = [1];
+        if (current > 4) pages.push('...');
+        for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) pages.push(i);
+        if (current < total - 3) pages.push('...');
+        pages.push(total);
+        return pages;
+    }
+
+    /* ============================================================
+       TÌM KIẾM / LỌC / SẮP XẾP
+       ============================================================ */
+    function onSearchInput(val) {
+        searchKeyword = val.trim();
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => { currentPage = 0; fetchReviews(); }, 400);
+    }
+    function onFilterChange() {
+        currentPage = 0;
+        fetchReviews();
+    }
+
+    /** Ô lọc Tour: chỉ các tour đã có đánh giá, kèm điểm TB (GET /tour-ratings) */
+    async function loadTourOptions() {
+        try {
+            const { res, json } = await api(`${API}/tour-ratings`);
+            if (!res.ok || !json?.success) return;
+            $('filterTour').insertAdjacentHTML('beforeend', json.data.map(t =>
+                `<option value="${t.tourId}">${escapeHtml(t.tourName)} (★ ${t.totalReviews ? t.averageRating.toFixed(1) : '—'} · ${t.totalReviews} đánh giá)</option>`).join(''));
+        } catch (_) { /* không tải được thì vẫn lọc được bằng ô tìm kiếm */ }
+    }
+    function onPerPageChange(val) { perPage = parseInt(val, 10); currentPage = 0; fetchReviews(); }
+    function openFilterModal() { bootstrap.Modal.getOrCreateInstance($('filterModal')).show(); }
+
+    function onDateRangeChange() {
+        const from = $('filterFromDate').value, to = $('filterToDate').value;
+        const invalid = from !== '' && to !== '' && from > to;
+        $('dateRangeError').classList.toggle('d-none', !invalid);
+        ['filterFromDate', 'filterToDate'].forEach(id => $(id).classList.toggle('is-invalid', invalid));
+        if (!invalid) onFilterChange();
+    }
+    function resetDateError() {
+        $('dateRangeError').classList.add('d-none');
+        ['filterFromDate', 'filterToDate'].forEach(id => $(id).classList.remove('is-invalid'));
+    }
+
+    function updateFilterUI() {
+        const active = activeFilters();
+        $('filterCount').textContent = active.length;
+        $('filterCount').classList.toggle('d-none', active.length === 0);
+        $('activeFilterBar').classList.toggle('d-none', active.length === 0);
+        $('activeChips').innerHTML = active.map(f => {
+            const el = $(f.id);
+            const text = f.format === 'date' ? fmtDate(el.value) : el.options[el.selectedIndex].text;
+            return `<span class="filter-chip">${escapeHtml(f.label)}: ${escapeHtml(text)}
+                        <button type="button" title="Bỏ bộ lọc này" aria-label="Bỏ bộ lọc ${escapeHtml(f.label)}"
+                                onclick="removeFilter('${f.id}')"><i class="bi bi-x"></i></button></span>`;
+        }).join('');
+    }
+
+    function removeFilter(id) {
+        $(id).value = '';
+        if (id === 'filterFromDate' || id === 'filterToDate') resetDateError();
+        onFilterChange();
+    }
+
+    function clearFilters() {
+        FILTERS.forEach(f => { $(f.id).value = ''; });
+        resetDateError();
+        currentPage = 0;
+        fetchReviews();
+    }
+
+    /** Bấm cùng cột → đổi chiều; cột mới: ngày → mới nhất trước, số sao → THẤP nhất trước (đánh giá xấu cần xem trước) */
+    function sortBy(col) {
+        if (userSorted && sortCol === col) sortAsc = !sortAsc;
+        else { sortCol = col; sortAsc = col === 'rating'; }
+        userSorted = true;
+        currentPage = 0;
+        fetchReviews();
+    }
+
+    function updateSortUI() {
+        document.querySelectorAll('.sort-btn').forEach(btn => {
+            const active = userSorted && btn.dataset.sort === sortCol;
+            btn.classList.toggle('sort-active', active);
+            btn.querySelector('.sort-icon').className = active
+                ? `bi ${sortAsc ? 'bi-arrow-up-short' : 'bi-arrow-down-short'} sort-icon`
+                : 'bi bi-arrow-down-up sort-icon';
+            btn.closest('th').setAttribute('aria-sort', active ? (sortAsc ? 'ascending' : 'descending') : 'none');
+        });
+    }
+
+    /* ============================================================
+       KHỞI ĐỘNG
+       ============================================================ */
+    loadTourOptions();
+    fetchReviews();
 </script>
 
 </body>
-
 </html>

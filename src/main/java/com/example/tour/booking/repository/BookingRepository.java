@@ -86,4 +86,7 @@ public interface BookingRepository extends JpaRepository<Booking, Integer>, JpaS
     List<Integer> findIdsByStatusCreatedBefore(@Param("status") BookingStatus status,
                                                @Param("payment") PaymentStatus payment,
                                                @Param("before") LocalDateTime before);
+
+    @EntityGraph(attributePaths = {"schedule", "schedule.tour", "promotion", "user"})
+    Optional<Booking> findWithDetailsByBookingCode(String bookingCode);
 }

@@ -330,11 +330,11 @@
          3. Trang này hỏi BE mỗi vài giây (/payment-status) → thấy PAID thì chuyển sang "Thanh toán thành công"
          - Quá 1 giờ chưa thanh toán → BE tự huỷ (làm sau)
 
-       PAY_MOCK = true: thông tin đơn (tour, khách...) vẫn đọc từ localStorage do booking.html lưu,
-       còn TRẠNG THÁI thanh toán luôn lấy từ BE thật: GET /api/public/bookings/{code}/payment-status
+       Thông tin đơn: GET /api/public/bookings/{code}/payment?token=...
+         - token (UUID bí mật) nằm trong link booking.html chuyển sang + link trong email
+         - khách đã đăng nhập và là chủ đơn → BE cho xem dù không có token
+       Trạng thái (hỏi định kỳ): GET /api/public/bookings/{code}/payment-status
        ============================================================ */
-    const PAY_MOCK = true;
-    const HOLD_MINUTES = 60;   // giữ chỗ 1 giờ (khớp job tự huỷ ở BE sau này)
     const POLL_MS = 3000;      // hỏi trạng thái mỗi 3 giây
 
     // Tài khoản nhận tiền (đã liên kết SePay) — sau này lấy từ BE (GET /api/public/bank-account)
@@ -372,7 +372,13 @@
 
     const q = new URLSearchParams(location.search);
     const code = (q.get('code') || '').trim();
-    const token = q.get('token') || '';
+    // Token: lấy từ link; nếu vừa từ VNPAY quay về (link không kèm token) thì lấy bản đã nhớ trong tab này
+    const TOKEN_KEY = 'payToken:' + code;
+    const token = q.get('token') || sessionStorage.getItem(TOKEN_KEY) || '';
+    if (token) { try { sessionStorage.setItem(TOKEN_KEY, token); } catch (_) {} }
+
+    // Dọn bản lưu đơn kiểu cũ (localStorage 'booking:BK...') — không dùng nữa
+    try { Object.keys(localStorage).filter(k => k.startsWith('booking:')).forEach(k => localStorage.removeItem(k)); } catch (_) {}
 
     let booking = null, deadline = null, timer = null, pollTimer = null;
 
@@ -393,12 +399,7 @@
 
     const tokenQuery = () => token ? `?token=${encodeURIComponent(token)}` : '';
 
-    async function loadBooking() {
-        if (PAY_MOCK) {
-            const saved = localStorage.getItem('booking:' + code);
-            if (!saved) { const e = new Error('NOT_FOUND'); e.status = 404; throw e; }
-            return JSON.parse(saved);
-        }
+    function loadBooking() {
         return api(`/api/public/bookings/${encodeURIComponent(code)}/payment${tokenQuery()}`);
     }
 
@@ -414,10 +415,9 @@
         return json.data;
     }
 
-    /** Ghép trạng thái mới vào đơn + cập nhật bản lưu localStorage (mock) */
+    /** Ghép trạng thái mới (từ polling) vào đơn đang hiển thị */
     function applyStatus(s) {
         booking = { ...booking, bookingStatus: s.bookingStatus, paymentStatus: s.paymentStatus };
-        if (PAY_MOCK) { try { localStorage.setItem('booking:' + code, JSON.stringify(booking)); } catch (_) {} }
     }
 
     /* ---------- Hỏi trạng thái định kỳ: thấy PAID / CANCELLED thì đổi màn hình ---------- */
@@ -451,29 +451,17 @@
     async function init() {
         if (!code) return showState('bad', 'bi-x-circle', 'Không tìm thấy đơn đặt tour', 'Đường dẫn thanh toán không hợp lệ.', homeButtons());
         try {
-            booking = await loadBooking();
+            booking = await loadBooking();   // đơn + trạng thái mới nhất từ BE
         } catch (e) {
             return showState('bad', 'bi-x-circle', 'Không tìm thấy đơn đặt tour',
-                e.status === 404 || e.message === 'NOT_FOUND'
-                    ? `Không tìm thấy đơn <b>${escapeHtml(code)}</b>, hoặc bạn không có quyền xem đơn này.`
+                e.status === 404 || e.status === 401 || e.status === 403
+                    ? `Không tìm thấy đơn <b>${escapeHtml(code)}</b>, hoặc đường dẫn không hợp lệ.<br>
+                       Vui lòng mở lại đường dẫn trong email xác nhận, hoặc đăng nhập đúng tài khoản đã đặt tour.`
                     : escapeHtml(e.message), homeButtons());
         }
 
-        // Trạng thái lấy từ BE (bản trong localStorage có thể đã cũ: webhook đã xác nhận, admin đã huỷ...)
-        try {
-            applyStatus(await fetchStatus());
-        } catch (e) {
-            if (e.status === 404) {   // đơn không còn trong DB (vd. đã xoá dữ liệu test)
-                return showState('bad', 'bi-x-circle', 'Không tìm thấy đơn đặt tour',
-                    `Không tìm thấy đơn <b>${escapeHtml(code)}</b>.`, homeButtons());
-            }
-            /* lỗi mạng → vẫn hiện trang theo dữ liệu đang có, polling sẽ thử lại */
-        }
-
         document.title = `Thanh toán ${booking.bookingCode} - VietTrip`;
-        // BE trả sẵn paymentDeadline; chưa có thì tính = giờ đặt + 1 giờ
-        deadline = booking.paymentDeadline ? parseLocal(booking.paymentDeadline)
-            : new Date(parseLocal(booking.createdAt).getTime() + HOLD_MINUTES * 60000);
+        deadline = parseLocal(booking.paymentDeadline);   // BE tính = giờ đặt + thời gian giữ chỗ
 
         if (booking.bookingStatus === 'CANCELLED') return showCancelled();
         if (booking.paymentStatus === 'PAID' || booking.bookingStatus === 'COMPLETED') return showPaid();

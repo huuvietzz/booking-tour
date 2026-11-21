@@ -27,8 +27,6 @@ public interface BookingService {
 
     BookingResponse updateBooking(BookingUpdateRequest request, Integer bookingId);
 
-    BookingResponse confirmBooking(Integer bookingId);
-
     BookingResponse cancelBooking(Integer bookingId);
 
     boolean expireUnpaidBooking(Integer bookingId);

@@ -97,6 +97,24 @@
     .sched-seat .progress { flex: 1; height: 6px; }
     .sched-seat b { color: #212529; white-space: nowrap; }
 
+    .kpi-delta .flat { color: #899bbd; font-weight: 700; }
+    .kpi-sub { font-size: .78rem; color: #899bbd; margin-top: 2px; }
+
+    .pay-sub { font-size: .72rem; margin-top: 3px; }
+    .pay-PENDING  { color: #b25e00; }
+    .pay-PAID     { color: #1e7e43; }
+    .pay-REFUNDED { color: #5f6b7a; }
+
+    .status-list { list-style: none; padding: 0; margin: 6px 0 0; }
+    .status-list li { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px dashed #edf0f7; font-size: .85rem; }
+    .status-list li:last-child { border-bottom: 0; }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 10px; }
+    .status-list .s-name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #444; }
+    .status-list .s-count { font-weight: 700; color: #333; }
+
+    .todo-item.hot { border-color: #ffd7a8; background: #fffaf3; }
+    .todo-item .lbl small { display: block; color: #9aa3bd; margin-top: 2px; }
+
     .empty-row td { text-align: center; color: #899bbd; padding: 28px 0 !important; }
 
     /* Khung chờ khi đang tải */
@@ -115,19 +133,8 @@
     </a>
     <i class="bi bi-list toggle-sidebar-btn"></i>
   </div>
-  <div class="search-bar">
-    <form class="search-form d-flex align-items-center" method="POST" action="#">
-      <input type="text" name="query" placeholder="Tìm kiếm nhanh..." title="Nhập từ khóa tìm kiếm">
-      <button type="submit" title="Search"><i class="bi bi-search"></i></button>
-    </form>
-  </div>
   <nav class="header-nav ms-auto">
     <ul class="d-flex align-items-center">
-      <li class="nav-item d-block d-lg-none">
-        <a class="nav-link nav-icon search-bar-toggle " href="#">
-          <i class="bi bi-search"></i>
-        </a>
-      </li>
       <li class="nav-item dropdown pe-3">
         <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
           <img src="assets/img/profile-img.jpg" alt="Profile" class="rounded-circle">
@@ -148,6 +155,8 @@
     </ul>
   </nav>
 </header>
+<script>AdminAuth.renderUser();</script>
+
 <aside id="sidebar" class="sidebar">
   <ul class="sidebar-nav" id="sidebar-nav">
 
@@ -195,7 +204,7 @@
 
     <li class="nav-item">
       <a class="nav-link collapsed" href="locations.html">
-        <i class="bi bi-geo-alt"></i><span>Quản lý địa điểm</span>
+        <i class="bi bi-geo-alt"></i><span>Quản lý điểm đến</span>
       </a>
     </li>
 
@@ -228,7 +237,7 @@
     </li>
 
     <li class="nav-item">
-      <a class="nav-link collapsed" href="report-revenue.html">
+      <a class="nav-link collapsed" href="reports.html">
         <i class="bi bi-bar-chart"></i><span>Báo cáo thống kê</span>
       </a>
     </li>
@@ -282,7 +291,7 @@
       <div class="col-xxl-3 col-md-6">
         <div class="card kpi-card">
           <div class="card-body">
-            <div class="kpi-label">Đơn đặt tour</div>
+            <div class="kpi-label">Đơn đã thanh toán</div>
             <div class="kpi-row">
               <div class="kpi-icon ic-blue"><i class="bi bi-cart-check"></i></div>
               <div>
@@ -310,12 +319,12 @@
       <div class="col-xxl-3 col-md-6">
         <div class="card kpi-card">
           <div class="card-body">
-            <div class="kpi-label">Khách hàng mới</div>
+            <div class="kpi-label">Điểm đánh giá</div>
             <div class="kpi-row">
-              <div class="kpi-icon ic-purple"><i class="bi bi-person-plus"></i></div>
+              <div class="kpi-icon ic-purple"><i class="bi bi-star-fill"></i></div>
               <div>
-                <div class="kpi-value skeleton" id="kpiCustomers">000</div>
-                <div class="kpi-delta" id="kpiCustomersDelta">&nbsp;</div>
+                <div class="kpi-value skeleton" id="kpiRating">0,0 / 5</div>
+                <div class="kpi-delta" id="kpiRatingDelta">&nbsp;</div>
               </div>
             </div>
           </div>
@@ -336,8 +345,9 @@
       <div class="col-lg-4">
         <div class="card">
           <div class="card-body">
-            <h5 class="card-title">Trạng thái đơn đặt <span class="sub" id="statusSub">| 30 ngày qua</span></h5>
-            <div id="statusChart" class="chart-box"></div>
+            <h5 class="card-title">Tình trạng đơn đặt <span class="sub" id="statusSub">| 30 ngày qua</span></h5>
+            <div id="statusChart"></div>
+            <ul class="status-list" id="statusList"></ul>
           </div>
         </div>
       </div>
@@ -376,7 +386,7 @@
           <div class="card-body">
             <div class="d-flex justify-content-between align-items-center">
               <h5 class="card-title">Tour bán chạy <span class="sub" id="topSub">| 30 ngày qua</span></h5>
-              <a href="tours.html" class="card-head-link">Quản lý tour <i class="bi bi-arrow-right"></i></a>
+              <a href="reports.html" class="card-head-link">Báo cáo <i class="bi bi-arrow-right"></i></a>
             </div>
             <div class="table-responsive">
               <table class="table dash-table">
@@ -403,25 +413,25 @@
           <div class="card-body">
             <h5 class="card-title">Cần xử lý</h5>
             <div class="todo-grid">
-              <a class="todo-item" href="bookings.html?status=PENDING">
+              <a class="todo-item" id="todoPayItem" href="bookings.html" title="Đơn đang giữ chỗ, sẽ tự huỷ nếu quá hạn thanh toán">
                 <i class="bi bi-hourglass-split text-warning"></i>
-                <div class="num" id="todoPending">–</div>
-                <div class="lbl">Đơn chờ xác nhận</div>
+                <div class="num" id="todoAwaiting">–</div>
+                <div class="lbl">Đơn chờ thanh toán</div>
               </a>
-              <a class="todo-item" href="payments.html?status=PENDING">
-                <i class="bi bi-credit-card text-primary"></i>
-                <div class="num" id="todoPayments">–</div>
-                <div class="lbl">Thanh toán chờ duyệt</div>
+              <a class="todo-item" id="todoCompleteItem" href="bookings.html" title="Đã thanh toán, tour đã về: bấm Hoàn thành để gửi mail mời đánh giá">
+                <i class="bi bi-flag text-primary"></i>
+                <div class="num" id="todoComplete">–</div>
+                <div class="lbl">Đơn cần hoàn thành</div>
               </a>
-              <a class="todo-item" href="reviews.html">
-                <i class="bi bi-star text-success"></i>
+              <a class="todo-item" id="todoReviewItem" href="reviews.html" title="Đánh giá đang hiển thị chưa có phản hồi của VietTrip">
+                <i class="bi bi-chat-left-text text-success"></i>
                 <div class="num" id="todoReviews">–</div>
-                <div class="lbl">Đánh giá mới</div>
+                <div class="lbl">Đánh giá chưa phản hồi</div>
               </a>
-              <a class="todo-item" href="promotions.html">
-                <i class="bi bi-tags text-danger"></i>
-                <div class="num" id="todoPromos">–</div>
-                <div class="lbl">Mã KM sắp hết hạn</div>
+              <a class="todo-item" id="todoLowItem" href="reports.html?tab=tours" title="Lịch khởi hành 7 ngày tới đã bán dưới 50% chỗ">
+                <i class="bi bi-exclamation-triangle text-danger"></i>
+                <div class="num" id="todoLow">–</div>
+                <div class="lbl">Lịch 7 ngày tới &lt; 50% chỗ</div>
               </a>
             </div>
           </div>
@@ -440,7 +450,7 @@
         <div class="card">
           <div class="card-body">
             <h5 class="card-title">Điểm đến được đặt nhiều <span class="sub" id="destSub">| 30 ngày qua</span></h5>
-            <div id="destChart" style="min-height:260px"></div>
+            <div id="destChart"></div>
           </div>
         </div>
       </div>
@@ -458,308 +468,256 @@
 
 <script>
   /* =====================================================================
-   * BẢNG ĐIỀU KHIỂN – hiện đang dùng DỮ LIỆU GIẢ LẬP.
-   * Khi có BE: đặt USE_MOCK = false, BE trả về đúng cấu trúc như mockDashboard()
-   * tại GET /api/admin/dashboard?period=WEEK|MONTH|YEAR
+   * BẢNG ĐIỀU KHIỂN — GET /api/admin/dashboard?period=WEEK|MONTH|YEAR
+   *   Phần theo khoảng (KPI, biểu đồ, tour bán chạy, điểm đến) dùng chung service với trang Báo cáo
+   *   → cùng khoảng thời gian thì 2 trang ra cùng con số.
+   *   Phần "Cần xử lý", đơn gần đây, lịch sắp tới: tình trạng NGAY LÚC NÀY.
+   * Tự tải lại mỗi 5 phút khi tab trình duyệt đang mở.
    * ===================================================================== */
-  const USE_MOCK = true;
   const API_URL = '/api/admin/dashboard';
+  const AUTO_REFRESH_MS = 5 * 60 * 1000;
 
   const PERIOD_TEXT = { WEEK: '7 ngày qua', MONTH: '30 ngày qua', YEAR: '12 tháng qua' };
   const STATUS_TEXT = { PENDING: 'Chờ xác nhận', CONFIRMED: 'Đã xác nhận', COMPLETED: 'Hoàn thành', CANCELLED: 'Đã huỷ' };
-  const STATUS_COLOR = { PENDING: '#ffc107', CONFIRMED: '#4154f1', COMPLETED: '#2eca6a', CANCELLED: '#dc3545' };
+  const PAY_TEXT = { PENDING: 'Chưa thanh toán', PAID: 'Đã thanh toán', REFUNDED: 'Hoàn tiền' };
 
   /* ---------- Định dạng ---------- */
   const fmtMoney = n => Number(n || 0).toLocaleString('vi-VN') + ' ₫';
   const fmtNum = n => Number(n || 0).toLocaleString('vi-VN');
-  // Rút gọn cho trục biểu đồ: 1,2 tỷ / 350 tr
-  function shortMoney(n) {
-    if (n >= 1e9) return (n / 1e9).toLocaleString('vi-VN', { maximumFractionDigits: 1 }) + ' tỷ';
-    if (n >= 1e6) return Math.round(n / 1e6).toLocaleString('vi-VN') + ' tr';
-    return fmtNum(n);
+  const fmtPct = v => Number(v || 0).toLocaleString('vi-VN', { maximumFractionDigits: 1 }) + '%';
+  /** Rút gọn cho trục biểu đồ: 1,25 tỷ / 45 tr / 150k */
+  function shortMoney(v) {
+    v = Number(v) || 0;
+    const f = (x, d) => x.toLocaleString('vi-VN', { maximumFractionDigits: d });
+    if (Math.abs(v) >= 1e9) return f(v / 1e9, 2) + ' tỷ';
+    if (Math.abs(v) >= 1e6) return f(v / 1e6, 1) + ' tr';
+    if (Math.abs(v) >= 1e3) return f(v / 1e3, 0) + 'k';
+    return f(v, 0);
   }
   const pad = n => String(n).padStart(2, '0');
-  const fmtDate = d => `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
-  const fmtDateTime = d => `${fmtDate(d)} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  /** "2026-11-19" → "19/11/2026" — tách chuỗi, không qua Date (tránh lệch múi giờ) */
+  const fmtIsoDate = s => s ? String(s).slice(0, 10).split('-').reverse().join('/') : '—';
+  /** "2026-11-19T16:05:12" → "19/11/2026 16:05" */
+  const fmtIsoDateTime = s => s ? `${fmtIsoDate(s)} ${String(s).slice(11, 16)}` : '—';
+  const fmtNow = () => { const d = new Date(); return `${pad(d.getHours())}:${pad(d.getMinutes())} ${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`; };
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-
-  /* ---------- Dữ liệu giả lập ---------- */
-  // Random có seed: cùng 1 khoảng thời gian luôn ra cùng số liệu, đổi tab qua lại không bị nhảy số
-  function seeded(seed) {
-    return () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
-  }
-
-  const MOCK_TOURS = [
-    { code: 'VT-HN-SP-001', name: 'Hà Nội - Sa Pa - Fansipan 3N2Đ', dest: 'Sa Pa', price: 4590000 },
-    { code: 'VT-DN-HA-002', name: 'Đà Nẵng - Hội An - Bà Nà Hills 4N3Đ', dest: 'Đà Nẵng', price: 6290000 },
-    { code: 'VT-PQ-003', name: 'Phú Quốc - Grand World - Hòn Thơm 3N2Đ', dest: 'Phú Quốc', price: 5490000 },
-    { code: 'VT-HL-004', name: 'Hạ Long - Du thuyền 5 sao 2N1Đ', dest: 'Hạ Long', price: 3890000 },
-    { code: 'VT-NT-005', name: 'Nha Trang - Vinpearl - Đảo Bình Ba 4N3Đ', dest: 'Nha Trang', price: 5790000 },
-    { code: 'VT-DL-006', name: 'Đà Lạt - Thành phố ngàn hoa 3N2Đ', dest: 'Đà Lạt', price: 3290000 },
-    { code: 'VT-HG-007', name: 'Hà Giang - Cao nguyên đá Đồng Văn 4N3Đ', dest: 'Hà Giang', price: 4190000 },
-    { code: 'VT-MT-008', name: 'Miền Tây - Cần Thơ - Chợ nổi Cái Răng 2N1Đ', dest: 'Cần Thơ', price: 2490000 }
-  ];
-  const MOCK_NAMES = ['Nguyễn Văn An', 'Trần Thị Bích', 'Lê Hoàng Long', 'Phạm Minh Châu', 'Hoàng Gia Huy',
-    'Vũ Thu Trang', 'Đặng Quốc Bảo', 'Bùi Ngọc Hân', 'Đỗ Thành Đạt', 'Ngô Thị Mai'];
-
-  function mockDashboard(period) {
-    const rnd = seeded({ WEEK: 7, MONTH: 30, YEAR: 365 }[period]);
-    const now = new Date();
-    const pick = arr => arr[Math.floor(rnd() * arr.length)];
-
-    // 1. Chuỗi thời gian
-    const labels = [], revenue = [], bookings = [];
-    if (period === 'YEAR') {
-      for (let i = 11; i >= 0; i--) {
-        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        labels.push(`T${d.getMonth() + 1}/${String(d.getFullYear()).slice(2)}`);
-        const b = Math.round(90 + rnd() * 110 + (d.getMonth() >= 5 && d.getMonth() <= 7 ? 60 : 0)); // hè đông khách
-        bookings.push(b);
-        revenue.push(Math.round(b * (8 + rnd() * 4)) * 1e6);
-      }
-    } else {
-      const days = period === 'WEEK' ? 7 : 30;
-      for (let i = days - 1; i >= 0; i--) {
-        const d = new Date(now); d.setDate(now.getDate() - i);
-        labels.push(`${pad(d.getDate())}/${pad(d.getMonth() + 1)}`);
-        const weekend = d.getDay() === 0 || d.getDay() === 6;
-        const b = Math.round(3 + rnd() * 6 + (weekend ? 3 : 0));
-        bookings.push(b);
-        revenue.push(Math.round(b * (8 + rnd() * 4)) * 1e6);
-      }
-    }
-
-    const sum = a => a.reduce((s, x) => s + x, 0);
-    const totalBookings = sum(bookings);
-    const totalRevenue = sum(revenue);
-
-    // 2. Trạng thái đơn (tổng = totalBookings)
-    const cancelled = Math.round(totalBookings * 0.08);
-    const pending = Math.round(totalBookings * 0.12);
-    const confirmed = Math.round(totalBookings * 0.35);
-    const completed = totalBookings - cancelled - pending - confirmed;
-
-    // 3. Tour bán chạy
-    const weights = MOCK_TOURS.map(() => 0.4 + rnd());
-    const wSum = sum(weights);
-    const topTours = MOCK_TOURS.map((t, i) => {
-      const bk = Math.max(1, Math.round(totalBookings * weights[i] / wSum));
-      const travelers = Math.round(bk * (2 + rnd() * 1.5));
-      return { tourCode: t.code, tourName: t.name, destination: t.dest, bookingCount: bk, travelerCount: travelers, revenue: travelers * t.price };
-    }).sort((a, b) => b.revenue - a.revenue);
-
-    const totalTravelers = sum(topTours.map(t => t.travelerCount));
-
-    // 4. Đơn gần đây (mới nhất trước)
-    const statuses = ['PENDING', 'CONFIRMED', 'CONFIRMED', 'COMPLETED', 'COMPLETED', 'CANCELLED'];
-    const recentBookings = Array.from({ length: 6 }, (_, i) => {
-      const t = pick(MOCK_TOURS);
-      const pax = 1 + Math.floor(rnd() * 4);
-      const created = new Date(now.getTime() - (i * 3 + rnd() * 3) * 3600e3);
-      const status = i === 0 ? 'PENDING' : pick(statuses);
-      // Đơn "Hoàn thành" thì tour đã đi xong → ngày khởi hành ở quá khứ
-      const dep = new Date(now);
-      dep.setDate(now.getDate() + (status === 'COMPLETED' ? -(3 + Math.floor(rnd() * 20)) : 5 + Math.floor(rnd() * 40)));
-      return {
-        bookingCode: 'BK' + (260000 + 917 - i * 7),
-        customerName: pick(MOCK_NAMES),
-        tourName: t.name,
-        departureDate: dep.toISOString(),
-        createdAt: created.toISOString(),
-        totalAmount: pax * t.price,
-        bookingStatus: status
-      };
-    });
-
-    // 5. Lịch khởi hành sắp tới
-    const upcomingSchedules = MOCK_TOURS.slice(0, 5).map((t, i) => {
-      const dep = new Date(now); dep.setDate(now.getDate() + 2 + i * 3); dep.setHours(6 + i, 30, 0, 0);
-      const total = [20, 25, 30, 35][i % 4];
-      const booked = Math.min(total, Math.round(total * (0.35 + rnd() * 0.7)));
-      return { tourName: t.name, departureDate: dep.toISOString(), totalSeats: total, bookedSeats: booked };
-    });
-
-    // 6. Điểm đến
-    const destMap = {};
-    topTours.forEach(t => destMap[t.destination] = (destMap[t.destination] || 0) + t.travelerCount);
-    const topDestinations = Object.entries(destMap)
-            .map(([name, travelerCount]) => ({ name, travelerCount }))
-            .sort((a, b) => b.travelerCount - a.travelerCount).slice(0, 6);
-
-    // % so với kỳ trước (âm = giảm)
-    const delta = () => Math.round((rnd() * 40 - 12) * 10) / 10;
-
-    return {
-      summary: {
-        revenue: totalRevenue, revenueChange: delta(),
-        bookings: totalBookings, bookingsChange: delta(),
-        travelers: totalTravelers, travelersChange: delta(),
-        newCustomers: Math.round(totalBookings * 0.45), newCustomersChange: delta()
-      },
-      chart: { labels, revenue, bookings },
-      bookingStatus: { PENDING: pending, CONFIRMED: confirmed, COMPLETED: completed, CANCELLED: cancelled },
-      recentBookings,
-      topTours: topTours.slice(0, 5),
-      upcomingSchedules,
-      topDestinations,
-      todo: { pendingBookings: 7, pendingPayments: 4, newReviews: 12, expiringPromotions: 2 }
-    };
-  }
+  const $ = id => document.getElementById(id);
 
   async function loadDashboard(period) {
-    if (USE_MOCK) {
-      await new Promise(r => setTimeout(r, 300)); // giả lập độ trễ mạng
-      return mockDashboard(period);
-    }
-    const res = await fetch(`${API_URL}?period=${period}`, {
-      headers: { Authorization: 'Bearer ' + (localStorage.getItem('adminToken') || '') }
-    });
-    const json = await res.json();
-    if (!res.ok || !json.success) throw new Error(json.message || 'Không tải được dữ liệu');
+    const res = await fetch(`${API_URL}?period=${period}`, { headers: AdminAuth.authHeaders() });
+    if (res.status === 401) { AdminAuth.logout(); throw new Error('UNAUTHORIZED'); }
+    const json = await res.json().catch(() => null);
+    if (!res.ok || !json?.success) throw new Error(json?.message || 'Không tải được dữ liệu');
     return json.data;
   }
 
-  /* ---------- Vẽ KPI ---------- */
-  function renderDelta(el, change) {
-    if (change == null) { el.innerHTML = '&nbsp;'; return; }
-    const up = change >= 0;
-    el.innerHTML = `<span class="${up ? 'up' : 'down'}"><i class="bi bi-arrow-${up ? 'up' : 'down'}-short"></i>${Math.abs(change).toLocaleString('vi-VN')}%</span>
-                    <span class="muted">so với kỳ trước</span>`;
+  /* ---------- KPI ---------- */
+  /** % so với kỳ trước; kỳ trước = 0 → "Mới" thay vì chia cho 0 */
+  function deltaHtml(cur, prev) {
+    cur = Number(cur) || 0; prev = Number(prev) || 0;
+    const tail = '<span class="muted">so với kỳ trước</span>';
+    if (prev === 0) return cur === 0 ? `<span class="flat">0%</span> ${tail}` : `<span class="up"><i class="bi bi-arrow-up-short"></i>Mới</span> <span class="muted">kỳ trước chưa có</span>`;
+    const pct = (cur - prev) / prev * 100;
+    if (Math.abs(pct) < 0.05) return `<span class="flat">0%</span> ${tail}`;
+    return `<span class="${pct > 0 ? 'up' : 'down'}"><i class="bi bi-arrow-${pct > 0 ? 'up' : 'down'}-short"></i>${fmtPct(Math.abs(pct))}</span> ${tail}`;
   }
-  function renderKpi(s) {
-    const set = (id, text, change) => {
-      const el = document.getElementById(id);
-      el.textContent = text; el.classList.remove('skeleton');
-      renderDelta(document.getElementById(id + 'Delta'), change);
+
+  function renderKpi(d) {
+    const s = d.revenue.summary, p = d.revenue.previous, r = d.rating;
+    const set = (id, html, delta) => {
+      $(id).innerHTML = html;
+      $(id).classList.remove('skeleton');
+      $(id + 'Delta').innerHTML = delta;
     };
-    set('kpiRevenue', fmtMoney(s.revenue), s.revenueChange);
-    set('kpiBookings', fmtNum(s.bookings), s.bookingsChange);
-    set('kpiTravelers', fmtNum(s.travelers), s.travelersChange);
-    set('kpiCustomers', fmtNum(s.newCustomers), s.newCustomersChange);
+    set('kpiRevenue', fmtMoney(s.revenue), deltaHtml(s.revenue, p.revenue));
+    set('kpiBookings', `${fmtNum(s.paidBookings)} <small class="text-muted fw-semibold fs-6">/ ${fmtNum(s.totalBookings)}</small>`,
+            deltaHtml(s.paidBookings, p.paidBookings));
+    set('kpiTravelers', fmtNum(s.guests), deltaHtml(s.guests, p.guests));
+
+    // Điểm TB so kỳ trước theo ĐIỂM (+0,2), không theo %
+    const avg = v => Number(v).toLocaleString('vi-VN', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    let ratingDelta = `<span class="muted">${fmtNum(r.totalReviews)} đánh giá</span>`;
+    if (r.totalReviews && r.previousTotalReviews) {
+      const diff = Math.round((r.averageRating - r.previousAverageRating) * 10) / 10;
+      ratingDelta = (diff === 0 ? '<span class="flat">±0</span>'
+                      : `<span class="${diff > 0 ? 'up' : 'down'}"><i class="bi bi-arrow-${diff > 0 ? 'up' : 'down'}-short"></i>${avg(Math.abs(diff))} điểm</span>`)
+              + ` <span class="muted">· ${fmtNum(r.totalReviews)} đánh giá</span>`;
+    }
+    set('kpiRating', r.totalReviews ? `${avg(r.averageRating)} <small class="text-muted fw-semibold fs-6">/ 5</small>` : '—', ratingDelta);
   }
 
   /* ---------- Biểu đồ ---------- */
   let revenueChart, statusChart, destChart;
   const FONT = 'Open Sans, sans-serif';
 
-  function renderRevenueChart(c) {
+  /** Nhãn trục X ngắn ("05/11", "T5"); khung hẹp thì hiện cách vài nhãn — tooltip vẫn đủ ngày */
+  function axisLabels(pts, byDay) {
+    const multiYear = new Set(pts.map(p => p.date.slice(0, 4))).size > 1;
+    const raw = pts.map(p => {
+      const [y, m, d] = p.date.split('-');
+      return byDay ? `${d}/${m}` : `T${Number(m)}${multiYear ? '/' + y.slice(2) : ''}`;
+    });
+    const width = $('revenueChart').clientWidth || 600;
+    const per = byDay || multiYear ? 46 : 32;
+    const step = Math.max(1, Math.ceil(raw.length / Math.max(1, Math.floor((width - 70) / per))));
+    return raw.map((l, i) => (i % step === 0 ? l : ''));
+  }
+
+  function renderRevenueChart(rev) {
+    const byDay = rev.groupBy === 'DAY';
+    const pts = rev.series;
+    const titles = pts.map(p => byDay ? fmtIsoDate(p.date) : `Tháng ${Number(p.date.slice(5, 7))}/${p.date.slice(0, 4)}`);
     const opt = {
       series: [
-        { name: 'Doanh thu', type: 'column', data: c.revenue },
-        { name: 'Đơn đặt', type: 'line', data: c.bookings }
+        { name: 'Doanh thu', type: 'column', data: pts.map(p => Number(p.revenue) || 0) },
+        { name: 'Đơn đã thanh toán', type: 'line', data: pts.map(p => p.paidBookings) }
       ],
       chart: { height: 330, type: 'line', toolbar: { show: false }, fontFamily: FONT, zoom: { enabled: false } },
       colors: ['#4154f1', '#ff771d'],
-      stroke: { width: [0, 3], curve: 'smooth' },
-      plotOptions: { bar: { columnWidth: c.labels.length > 12 ? '60%' : '45%', borderRadius: 4 } },
-      markers: { size: [0, 4] },
+      stroke: { width: [0, 3], curve: 'straight' },   // 'smooth' võng xuống dưới 0 ở những ngày không có đơn
+      plotOptions: { bar: { columnWidth: pts.length > 12 ? '60%' : '45%', borderRadius: 4 } },
+      markers: { size: [0, pts.length > 40 ? 0 : 4] },
       dataLabels: { enabled: false },
-      xaxis: { categories: c.labels, labels: { rotate: -45, rotateAlways: false, hideOverlappingLabels: true, style: { fontSize: '11px' } },
-        tickAmount: c.labels.length > 15 ? 10 : undefined },
+      xaxis: { categories: axisLabels(pts, byDay), labels: { rotate: 0, trim: false, hideOverlappingLabels: false, style: { fontSize: '11px' } },
+        tooltip: { enabled: false } },
       yaxis: [
         { min: 0, title: { text: 'Doanh thu' }, labels: { formatter: shortMoney } },
-        { min: 0, opposite: true, title: { text: 'Số đơn' }, labels: { formatter: v => Math.round(v) } }
+        { min: 0, opposite: true, forceNiceScale: true, title: { text: 'Số đơn' }, labels: { formatter: v => Number.isInteger(v) ? fmtNum(v) : '' } }
       ],
       legend: { position: 'top', horizontalAlign: 'right' },
-      tooltip: { shared: true, intersect: false, y: { formatter: (v, { seriesIndex }) => seriesIndex === 0 ? fmtMoney(v) : fmtNum(v) + ' đơn' } },
+      tooltip: { shared: true, intersect: false,
+        x: { formatter: (v, o) => titles[o?.dataPointIndex] ?? v },
+        y: { formatter: (v, o) => o?.seriesIndex === 0 ? fmtMoney(v) : fmtNum(v) + ' đơn' } },
       grid: { borderColor: '#eef0f5' }
     };
     if (revenueChart) revenueChart.destroy();
-    revenueChart = new ApexCharts(document.querySelector('#revenueChart'), opt);
+    revenueChart = new ApexCharts($('revenueChart'), opt);
     revenueChart.render();
   }
 
-  function renderStatusChart(st) {
-    const keys = ['PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED'];
+  /** Cùng 4 nhóm với trang Báo cáo. Chú thích vẽ bằng HTML: cột hẹp (sidebar mở) không bị cắt */
+  function renderStatusChart(s) {
+    const items = [
+      { name: 'Đã thanh toán',         count: s.paidBookings,                                        color: '#2eca6a' },
+      { name: 'Chờ thanh toán',        count: s.pendingBookings,                                     color: '#ffbb2c' },
+      { name: 'Huỷ (chưa thanh toán)', count: Math.max(s.cancelledBookings - s.refundedBookings, 0), color: '#adb5bd' },
+      { name: 'Huỷ – đã hoàn tiền',    count: s.refundedBookings,                                    color: '#dc3545' }
+    ];
+    const total = items.reduce((a, i) => a + i.count, 0);
     const opt = {
-      series: keys.map(k => st[k] || 0),
-      labels: keys.map(k => STATUS_TEXT[k]),
-      colors: keys.map(k => STATUS_COLOR[k]),
-      chart: { type: 'donut', height: 330, fontFamily: FONT },
-      legend: { position: 'bottom' },
-      dataLabels: { enabled: true, formatter: v => Math.round(v) + '%' },
-      plotOptions: { pie: { donut: { size: '62%', labels: {
+      series: total ? items.map(i => i.count) : [1],
+      labels: total ? items.map(i => i.name) : ['Chưa có đơn'],
+      colors: total ? items.map(i => i.color) : ['#eef0f6'],
+      chart: { type: 'donut', height: 230, fontFamily: FONT },
+      legend: { show: false },
+      dataLabels: { enabled: total > 0, formatter: v => Math.round(v) + '%' },
+      stroke: { width: 2 },
+      plotOptions: { pie: { donut: { size: '66%', labels: {
               show: true,
-              total: { show: true, label: 'Tổng đơn', formatter: w => fmtNum(w.globals.seriesTotals.reduce((a, b) => a + b, 0)) }
+              value: { fontSize: '22px', fontWeight: 700, color: '#012970', formatter: v => total ? fmtNum(v) : '0' },
+              total: { show: true, showAlways: true, label: 'Tổng đơn', color: '#899bbd', fontSize: '12px', formatter: () => fmtNum(total) }
             } } } },
-      tooltip: { y: { formatter: v => fmtNum(v) + ' đơn' } }
+      tooltip: { enabled: total > 0, y: { formatter: v => fmtNum(v) + ' đơn' } }
     };
     if (statusChart) statusChart.destroy();
-    statusChart = new ApexCharts(document.querySelector('#statusChart'), opt);
+    statusChart = new ApexCharts($('statusChart'), opt);
     statusChart.render();
+    $('statusList').innerHTML = items.map(i => `
+      <li><span class="status-dot" style="background:${i.color}"></span>
+          <span class="s-name">${i.name}</span><span class="s-count">${fmtNum(i.count)}</span></li>`).join('');
   }
 
   function renderDestChart(list) {
-    const opt = {
-      series: [{ name: 'Lượt khách', data: list.map(d => d.travelerCount) }],
-      chart: { type: 'bar', height: 260, toolbar: { show: false }, fontFamily: FONT },
+    if (destChart) { destChart.destroy(); destChart = null; }
+    if (!list.length) {
+      $('destChart').innerHTML = '<div class="text-center text-muted small py-4">Chưa có đơn đã thanh toán.</div>';
+      return;
+    }
+    $('destChart').innerHTML = '';
+    destChart = new ApexCharts($('destChart'), {
+      series: [{ name: 'Lượt khách', data: list.map(d => d.guests) }],
+      chart: { type: 'bar', height: Math.max(180, list.length * 38 + 40), toolbar: { show: false }, fontFamily: FONT },
       plotOptions: { bar: { horizontal: true, barHeight: '55%', borderRadius: 4 } },
       colors: ['#2eca6a'],
       dataLabels: { enabled: true, style: { fontSize: '11px' } },
-      xaxis: { categories: list.map(d => d.name) },
+      xaxis: { categories: list.map(d => d.name), labels: { formatter: v => Number.isInteger(+v) ? v : '' } },
       grid: { borderColor: '#eef0f5' },
-      tooltip: { y: { formatter: v => fmtNum(v) + ' khách' } }
-    };
-    if (destChart) destChart.destroy();
-    destChart = new ApexCharts(document.querySelector('#destChart'), opt);
+      tooltip: { custom: ({ dataPointIndex }) => {
+          const d = list[dataPointIndex];
+          return `<div class="px-3 py-2 small"><div class="fw-semibold mb-1">${esc(d.name)}</div>
+                <div>${fmtNum(d.guests)} khách · ${fmtNum(d.bookings)} đơn</div><div>Doanh thu: <b>${fmtMoney(d.revenue)}</b></div></div>`;
+        } }
+    });
     destChart.render();
   }
 
   /* ---------- Bảng & danh sách ---------- */
   function renderRecent(list) {
-    const tb = document.getElementById('recentBody');
+    const tb = $('recentBody');
     if (!list.length) { tb.innerHTML = '<tr class="empty-row"><td colspan="6">Chưa có đơn đặt tour nào.</td></tr>'; return; }
-    tb.innerHTML = list.map(b => `
+    tb.innerHTML = list.map(b => {
+      const cancelled = b.bookingStatus === 'CANCELLED';
+      return `
       <tr>
-        <td><span class="code">${esc(b.bookingCode)}</span><div class="text-muted small">${fmtDateTime(new Date(b.createdAt))}</div></td>
-        <td class="nowrap">${esc(b.customerName)}</td>
+        <td><span class="code">${esc(b.bookingCode)}</span><div class="text-muted small">${fmtIsoDateTime(b.createdAt)}</div></td>
+        <td class="nowrap">${esc(b.contactName)}</td>
         <td><div class="tour-name" title="${esc(b.tourName)}">${esc(b.tourName)}</div></td>
-        <td class="nowrap">${fmtDate(new Date(b.departureDate))}</td>
-        <td class="text-end money">${fmtMoney(b.totalAmount)}</td>
-        <td class="text-center"><span class="bk-badge bk-${b.bookingStatus}">${STATUS_TEXT[b.bookingStatus] || b.bookingStatus}</span></td>
-      </tr>`).join('');
+        <td class="nowrap">${fmtIsoDate(b.departureDate)}</td>
+        <td class="text-end money ${cancelled ? 'text-muted text-decoration-line-through' : ''}">${fmtMoney(b.totalAmount)}</td>
+        <td class="text-center">
+          <span class="bk-badge bk-${b.bookingStatus}">${STATUS_TEXT[b.bookingStatus] || b.bookingStatus}</span>
+          ${b.paymentStatus ? `<div class="pay-sub pay-${b.paymentStatus}">${PAY_TEXT[b.paymentStatus] || b.paymentStatus}</div>` : ''}
+        </td>
+      </tr>`;
+    }).join('');
   }
 
   function renderTop(list) {
-    const tb = document.getElementById('topBody');
-    if (!list.length) { tb.innerHTML = '<tr class="empty-row"><td colspan="5">Chưa có dữ liệu.</td></tr>'; return; }
-    tb.innerHTML = list.map((t, i) => `
+    const tb = $('topBody');
+    if (!list.length) { tb.innerHTML = '<tr class="empty-row"><td colspan="5">Chưa có đơn đã thanh toán trong khoảng này.</td></tr>'; return; }
+    tb.innerHTML = list.slice(0, 5).map((t, i) => `
       <tr>
         <td><span class="rank ${i < 3 ? 'r' + (i + 1) : ''}">${i + 1}</span></td>
-        <td><div class="tour-name fw-semibold" title="${esc(t.tourName)}">${esc(t.tourName)}</div><div class="text-muted small">${esc(t.tourCode)}</div></td>
-        <td class="text-center">${fmtNum(t.bookingCount)}</td>
-        <td class="text-center">${fmtNum(t.travelerCount)}</td>
+        <td><a class="tour-name fw-semibold d-block text-dark text-decoration-none" href="tour-form.html?id=${encodeURIComponent(t.tourId)}&view=true"
+               title="${esc(t.tourName)}">${esc(t.tourName)}</a><div class="text-muted small">${esc(t.tourCode)}</div></td>
+        <td class="text-center">${fmtNum(t.bookings)}</td>
+        <td class="text-center">${fmtNum(t.guests)}</td>
         <td class="text-end money">${fmtMoney(t.revenue)}</td>
       </tr>`).join('');
   }
 
   function renderSchedules(list) {
-    const box = document.getElementById('schedList');
+    const box = $('schedList');
     if (!list.length) { box.innerHTML = '<div class="text-center text-muted small py-3">Không có lịch khởi hành sắp tới.</div>'; return; }
     box.innerHTML = list.map(s => {
-      const pct = s.totalSeats ? Math.round(s.bookedSeats * 100 / s.totalSeats) : 0;
-      const color = pct >= 100 ? 'bg-danger' : pct >= 80 ? 'bg-warning' : 'bg-success';
-      const left = s.totalSeats - s.bookedSeats;
+      const pct = s.totalSlots ? Math.round(s.bookedSlots * 100 / s.totalSlots) : 0;
+      // Lấp đầy: thấp = cần đẩy bán (đỏ), cao = tốt (xanh)
+      const color = pct >= 80 ? 'bg-success' : pct >= 50 ? 'bg-warning' : 'bg-danger';
+      const left = s.totalSlots - s.bookedSlots;
       return `
         <div class="sched-item">
           <div class="sched-top">
             <div class="sched-name" title="${esc(s.tourName)}">${esc(s.tourName)}</div>
-            <div class="sched-date"><i class="bi bi-calendar3 me-1"></i>${fmtDateTime(new Date(s.departureDate))}</div>
+            <div class="sched-date"><i class="bi bi-calendar3 me-1"></i>${fmtIsoDate(s.departureDate)}</div>
           </div>
           <div class="sched-seat">
             <div class="progress"><div class="progress-bar ${color}" style="width:${Math.min(pct, 100)}%"></div></div>
-            <b>${s.bookedSeats}/${s.totalSeats}</b>
-            <span class="${left === 0 ? 'text-danger fw-semibold' : ''}">${left === 0 ? 'Hết chỗ' : 'còn ' + left}</span>
+            <b>${s.bookedSlots}/${s.totalSlots}</b>
+            <span class="${left <= 0 ? 'text-success fw-semibold' : ''}">${left <= 0 ? 'Hết chỗ' : 'còn ' + left}</span>
           </div>
         </div>`;
     }).join('');
   }
 
   function renderTodo(t) {
-    document.getElementById('todoPending').textContent = fmtNum(t.pendingBookings);
-    document.getElementById('todoPayments').textContent = fmtNum(t.pendingPayments);
-    document.getElementById('todoReviews').textContent = fmtNum(t.newReviews);
-    document.getElementById('todoPromos').textContent = fmtNum(t.expiringPromotions);
+    const set = (numId, itemId, n) => {
+      $(numId).textContent = fmtNum(n);
+      $(itemId).classList.toggle('hot', n > 0);   // có việc → nền cam nhạt cho dễ thấy
+    };
+    set('todoAwaiting', 'todoPayItem', t.awaitingPayment);
+    set('todoComplete', 'todoCompleteItem', t.toComplete);
+    set('todoReviews', 'todoReviewItem', t.unrepliedReviews);
+    set('todoLow', 'todoLowItem', t.lowUpcoming);
   }
 
   /* ---------- Tải trang ---------- */
@@ -767,29 +725,32 @@
   async function refresh() {
     const period = document.querySelector('input[name="period"]:checked').value;
     const text = '| ' + PERIOD_TEXT[period];
-    ['revenueSub', 'statusSub', 'topSub', 'destSub'].forEach(id => document.getElementById(id).textContent = text);
+    ['revenueSub', 'statusSub', 'topSub', 'destSub'].forEach(id => $(id).textContent = text);
 
-    const seq = ++loadSeq; // bấm đổi kỳ liên tục: chỉ lấy kết quả của lần bấm cuối
+    const seq = ++loadSeq;   // bấm đổi kỳ liên tục: chỉ lấy kết quả của lần bấm cuối
     try {
       const d = await loadDashboard(period);
       if (seq !== loadSeq) return;
-      renderKpi(d.summary);
-      renderRevenueChart(d.chart);
-      renderStatusChart(d.bookingStatus);
-      renderDestChart(d.topDestinations);
-      renderRecent(d.recentBookings);
-      renderTop(d.topTours);
-      renderSchedules(d.upcomingSchedules);
+      renderKpi(d);
+      renderRevenueChart(d.revenue);
+      renderStatusChart(d.revenue.summary);
+      renderDestChart(d.topDestinations || []);
+      renderRecent(d.recentBookings || []);
+      renderTop(d.revenue.topTours || []);
+      renderSchedules(d.upcomingSchedules || []);
       renderTodo(d.todo);
-      document.getElementById('updatedAt').textContent = 'Cập nhật lúc ' + fmtDateTime(new Date());
+      $('updatedAt').textContent = 'Cập nhật lúc ' + fmtNow();
     } catch (e) {
+      if (e.message === 'UNAUTHORIZED') return;
       console.error(e);
-      document.getElementById('updatedAt').innerHTML = '<span class="text-danger">' + esc(e.message) + '</span>';
+      $('updatedAt').innerHTML = '<span class="text-danger">' + esc(e.message === 'Failed to fetch' ? 'Không kết nối được máy chủ' : e.message) + '</span>';
     }
   }
 
   document.querySelectorAll('input[name="period"]').forEach(r => r.addEventListener('change', refresh));
   document.addEventListener('DOMContentLoaded', refresh);
+  // Tự cập nhật; tab đang ẩn thì bỏ qua cho đỡ tải máy chủ
+  setInterval(() => { if (!document.hidden) refresh(); }, AUTO_REFRESH_MS);
 </script>
 </body>
 

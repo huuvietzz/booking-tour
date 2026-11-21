@@ -264,22 +264,6 @@ public class BookingServiceImpl implements BookingService {
         return toBookingResponse(booking);
     }
 
-    /**
-     * Admin "Xác nhận thanh toán" (dự phòng): khách chuyển khoản sai nội dung, webhook lỗi, trả tiền mặt...
-     * Đơn đã CONFIRMED sẵn → chỉ chuyển thanh toán sang PAID.
-     */
-    @Override
-    @Transactional
-    public BookingResponse confirmBooking(Integer bookingId) {
-        Booking booking = lock(bookingId);
-        if (booking.getBookingStatus() != BookingStatus.CONFIRMED
-                || booking.getPaymentStatus() != PaymentStatus.PENDING) {
-            throw new AppException(ErrorCode.BOOKING_INVALID_STATUS);
-        }
-        booking.setPaymentStatus(PaymentStatus.PAID);
-        return toBookingResponse(booking);
-    }
-
     @Override
     @Transactional
     public BookingResponse cancelBooking(Integer bookingId) {

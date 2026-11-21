@@ -280,7 +280,7 @@
       <a class="nav-link collapsed" href="tour-schedules.html"><i class="bi bi-calendar-event"></i><span>Quản lý lịch khởi hành</span></a>
     </li>
     <li class="nav-item">
-      <a class="nav-link collapsed" href="locations.html"><i class="bi bi-geo-alt"></i><span>Quản lý địa điểm</span></a>
+      <a class="nav-link collapsed" href="locations.html"><i class="bi bi-geo-alt"></i><span>Quản lý điểm đến</span></a>
     </li>
     <li class="nav-item">
       <a class="nav-link collapsed" href="categories.html"><i class="bi bi-bookmarks"></i><span>Quản lý danh mục</span></a>
@@ -297,7 +297,7 @@
       <a class="nav-link collapsed" href="staff.html"><i class="bi bi-person-badge"></i><span>Quản lý nhân viên</span></a>
     </li>
     <li class="nav-item">
-      <a class="nav-link collapsed" href="report-revenue.html"><i class="bi bi-bar-chart"></i><span>Báo cáo thống kê</span></a>
+      <a class="nav-link collapsed" href="reports.html"><i class="bi bi-bar-chart"></i><span>Báo cáo thống kê</span></a>
     </li>
   </ul>
 </aside>
@@ -550,7 +550,8 @@
        GET   /api/admin/bookings?page&size&sort=field,dir + BookingFilterRequest
        GET   /api/admin/bookings/{id}              → BookingResponse
        PUT   /api/admin/bookings/{id}              ← BookingUpdateRequest
-       PATCH /api/admin/bookings/{id}/confirm (xác nhận thanh toán tay) | /cancel | /complete
+       PATCH /api/admin/bookings/{id}/cancel | /complete
+       (Thanh toán: chỉ webhook SePay / IPN VNPAY đổi sang Đã thanh toán — admin không xác nhận tay)
        GET   /api/admin/bookings/export            → file Excel (theo bộ lọc)
      ============================================================ */
   const API      = '/api/admin/bookings';
@@ -810,7 +811,7 @@
    /**
    * Nút 3 chấm dọc → menu hành động xổ xuống theo chiều dọc.
    * Chỉ hiện hành động dùng được với trạng thái hiện tại:
-   *   CONFIRMED + Chưa thanh toán : Xem · Sửa · Xuất PDF · Xác nhận thanh toán · Hủy
+   *   CONFIRMED + Chưa thanh toán : Xem · Sửa · Xuất PDF · Hủy
    *   CONFIRMED + Đã thanh toán   : Xem · Sửa · Xuất PDF · Hoàn thành · Hủy
    *   CANCELLED / COMPLETED : Xem · Xuất PDF
    * popper strategy "fixed": menu nổi lên trên, không bị khung cuộn của bảng (.table-responsive) cắt mất
@@ -819,7 +820,7 @@
     const s = b.bookingStatus;
     const data = `data-id="${b.bookingId}" data-code="${escapeHtml(b.bookingCode)}"
                       data-departure="${escapeHtml(b.departureDate || '')}" data-return="${escapeHtml(b.returnDate || '')}" data-people="${b.totalPeople ?? 0}"
-                      data-payment="${escapeHtml(b.paymentStatus || '')}" data-amount="${b.totalAmount ?? ''}"`;
+                      data-payment="${escapeHtml(b.paymentStatus || '')}"`;
     const editable = isEditable(s);
     const item = (icon, text, onclick, cls = '') =>
             `<li><button type="button" class="dropdown-item ${cls}" ${data} onclick="${onclick}">
@@ -835,7 +836,6 @@
                     ${item('bi-eye text-info', 'Xem chi tiết', `openViewModal(${b.bookingId})`)}
                     ${editable ? item('bi-pencil-square text-warning', 'Sửa', `openEditModal(${b.bookingId})`) : ''}
                     ${item('bi-filetype-pdf text-secondary', 'Xuất PDF', 'exportPdf(this)')}
-                    ${s === 'CONFIRMED' && b.paymentStatus === 'PENDING' ? item('bi-cash-coin text-success', 'Xác nhận thanh toán', 'confirmBooking(this)') : ''}
                     ${s === 'CONFIRMED' && b.paymentStatus === 'PAID' ? item('bi-flag text-primary', 'Hoàn thành', 'completeBooking(this)') : ''}
                     ${editable ? `<li><hr class="dropdown-divider"></li>
                     ${item('bi-x-circle', 'Hủy đơn', 'cancelBooking(this)', 'text-danger')}` : ''}
@@ -1165,28 +1165,8 @@
   });
 
   /* ============================================================
-     4. ĐỔI TRẠNG THÁI: PATCH /confirm · /complete · /cancel
+     4. ĐỔI TRẠNG THÁI: PATCH /complete · /cancel
      ============================================================ */
-  /**
-   * Xác nhận thanh toán TAY (dự phòng): webhook SePay/VNPAY tự làm việc này khi khách trả tiền.
-   * Chỉ dùng khi khách chuyển sai nội dung, webhook lỗi, trả tiền mặt... → BE đổi thanh toán sang PAID
-   */
-  async function confirmBooking(btn) {
-    const { code, amount } = btn.dataset;
-    const res = await Swal.fire({
-      icon: 'question',
-      title: 'Xác nhận thanh toán?',
-      html: `Chỉ xác nhận khi đã kiểm tra sao kê và nhận đủ
-                   <b>${amount ? fmtMoney(Number(amount)) : ''}</b> cho đơn <b>${escapeHtml(code)}</b>.`,
-      showCancelButton: true,
-      confirmButtonText: 'Đã nhận tiền',
-      cancelButtonText: 'Đóng',
-      confirmButtonColor: '#198754'
-    });
-    if (!res.isConfirmed) return;
-    await patchStatus(btn, 'confirm', 'Đã xác nhận thanh toán đơn ' + code, 'Không xác nhận được thanh toán');
-  }
-
   async function completeBooking(btn) {
     const { code, departure } = btn.dataset;
     const end = btn.dataset.return || departure;   // chưa có ngày về → lấy ngày đi

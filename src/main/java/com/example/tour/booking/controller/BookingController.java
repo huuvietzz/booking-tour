@@ -131,12 +131,6 @@ public class BookingController {
         return ResponseEntity.ok(ApiResponse.success("Cập nhật đơn đặt thành công", data));
     }
 
-    @PatchMapping("/admin/bookings/{bookingId}/confirm")
-    public ResponseEntity<ApiResponse<BookingResponse>> confirmBooking(@PathVariable Integer bookingId) {
-        BookingResponse data = bookingService.confirmBooking(bookingId);
-        return ResponseEntity.ok(ApiResponse.success("Đã xác nhận thanh toán", data));
-    }
-
     @PatchMapping("/admin/bookings/{bookingId}/cancel")
     public ResponseEntity<ApiResponse<BookingResponse>> cancelBooking(@PathVariable Integer bookingId) {
         BookingResponse data = bookingService.cancelBooking(bookingId);

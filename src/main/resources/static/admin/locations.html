@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>Quản lý Địa điểm - Admin</title>
+    <title>Quản lý điểm đến - Admin</title>
 
     <link href="assets/img/favicon.png" rel="icon">
     <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
@@ -185,7 +185,7 @@
             <a class="nav-link collapsed" href="tour-schedules.html"><i class="bi bi-calendar-event"></i><span>Quản lý lịch khởi hành</span></a>
         </li>
         <li class="nav-item">
-            <a class="nav-link collapsed" href="locations.html"><i class="bi bi-geo-alt"></i><span>Quản lý địa điểm</span></a>
+            <a class="nav-link collapsed" href="locations.html"><i class="bi bi-geo-alt"></i><span>Quản lý điểm đến</span></a>
         </li>
         <li class="nav-item">
             <a class="nav-link collapsed" href="categories.html"><i class="bi bi-bookmarks"></i><span>Quản lý danh mục</span></a>
@@ -202,7 +202,7 @@
             <a class="nav-link collapsed" href="staff.html"><i class="bi bi-person-badge"></i><span>Quản lý nhân viên</span></a>
         </li>
         <li class="nav-item">
-            <a class="nav-link collapsed" href="report-revenue.html"><i class="bi bi-bar-chart"></i><span>Báo cáo thống kê</span></a>
+            <a class="nav-link collapsed" href="reports.html"><i class="bi bi-bar-chart"></i><span>Báo cáo thống kê</span></a>
         </li>
     </ul>
 </aside>
@@ -210,12 +210,12 @@
 <!-- ======================= NỘI DUNG ======================= -->
 <main id="main" class="main">
     <div class="pagetitle">
-        <h1>Quản lý Địa điểm</h1>
+        <h1>Quản lý điểm đến</h1>
         <nav>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="index.html">Trang chủ</a></li>
                 <li class="breadcrumb-item">Sản phẩm</li>
-                <li class="breadcrumb-item active">Địa điểm</li>
+                <li class="breadcrumb-item active">Điểm đến</li>
             </ol>
         </nav>
     </div>
@@ -226,9 +226,9 @@
 
                 <!-- Tiêu đề + nút Thêm -->
                 <div class="d-flex justify-content-between align-items-center mt-3 mb-3 flex-wrap gap-2">
-                    <h5 class="card-title p-0 m-0">Danh sách địa điểm</h5>
+                    <h5 class="card-title p-0 m-0">Danh sách điểm đến</h5>
                     <button type="button" class="btn btn-primary" onclick="openCreateModal()">
-                        <i class="bi bi-plus-lg me-1"></i>Thêm địa điểm
+                        <i class="bi bi-plus-lg me-1"></i>Thêm điểm đến
                     </button>
                 </div>
 
@@ -260,7 +260,7 @@
                         <div class="input-group input-group-sm">
                             <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
                             <input type="text" class="form-control border-start-0" id="searchInput"
-                                   placeholder="Tên địa điểm..." oninput="onSearchInput(this.value)"
+                                   placeholder="Tên điểm đến..." oninput="onSearchInput(this.value)"
                                    style="min-width: 240px;">
                         </div>
                     </div>
@@ -278,7 +278,7 @@
                                 <th style="width: 90px;">Hình ảnh</th>
                                 <th>
                                     <button type="button" class="sort-btn" data-sort="locationName" onclick="sortBy('locationName')">
-                                        Tên địa điểm <i class="bi bi-arrow-down-up sort-icon"></i>
+                                        Tên điểm đến <i class="bi bi-arrow-down-up sort-icon"></i>
                                     </button>
                                 </th>
                                 <th class="text-center" style="width: 160px;">Trạng thái</th>
@@ -308,7 +308,7 @@
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title fw-bold" id="modalTitle">Thêm địa điểm</h5>
+                <h5 class="modal-title fw-bold" id="modalTitle">Thêm điểm đến</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
             </div>
             <div class="modal-body">
@@ -318,7 +318,7 @@
                     <!-- Cột trái: thông tin -->
                     <div class="col-md-7">
                         <div class="mb-3">
-                            <label class="form-label" for="locationName">Tên địa điểm <span class="text-danger">*</span></label>
+                            <label class="form-label" for="locationName">Tên điểm đến <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="locationName" maxlength="255"
                                    placeholder="VD: Hạ Long, Sa Pa, Phú Quốc...">
                             <div class="invalid-feedback" id="locationNameFeedback"></div>
@@ -342,7 +342,7 @@
                     <div class="col-md-5">
                         <label class="form-label">Hình ảnh</label>
                         <div class="image-picker" id="imagePicker" role="button" tabindex="0" title="Chọn ảnh">
-                            <img id="imagePreview" class="d-none" alt="Ảnh địa điểm">
+                            <img id="imagePreview" class="d-none" alt="Ảnh điểm đến">
                             <div class="placeholder-text" id="imagePlaceholder">
                                 <i class="bi bi-image"></i>Bấm để chọn ảnh<br>
                                 <small>JPG, PNG, WEBP · tối đa 5MB</small>
@@ -377,7 +377,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header" style="background: #4154f1;">
-                <h5 class="modal-title text-white fw-bold"><i class="bi bi-geo-alt me-2"></i>Chi tiết địa điểm</h5>
+                <h5 class="modal-title text-white fw-bold"><i class="bi bi-geo-alt me-2"></i>Chi tiết điểm đến</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
             </div>
             <div class="modal-body">
@@ -386,11 +386,11 @@
                 </div>
                 <div id="viewBody" class="d-none">
                     <div class="mb-3" id="viewImageWrap">
-                        <img id="viewImage" alt="Ảnh địa điểm">
+                        <img id="viewImage" alt="Ảnh điểm đến">
                     </div>
                     <div class="row g-3">
                         <div class="col-8">
-                            <div class="detail-label">Tên địa điểm</div>
+                            <div class="detail-label">Tên điểm đến</div>
                             <div class="detail-value" id="viewName"></div>
                         </div>
                         <div class="col-4">
@@ -523,7 +523,7 @@
                 updateSortUI();
                 renderPagination(page.totalElements, page.totalPages, page.number, page.size);
             } else {
-                showTableError(errorMessage(json, 'Không tải được danh sách địa điểm.'));
+                showTableError(errorMessage(json, 'Không tải được danh sách điểm đến.'));
             }
         } catch (e) {
             console.error(e);
@@ -541,7 +541,7 @@
             tbody.innerHTML = `
                 <tr><td colspan="4" class="text-center text-muted py-5">
                     <i class="bi bi-inbox fs-3 d-block mb-2 opacity-50"></i>
-                    ${filtering ? 'Không có địa điểm nào khớp bộ lọc.' : 'Chưa có địa điểm nào. Bấm "Thêm địa điểm" để tạo.'}
+                    ${filtering ? 'Không có điểm đến nào khớp bộ lọc.' : 'Chưa có điểm đến nào. Bấm "Thêm điểm đến" để tạo.'}
                 </td></tr>`;
             return;
         }
@@ -577,12 +577,12 @@
     }
 
     /* ============================================================
-       XOÁ CỨNG: DELETE /api/admin/locations/{id} (chỉ khi địa điểm chưa có tour)
+       XOÁ CỨNG: DELETE /api/admin/locations/{id} (chỉ khi điểm đến chưa có tour)
        ============================================================ */
     async function deleteLocation(id, btn) {
         const confirm = await Swal.fire({
             icon: 'warning',
-            title: 'Xoá địa điểm?',
+            title: 'Xoá điểm đến?',
             showCancelButton: true,
             confirmButtonText: 'Xoá',
             cancelButtonText: 'Huỷ',
@@ -598,17 +598,17 @@
             const json = await readJson(res);
 
             if (res.ok && json && json.success) {
-                showToast('Đã xoá địa điểm');
+                showToast('Đã xoá điểm đến');
                 fetchLocations();      // xoá dòng cuối của trang → fetchLocations tự lùi 1 trang
             } else {
                 Swal.fire({
-                    icon: 'error', title: 'Không xoá được địa điểm',
-                    text: errorMessage(json, 'Vui lòng thử lại.')   // vd: "Địa điểm đang có tour..."
+                    icon: 'error', title: 'Không xoá được điểm đến',
+                    text: errorMessage(json, 'Vui lòng thử lại.')   // vd: "Điểm đến đang có tour..."
                 });
             }
         } catch (e) {
             console.error(e);
-            Swal.fire({ icon: 'error', title: 'Không xoá được địa điểm', text: 'Không kết nối được tới máy chủ.' });
+            Swal.fire({ icon: 'error', title: 'Không xoá được điểm đến', text: 'Không kết nối được tới máy chủ.' });
         } finally {
             btn.disabled = false;
         }
@@ -640,7 +640,7 @@
 
             if (res.ok && json && json.success) {
                 input.closest('label').title = active ? 'Đang hiển thị, bấm để ẩn' : 'Đang ẩn, bấm để hiển thị';
-                showToast(active ? 'Đã hiển thị địa điểm' : 'Đã ẩn địa điểm');
+                showToast(active ? 'Đã hiển thị điểm đến' : 'Đã ẩn điểm đến');
                 if ($('filterStatus').value !== '') fetchLocations();
             } else {
                 input.checked = !active;
@@ -664,7 +664,7 @@
 
         $('paginationInfo').innerHTML = total === 0
             ? 'Không có mục nào'
-            : `Hiển thị <span>${start}–${end}</span> trong tổng số <span>${total}</span> địa điểm`;
+            : `Hiển thị <span>${start}–${end}</span> trong tổng số <span>${total}</span> điểm đến`;
 
         const ul = $('paginationControls');
         ul.innerHTML = '';
@@ -758,7 +758,7 @@
         const res = await fetch(`${API}/${id}`, { headers: AdminAuth.authHeaders() });
         if (res.status === 401) { AdminAuth.logout(); throw new Error('unauthorized'); }
         const json = await readJson(res);
-        if (!res.ok || !json || !json.success) throw new Error(errorMessage(json, 'Không tải được địa điểm.'));
+        if (!res.ok || !json || !json.success) throw new Error(errorMessage(json, 'Không tải được điểm đến.'));
         return json.data;
     }
 
@@ -784,7 +784,7 @@
         } catch (e) {
             if (e.message === 'unauthorized') return;
             viewModal.hide();
-            Swal.fire({ icon: 'error', title: 'Không xem được địa điểm', text: e.message });
+            Swal.fire({ icon: 'error', title: 'Không xem được điểm đến', text: e.message });
         }
     }
 
@@ -805,7 +805,7 @@
 
     function openCreateModal() {
         resetForm();
-        $('modalTitle').textContent = 'Thêm địa điểm';
+        $('modalTitle').textContent = 'Thêm điểm đến';
         $('saveText').textContent   = 'Thêm';
         locationModal.show();
     }
@@ -823,12 +823,12 @@
             originalImageUrl = l.imageUrl || null;
             showImagePreview(originalImageUrl);
 
-            $('modalTitle').textContent = 'Sửa địa điểm';
+            $('modalTitle').textContent = 'Sửa điểm đến';
             $('saveText').textContent   = 'Lưu thay đổi';
             locationModal.show();
         } catch (e) {
             if (e.message === 'unauthorized') return;
-            Swal.fire({ icon: 'error', title: 'Không mở được địa điểm', text: e.message });
+            Swal.fire({ icon: 'error', title: 'Không mở được điểm đến', text: e.message });
         }
     }
 
@@ -897,7 +897,7 @@
         const isUpdate     = id !== '';
         const locationName = $('locationName').value.trim();
 
-        if (!locationName) { setFieldError('locationName', 'Vui lòng nhập tên địa điểm'); return; }
+        if (!locationName) { setFieldError('locationName', 'Vui lòng nhập tên điểm đến'); return; }
 
         const payload = {
             locationName: locationName,
@@ -926,11 +926,11 @@
                 locationModal.hide();
                 if (!isUpdate) currentPage = 0;
                 await fetchLocations();
-                showToast(isUpdate ? 'Đã lưu thay đổi' : 'Thêm địa điểm thành công!');
+                showToast(isUpdate ? 'Đã lưu thay đổi' : 'Thêm điểm đến thành công!');
                 return;
             }
 
-            const msg = errorMessage(json, res.status === 413 ? 'Ảnh vượt quá dung lượng cho phép.' : 'Lưu địa điểm thất bại.');
+            const msg = errorMessage(json, res.status === 413 ? 'Ảnh vượt quá dung lượng cho phép.' : 'Lưu điểm đến thất bại.');
             if (/tên/i.test(msg))           setFieldError('locationName', msg);
             else if (/ảnh|file/i.test(msg)) showImageError(msg);
             else Swal.fire({ icon: 'error', title: 'Không lưu được', text: msg });

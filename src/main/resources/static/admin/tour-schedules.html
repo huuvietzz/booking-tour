@@ -86,7 +86,8 @@
         .st-available { background: #e7f6ec; color: #1e7e43; }
         .st-full      { background: #fff4e5; color: #b25e00; }
         .st-cancelled { background: #fdecee; color: #c12a3a; }
-        .st-departed  { background: #eef0f3; color: #5f6b7a; }
+        .st-departed  { background: #e8eefc; color: #2948b8; }
+        .st-finished  { background: #eef0f3; color: #5f6b7a; }
 
         /* ===== THẺ TOUR (khi mở từ trang tour: ?tourId=) ===== */
         .tour-banner {
@@ -231,7 +232,7 @@
             <a class="nav-link collapsed" href="tour-schedules.html"><i class="bi bi-calendar-event"></i><span>Quản lý lịch khởi hành</span></a>
         </li>
         <li class="nav-item">
-            <a class="nav-link collapsed" href="locations.html"><i class="bi bi-geo-alt"></i><span>Quản lý địa điểm</span></a>
+            <a class="nav-link collapsed" href="locations.html"><i class="bi bi-geo-alt"></i><span>Quản lý điểm đến</span></a>
         </li>
         <li class="nav-item">
             <a class="nav-link collapsed" href="categories.html"><i class="bi bi-bookmarks"></i><span>Quản lý danh mục</span></a>
@@ -248,7 +249,7 @@
             <a class="nav-link collapsed" href="staff.html"><i class="bi bi-person-badge"></i><span>Quản lý nhân viên</span></a>
         </li>
         <li class="nav-item">
-            <a class="nav-link collapsed" href="report-revenue.html"><i class="bi bi-bar-chart"></i><span>Báo cáo thống kê</span></a>
+            <a class="nav-link collapsed" href="reports.html"><i class="bi bi-bar-chart"></i><span>Báo cáo thống kê</span></a>
         </li>
     </ul>
 </aside>
@@ -402,6 +403,8 @@
                             <option value="">Tất cả</option>
                             <option value="AVAILABLE">Còn chỗ</option>
                             <option value="FULL">Hết chỗ</option>
+                            <option value="DEPARTED">Đã khởi hành</option>
+                            <option value="FINISHED">Đã kết thúc</option>
                             <option value="CANCELLED">Đã huỷ</option>
                         </select>
                     </div>
@@ -601,7 +604,8 @@
         AVAILABLE: { text: 'Còn chỗ',       cls: 'st-available' },
         FULL:      { text: 'Hết chỗ',       cls: 'st-full' },
         CANCELLED: { text: 'Đã huỷ',        cls: 'st-cancelled' },
-        DEPARTED:  { text: 'Đã khởi hành',  cls: 'st-departed' }
+        DEPARTED:  { text: 'Đã khởi hành',  cls: 'st-departed' },   // đang trong chuyến: ngày đi ≤ hôm nay ≤ ngày về
+        FINISHED:  { text: 'Đã kết thúc',   cls: 'st-finished' }    // ngày về < hôm nay
     };
 
     /* ============================================================
@@ -646,10 +650,19 @@
     /** Lịch đã khởi hành: ngày đi ≤ hôm nay (khớp điều kiện isAfter(now) ở BE) */
     function isDeparted(s) { return s.departureDate <= todayIso(); }
 
+    /** Lịch đã kết thúc: ngày về < hôm nay */
+    function isFinished(s) { return s.returnDate < todayIso(); }
+
+    /**
+     * Trạng thái hiển thị — BE trả sẵn displayStatus (khớp bộ lọc); bản cũ chưa có thì tự tính theo ngày.
+     * Ưu tiên: Đã huỷ > Đã kết thúc > Đã khởi hành > Còn chỗ / Hết chỗ
+     */
     function displayStatus(s) {
+        if (s.displayStatus && STATUS_META[s.displayStatus]) return STATUS_META[s.displayStatus];
         if (s.status === 'CANCELLED') return STATUS_META.CANCELLED;
+        if (isFinished(s)) return STATUS_META.FINISHED;
         if (isDeparted(s)) return STATUS_META.DEPARTED;
-        return STATUS_META[s.status] || { text: s.status, cls: 'st-departed' };
+        return STATUS_META[s.status] || { text: s.status, cls: 'st-finished' };
     }
 
     function removeAccents(text) {

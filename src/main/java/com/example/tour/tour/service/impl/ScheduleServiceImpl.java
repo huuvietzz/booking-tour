@@ -4,6 +4,7 @@ import com.example.tour.booking.constant.BookingStatus;
 import com.example.tour.booking.repository.BookingRepository;
 import com.example.tour.common.exception.AppException;
 import com.example.tour.common.exception.ErrorCode;
+import com.example.tour.tour.constant.ScheduleDisplayStatus;
 import com.example.tour.tour.constant.ScheduleStatus;
 import com.example.tour.tour.dto.request.ScheduleFilterRequest;
 import com.example.tour.tour.dto.request.ScheduleRequest;
@@ -270,6 +271,7 @@ public class ScheduleServiceImpl implements ScheduleService {
                 .singleRoomSupplement(s.getSingleRoomSupplement())
                 .transport(s.getTransport())
                 .status(s.getStatus())
+                .displayStatus(ScheduleDisplayStatus.of(s, LocalDate.now()))
                 .createdAt(s.getCreatedAt())
                 .updatedAt(s.getUpdatedAt())
                 .build();

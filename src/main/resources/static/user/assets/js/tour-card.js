@@ -52,10 +52,10 @@
 
         // departureDates: [{ scheduleId, departureDate, status }] — BE đã lọc: sau hôm nay, chưa huỷ, tăng dần
         const dates = t.departureDates || [];
-        const chip = d => d.status === 'FULL'
-            ? `<span class="tl-date is-full" title="Hết chỗ">${shortDate(d.departureDate)}</span>`
-            : `<a href="${url}&date=${d.departureDate}" ${NEW_TAB} class="tl-date ${d.departureDate === selectedDate ? 'active' : ''}"
-                  title="Khởi hành ${parseIso(d.departureDate).toLocaleDateString('vi-VN')}">${shortDate(d.departureDate)}</a>`;
+        // Hết chỗ vẫn hiện chip đỏ như ngày khác (không gạch, không xám); chỉ khác tooltip.
+        // Vẫn là link → trang chi tiết tự báo hết chỗ và gợi ý ngày khác.
+        const chip = d => `<a href="${url}&date=${d.departureDate}" ${NEW_TAB} class="tl-date ${d.departureDate === selectedDate ? 'active' : ''}"
+                  title="${d.status === 'FULL' ? 'Hết chỗ' : 'Khởi hành ' + parseIso(d.departureDate).toLocaleDateString('vi-VN')}">${shortDate(d.departureDate)}</a>`;
         const datesHtml = dates.length
             ? `<div class="tl-dates">
                  <button type="button" class="tl-dates-nav prev is-hidden" aria-label="Ngày trước" onclick="scrollDates(this, -1)">

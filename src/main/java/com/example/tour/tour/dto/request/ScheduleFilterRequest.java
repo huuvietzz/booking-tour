@@ -1,6 +1,6 @@
 package com.example.tour.tour.dto.request;
 
-import com.example.tour.tour.constant.ScheduleStatus;
+import com.example.tour.tour.constant.ScheduleDisplayStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,7 +15,7 @@ import java.time.LocalDate;
 public class ScheduleFilterRequest {
     private String keyword;          // mã lịch, mã tour, tên tour
     private Integer tourId;
-    private ScheduleStatus status;
+    private ScheduleDisplayStatus status;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate fromDate;      // ngày khởi hành từ (yyyy-MM-dd)

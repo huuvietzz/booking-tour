@@ -195,11 +195,4 @@
 }
 .tl-skel--list { height: 230px; }
 @keyframes tl-shimmer { to { background-position: -200% 0; } }
-/* Lịch đã kín chỗ: vẫn hiện để khách biết có lịch, nhưng gạch + không bấm được */
-.tl-date.is-full {
-    border-color: var(--tl-border); color: #a3a9b6; background: #f5f6f8;
-    text-decoration: line-through; cursor: not-allowed;
-}
-.tl-date.is-full:hover { background: #f5f6f8; border-color: var(--tl-border); color: #a3a9b6; }
-
 .tl-fav-pop.is-error { color: #d6262c; font-weight: 500; }

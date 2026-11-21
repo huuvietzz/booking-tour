@@ -29,7 +29,7 @@ public class ScheduleSpecification {
                 ps.add(cb.equal(tour.get("tourId"), f.getTourId()));
             }
             if (f.getStatus() != null) {
-                ps.add(cb.equal(root.get("status"), f.getStatus()));
+                ps.add(f.getStatus().toPredicate(root, cb, LocalDate.now()));
             }
             if (f.getFromDate() != null) {
                 ps.add(cb.greaterThanOrEqualTo(root.get("departureDate"), f.getFromDate()));

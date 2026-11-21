@@ -1,5 +1,6 @@
 package com.example.tour.tour.dto.response;
 
+import com.example.tour.tour.constant.ScheduleDisplayStatus;
 import com.example.tour.tour.constant.ScheduleStatus;
 import lombok.*;
 
@@ -35,6 +36,7 @@ public class ScheduleResponse {
     private String transport;
 
     private ScheduleStatus status;
+    private ScheduleDisplayStatus displayStatus;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

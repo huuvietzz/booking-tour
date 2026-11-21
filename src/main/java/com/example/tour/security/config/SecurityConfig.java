@@ -58,6 +58,7 @@ public class SecurityConfig {
                         // mở endpoint webhook (SePay không có JWT)
                         .requestMatchers("/api/webhooks/**").permitAll()
                         .requestMatchers("/api/payments/vnpay/**").permitAll()    // VNPAY return + IPN
+                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
                         // Còn lại đều cần xác thực
                         .anyRequest().authenticated()

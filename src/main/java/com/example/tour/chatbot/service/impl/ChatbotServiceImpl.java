@@ -2,6 +2,9 @@ package com.example.tour.chatbot.service.impl;
 
 import com.example.tour.chatbot.dto.request.ChatRequest;
 import com.example.tour.chatbot.dto.response.ChatResponse;
+import com.example.tour.chatbot.repository.ChatbotQueryRepository;
+import com.example.tour.chatbot.repository.ChatbotQueryRepository.ItineraryDay;
+import com.example.tour.chatbot.repository.ChatbotQueryRepository.TourMeta;
 import com.example.tour.chatbot.service.ChatbotService;
 import com.example.tour.common.exception.AppException;
 import com.example.tour.common.exception.ErrorCode;
@@ -31,6 +34,7 @@ import java.math.BigDecimal;
 import java.text.Normalizer;
 import java.text.NumberFormat;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -58,7 +62,20 @@ public class ChatbotServiceImpl implements ChatbotService {
     private static final int MAX_CATALOG = 80;
     private static final int MAX_PROMOTIONS = 8;
     private static final DateTimeFormatter VN_DATE = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    private static final Pattern MAX_PRICE = Pattern.compile("(duoi|toi da|khong qua|<)\\s*(\\d+(?:[.,]\\d+)?)\\s*(trieu|tr\\b|m\\b)");
+    private static final int MAX_ITINERARY_TOURS = 3;     // lịch trình dài → chỉ gửi cho 3 tour liên quan nhất
+    private static final int MAX_ITINERARY_DAYS = 7;
+    private static final int MAX_ITINERARY_CHARS = 220;   // mỗi ngày tối đa ~220 ký tự cho prompt gọn
+    // Giá (so trên chữ KHÔNG dấu): "từ 3 đến 5 triệu", "3-5tr" | "dưới 5 triệu" | "trên 10 triệu"
+    private static final String NUM = "(\\d+(?:[.,]\\d+)?)";
+    private static final String MIL = "\\s*(?:trieu|tr\\b|m\\b)";
+    private static final Pattern RANGE_PRICE = Pattern.compile(NUM + "\\s*(?:trieu|tr)?\\s*(?:den|toi|-|~)\\s*" + NUM + MIL);
+    private static final Pattern MAX_PRICE = Pattern.compile("(?:\\bduoi|\\btoi da|\\bkhong qua|\\bkhong hon|<)\\s*" + NUM + MIL);
+    private static final Pattern MIN_PRICE = Pattern.compile("(?:\\btren|\\bhon|\\btu|\\bit nhat|\\btoi thieu|>)\\s*" + NUM + MIL);
+    // Tháng: "tháng 12", "tháng 1/2027", "tháng 3 năm 2027" | "tháng này", "tháng sau", "tháng tới"
+    private static final Pattern MONTH = Pattern.compile("thang\\s*(\\d{1,2})(?:\\s*(?:/|-|nam)\\s*(\\d{4}))?");
+    private static final Pattern MONTH_REL = Pattern.compile("thang\\s*(nay|sau|toi)");
+    private static final Map<String, String> CLASS_LABELS = Map.of(
+            "BUDGET", "Tiết kiệm", "STANDARD", "Tiêu chuẩn", "GOOD_PRICE", "Giá tốt", "PREMIUM", "Cao cấp");
     /** Gợi ý viết theo giọng trợ lý hỏi khách — bấm vào sẽ thành khách tự hỏi chính mình, vô nghĩa */
     private static final Pattern BOT_VOICE = Pattern.compile(
             "^\\s*(bạn|quý khách|anh/chị)\\s+(có\\s+)?(muốn|cần|thích|định|quan tâm)", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
@@ -72,10 +89,23 @@ public class ChatbotServiceImpl implements ChatbotService {
 
     private static final BeanOutputConverter<AiAnswer> OUTPUT = new BeanOutputConverter<>(AiAnswer.class);
 
+    /** Khoảng ngày khách hỏi ("tháng 12") — from đã kéo về sau hôm nay */
+    record DateRange(LocalDate from, LocalDate to, String label) {
+        boolean contains(LocalDate d) { return !d.isBefore(from) && !d.isAfter(to); }
+    }
+
+    /** Khoảng giá "giá từ" của tour; null = không giới hạn phía đó */
+    record PriceRange(BigDecimal min, BigDecimal max) {
+        boolean accepts(BigDecimal p) {
+            return p != null && (min == null || p.compareTo(min) >= 0) && (max == null || p.compareTo(max) <= 0);
+        }
+    }
+
     private final ChatClient chatClient;
     private final TourRepository tourRepository;
     private final ScheduleRepository scheduleRepository;
     private final PromotionService promotionService;
+    private final ChatbotQueryRepository chatbotQueryRepository;
 
     /**
      * CỐ Ý không @Transactional: gọi AI có thể mất tới 30 giây, bọc transaction thì giữ 1 kết nối DB suốt thời gian đó
@@ -88,15 +118,26 @@ public class ChatbotServiceImpl implements ChatbotService {
         List<ChatRequest.ChatTurn> history = cleanHistory(request.getHistory());
 
         // 1. Lấy dữ liệu liên quan. Ghép thêm 2 câu gần nhất: hỏi "tour đó còn chỗ không?" vẫn tìm đúng tour vừa nói
+        LocalDate today = LocalDate.now();
         List<Tour> allTours = tourRepository.findAllPublicWithLocation();
+        Map<Integer, TourMeta> meta = chatbotQueryRepository.findTourMeta();
         String searchText = message + " " + history.stream()
                 .skip(Math.max(0, history.size() - 2)).map(ChatRequest.ChatTurn::getContent)
                 .collect(Collectors.joining(" "));
-        List<Tour> tours = pickTours(allTours, searchText);
+        // Tháng chỉ đọc từ câu MỚI: câu cũ lỡ nhắc "tháng 12" thì không ép mọi câu sau phải lọc theo tháng đó
+        DateRange range = parseMonth(normalize(message), today);
+        Set<Integer> departingInRange = range == null ? Set.of()
+                : chatbotQueryRepository.findTourIdsDepartingBetween(range.from(), range.to());
+        List<Tour> tours = pickTours(allTours, searchText, meta, departingInRange);
 
         Map<Integer, List<Schedule>> schedules = tours.isEmpty() ? Map.of()
-                : scheduleRepository.findUpcomingByTourIds(tours.stream().map(Tour::getTourId).toList(), LocalDate.now())
+                : scheduleRepository.findUpcomingByTourIds(tours.stream().map(Tour::getTourId).toList(), today)
                 .stream().collect(Collectors.groupingBy(s -> s.getTour().getTourId()));
+
+        // Lịch trình từng ngày: chỉ cho vài tour liên quan nhất (đã sắp theo điểm) để prompt không quá dài
+        Map<Integer, List<ItineraryDay>> itineraries = chatbotQueryRepository
+                .findItineraries(tours.stream().limit(MAX_ITINERARY_TOURS).map(Tour::getTourId).toList())
+                .stream().collect(Collectors.groupingBy(ItineraryDay::tourId));
 
         List<PromotionPublicResponse> promotions = promotionService.getUsablePromotions(null)
                 .stream().limit(MAX_PROMOTIONS).toList();
@@ -109,7 +150,7 @@ public class ChatbotServiceImpl implements ChatbotService {
                 .toList();
 
         // 3. Gọi AI: system (luật + dữ liệu + khuôn JSON) → lịch sử → câu hỏi mới
-        String raw = callAi(systemPrompt(allTours, tours, schedules, promotions) + "\n" + OUTPUT.getFormat(), past, message);
+        String raw = callAi(systemPrompt(allTours, meta, tours, schedules, itineraries, range, promotions) + "\n" + OUTPUT.getFormat(), past, message);
         return toResponse(raw, allTours);
     }
 
@@ -153,30 +194,36 @@ public class ChatbotServiceImpl implements ChatbotService {
     // =====================================================================
     /**
      * Chấm điểm từng tour theo câu hỏi (so không dấu):
-     *   tên địa điểm có trong câu hỏi +10, điểm khởi hành +2, mỗi từ trùng tên tour +1.
+     *   tên địa điểm có trong câu hỏi +10, có lịch trong tháng khách hỏi +5,
+     *   khớp danh mục ("biển", "trekking"...) +3, khớp hạng ("cao cấp", "tiết kiệm"...) +3,
+     *   điểm khởi hành +2, mỗi từ trùng tên tour +1.
      * Không tour nào khớp → gửi tour nổi bật / xem nhiều để AI vẫn có cái gợi ý.
      */
-    private List<Tour> pickTours(List<Tour> all, String text) {
+    private List<Tour> pickTours(List<Tour> all, String text, Map<Integer, TourMeta> meta, Set<Integer> departingInRange) {
         String q = normalize(text);
         Set<String> words = Arrays.stream(q.split("[^a-z0-9]+"))
-                .filter(w -> w.length() >= 2 && !STOP_WORDS.contains(w))
+                .filter(w -> w.length() >= 2 && !STOP_WORDS.contains(w) && !w.chars().allMatch(Character::isDigit))
                 .collect(Collectors.toSet());
 
-        BigDecimal maxPrice = null;
-        Matcher m = MAX_PRICE.matcher(q);
-        if (m.find()) {
-            maxPrice = new BigDecimal(m.group(2).replace(',', '.')).multiply(BigDecimal.valueOf(1_000_000));
-        }
-        final BigDecimal limit = maxPrice;
-
+        PriceRange price = parsePrice(q);
         List<Tour> candidates = all.stream()
-                .filter(t -> limit == null || t.getBasePrice().compareTo(limit) <= 0)
+                .filter(t -> price == null || price.accepts(t.getBasePrice()))
                 .toList();
 
         Map<Tour, Integer> scores = new HashMap<>();
         for (Tour t : candidates) {
             int score = 0;
             if (q.contains(normalize(t.getLocation().getLocationName()))) score += 10;
+            if (departingInRange.contains(t.getTourId())) score += 5;
+            TourMeta m = meta.get(t.getTourId());
+            if (m != null) {
+                // "Biển đảo" → bien, dao; "Khám phá – Trekking" → kham, pha, trekking (bỏ từ ngắn / từ chung)
+                boolean categoryHit = Arrays.stream(normalize(m.categoryName()).split("[^a-z0-9]+"))
+                        .anyMatch(w -> w.length() >= 3 && !STOP_WORDS.contains(w) && words.contains(w));
+                if (categoryHit) score += 3;
+                String label = CLASS_LABELS.get(m.tourClass());
+                if (label != null && q.contains(normalize(label))) score += 3;
+            }
             if (q.contains(normalize(t.getDepartureLocation()))) score += 2;
             String name = normalize(t.getTourName());
             for (String w : words) if (name.contains(w)) score += 1;
@@ -194,6 +241,48 @@ public class ChatbotServiceImpl implements ChatbotService {
                 .limit(MAX_CONTEXT_TOURS).toList();
     }
 
+    /** "3-5 triệu" → [3tr, 5tr]; "dưới 5tr" → [_, 5tr]; "trên 10 triệu" → [10tr, _]; không có → null */
+    static PriceRange parsePrice(String q) {
+        Matcher m = RANGE_PRICE.matcher(q);
+        if (m.find()) {
+            BigDecimal a = million(m.group(1)), b = million(m.group(2));
+            return a.compareTo(b) <= 0 ? new PriceRange(a, b) : new PriceRange(b, a);   // khách gõ ngược "5-3 triệu"
+        }
+        m = MAX_PRICE.matcher(q);
+        if (m.find()) return new PriceRange(null, million(m.group(1)));
+        m = MIN_PRICE.matcher(q);
+        if (m.find()) return new PriceRange(million(m.group(1)), null);
+        return null;
+    }
+
+    private static BigDecimal million(String n) {
+        return new BigDecimal(n.replace(',', '.')).multiply(BigDecimal.valueOf(1_000_000));
+    }
+
+    /**
+     * "tháng 12" → 12 năm nay (tháng đã qua → năm sau); "tháng 1/2027"; "tháng này", "tháng sau".
+     * Ngày bắt đầu kéo về sau hôm nay (chỉ tính lịch chưa khởi hành).
+     */
+    static DateRange parseMonth(String q, LocalDate today) {
+        YearMonth ym;
+        Matcher m = MONTH.matcher(q), rel = MONTH_REL.matcher(q);
+        if (m.find()) {
+            int month = Integer.parseInt(m.group(1));
+            if (month < 1 || month > 12) return null;
+            int year = m.group(2) != null ? Integer.parseInt(m.group(2))
+                    : month < today.getMonthValue() ? today.getYear() + 1 : today.getYear();
+            ym = YearMonth.of(year, month);
+        } else if (rel.find()) {
+            ym = YearMonth.from(today).plusMonths("nay".equals(rel.group(1)) ? 0 : 1);
+        } else {
+            return null;
+        }
+        LocalDate from = ym.atDay(1);
+        if (!from.isAfter(today)) from = today.plusDays(1);
+        // Tháng đã qua hẳn (vd "tháng 3/2025") → from > to → không có lịch nào, prompt sẽ nói rõ
+        return new DateRange(from, ym.atEndOfMonth(), "tháng " + ym.getMonthValue() + "/" + ym.getYear());
+    }
+
     /** "Đà Nẵng" → "da nang" */
     private static String normalize(String s) {
         if (s == null) return "";
@@ -204,8 +293,9 @@ public class ChatbotServiceImpl implements ChatbotService {
     // =====================================================================
     // PROMPT
     // =====================================================================
-    private String systemPrompt(List<Tour> allTours, List<Tour> tours, Map<Integer, List<Schedule>> schedules,
-                                List<PromotionPublicResponse> promotions) {
+    private String systemPrompt(List<Tour> allTours, Map<Integer, TourMeta> meta, List<Tour> tours,
+                                Map<Integer, List<Schedule>> schedules, Map<Integer, List<ItineraryDay>> itineraries,
+                                DateRange range, List<PromotionPublicResponse> promotions) {
         StringBuilder sb = new StringBuilder();
         sb.append("""
                 Bạn là "Trợ lý VietTrip", tư vấn viên của công ty du lịch VietTrip (chỉ bán tour trong nước Việt Nam).
@@ -226,11 +316,22 @@ public class ChatbotServiceImpl implements ChatbotService {
                   luôn gọi tour bằng tên, ví dụ "tour **Hà Nội - Hạ Long - Ninh Bình**".
                 - Khách muốn đặt tour: hướng dẫn bấm vào thẻ tour bên dưới (hoặc link [xem tour](tour-details.html?id=<tourId>))
                   rồi chọn ngày khởi hành. Mình không tự đặt tour hộ khách được.
+                - Hỏi theo vùng miền (miền Bắc, Tây Bắc, miền Trung, miền Nam, miền Tây...) thì tự xếp các điểm đến
+                  trong DỮ LIỆU theo địa lý Việt Nam.
+                - Hỏi tổng tiền cho nhiều người: chỉ tính khi có giá của đúng ngày khởi hành, ghi rõ phép tính
+                  (vd 2 người lớn × 3.890.000đ + 1 trẻ em × 2.920.000đ) và nói đây là giá tạm tính, chưa gồm mã giảm giá.
+                - Lịch trình trong DỮ LIỆU là bản tóm tắt; khách cần chi tiết hơn thì mời xem trang tour.
 
                 KIẾN THỨC CHUNG:
                 - Đặt tour: chọn tour ở trang Tours → chọn ngày khởi hành → nhập thông tin liên hệ và hành khách → bấm Đặt tour.
-                - Xem / huỷ đơn: mục Đơn đặt tour trong tài khoản (profile.html#bookings). Đơn "Chờ xác nhận" khách tự huỷ được;
-                  đơn đã thanh toán thì phí huỷ theo Điều khoản dịch vụ (terms.html) hoặc liên hệ hotline.
+                  Khách chưa có tài khoản vẫn đặt được; đăng nhập thì dùng được mã giảm giá và xem đơn trong tài khoản.
+                - Độ tuổi tính tại ngày khởi hành: người lớn từ 12 tuổi, trẻ em 5 - 11 tuổi, trẻ nhỏ 2 - 4 tuổi.
+                  Đi một mình bắt buộc phòng đơn (có phụ thu nếu lịch đó có phụ thu phòng đơn).
+                - Thanh toán: đặt xong chuyển sang trang thanh toán, chọn chuyển khoản ngân hàng (quét mã QR) hoặc VNPAY.
+                  Chỗ được giữ trong 1 giờ; quá 1 giờ chưa thanh toán thì đơn tự huỷ và trả lại chỗ.
+                - Xem đơn: mục Đơn đặt tour trong tài khoản (profile.html#bookings).
+                  Muốn huỷ đơn đã thanh toán: liên hệ hotline, phí huỷ theo Điều khoản dịch vụ (terms.html).
+                - Sau chuyến đi, VietTrip gửi email mời đánh giá tour.
                 - Mã khuyến mãi: nhập ở bước đặt tour; danh sách mã ở profile.html#promo.
                 - Hotline: +84 123 456 789. Email: lienhe@viettrip.vn.
 
@@ -252,12 +353,25 @@ public class ChatbotServiceImpl implements ChatbotService {
         sb.append("Các điểm đến đang có tour: ")
                 .append(allTours.stream().map(t -> t.getLocation().getLocationName()).distinct().sorted()
                         .collect(Collectors.joining(", ")))
-                .append("\n\nDANH MỤC TẤT CẢ TOUR (dùng cho câu hỏi so sánh: rẻ nhất, đắt nhất, ngắn ngày nhất...):\n");
-        allTours.stream().limit(MAX_CATALOG).forEach(t -> sb.append("- tourId=").append(t.getTourId())
-                .append(" | ").append(t.getTourName())
-                .append(" | ").append(t.getLocation().getLocationName())
-                .append(" | ").append(t.getDuration())
-                .append(" | giá người lớn từ ").append(money(t.getBasePrice())).append("\n"));
+                .append("\n\nDANH MỤC TẤT CẢ TOUR (dùng cho câu hỏi so sánh: rẻ nhất, đắt nhất, ngắn ngày nhất, loại tour...):\n");
+        allTours.stream().limit(MAX_CATALOG).forEach(t -> {
+            TourMeta m = meta.get(t.getTourId());
+            sb.append("- tourId=").append(t.getTourId())
+                    .append(" | ").append(t.getTourName())
+                    .append(" | ").append(t.getLocation().getLocationName())
+                    .append(" | ").append(t.getDuration());
+            if (m != null) {
+                sb.append(" | loại: ").append(m.categoryName());
+                if (CLASS_LABELS.containsKey(m.tourClass())) sb.append(" | hạng: ").append(CLASS_LABELS.get(m.tourClass()));
+            }
+            sb.append(" | giá người lớn từ ").append(money(t.getBasePrice())).append("\n");
+        });
+
+        if (range != null) {
+            sb.append("\nKHÁCH ĐANG HỎI LỊCH KHỞI HÀNH ").append(range.label().toUpperCase(Locale.ROOT))
+                    .append(" (từ ").append(range.from().format(VN_DATE)).append(" đến ").append(range.to().format(VN_DATE))
+                    .append("). Chỉ giới thiệu tour có lịch trong khoảng này; tour không có lịch thì nói rõ là không có.\n");
+        }
 
         sb.append("\nCHI TIẾT CÁC TOUR LIÊN QUAN ĐẾN CÂU HỎI (kèm lịch khởi hành và giá từng loại khách):\n");
 
@@ -273,8 +387,19 @@ public class ChatbotServiceImpl implements ChatbotService {
             if (t.getTotalReviews() != null && t.getTotalReviews() > 0) {
                 sb.append(" | đánh giá ").append(t.getAverageRating()).append("/5 (").append(t.getTotalReviews()).append(" lượt)");
             }
-            sb.append("\n  Lịch khởi hành sắp tới:");
-            List<Schedule> list = schedules.getOrDefault(t.getTourId(), List.of());
+            List<Schedule> upcoming = schedules.getOrDefault(t.getTourId(), List.of());
+            List<Schedule> list = upcoming;
+            if (range != null) {
+                List<Schedule> inRange = upcoming.stream().filter(s -> range.contains(s.getDepartureDate())).toList();
+                if (inRange.isEmpty()) {
+                    sb.append("\n  KHÔNG có lịch khởi hành ").append(range.label()).append(". Lịch gần nhất:");
+                } else {
+                    sb.append("\n  Lịch khởi hành ").append(range.label()).append(":");
+                    list = inRange;
+                }
+            } else {
+                sb.append("\n  Lịch khởi hành sắp tới:");
+            }
             if (list.isEmpty()) {
                 sb.append(" chưa có lịch, liên hệ hotline\n");
             }
@@ -290,6 +415,14 @@ public class ChatbotServiceImpl implements ChatbotService {
                             ? ", phụ thu phòng đơn " + money(s.getSingleRoomSupplement()) : "")
                     .append(s.getTransport() != null ? " | " + s.getTransport() : ""));
             sb.append("\n");
+
+            List<ItineraryDay> days = itineraries.getOrDefault(t.getTourId(), List.of());
+            if (!days.isEmpty()) {
+                sb.append("  Lịch trình tóm tắt:\n");
+                days.stream().limit(MAX_ITINERARY_DAYS).forEach(d -> sb.append("    Ngày ").append(d.dayNumber())
+                        .append(": ").append(d.title())
+                        .append(d.description() != null ? " — " + plainText(d.description()) : "").append("\n"));
+            }
         }
 
         sb.append("\nMÃ KHUYẾN MÃI ĐANG DÙNG ĐƯỢC:\n");
@@ -307,6 +440,16 @@ public class ChatbotServiceImpl implements ChatbotService {
             sb.append("\n");
         }
         return sb.toString();
+    }
+
+    /** Mô tả lịch trình lưu HTML (từ trình soạn thảo) → chữ thường, cắt ngắn cho prompt */
+    private static String plainText(String html) {
+        String text = html.replaceAll("(?i)<br\\s*/?>|</p>|</li>", " ")
+                .replaceAll("<[^>]+>", "")
+                .replace("&nbsp;", " ").replace("&lt;", "<").replace("&gt;", ">")
+                .replace("&quot;", "\"").replace("&#39;", "'").replace("&amp;", "&")
+                .replaceAll("\\s+", " ").trim();
+        return text.length() > MAX_ITINERARY_CHARS ? text.substring(0, MAX_ITINERARY_CHARS) + "…" : text;
     }
 
     private static String money(BigDecimal v) {

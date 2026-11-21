@@ -350,6 +350,17 @@
     .bk-done-total { color: var(--tl-price); font-size: 18px; }
     .bk-done .bk-btn { display: inline-block; margin-top: 16px; text-decoration: none; }
 
+    /* Đang xử lý đặt chỗ (sau khi bấm "Đặt tour", giống Vietravel): thay cả form bằng dòng chữ + thanh chạy */
+    .bk-processing { padding: 60px 0 40px; }
+    .bk-processing h1 { font-size: clamp(18px, 1.6vw, 24px); font-weight: 600; margin: 0 0 30px; }
+    .bk-progress { position: relative; height: 5px; border-radius: 99px; background: #dfe5f0; overflow: hidden; }
+    .bk-progress span {
+      position: absolute; top: 0; bottom: 0; left: 0; width: 40%; border-radius: inherit; background: var(--tl-primary);
+      animation: bk-progress 1.4s ease-in-out infinite;
+    }
+    @keyframes bk-progress { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+    @media (prefers-reduced-motion: reduce) { .bk-progress span { animation-duration: 3s; } }
+
     /* Đang tải / lỗi */
     .bk-skel { border-radius: 24px; background: linear-gradient(90deg, #eceff5 25%, #f7f9fc 50%, #eceff5 75%); background-size: 200% 100%; animation: tl-shimmer 1.2s infinite linear; }
     .bk-state { background: #fff; border-radius: 24px; padding: 70px 20px; text-align: center; color: var(--tl-muted); }
@@ -388,6 +399,12 @@
       <i class="bi bi-calendar-x"></i>
       <div id="bkErrorText">Không tìm thấy lịch khởi hành.</div>
       <a href="tours.html" id="bkErrorLink">Xem các tour khác</a>
+    </div>
+
+    <!-- Đang xử lý đặt chỗ: hiện thay form trong lúc chờ BE tạo đơn -->
+    <div class="bk-processing d-none" id="bkProcessing" role="status" aria-live="polite">
+      <h1>Chúng tôi đang xử lý thông tin đặt chỗ của Quý khách. Xin vui lòng chờ một chút!</h1>
+      <div class="bk-progress"><span></span></div>
     </div>
 
     <!-- Đặt tour thành công -->
@@ -1518,33 +1535,50 @@
     submitting = true;
     setSubmitMsg('');
     $('bkSubmit').disabled = true;
-    $('bkSubmit').innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang đặt tour...';
-    let redirecting = false;
+    showProcessing(true);
+    const started = Date.now();
+    let booking = null, error = null;
     try {
       // Có token → BE gắn đơn vào tài khoản; không có → đơn của khách vãng lai
-      const booking = await api('/api/public/bookings', { method: 'POST', body: buildPayload(), auth: !!user() });
+      booking = await api('/api/public/bookings', { method: 'POST', body: buildPayload(), auth: !!user() });
+    } catch (err) {
+      error = err;
+    }
+    // BE trả quá nhanh thì màn hình chờ chỉ chớp 1 cái → giữ tối thiểu MIN_PROCESSING_MS cho mắt kịp đọc
+    const wait = MIN_PROCESSING_MS - (Date.now() - started);
+    if (wait > 0) await new Promise(r => setTimeout(r, wait));
+
+    if (booking) {
       // Chỗ đã được giữ → sang trang thanh toán. payment.html tự lấy đơn từ BE bằng mã đơn + token (không lưu gì ở trình duyệt)
       const params = new URLSearchParams({ code: booking.bookingCode });
       params.set('token', booking.paymentToken);   // token bí mật của đơn: ai có link mới xem / thanh toán được
-      // Giữ nút đang quay tới khi trang thanh toán mở hẳn (không để finally đổi nút về "Đặt tour")
-      redirecting = true;
-      location.replace('payment.html?' + params);   // replace: bấm Back không quay lại form đã gửi
+      // Màn hình chờ giữ nguyên tới khi payment.html mở hẳn → khách không bấm lại được
+      location.replace('payment.html?' + params);  // replace: bấm Back không quay lại form đã gửi
       return;
-    } catch (err) {
-      setSubmitMsg(err.message);
-      $('bkSubmitMsg').scrollIntoView({ block: 'center', behavior: 'smooth' });
-      // Mã KM vừa hết lượt / hết hạn → bỏ mã để khách đặt lại không cần mã
-      if (coupon && /mã giảm giá|khuyến mãi/i.test(err.message)) removeCoupon(err.message);
-      refreshSchedule();   // có thể người khác vừa đặt mất chỗ
-    } finally {
-      // Thành công thì KHÔNG trả nút về như cũ: trình duyệt còn mất một lúc mới mở xong payment.html,
-      // trả nút về "Đặt tour" lúc đó khiến khách tưởng chưa gửi và bấm thêm lần nữa
-      if (!redirecting) {
-        submitting = false;
-        updateSubmit();
-      }
     }
+
+    // Lỗi → hiện lại form (dữ liệu khách nhập vẫn còn nguyên) + báo lỗi ngay dưới nút
+    showProcessing(false);
+    setSubmitMsg(error.message);
+    $('bkSubmitMsg').scrollIntoView({ block: 'center' });
+    // Mã KM vừa hết lượt / hết hạn → bỏ mã để khách đặt lại không cần mã
+    if (coupon && /mã giảm giá|khuyến mãi/i.test(error.message)) removeCoupon(error.message);
+    submitting = false;
+    updateSubmit();
+    refreshSchedule();   // có thể người khác vừa đặt mất chỗ
   });
+
+  const MIN_PROCESSING_MS = 200;
+  /** Bật: ẩn form, hiện dòng "đang xử lý" + thanh chạy (giống Vietravel). Tắt: trả form về */
+  function showProcessing(on) {
+    $('bkForm').classList.toggle('d-none', on);
+    $('bkProcessing').classList.toggle('d-none', !on);
+    if (on) {
+      paxModal.hide();
+      closePromoList();
+      window.scrollTo({ top: 0 });
+    }
+  }
 
   /** Màn hình đặt thành công (dữ liệu từ BookingResponse) */
   function showDone(b) {

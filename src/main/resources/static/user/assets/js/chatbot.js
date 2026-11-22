@@ -27,7 +27,36 @@
 
     const CHAT_MOCK = false;   // true = trả lời giả lập (không cần BE)
     const API_URL = '/api/public/chatbot';
-    const STORE_KEY = 'viettrip.chat';        // sessionStorage: chuyển trang vẫn giữ cuộc trò chuyện, đóng tab thì mất
+    /* Lưu cuộc trò chuyện THEO TÀI KHOẢN trong localStorage:
+       - localStorage (không phải sessionStorage) vì thẻ tour mở "Chi tiết" ở TAB MỚI, sessionStorage riêng từng tab.
+       - Mỗi tài khoản 1 key riêng: "viettrip.chat.user:<id>", khách chưa đăng nhập: "viettrip.chat.guest".
+       - Trình duyệt đang KHÔNG đăng nhập tài khoản nào → xoá hết chat của các tài khoản (đăng xuất là mất,
+         người sau dùng chung máy không đọc được). Đăng nhập tài khoản A → xoá chat của tài khoản khác.
+       - Im lặng quá 1 ngày thì tự xoá. */
+    const STORE_PREFIX = 'viettrip.chat.';
+    const USER_PREFIX = STORE_PREFIX + 'user:';
+    const STORE_TTL = 24 * 60 * 60 * 1000;
+
+    function currentUser() {
+        try { return window.AuthUI?.getCurrentUser() || null; } catch (_) { return null; }
+    }
+    /** Key của người đang dùng: id tài khoản (không có id thì dùng email) / guest */
+    function storeKey() {
+        const u = currentUser();
+        const id = u && (u.userId ?? u.id ?? u.email);
+        return id != null && id !== '' ? USER_PREFIX + String(id).toLowerCase() : STORE_PREFIX + 'guest';
+    }
+    /** Dọn chat không thuộc người đang dùng (chạy mỗi lần mở trang) */
+    function cleanupOtherAccounts() {
+        try {
+            const keep = storeKey();
+            Object.keys(localStorage)
+                .filter(k => (k.startsWith(USER_PREFIX) && k !== keep) || k === 'viettrip.chat')   // + key bản cũ
+                .forEach(k => localStorage.removeItem(k));
+        } catch (_) { /* bị chặn: bỏ qua */ }
+    }
+    cleanupOtherAccounts();
+    let activeKey = storeKey();
     const MAX_LEN = 500;
     const HISTORY_SENT = 10;
 
@@ -74,10 +103,27 @@
     let messages = load();   // [{ role: 'user'|'assistant', content, tours?, suggestions? }]
 
     function load() {
-        try { return JSON.parse(sessionStorage.getItem(STORE_KEY)) || []; } catch (_) { return []; }
+        try {
+            const data = JSON.parse(localStorage.getItem(activeKey));
+            if (data && Array.isArray(data.messages) && Date.now() - data.savedAt < STORE_TTL) return data.messages;
+            localStorage.removeItem(activeKey);   // quá hạn / hỏng → bỏ
+        } catch (_) { /* bị chặn: bắt đầu mới */ }
+        return [];
     }
     function save() {
-        try { sessionStorage.setItem(STORE_KEY, JSON.stringify(messages.slice(-40))); } catch (_) { /* ẩn danh: bỏ qua */ }
+        try {
+            if (messages.length) localStorage.setItem(activeKey, JSON.stringify({ savedAt: Date.now(), messages: messages.slice(-40) }));
+            else localStorage.removeItem(activeKey);
+        } catch (_) { /* hết dung lượng / bị chặn: bỏ qua */ }
+    }
+    /** Đăng nhập / đăng xuất ở tab khác mà tab này chưa tải lại → đổi sang đúng cuộc trò chuyện của người đang dùng */
+    function syncAccount() {
+        const key = storeKey();
+        if (key === activeKey) return false;
+        activeKey = key;
+        cleanupOtherAccounts();
+        messages = load();
+        return true;
     }
 
     // ----- Dựng giao diện -----
@@ -94,6 +140,8 @@
                     <div class="cb-head-title">Trợ lý VietTrip</div>
                     <div class="cb-head-status">Trực tuyến</div>
                 </div>
+                <button type="button" class="cb-head-btn" data-cb-reset title="Cuộc trò chuyện mới" aria-label="Bắt đầu cuộc trò chuyện mới">
+                    <i class="bi bi-arrow-counterclockwise"></i></button>
                 <button type="button" class="cb-head-btn" data-cb-close title="Thu nhỏ" aria-label="Đóng trợ lý">
                     <i class="bi bi-chevron-down"></i></button>
             </div>
@@ -132,6 +180,7 @@
     // ----- Mở / đóng -----
     function open() {
         hideHello();
+        if (syncAccount()) body.innerHTML = '';   // đổi tài khoản → vẽ lại từ đầu
         document.body.classList.add('cb-open');
         launcher.setAttribute('aria-expanded', 'true');
         panel.setAttribute('aria-hidden', 'false');
@@ -147,6 +196,22 @@
     }
     launcher.addEventListener('click', open);
     root.querySelector('[data-cb-close]').addEventListener('click', close);
+    // Cuộc trò chuyện mới: xoá lịch sử (cả ở các tab khác), về lời chào ban đầu
+    root.querySelector('[data-cb-reset]').addEventListener('click', () => {
+        if (busy) return;
+        messages = [];
+        save();
+        renderAll();
+        input.focus();
+    });
+    // Tab khác vừa chat / xoá → tab này cập nhật theo (sự kiện "storage" chỉ bắn ở các tab KHÁC tab vừa ghi)
+    window.addEventListener('storage', e => {
+        if (busy) return;
+        const switched = syncAccount();            // tab khác vừa đăng nhập / đăng xuất (token, user đổi)
+        if (!switched && e.key !== activeKey) return;
+        if (!switched) messages = load();
+        if (body.childElementCount) renderAll();   // chưa mở khung chat lần nào thì để lúc mở mới vẽ
+    });
     document.addEventListener('keydown', e => {
         if (e.key === 'Escape' && document.body.classList.contains('cb-open')) close();
     });
@@ -209,6 +274,10 @@
     function autoGrow() {
         input.style.height = 'auto';
         input.style.height = Math.min(input.scrollHeight, 110) + 'px';
+        // Thanh cuộn (2 mũi tên ▲▼) chỉ hiện khi đã sang dòng 2 trở lên; 1 dòng thì ẩn cho gọn
+        const cs = getComputedStyle(input);
+        const contentH = input.scrollHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+        input.style.overflowY = contentH > parseFloat(cs.lineHeight) * 1.5 ? 'auto' : 'hidden';
         sendBtn.disabled = busy || !input.value.trim();
     }
     input.addEventListener('input', autoGrow);
@@ -227,6 +296,7 @@
     async function send(text) {
         text = String(text || '').trim().slice(0, MAX_LEN);
         if (!text || busy) return;
+        if (syncAccount()) renderAll();   // vừa đổi tài khoản ở tab khác → không gửi lẫn lịch sử của người trước
         busy = true;
         input.value = '';
         autoGrow();

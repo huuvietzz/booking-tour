@@ -163,12 +163,40 @@
             }
         }
 
-        .btn-outline-primary:hover,
-        .btn-outline-primary:focus,
-        .btn-outline-primary:active {
-            background-color: transparent !important;
-            color: #0d6efd !important;
-            border-color: #0d6efd !important;
+        /* Nút "Đăng nhập": CÙNG MÀU nút Đăng nhập trên menu ngang.
+           Màu thật được JS đọc từ #header .btn-getstarted rồi gán vào 3 biến dưới (đổi màu header là nút này đổi theo);
+           giá trị sau dấu phẩy chỉ dùng khi không đọc được. */
+        .btn-login-main {
+            background-color: var(--login-btn-bg, #eceff3);
+            background-image: var(--login-btn-img, none);
+            color: var(--login-btn-fg, #1d2433);
+            border: 0;
+            transition: filter .15s, box-shadow .15s;
+        }
+        .btn-login-main:hover:not(:disabled),
+        .btn-login-main:focus-visible {
+            background-color: var(--login-btn-bg, #eceff3);
+            color: var(--login-btn-fg, #1d2433);
+            filter: brightness(.94);
+            box-shadow: 0 4px 12px rgba(16, 24, 40, .12);
+        }
+        .btn-login-main:disabled { background-color: var(--login-btn-bg, #eceff3); color: var(--login-btn-fg, #1d2433); opacity: .7; }
+        /* Nút "Lấy lại mật khẩu" chưa nhập email: mờ hơn để thấy rõ là chưa bấm được */
+        #forgotSubmitBtn:disabled { opacity: .55; }
+
+        /* Nút "Đăng ký ngay": viền + chữ màu chủ đạo của trang, nền trắng → phụ, không tranh với nút Đăng nhập */
+        .btn-register {
+            background: #fff;
+            color: var(--accent-color, #0a5bd3);
+            border: 1px solid var(--accent-color, #0a5bd3);
+            transition: background-color .15s, color .15s;
+        }
+        .btn-register:hover,
+        .btn-register:focus-visible,
+        .btn-register:active {
+            background: color-mix(in srgb, var(--accent-color, #0a5bd3) 8%, #fff);
+            color: var(--accent-color, #0a5bd3);
+            border-color: var(--accent-color, #0a5bd3);
         }
     </style>
 </head>
@@ -244,12 +272,12 @@
                 </div>
 
                 <div class="col-12 mt-4">
-                    <button class="btn btn-primary btn-pill w-100 mb-3" type="submit" id="submitBtn">
+                    <button class="btn btn-login-main btn-pill w-100 mb-3" type="submit" id="submitBtn">
                         <span class="spinner-border spinner-border-sm d-none" id="submitSpinner"></span>
                         <span id="submitText">Đăng nhập</span>
                     </button>
 
-                    <a href="pages-register.html" class="btn btn-outline-primary btn-pill w-100">
+                    <a href="pages-register.html" class="btn btn-register btn-pill w-100">
                         Đăng ký ngay
                     </a>
                 </div>
@@ -300,7 +328,7 @@
                         <!-- Thông báo trả về từ API -->
                         <div id="forgotResultMsg" class="forgot-msg mb-3 d-none"></div>
 
-                        <button class="btn btn-light btn-pill w-100" style="background-color: #e9ecef; border: none; color: #495057;" type="submit" id="forgotSubmitBtn" disabled>
+                        <button class="btn btn-login-main btn-pill w-100" type="submit" id="forgotSubmitBtn" disabled>
                             <span class="spinner-border spinner-border-sm d-none" id="forgotSubmitSpinner"></span>
                             <span id="forgotSubmitText">Lấy lại mật khẩu</span>
                         </button>
@@ -392,6 +420,19 @@
     const topAlert      = document.getElementById('topAlert');
 
     const errorModalInstance = new bootstrap.Modal(document.getElementById('errorModal'));
+
+    // Nút "Đăng nhập" + "Lấy lại mật khẩu" lấy đúng màu nút "Đăng nhập" trên menu ngang (đọc màu đang hiển thị thật)
+    (function matchHeaderButton() {
+        const hb = document.querySelector('#header .btn-getstarted');
+        if (!hb) return;
+        const cs = getComputedStyle(hb);
+        const transparent = cs.backgroundColor === 'rgba(0, 0, 0, 0)' || cs.backgroundColor === 'transparent';
+        document.querySelectorAll('.btn-login-main').forEach(b => {
+            if (!transparent) b.style.setProperty('--login-btn-bg', cs.backgroundColor);
+            if (cs.backgroundImage !== 'none') b.style.setProperty('--login-btn-img', cs.backgroundImage);   // nút gradient
+            b.style.setProperty('--login-btn-fg', cs.color);
+        });
+    })();
     const errorMessageEl     = document.getElementById('errorMessage');
 
     // Vừa xác thực email xong thì verify-email.html chuyển về đây kèm ?verified=true
@@ -526,12 +567,9 @@
         forgotSubmitText.textContent = loading ? 'Đang xử lý...' : 'Lấy lại mật khẩu';
     }
 
+    /** Màu nút do CSS .btn-login-main lo (giống nút Đăng nhập); chỉ cần bật / tắt, tắt thì CSS tự làm mờ */
     function enableForgotBtn(enable) {
         forgotSubmitBtn.disabled = !enable;
-        forgotSubmitBtn.classList.toggle('btn-primary', enable);
-        forgotSubmitBtn.classList.toggle('btn-light', !enable);
-        forgotSubmitBtn.style.backgroundColor = enable ? '' : '#e9ecef';
-        forgotSubmitBtn.style.color = enable ? '#fff' : '#495057';
     }
 
     forgotEmailInput.addEventListener('input', function() {

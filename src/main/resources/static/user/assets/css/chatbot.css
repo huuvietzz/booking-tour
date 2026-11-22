@@ -159,6 +159,7 @@ body.cb-open .cb-panel { transform: none; opacity: 1; visibility: visible; trans
 .cb-input {
     flex: 1; resize: none; border: 1px solid var(--cb-border); border-radius: 20px; padding: 9px 14px;
     font-size: 14.5px; line-height: 1.4; max-height: 110px; outline: none; color: var(--cb-text); font-family: inherit;
+    overflow-y: hidden;   /* 1 dòng: không hiện thanh cuộn (2 mũi tên ▲▼); từ dòng 2 JS bật lại */
 }
 .cb-input:focus { border-color: var(--cb-primary); box-shadow: 0 0 0 3px var(--cb-primary-soft); }
 .cb-send {

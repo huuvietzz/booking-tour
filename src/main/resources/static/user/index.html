@@ -46,7 +46,7 @@
        ========================================================= */
     .hp-wrap { max-width: 1640px; margin: 0 auto; padding: 0 24px; }
     .hp-hero {
-      --hp-hero-img: url("assets/img/travel/showcase-8.webp");
+      --hp-hero-img: url("assets/img/travel/hero-ha-long.webp");
       position: relative; min-height: 600px; display: flex; align-items: flex-end;
       padding-bottom: 120px;   /* chừa chỗ cho khung tìm kiếm đè lên mép dưới ảnh */
       /* lớp tối dần về phía dưới-trái để chữ trắng luôn đọc được, ảnh sáng cỡ nào cũng vậy */
@@ -138,6 +138,28 @@
     .hp-pkg-tab:hover { border-color: var(--tl-primary); color: var(--tl-primary); }
     .hp-pkg-tab.active { background: var(--tl-text); border-color: var(--tl-text); color: #fff; }
     .hp-pkg-tab:focus-visible { outline: 2px solid var(--tl-primary); outline-offset: 2px; }
+
+    /* Nút ‹ › cho dãy tab (người dùng chuột không vuốt ngang được như touchpad).
+       Mỗi nút là 1 dải mờ dần cùng màu nền khung (#eef5fd) + vòng tròn trắng: tab bị che mờ dần → biết còn tab phía đó.
+       Hết tab phía nào thì ẩn nút phía đó; không tràn (màn rộng) thì ẩn cả 2. */
+    .hp-pkg-tabs-wrap { position: relative; margin-bottom: 22px; }
+    .hp-pkg-tabs-wrap .hp-pkg-tabs { margin-bottom: 0; }
+    .hp-tabs-nav {
+      position: absolute; top: 0; bottom: 4px; z-index: 2; width: 78px; border: 0; padding: 0;
+      display: flex; align-items: center; transition: opacity .15s;
+    }
+    .hp-tabs-nav.prev { left: 0; justify-content: flex-start; background: linear-gradient(to right, #eef5fd 55%, rgba(238, 245, 253, 0)); }
+    .hp-tabs-nav.next { right: 0; justify-content: flex-end; background: linear-gradient(to left, #eef5fd 55%, rgba(238, 245, 253, 0)); }
+    .hp-tabs-nav span {
+      width: 40px; height: 40px; border-radius: 50%; background: #fff; color: var(--tl-text); font-size: 16px;
+      display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 10px rgba(16, 24, 40, .16);
+      transition: background .15s, color .15s;
+    }
+    .hp-tabs-nav:hover span { background: var(--tl-primary); color: #fff; }
+    .hp-tabs-nav:focus-visible { outline: none; }
+    .hp-tabs-nav:focus-visible span { outline: 2px solid var(--tl-primary); outline-offset: 2px; }
+    .hp-tabs-nav.is-hidden { opacity: 0; pointer-events: none; }
+    @media (max-width: 575.98px) { .hp-tabs-nav { display: none; } }   /* điện thoại: vuốt */
 
     /* Băng chuyền: cuộn ngang, mỗi lần dừng đúng mép 1 thẻ */
     .hp-pkg-carousel { position: relative; }
@@ -360,7 +382,7 @@
         </div>
         <div class="col-lg-6" data-aos="fade-left" data-aos-delay="300">
           <div class="about-image">
-            <img src="assets/img/travel/showcase-8.webp" alt="Du lịch Việt Nam" class="img-fluid rounded-4">
+            <img src="assets/img/travel/hero-ha-long.webp" alt="Du lịch Việt Nam" class="img-fluid rounded-4">
           </div>
         </div>
       </div>
@@ -433,8 +455,14 @@
           <a href="tours.html" class="hp-more-btn">Xem thêm <span><i class="bi bi-arrow-right"></i></span></a>
         </div>
 
-        <div class="hp-pkg-tabs" id="pkgTabs" role="tablist" aria-label="Danh mục tour">
-          <button type="button" class="hp-pkg-tab active" role="tab" aria-selected="true" data-id="">Tất cả</button>
+        <div class="hp-pkg-tabs-wrap">
+          <button type="button" class="hp-tabs-nav prev is-hidden" id="tabsPrev" aria-label="Danh mục trước" tabindex="-1">
+            <span><i class="bi bi-chevron-left"></i></span></button>
+          <div class="hp-pkg-tabs" id="pkgTabs" role="tablist" aria-label="Danh mục tour">
+            <button type="button" class="hp-pkg-tab active" role="tab" aria-selected="true" data-id="">Tất cả</button>
+          </div>
+          <button type="button" class="hp-tabs-nav next is-hidden" id="tabsNext" aria-label="Danh mục sau" tabindex="-1">
+            <span><i class="bi bi-chevron-right"></i></span></button>
         </div>
 
         <div class="hp-pkg-carousel">
@@ -491,7 +519,7 @@
         </div>
 
         <div class="visual-element">
-          <img src="assets/img/travel/showcase-3.webp" alt="Du lịch cùng VietTrip" class="hero-image" loading="lazy">
+          <img src="assets/img/travel/cta-hoi-an.webp" alt="Phố cổ Hội An" class="hero-image" loading="lazy">
         </div>
       </div>
 
@@ -701,7 +729,20 @@
     $('pkgTabs').insertAdjacentHTML('beforeend', cats.map(c => `
       <button type="button" class="hp-pkg-tab" role="tab" aria-selected="false" data-id="${c.categoryId}">
         ${escapeHtml(c.categoryName)}</button>`).join(''));
+    updateTabsNav();   // vừa thêm tab → có thể đã tràn, hiện nút ›
   }
+
+  /* ----- Nút ‹ › của dãy tab danh mục ----- */
+  function updateTabsNav() {
+    const t = $('pkgTabs');
+    $('tabsPrev').classList.toggle('is-hidden', t.scrollLeft <= 1);
+    $('tabsNext').classList.toggle('is-hidden', t.scrollLeft + t.clientWidth >= t.scrollWidth - 1);
+  }
+  // Mỗi lần bấm trượt ~70% bề rộng đang thấy: tab cuối của lượt trước vẫn còn thấy → không bị mất dấu
+  $('tabsPrev').addEventListener('click', () => $('pkgTabs').scrollBy({ left: -$('pkgTabs').clientWidth * 0.7, behavior: 'smooth' }));
+  $('tabsNext').addEventListener('click', () => $('pkgTabs').scrollBy({ left: $('pkgTabs').clientWidth * 0.7, behavior: 'smooth' }));
+  $('pkgTabs').addEventListener('scroll', updateTabsNav, { passive: true });
+  window.addEventListener('resize', updateTabsNav);
 
   async function selectCategory(categoryId) {
     pkgCurrent = categoryId;
@@ -709,6 +750,13 @@
       const on = b.dataset.id === categoryId;
       b.classList.toggle('active', on);
       b.setAttribute('aria-selected', on);
+      // Tab vừa chọn đang bị nút ‹ › che một nửa → cuộn dãy tab cho hiện trọn (chỉ cuộn ngang, trang không nhảy)
+      if (on) {
+        const t = $('pkgTabs'), pad = 80;
+        const left = b.offsetLeft - t.offsetLeft, right = left + b.offsetWidth;
+        if (left < t.scrollLeft + pad) t.scrollTo({ left: left - pad, behavior: 'smooth' });
+        else if (right > t.scrollLeft + t.clientWidth - pad) t.scrollTo({ left: right - t.clientWidth + pad, behavior: 'smooth' });
+      }
     });
 
     const track = $('pkgTrack');

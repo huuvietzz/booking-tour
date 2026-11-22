@@ -133,6 +133,29 @@
       }
     }
 
+    /* Nút "Hoàn tất đăng ký": CÙNG MÀU nút Đăng nhập trên menu ngang (giống trang đăng nhập).
+       JS đọc màu thật từ #header .btn-getstarted gán vào 3 biến dưới; giá trị sau dấu phẩy chỉ dùng khi không đọc được. */
+    .btn-register-submit {
+      background-color: var(--reg-btn-bg, #eceff3);
+      background-image: var(--reg-btn-img, none);
+      color: var(--reg-btn-fg, #1d2433);
+      border: 0;
+      transition: filter .15s, box-shadow .15s, opacity .15s;
+    }
+    .btn-register-submit:hover:not(:disabled),
+    .btn-register-submit:focus-visible {
+      background-color: var(--reg-btn-bg, #eceff3);
+      color: var(--reg-btn-fg, #1d2433);
+      filter: brightness(.94);
+      box-shadow: 0 4px 12px rgba(16, 24, 40, .12);
+    }
+    /* Chưa nhập đủ thông tin: mờ đi để khách biết chưa bấm được */
+    .btn-register-submit:disabled {
+      background-color: var(--reg-btn-bg, #eceff3);
+      color: var(--reg-btn-fg, #1d2433);
+      opacity: .55;
+    }
+
     /* Ngăn nút outline-secondary đổi màu nền khi hover */
     .btn-outline-secondary:hover,
     .btn-outline-secondary:focus,
@@ -281,7 +304,7 @@
         <!-- Nút -->
         <div class="col-12 mt-4">
           <!-- Bị vô hiệu hóa mặc định -->
-          <button class="btn btn-primary btn-pill w-100 mb-3" type="submit" id="submitBtn" disabled>
+          <button class="btn btn-register-submit btn-pill w-100 mb-3" type="submit" id="submitBtn" disabled>
             <span class="spinner-border spinner-border-sm d-none" id="submitSpinner"></span>
             <span id="submitText">Hoàn tất đăng ký</span>
           </button>
@@ -381,6 +404,17 @@
   const addressInput    = document.getElementById('address');
   const passwordInput   = document.getElementById('password');
   const confirmInput    = document.getElementById('confirmPassword');
+
+  // Nút "Hoàn tất đăng ký" lấy đúng màu nút "Đăng nhập" trên menu ngang (đọc màu đang hiển thị thật)
+  (function matchHeaderButton() {
+    const hb = document.querySelector('#header .btn-getstarted');
+    if (!hb) return;
+    const cs = getComputedStyle(hb);
+    const transparent = cs.backgroundColor === 'rgba(0, 0, 0, 0)' || cs.backgroundColor === 'transparent';
+    if (!transparent) submitBtn.style.setProperty('--reg-btn-bg', cs.backgroundColor);
+    if (cs.backgroundImage !== 'none') submitBtn.style.setProperty('--reg-btn-img', cs.backgroundImage);   // nút gradient
+    submitBtn.style.setProperty('--reg-btn-fg', cs.color);
+  })();
 
   // Regex kiểm tra
   const PHONE_REGEX = /^0[0-9]{9}$/; // Bắt đầu bằng 0, theo sau là 9 số (tổng 10 số)

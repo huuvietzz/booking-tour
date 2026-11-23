@@ -1,5 +1,6 @@
 package com.example.tour.tour.service.impl;
 
+import com.example.tour.common.constant.CacheNames;
 import com.example.tour.common.exception.AppException;
 import com.example.tour.common.exception.ErrorCode;
 import com.example.tour.common.service.FileStorageService;
@@ -11,6 +12,9 @@ import com.example.tour.tour.repository.TourRepository;
 import com.example.tour.tour.service.LocationService;
 import com.example.tour.tour.specification.LocationSpecification;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -19,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +37,7 @@ public class LocationServiceImpl implements LocationService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = CacheNames.LOCATIONS, allEntries = true)
     public LocationResponse createLocation(LocationRequest request, MultipartFile image) {
         Location location = new Location();
         location.setLocationName(request.getLocationName().trim());
@@ -52,8 +58,13 @@ public class LocationServiceImpl implements LocationService {
         return toLocationResponse(savedLocation);
     }
 
+    // Tên điểm đến nằm trong chi tiết tour → xoá luôn cache chi tiết tour
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(cacheNames = CacheNames.LOCATIONS, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.TOUR_DETAIL, allEntries = true)
+    })
     public LocationResponse updateLocation(int locationId, LocationRequest request,
                                            MultipartFile image, boolean removeImage) {
         Location location = locationRepository.findById(locationId)
@@ -90,6 +101,10 @@ public class LocationServiceImpl implements LocationService {
      */
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(cacheNames = CacheNames.LOCATIONS, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.TOUR_DETAIL, allEntries = true)
+    })
     public LocationResponse changeStatus(int locationId, boolean active) {
         Location location = locationRepository.findById(locationId)
                 .orElseThrow(() -> new AppException(ErrorCode.LOCATION_NOT_FOUND));
@@ -113,13 +128,15 @@ public class LocationServiceImpl implements LocationService {
         return toLocationResponse(location);
     }
 
+    /** Điểm đến phía khách (ô tìm kiếm, trang chủ, trang Điểm đến): đọc rất nhiều, hầu như không đổi → cache 6 giờ */
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheNames.LOCATIONS, key = "'all'")
     public List<LocationResponse> getAllLocations() {
         return locationRepository.findByIsActiveTrueOrderByLocationNameAsc()
                 .stream()
                 .map(this::toLocationResponse)
-                .toList();
+                .collect(Collectors.toList());   // List thường: .toList() đọc lại từ Redis bị lỗi
     }
 
     @Override
@@ -133,6 +150,7 @@ public class LocationServiceImpl implements LocationService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = CacheNames.LOCATIONS, allEntries = true)
     public void deleteLocation(int locationId) {
         Location location = locationRepository.findById(locationId)
                 .orElseThrow(() -> new AppException(ErrorCode.LOCATION_NOT_FOUND));

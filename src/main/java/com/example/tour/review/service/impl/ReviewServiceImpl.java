@@ -14,6 +14,7 @@ import com.example.tour.review.service.ReviewService;
 import com.example.tour.review.specification.ReviewSpecification;
 import com.example.tour.tour.entity.Schedule;
 import com.example.tour.tour.repository.TourRepository;
+import com.example.tour.tour.service.impl.TourCacheEvictor;
 import com.example.tour.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -44,6 +45,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final ReviewRepository reviewRepository;
     private final BookingRepository bookingRepository;
     private final TourRepository tourRepository;
+    private final TourCacheEvictor tourCacheEvictor;
 
     // =====================================================================
     // KHÁCH
@@ -271,6 +273,7 @@ public class ReviewServiceImpl implements ReviewService {
         long total  = reviewRepository.countForStats(tourId, false);
         BigDecimal rating = avg == null ? BigDecimal.ZERO : BigDecimal.valueOf(avg).setScale(1, RoundingMode.HALF_UP);
         tourRepository.updateRating(tourId, rating, (int) total);
+        tourCacheEvictor.evictTourDetail(tourId);
     }
 
     private static Integer tourIdOf(Booking b) {

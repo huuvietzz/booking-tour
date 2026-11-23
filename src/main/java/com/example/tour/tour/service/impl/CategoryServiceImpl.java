@@ -1,5 +1,6 @@
 package com.example.tour.tour.service.impl;
 
+import com.example.tour.common.constant.CacheNames;
 import com.example.tour.common.exception.AppException;
 import com.example.tour.common.exception.ErrorCode;
 import com.example.tour.common.service.FileStorageService;
@@ -12,6 +13,9 @@ import com.example.tour.tour.repository.TourRepository;
 import com.example.tour.tour.service.CategoryService;
 import com.example.tour.tour.specification.CategorySpecification;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -20,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +36,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = CacheNames.CATEGORIES, allEntries = true)
     public CategoryResponse createCategory(CategoryRequest request, MultipartFile image) {
         // Thứ tự không được trùng với danh mục đang hoạt động
         if (categoryRepository.existsByDisplayOrderAndIsActiveTrue(request.getDisplayOrder())) {
@@ -67,13 +73,15 @@ public class CategoryServiceImpl implements CategoryService {
         return toCategoryResponse(savedCategory);
     }
 
+    /** Danh mục phía khách (tab trang chủ, bộ lọc): đọc rất nhiều, hầu như không đổi → cache 6 giờ */
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheNames.CATEGORIES, key = "'all'")
     public List<CategoryResponse> getAllCategories() {
         return categoryRepository.findByIsActiveTrueOrderByDisplayOrderAsc()
                 .stream()
                 .map(this::toCategoryResponse)
-                .toList();
+                .collect(Collectors.toList());   // List thường: .toList() đọc lại từ Redis bị lỗi
     }
 
     @Override
@@ -98,8 +106,13 @@ public class CategoryServiceImpl implements CategoryService {
         return toCategoryResponse(category);
     }
 
+    // Tên danh mục nằm trong chi tiết tour → xoá luôn cache chi tiết tour
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(cacheNames = CacheNames.CATEGORIES, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.TOUR_DETAIL, allEntries = true)
+    })
     public CategoryResponse updateCategory(int categoryId, CategoryRequest request,
                                            MultipartFile image, boolean removeImage) {
         Category category = categoryRepository.findById(categoryId)
@@ -151,6 +164,10 @@ public class CategoryServiceImpl implements CategoryService {
      */
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(cacheNames = CacheNames.CATEGORIES, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.TOUR_DETAIL, allEntries = true)   // ẩn danh mục có thể ẩn luôn tour của nó
+    })
     public CategoryResponse changeStatus(int categoryId, boolean active) {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
@@ -168,6 +185,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = CacheNames.CATEGORIES, allEntries = true)   // xoá được ⇔ không còn tour → không đụng chi tiết tour
     public void deleteCategory(int categoryId) {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));

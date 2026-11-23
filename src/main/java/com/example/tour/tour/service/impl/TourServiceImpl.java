@@ -1,6 +1,7 @@
 package com.example.tour.tour.service.impl;
 
 import com.example.tour.booking.repository.BookingRepository;
+import com.example.tour.common.constant.CacheNames;
 import com.example.tour.common.exception.AppException;
 import com.example.tour.common.exception.ErrorCode;
 import com.example.tour.common.service.FileStorageService;
@@ -25,6 +26,7 @@ import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -56,6 +58,7 @@ public class TourServiceImpl implements TourService {
     private final FavoriteRepository favoriteRepository;
     private final FileStorageService fileStorageService;
     private final EntityManager entityManager;
+    private final TourDetailCache tourDetailCache;
 
     // =====================================================================
     // THÊM
@@ -108,6 +111,7 @@ public class TourServiceImpl implements TourService {
     // =====================================================================
     @Override
     @Transactional
+    @CacheEvict(cacheNames = CacheNames.TOUR_DETAIL, key = "#tourId")   // sửa xong → khách thấy bản mới ngay
     public TourResponse updateTour(int tourId, TourRequest request, MultipartFile thumbnail,
                                    boolean removeThumbnail, List<MultipartFile> galleryImages) {
         Tour tour = findTour(tourId);
@@ -177,6 +181,7 @@ public class TourServiceImpl implements TourService {
     // =====================================================================
     @Override
     @Transactional
+    @CacheEvict(cacheNames = CacheNames.TOUR_DETAIL, key = "#tourId")
     public void deleteTour(int tourId) {
         Tour tour = findTour(tourId);
 
@@ -203,6 +208,7 @@ public class TourServiceImpl implements TourService {
     // =====================================================================
     @Override
     @Transactional
+    @CacheEvict(cacheNames = CacheNames.TOUR_DETAIL, key = "#tourId")   // ẩn tour → khách không còn mở được từ cache
     public TourResponse changeStatus(int tourId, boolean active) {
         Tour tour = findTour(tourId);
         tour.setIsActive(active);
@@ -238,15 +244,18 @@ public class TourServiceImpl implements TourService {
         return tourRepository.findPublicDepartureLocations();
     }
 
+    /**
+     * Chi tiết tour phía khách.
+     * Phần nặng (tour + danh mục + điểm đến + ảnh + lịch trình) lấy từ cache Redis qua TourDetailCache;
+     * lượt xem KHÔNG cache: vẫn +1 mỗi lần mở và đọc số mới nhất (1 câu SELECT theo khoá chính, rất nhẹ).
+     */
     @Override
     @Transactional   // KHÔNG readOnly: có câu UPDATE tăng lượt xem
     public TourResponse getTourById(int tourId) {
-        Tour tour = tourRepository.findPublicById(tourId)
-                .orElseThrow(() -> new AppException(ErrorCode.TOUR_NOT_FOUND));
+        // Gọi qua bean khác (không phải this.) thì @Cacheable mới chạy. Tour ẩn / không có → TOUR_NOT_FOUND, không +1 lượt xem
+        TourResponse response = tourDetailCache.load(tourId);
         tourRepository.incrementViewCount(tourId);
-
-        TourResponse response = toTourResponse(tour);
-        response.setViewCount(tour.getViewCount() + 1);   // entity đã nạp trước khi UPDATE
+        response.setViewCount(tourRepository.findViewCount(tourId));   // response là bản đọc ra từ Redis, sửa thoải mái
         return response;
     }
 
@@ -411,7 +420,8 @@ public class TourServiceImpl implements TourService {
                 .build();
     }
 
-    private TourResponse toTourResponse(Tour t) {
+    /** static + package-private: TourDetailCache (cùng package) dùng chung, không phải chép lại */
+    static TourResponse toTourResponse(Tour t) {
         List<ImageResponse> images = t.getImages().stream()
                 .sorted(Comparator.comparing(Image::getDisplayOrder, Comparator.nullsLast(Integer::compare)))
                 .map(img -> ImageResponse.builder()
@@ -419,7 +429,7 @@ public class TourServiceImpl implements TourService {
                         .imageUrl(img.getImageUrl())
                         .displayOrder(img.getDisplayOrder())
                         .build())
-                .toList();
+                .collect(Collectors.toList());   // List thường (ArrayList): .toList() đọc lại từ Redis bị lỗi
 
         List<ItineraryResponse> itineraries = t.getItineraries().stream()
                 .sorted(Comparator.comparing(Itinerary::getDayNumber))
@@ -429,7 +439,7 @@ public class TourServiceImpl implements TourService {
                         .title(iti.getTitle())
                         .description(iti.getDescription())
                         .build())
-                .toList();
+                .collect(Collectors.toList());
 
         return TourResponse.builder()
                 .tourId(t.getTourId())

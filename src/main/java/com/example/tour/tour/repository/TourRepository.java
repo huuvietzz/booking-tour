@@ -59,4 +59,8 @@ public interface TourRepository extends JpaRepository<Tour, Integer>, JpaSpecifi
             "JOIN t.category c " +
             "WHERE t.isActive = true AND l.isActive = true AND c.isActive = true")
     List<Tour> findAllPublicWithLocation();
+
+    /** Lượt xem hiện tại (chi tiết tour lấy từ cache, riêng lượt xem luôn đọc mới) */
+    @Query("SELECT t.viewCount FROM Tour t WHERE t.tourId = :tourId")
+    Integer findViewCount(@Param("tourId") int tourId);
 }

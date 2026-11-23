@@ -1,0 +1,48 @@
+/* =========================================================
+   admin/assets/css/sidebar-mini.css
+   Menu trái thu gọn còn ICON (mini sidebar) thay vì ẩn hẳn — chỉ áp dụng màn ≥ 1200px.
+   Màn nhỏ hơn giữ nguyên kiểu NiceAdmin: ẩn hẳn, bấm ☰ thì trượt ra.
+   Trạng thái do assets/js/sidebar-mini.js gắn class "sb-mini" vào thẻ <html>.
+   ========================================================= */
+:root { --sb-mini-w: 76px; }
+
+@media (min-width: 1200px) {
+    #main, #footer { transition: margin-left .3s; }
+
+    html.sb-mini .sidebar {
+        width: var(--sb-mini-w);
+        padding: 20px 10px;
+        overflow-x: hidden;
+        scrollbar-width: none;                 /* ẩn thanh cuộn (vẫn cuộn được bằng con lăn) */
+    }
+    html.sb-mini .sidebar::-webkit-scrollbar { display: none; }
+    html.sb-mini #main,
+    html.sb-mini #footer { margin-left: var(--sb-mini-w); }
+
+    /* Chỉ còn icon, căn giữa */
+    html.sb-mini .sidebar-nav .nav-link {
+        justify-content: center;
+        padding: 11px 0;
+    }
+    html.sb-mini .sidebar-nav .nav-link span,
+    html.sb-mini .sidebar-nav .nav-link .bi-chevron-down,    /* mũi tên menu con */
+    html.sb-mini .sidebar .logo span { display: none; }       /* nếu logo nằm trong sidebar: bỏ chữ, giữ hình */
+    html.sb-mini .sidebar-nav .nav-link i {
+        margin-right: 0;
+        font-size: 18px;
+    }
+    html.sb-mini .sidebar-nav .nav-content { display: none !important; }   /* menu con: mở rộng menu ra mới thấy */
+
+    /* Tiêu đề nhóm "KINH DOANH"... → 1 vạch kẻ mảnh (không còn chữ bị cắt "KINH…") */
+    html.sb-mini .sidebar-nav .nav-heading {
+        font-size: 0;
+        height: 1px;
+        padding: 0;
+        margin: 14px 10px;
+        background: #e3e7ef;
+        overflow: hidden;
+    }
+
+    /* Tooltip tên menu bên phải icon */
+    .sb-tooltip .tooltip-inner { font-size: 13px; padding: 6px 12px; }
+}

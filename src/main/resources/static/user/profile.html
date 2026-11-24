@@ -312,6 +312,15 @@
         .voucher-meta i { color: var(--accent-color); font-size: 15px; }
         .voucher-meta b { color: #495057; font-weight: 500; }
         .voucher-meta.soon b { color: #dc3545; }
+        /* Mã khách đã dùng hết lượt: mờ + xám, không sao chép được */
+        .voucher.is-used { opacity: .55; filter: grayscale(.85); box-shadow: none; }
+        .voucher.is-used .voucher-copy { display: none; }
+        .voucher-used {
+            display: inline-flex; align-items: center; gap: 5px; align-self: flex-start;
+            padding: 3px 10px; border-radius: 999px; font-size: 12.5px; font-weight: 600;
+            background: #eef0f3; color: #495057;
+        }
+        .voucher-used.partial { background: #fff4d6; color: #a86b00; }
         .promo-empty { text-align: center; color: #6c757d; padding: 36px 12px; }
         .promo-empty i { font-size: 40px; opacity: .4; display: block; margin-bottom: 8px; }
         @media (max-width: 575.98px) {
@@ -1278,7 +1287,9 @@
     });
 
     // =====================================================================
-    // MÃ KHUYẾN MÃI: GET /api/public/promotions (mã đang dùng được)
+    // MÃ KHUYẾN MÃI: GET /api/user/promotions/my
+    //   mã đang dùng được + userUsedCount / maxUsesPerUser / usedUp của CHÍNH khách này
+    //   usedUp = true → đã dùng hết lượt → thẻ mờ, xếp cuối (BE đã xếp)
     // =====================================================================
 
     const moneyFmt = new Intl.NumberFormat('vi-VN');
@@ -1307,16 +1318,29 @@
     function fmtDate(s) { if (!s) return '—'; const [y, m, d] = s.slice(0, 10).split('-'); return `${d}/${m}/${y}`; }
 
     /** Thứ tự: tên KM → Mã → Mô tả → Đơn tối thiểu → Ngày hết hạn */
+    /** Nhãn "Đã dùng": hết lượt → xám; dùng 1 phần (vd 1/3) → vàng, thẻ vẫn rõ vì còn dùng được */
+    function usedBadge(p) {
+        const used = Number(p.userUsedCount) || 0;
+        if (!used) return '';
+        if (p.usedUp) {
+            return `<span class="voucher-used"><i class="bi bi-check2-circle"></i>Đã dùng${
+                p.maxUsesPerUser > 1 ? ` hết ${p.maxUsesPerUser} lượt` : ''}</span>`;
+        }
+        return `<span class="voucher-used partial"><i class="bi bi-info-circle"></i>Đã dùng ${used}${
+            p.maxUsesPerUser ? '/' + p.maxUsesPerUser : ''} lượt</span>`;
+    }
+
     function voucherHtml(p) {
         const percent = p.discountType === 'PERCENT';
-        const soon = p.endDate && new Date(p.endDate) - new Date() <= 3 * 24 * 3600 * 1000;   // còn ≤ 3 ngày → chữ đỏ
+        const soon = !p.usedUp && p.endDate && new Date(p.endDate) - new Date() <= 3 * 24 * 3600 * 1000;   // còn ≤ 3 ngày → chữ đỏ
         return `
-        <div class="voucher">
+        <div class="voucher ${p.usedUp ? 'is-used' : ''}" ${p.usedUp ? 'title="Bạn đã dùng hết lượt của mã này"' : ''}>
             <div class="voucher-left">
                 <div class="voucher-value">${percent ? `${Number(p.discountValue)}%` : shortMoney(p.discountValue)}</div>
                 <div class="voucher-unit">GIẢM GIÁ</div>
             </div>
             <div class="voucher-body">
+                ${usedBadge(p)}
                 <div class="voucher-name">${escapeHtml(p.promotionName)}</div>
                 <div class="voucher-code-row">
                     Mã: <span class="voucher-code">${escapeHtml(p.promotionCode)}</span>
@@ -1338,7 +1362,8 @@
 
     async function loadPromotions() {
         try {
-            const res = await fetch('/api/public/promotions');
+            const res = await fetch('/api/user/promotions/my', { headers: AuthUI.authHeaders() });
+            if (res.status === 401) { AuthUI.logout(); return; }
             const json = await readJson(res);
             if (!res.ok || !json || !json.success) throw new Error(errorMessage(json, 'Không tải được mã khuyến mãi.'));
 

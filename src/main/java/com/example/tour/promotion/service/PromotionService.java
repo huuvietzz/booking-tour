@@ -32,6 +32,9 @@ public interface PromotionService {
     /** Mã đang dùng được; tourId != null → chỉ mã áp dụng cho tour đó */
     List<PromotionPublicResponse> getUsablePromotions(Integer tourId);
 
+    /** Mã đang dùng được + số lần khách này đã dùng (trang cá nhân) */
+    List<PromotionPublicResponse> getMyPromotions(Integer userId, Integer tourId);   // tourId null = mọi mã
+
     /** Nút "Áp dụng" ở trang đặt tour: kiểm tra mã và tính thử tiền giảm */
     PromotionCheckResponse checkPromotion(PromotionCheckRequest request, Integer userId);
 

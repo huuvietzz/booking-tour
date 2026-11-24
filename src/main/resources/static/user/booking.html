@@ -320,6 +320,8 @@
     .bk-promo-item .name { font-size: 13px; color: var(--tl-text); }
     .bk-promo-item .meta { font-size: 12px; color: var(--tl-muted); margin-top: 2px; }
     .bk-promo-item .meta.warn { color: #e0252b; }
+    .bk-promo-item .meta.used { color: var(--tl-text); font-weight: 500; }
+    .bk-promo-item:disabled > i { color: var(--tl-muted); }
     .bk-promo-empty { padding: 14px; text-align: center; color: var(--tl-muted); font-size: 13px; }
     .bk-coupon-login { display: flex; align-items: center; gap: 10px; background: var(--tl-bg); border-radius: 14px; padding: 12px 16px; font-size: 13px; }
     .bk-coupon-login i { color: var(--tl-primary); font-size: 18px; }
@@ -570,7 +572,7 @@
      API dùng:
        GET  /api/public/tours/{tourId}               → tên, ảnh, nơi khởi hành...
        GET  /api/public/tours/{tourId}/schedules     → đúng lịch: giá từng độ tuổi, số chỗ còn
-       GET  /api/public/promotions?tourId=           → danh sách mã áp dụng cho tour (xổ xuống ở ô mã)
+       GET  /api/user/promotions/my?tourId=          → mã áp dụng cho tour + khách này đã dùng hết lượt chưa (usedUp)
        POST /api/user/promotions/check               → "Áp dụng" mã (cần đăng nhập) → số tiền được giảm
        POST /api/public/bookings                     → tạo đơn (khách vãng lai cũng đặt được; có token thì gắn vào tài khoản)
 
@@ -1321,7 +1323,8 @@
   function loadPromos() {
     if (promos) return Promise.resolve(promos);
     if (!promoLoading) {
-      promoLoading = api(`/api/public/promotions?tourId=${tourId}`)
+      // Ô mã chỉ hiện khi đã đăng nhập → gọi API có token để biết mã nào khách đã dùng hết lượt
+      promoLoading = api(`/api/user/promotions/my?tourId=${tourId}`, { auth: true })
               .then(list => (promos = list || []))
               .catch(e => { promoLoading = null; throw e; });   // lỗi → lần sau bấm thử lại
     }
@@ -1347,7 +1350,7 @@
     activeIdx = -1;
   }
 
-  /** Lọc theo chữ đang gõ (mã hoặc tên); mã chưa đủ đơn tối thiểu vẫn hiện nhưng không chọn được */
+  /** Lọc theo chữ đang gõ (mã hoặc tên); mã chưa đủ đơn tối thiểu / đã dùng hết lượt vẫn hiện nhưng không chọn được */
   function renderPromoList() {
     if (!promos) return;
     const kw = $('couponInput').value.trim().toUpperCase();
@@ -1357,18 +1360,21 @@
     $('couponList').innerHTML = list.length ? list.map(p => {
       const min = Number(p.minOrderAmount) || 0;
       const lack = min > temp;
+      const usedUp = !!p.usedUp;                 // khách đã dùng hết lượt mã này (BE xếp sẵn xuống cuối)
       const meta = [
         min > 0 ? `Đơn từ ${fmtMoney(min)}` : 'Mọi đơn hàng',
         p.endDate ? `HSD ${vnDate(p.endDate)}` : ''
       ].filter(Boolean).join(' · ');
       return `
-        <button type="button" class="bk-promo-item" role="option" data-code="${escapeHtml(p.promotionCode)}" ${lack ? 'disabled' : ''}>
+        <button type="button" class="bk-promo-item" role="option" data-code="${escapeHtml(p.promotionCode)}" ${lack || usedUp ? 'disabled' : ''}>
           <i class="bi bi-ticket-perforated"></i>
           <span class="min-w-0">
             <span class="code">${escapeHtml(p.promotionCode)}</span> · <span class="name">${escapeHtml(discountText(p))}</span>
             ${p.promotionName ? `<div class="name">${escapeHtml(p.promotionName)}</div>` : ''}
             <div class="meta">${escapeHtml(meta)}</div>
-            ${lack ? `<div class="meta warn">Mua thêm ${fmtMoney(min - temp)} để dùng mã này</div>` : ''}
+            ${usedUp
+              ? `<div class="meta used"><i class="bi bi-check2-circle me-1"></i>Bạn đã dùng hết lượt của mã này</div>`
+              : lack ? `<div class="meta warn">Mua thêm ${fmtMoney(min - temp)} để dùng mã này</div>` : ''}
           </span>
         </button>`;
     }).join('') : `<div class="bk-promo-empty">${promos.length ? 'Không có mã nào khớp. Bạn vẫn có thể bấm "Áp dụng" để kiểm tra mã.' : 'Tour này hiện chưa có mã giảm giá.'}</div>`;

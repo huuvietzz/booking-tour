@@ -91,6 +91,18 @@ public class PromotionController {
     }
 
     /**
+     * Mã khuyến mãi trong trang cá nhân: như /public/promotions nhưng kèm số lần CHÍNH KHÁCH NÀY đã dùng
+     * → mã đã dùng hết lượt hiện mờ. userId lấy từ token.
+     */
+    @GetMapping("/user/promotions/my")
+    public ResponseEntity<ApiResponse<List<PromotionPublicResponse>>> getMyPromotions(
+            @AuthenticationPrincipal User user,
+            @RequestParam(required = false) Integer tourId) {   // ?tourId=5: trang đặt tour, chỉ mã áp dụng cho tour 5
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách khuyến mãi thành công",
+                promotionService.getMyPromotions(user.getUserId(), tourId)));
+    }
+
+    /**
      * Nút "Áp dụng" ở trang đặt tour. Cần đăng nhập để kiểm tra "mỗi khách dùng tối đa N lần";
      * userId lấy từ token, không nhận từ body → không ai kiểm tra hộ / dùng hộ lượt của người khác.
      */

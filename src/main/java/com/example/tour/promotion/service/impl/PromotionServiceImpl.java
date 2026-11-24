@@ -114,6 +114,28 @@ public class PromotionServiceImpl implements PromotionService {
                 .stream().map(this::toPublicResponse).toList();
     }
 
+    /**
+     * Mã đang dùng được + số lần khách này đã dùng (đơn chưa huỷ, cùng cách đếm với lúc áp mã khi đặt tour).
+     * Mã đã dùng hết lượt của khách xếp xuống cuối. Số mã đang chạy ít (vài chục) → đếm từng mã là đủ nhanh.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public List<PromotionPublicResponse> getMyPromotions(Integer userId, Integer tourId) {
+        return promotionRepository.findAll(PromotionSpecification.usable(tourId), Sort.by("endDate").ascending())
+                .stream()
+                .map(p -> {
+                    long used = promotionRepository.countActiveUsesByUser(p.getPromotionId(), userId);
+                    boolean usedUp = p.getMaxUsesPerUser() != null && used >= p.getMaxUsesPerUser();
+                    return toPublicResponseBuilder(p)
+                            .maxUsesPerUser(p.getMaxUsesPerUser())
+                            .userUsedCount((int) used)
+                            .usedUp(usedUp)
+                            .build();
+                })
+                .sorted(Comparator.comparing(r -> Boolean.TRUE.equals(r.getUsedUp())))   // ổn định: giữ thứ tự hạn dùng
+                .toList();
+    }
+
     @Override
     @Transactional(readOnly = true)
     public PromotionCheckResponse checkPromotion(PromotionCheckRequest request, Integer userId) {
@@ -265,6 +287,10 @@ public class PromotionServiceImpl implements PromotionService {
     }
 
     private PromotionPublicResponse toPublicResponse(Promotion p) {
+        return toPublicResponseBuilder(p).build();
+    }
+
+    private PromotionPublicResponse.PromotionPublicResponseBuilder toPublicResponseBuilder(Promotion p) {
         return PromotionPublicResponse.builder()
                 .promotionCode(p.getPromotionCode())
                 .promotionName(p.getPromotionName())
@@ -273,7 +299,6 @@ public class PromotionServiceImpl implements PromotionService {
                 .discountValue(p.getDiscountValue())
                 .maxDiscountAmount(p.getMaxDiscountAmount())
                 .minOrderAmount(p.getMinOrderAmount())
-                .endDate(p.getEndDate())
-                .build();
+                .endDate(p.getEndDate());
     }
 }

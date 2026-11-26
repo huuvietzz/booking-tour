@@ -116,9 +116,10 @@ src/main/resources/static
 ### Yêu cầu
 
 - JDK 17
-- Maven 3.9+ (hoặc dùng `mvnw` đi kèm)
+- Maven 3.9+
 - MySQL 8.0
 - Docker (để chạy Redis)
+- IDE: IntelliJ IDEA
 
 ### Các bước
 
@@ -145,7 +146,7 @@ docker run -d --name viettrip-redis -p 6379:6379 --restart unless-stopped redis:
 
 ## Tài liệu API
 
-Swagger UI tại `/swagger-ui.html`
+Swagger UI tại `http://localhost:8080/swagger-ui.html`
 
 ---
 
